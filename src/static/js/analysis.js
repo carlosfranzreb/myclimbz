@@ -18,15 +18,17 @@ window.onload = function() {
     let csv_data = d3.csv("data/boulders.csv");
 
     csv_data.then(function(data) {
-    
         // Group no. of sent boulders per grade
         let sent = data.filter(d => d.Sent == "yes");
-        let pyramid = d3.rollup(sent, v => v.length, d => d.Grade)
+        let unsorted_pyramid = d3.rollup(sent, v => v.length, d => d.Grade)
+
+        // Sort the data by grade
+        let pyramid = new Map([...unsorted_pyramid].sort(compareMapGrades));
 
         // X axis
         let x = d3.scaleBand()
             .range([ 0, width ])
-            .domain(data.map(function(d) { return d.Grade; }))
+            .domain(pyramid.keys())
             .padding(0.2);
 
         svg.append("g")
@@ -37,7 +39,6 @@ window.onload = function() {
             .style("text-anchor", "end");
 
         // Add Y axis
-        console.log(d3.max(pyramid.values()));
         let y = d3.scaleLinear()
             .domain([0, d3.max(pyramid.values())])
             .range([height, 0]);
