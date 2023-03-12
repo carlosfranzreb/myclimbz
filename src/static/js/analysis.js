@@ -2,6 +2,7 @@
 let margin = {top: 30, right: 30, bottom: 70, left: 60};
 let width = 460 - margin.left - margin.right;
 let height = 400 - margin.top - margin.bottom;
+
 // append the svg object to the body of the page
 let svg = d3.select("#chart")
     .append("svg")
@@ -13,29 +14,52 @@ let svg = d3.select("#chart")
 
 // Plot the data with D3.js
 window.onload = function() {
-    // Parse the data
+    // Plot the pyramid
     let csv_data = d3.csv("data/boulders.csv");
-
     csv_data.then(function(data) {
-        // Group no. of sent boulders per grade
+        // Filter sent boulders
         let sent = data.filter(d => d.Sent == "yes");
-        let unsorted_pyramid = d3.rollup(sent, v => v.length, d => d.Grade)
 
-        // Sort the data by grade
-        let pyramid = new Map([...unsorted_pyramid].sort(compareMapGrades));
+        // Add the "None" option to the group menu
+        document.getElementById("group-select").options.add(new Option("None", "None"));
+        // Fill the markdown menus with the options
+        let ids = ["x-axis-select", "group-select"];
+        for (let id of ids) {
+            let obj = document.getElementById(id);
+            // Iterate over the keys of the pyramid
+            for (let key of Object.keys(sent[0]))
+                obj.options.add(new Option(key, key));
+        }
+        // Select the "Grade" option by default in the x-axis menu
+        document.getElementById("x-axis-select").value = "Grade";
 
-        // Plot the data
-        plot_data(pyramid);
+        // Plot the data with the selected options
+        plot_data(sent)
     });
 }
 
 // Plot the data (a Map object) with D3.js
 function plot_data(data) {
 
+    // Get the selected options
+    x_axis = document.getElementById("x-axis-select").value;
+    group = document.getElementById("group-select").value;
+
+    // Count values per x-axis key
+    let unsorted_out = d3.rollup(data, v => v.length, d => d[x_axis])
+    let out = null;
+    if (x_axis == "Grade")  // TODO: add empty grades in between
+        out = new Map([...unsorted_out].sort(compareMapGrades));
+    else
+        out = new Map([...unsorted_out].sort());
+
+    // Group values by group key
+    // TODO
+    
     // X axis
     let x = d3.scaleBand()
         .range([ 0, width ])
-        .domain(data.keys())
+        .domain(out.keys())
         .padding(0.2);
 
     svg.append("g")
@@ -47,14 +71,14 @@ function plot_data(data) {
 
     // Add Y axis
     let y = d3.scaleLinear()
-        .domain([0, d3.max(data.values())])
+        .domain([0, d3.max(out.values())])
         .range([height, 0]);
 
     svg.append("g").call(d3.axisLeft(y));
 
     // Bars
     svg.selectAll("mybar")
-        .data(data)
+        .data(out)
         .enter()
         .append("rect")
             .attr("x", function(d) { return x(d[0]) })
