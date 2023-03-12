@@ -12,14 +12,16 @@ let svg = d3.select("#chart")
         .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
 
+// Create the variable where the data will be stored
+var data = null;
+
 // Plot the data with D3.js
 window.onload = function() {
     // Plot the pyramid
     let csv_data = d3.csv("data/boulders.csv");
-    csv_data.then(function(data) {
+    csv_data.then(function(all_data) {
         // Filter sent boulders
-        let sent = data.filter(d => d.Sent == "yes");
-
+        data = all_data.filter(d => d.Sent == "yes");
         // Add the "None" option to the group menu
         document.getElementById("group-select").options.add(new Option("None", "None"));
         // Fill the markdown menus with the options
@@ -27,19 +29,22 @@ window.onload = function() {
         for (let id of ids) {
             let obj = document.getElementById(id);
             // Iterate over the keys of the pyramid
-            for (let key of Object.keys(sent[0]))
+            for (let key of Object.keys(data[0]))
                 obj.options.add(new Option(key, key));
         }
         // Select the "Grade" option by default in the x-axis menu
         document.getElementById("x-axis-select").value = "Grade";
 
         // Plot the data with the selected options
-        plot_data(sent)
+        plot_data()
     });
 }
 
 // Plot the data (a Map object) with D3.js
-function plot_data(data) {
+function plot_data() {
+
+    // Clear the previous plot
+    svg.selectAll("*").remove();
 
     // Get the selected options
     x_axis = document.getElementById("x-axis-select").value;
