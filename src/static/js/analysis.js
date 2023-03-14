@@ -53,8 +53,10 @@ function plot_data() {
     // Count values per x-axis key
     let unsorted_out = d3.rollup(data, v => v.length, d => d[x_axis])
     let out = null;
-    if (x_axis == "Grade")  // TODO: add empty grades in between
+    if (x_axis == "Grade") {
         out = new Map([...unsorted_out].sort(compareMapGrades));
+        out = fill_grades(out);
+    }
     else
         out = new Map([...unsorted_out].sort());
 
