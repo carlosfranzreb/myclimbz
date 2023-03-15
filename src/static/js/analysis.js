@@ -22,16 +22,16 @@ window.onload = function() {
     csv_data.then(function(all_data) {
         // Filter sent boulders
         data = all_data.filter(d => d.Sent == "yes");
-        // Add the "None" option to the group menu
-        document.getElementById("group-select").options.add(new Option("None", "None"));
-        // Fill the markdown menus with the options
-        let ids = ["x-axis-select", "group-select"];
-        for (let id of ids) {
-            let obj = document.getElementById(id);
-            // Iterate over the keys of the pyramid
-            for (let key of Object.keys(data[0]))
-                obj.options.add(new Option(key, key));
-        }
+
+        // Add the x-axis options to the menu, as defined in y_axis.js
+        for (let key of Object.keys(y_axis_options))
+            document.getElementById("y-axis-select").options.add(
+                new Option(key, key)
+            );
+
+        // Fill the x-axis options with the keys of the first data element
+        for (let key of Object.keys(data[0]))
+            document.getElementById("x-axis-select").options.add(new Option(key, key));
         // Select the "Grade" option by default in the x-axis menu
         document.getElementById("x-axis-select").value = "Grade";
 
@@ -48,10 +48,18 @@ function plot_data() {
 
     // Get the selected options
     x_axis = document.getElementById("x-axis-select").value;
-    group = document.getElementById("group-select").value;
+    y_axis = document.getElementById("y-axis-select").value;
 
-    // Count values per x-axis key
-    let unsorted_out = d3.rollup(data, v => v.length, d => d[x_axis])
+    // Group the data by the selected x-axis key
+    let unsorted_out = d3.group(data, d => d[x_axis]);
+    console.log(unsorted_out);
+
+    // Compute the data to be plotted according to the selected y-axis option
+    let y_axis_func = y_axis_options[y_axis];
+    unsorted_out = y_axis_func(unsorted_out);
+    console.log(unsorted_out);
+
+    // Sort the data
     let out = null;
     if (x_axis == "Grade") {
         out = new Map([...unsorted_out].sort(compareMapGrades));
@@ -59,9 +67,6 @@ function plot_data() {
     }
     else
         out = new Map([...unsorted_out].sort());
-
-    // Group values by group key
-    // TODO
     
     // X axis
     let x = d3.scaleBand()
