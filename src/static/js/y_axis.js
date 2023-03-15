@@ -44,8 +44,8 @@ function tries_per_climb(data) {
 
 
 // Compute the success rate per x-axis key: # of climbs / # of sent climbs
-function success_rate(data) {  // TODO: copilot predicted this function
-    return data;  // TODO
+function success_rate(data) {
+    return data;  // TODO: requires unsent boulders
 }
 
 // Compute the average grade per x-axis key
