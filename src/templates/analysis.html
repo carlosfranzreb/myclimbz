@@ -7,8 +7,10 @@
     <!-- Markdown menus -->
     <label for="x-axis-select">X Axis:</label>
     <select id="x-axis-select" onchange="plot_data()"></select>
-    <!-- <label for="filter-select">Filter</label>
-    <select id="filter-select"></select> -->
     <label for="y-axis-select">Y Axis:</label>
     <select id="y-axis-select" onchange="plot_data()"></select>
+
+
+    <button onclick="add_filter()">Add filter</button>
+    <div id="filterList"></div>
 {% endblock content %}
