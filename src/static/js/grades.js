@@ -58,17 +58,18 @@ function get_next_grade(grade) {
 // Fill in the missing grades between the lowest and highest grade
 // ! The input map is expected to be sorted
 function fill_grades(sorted_map) {
+
     // Create the new map, add the lowest grade and remove it from the input map
     let last_added_grade = [...sorted_map.keys()][0];
     filled_map = new Map();
     filled_map.set(last_added_grade, sorted_map.get(last_added_grade));
     sorted_map.delete(last_added_grade);
-    // Iterate over the map
+
     for (let grade of sorted_map.keys()) {
-        // Get the next grade of the last one in the output map
+
         let next_grade = get_next_grade(last_added_grade);
-        // Add missing grades if needed
-        while (next_grade != grade) {
+
+        while (next_grade != grade) {  // Add missing grades if needed
             filled_map.set(next_grade, 0);
             next_grade = get_next_grade(next_grade);
         }
