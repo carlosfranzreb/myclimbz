@@ -21,7 +21,6 @@ def home():
 @app.route("/analysis")
 def analysis():
     format_file(FILE)
-
     return render_template("analysis.html", title="Analysis")
 
 
