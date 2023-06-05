@@ -12,16 +12,19 @@ let svg = d3.select("#chart")
         .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
 
-// Create the variable where the data will be stored
-var data = null;
+// Create the variables where the data and grades will be stored
+let DATA = null;
+let GRADES = null;
 
 // Plot the data with D3.js
 window.onload = function() {
-    // Plot the pyramid
-    let csv_data = d3.csv("data/boulders.csv");
-    csv_data.then(function(all_data) {
-        // Filter sent boulders
-        data = all_data.filter(d => d.Sent == "yes");
+    
+    let data_promise = d3.csv("data/boulders.csv");
+    let grades_promise = d3.json("data/grades.json");
+
+    Promise.all([data_promise, grades_promise]).then(function([data, grades]) {
+        DATA = data.filter(d => d.Sent == "yes");
+        GRADES = grades;
 
         // Add the x-axis options to the menu, as defined in y_axis.js
         for (let key of Object.keys(y_axis_options))
@@ -30,15 +33,16 @@ window.onload = function() {
             );
 
         // Fill the x-axis options with the keys of the first data element
-        for (let key of Object.keys(data[0]))
+        for (let key of Object.keys(DATA[0]))
             document.getElementById("x-axis-select").options.add(new Option(key, key));
+
         // Select the "Grade" option by default in the x-axis menu
         document.getElementById("x-axis-select").value = "Grade";
 
-        // Plot the data with the selected options
-        plot_data()
+        plot_data();
     });
 }
+
 
 // Plot the data (a Map object) with D3.js
 function plot_data() {
@@ -51,18 +55,16 @@ function plot_data() {
     y_axis = document.getElementById("y-axis-select").value;
 
     // Group the data by the selected x-axis key
-    let unsorted_out = d3.group(data, d => d[x_axis]);
-    console.log(unsorted_out);
+    let unsorted_out = d3.group(DATA, d => d[x_axis]);
 
     // Compute the data to be plotted according to the selected y-axis option
     let y_axis_func = y_axis_options[y_axis];
     unsorted_out = y_axis_func(unsorted_out);
-    console.log(unsorted_out);
 
     // Sort the data
     let out = null;
     if (x_axis == "Grade") {
-        out = new Map([...unsorted_out].sort(compareMapGrades));
+        out = new Map([...unsorted_out].sort(compare_grades));
         out = fill_grades(out);
     }
     else
