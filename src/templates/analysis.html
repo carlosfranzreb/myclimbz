@@ -1,6 +1,19 @@
 {% extends "main.html" %}
 {% block content %}
     <h1>Analysis</h1>
+
+    <!-- Switch to define the grade type -->
+    <div>
+        <span>Font</span>
+        <span>
+            <label class="switch">
+                <input type="checkbox" id="grade-scale-toggle">
+                <span class="slider round"></span>
+            </label>
+        </span>
+        <span>Hueco</span>
+    </div>
+
     <!-- D3.js chart-->
     <div id="chart"></div>
 
