@@ -31,10 +31,19 @@ function fill_grades(sorted_map, grade_type="font") {
 }
 
 
-// Return the average grade of a list of climbs
-function get_avg_grade(climbs) {
-    let grades = climbs.map(d => d.Grade);
-    grades = grades.map(d => get_grade_number(d));
-    let avg_grade = grades.reduce((a, b) => a + b) / grades.length;
-    return get_grade_string(avg_grade);
+// Return the average level of a list of climbs
+function get_avg_level(climbs, grade_type) {
+    let levels = climbs.map(d => GRADES.find(obj => obj[grade_type]== d.Grade).level);
+    let avg_level = levels.reduce((a, b) => a + b) / levels.length;
+    return avg_level;
+}
+
+
+// Return a map of levels to grades of the given type (font or hueco)
+function grade_axis(grade_type) {
+    let axis_labels = new Map();
+    for (let idx in GRADES)
+        axis_labels.set(GRADES[idx].level, GRADES[idx][grade_type]);    
+
+    return axis_labels;
 }

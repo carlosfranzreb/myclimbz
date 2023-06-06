@@ -2,11 +2,26 @@
 // the data to be plotted according to the selected option.
 
 let y_axis_options = {
-    "# of climbs": count_climbs,
-    "# of tries": count_tries,
-    "Tries per climb": tries_per_climb,
-    "Success rate": success_rate,
-    "Avg. grade": avg_grade,
+    "# of climbs": {
+        "data": count_climbs,
+        "axis_labels": null,
+    },
+    "# of tries": {
+        "data": count_tries,
+        "axis_labels": null,
+    },
+    "Tries per climb": {
+        "data": tries_per_climb,
+        "axis_labels": null,
+    },
+    "Success rate": {
+        "data": success_rate,
+        "axis_labels": null,
+    },
+    "Avg. grade": {
+        "data": avg_grade,
+        "axis_labels": grade_axis,
+    },
 }
 
 
@@ -49,6 +64,10 @@ function success_rate(data) {
 }
 
 // Compute the average grade per x-axis key
-function avg_grade(data) {
-    return data; // TODO
+function avg_grade(data, grade_type="font") {
+    out = new Map();
+    for (let [key, value] of data) {
+        out.set(key, get_avg_level(value, grade_type));
+    }
+    return out;
 }

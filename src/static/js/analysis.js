@@ -58,8 +58,7 @@ function plot_data() {
     let unsorted_out = d3.group(DATA, d => d[x_axis]);
 
     // Compute the data to be plotted according to the selected y-axis option
-    let y_axis_func = y_axis_options[y_axis];
-    unsorted_out = y_axis_func(unsorted_out);
+    unsorted_out = y_axis_options[y_axis]["data"](unsorted_out);
 
     // Sort the data
     let out = null;
@@ -70,7 +69,6 @@ function plot_data() {
     else
         out = new Map([...unsorted_out].sort());
     
-    // X axis
     let x = d3.scaleBand()
         .range([ 0, width ])
         .domain(out.keys())
@@ -83,14 +81,22 @@ function plot_data() {
         .attr("transform", "translate(-10,0)rotate(-45)")
         .style("text-anchor", "end");
 
-    // Add Y axis
     let y = d3.scaleLinear()
         .domain([0, d3.max(out.values())])
         .range([height, 0]);
 
-    svg.append("g").call(d3.axisLeft(y));
+    if (y_axis_options[y_axis]["axis_labels"] != null) { 
+        let y_labels = y_axis_options[y_axis]["axis_labels"]("font");
+        console.log(y_labels);
+        let y_axis_obj = d3.axisLeft(y)
+            .tickFormat(function(d){ return y_labels.get(d); })
+        svg.append("g").call(y_axis_obj)
+    }
+    else {
+        svg.append("g")
+            .call(d3.axisLeft(y));
+    }
 
-    // Bars
     svg.selectAll("mybar")
         .data(out)
         .enter()
