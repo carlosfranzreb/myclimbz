@@ -53,6 +53,8 @@ function write_both_grade_scales(data, grade_scale) {
 
     for (let idx in data) {
         let climb = data[idx];
+        if (! ("Grade" in climb))
+            continue;
         climb[grade_scale] = climb.Grade;
         let grade_idx = GRADES.findIndex(obj => obj[grade_scale] == climb.Grade);
         let other_scale = grade_scale == "font" ? "hueco" : "font";

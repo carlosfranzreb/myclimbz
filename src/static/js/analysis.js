@@ -3,6 +3,7 @@ let margin = {top: 30, right: 30, bottom: 70, left: 60};
 let width = 460 - margin.left - margin.right;
 let height = 400 - margin.top - margin.bottom;
 
+
 // append the svg object to the body of the page
 let svg = d3.select("#chart")
     .append("svg")
@@ -12,11 +13,14 @@ let svg = d3.select("#chart")
         .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
 
+
 // Create the variables where the data and grades will be stored
 let DATA = null;
 let GRADES = null;
 let GRADE_SCALE = "font";  // Scale chosen with the toggle button
 let DATA_GRADE_SCALE = "font";  // Scale used in the CSV file
+let INCLUDE_UNSENT_CLIMBS = false;
+
 
 // Plot the data with D3.js
 window.onload = function() {
@@ -26,9 +30,8 @@ window.onload = function() {
 
     Promise.all([data_promise, grades_promise]).then(function([data, grades]) {
         
-        DATA = data.filter(d => d.Sent == "yes");
         GRADES = grades;
-        DATA = write_both_grade_scales(DATA, DATA_GRADE_SCALE);
+        DATA = write_both_grade_scales(data, DATA_GRADE_SCALE);
 
         // Add the x-axis options to the menu, as defined in y_axis.js
         for (let key of Object.keys(y_axis_options))
@@ -55,13 +58,20 @@ function plot_data() {
     svg.selectAll("*").remove();
 
     // Get the selected options
-    x_axis = document.getElementById("x-axis-select").value;
-    y_axis = document.getElementById("y-axis-select").value;
+    let x_axis = document.getElementById("x-axis-select").value;
+    let y_axis = document.getElementById("y-axis-select").value;
+
+    // Remove unsent climbs if the corresponding button is unchecked
+    let this_data = null;
+    if (INCLUDE_UNSENT_CLIMBS)
+        this_data = DATA
+    else
+        this_data = DATA.filter(d => d.Sent == "yes");
 
     // Group the data by the selected x-axis key
     if (x_axis == "Grade")
         x_axis = GRADE_SCALE;
-    let unsorted_out = d3.group(DATA, d => d[x_axis]);
+    let unsorted_out = d3.group(this_data, d => d[x_axis]);
 
     // Compute the data to be plotted according to the selected y-axis option
     unsorted_out = y_axis_options[y_axis]["data"](unsorted_out);
