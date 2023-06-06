@@ -58,7 +58,7 @@ function tries_per_climb(data) {
 }
 
 
-// Compute the success rate per x-axis key: # of climbs / # of sent climbs
+// Compute the success rate per x-axis key: # sent climbs / # climbs
 function success_rate(data) {
     return data;  // TODO: requires unsent boulders
 }
