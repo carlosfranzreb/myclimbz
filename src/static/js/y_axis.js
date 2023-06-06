@@ -63,11 +63,12 @@ function success_rate(data) {
     return data;  // TODO: requires unsent boulders
 }
 
+
 // Compute the average grade per x-axis key
-function avg_grade(data, grade_type="font") {
+function avg_grade(data) {
     out = new Map();
     for (let [key, value] of data) {
-        out.set(key, get_avg_level(value, grade_type));
+        out.set(key, get_avg_level(value));
     }
     return out;
 }

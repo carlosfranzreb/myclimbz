@@ -25,8 +25,10 @@ window.onload = function() {
     let grades_promise = d3.json("data/grades.json");
 
     Promise.all([data_promise, grades_promise]).then(function([data, grades]) {
+        
         DATA = data.filter(d => d.Sent == "yes");
         GRADES = grades;
+        DATA = write_both_grade_scales(DATA, DATA_GRADE_SCALE);
 
         // Add the x-axis options to the menu, as defined in y_axis.js
         for (let key of Object.keys(y_axis_options))
@@ -57,6 +59,8 @@ function plot_data() {
     y_axis = document.getElementById("y-axis-select").value;
 
     // Group the data by the selected x-axis key
+    if (x_axis == "Grade")
+        x_axis = GRADE_SCALE;
     let unsorted_out = d3.group(DATA, d => d[x_axis]);
 
     // Compute the data to be plotted according to the selected y-axis option
@@ -70,9 +74,6 @@ function plot_data() {
     }
     else
         out = new Map([...unsorted_out].sort());
-    
-    console.log(out);
-    console.log(DATA);
     
     let x = d3.scaleBand()
         .range([ 0, width ])

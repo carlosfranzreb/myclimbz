@@ -33,7 +33,7 @@ function fill_grades(sorted_map) {
 
 // Return the average level of a list of climbs
 function get_avg_level(climbs) {
-    let levels = climbs.map(d => GRADES.find(obj => obj[GRADE_SCALE]== d.Grade).level);
+    let levels = climbs.map(d => GRADES.find(obj => obj[GRADE_SCALE]== d[GRADE_SCALE]).level);
     let avg_level = levels.reduce((a, b) => a + b) / levels.length;
     return avg_level;
 }
@@ -46,4 +46,18 @@ function grade_axis() {
         axis_labels.set(GRADES[idx].level, GRADES[idx][GRADE_SCALE]);    
 
     return axis_labels;
+}
+
+// Write both grade scales to the data
+function write_both_grade_scales(data, grade_scale) {
+
+    for (let idx in data) {
+        let climb = data[idx];
+        climb[grade_scale] = climb.Grade;
+        let grade_idx = GRADES.findIndex(obj => obj[grade_scale] == climb.Grade);
+        let other_scale = grade_scale == "font" ? "hueco" : "font";
+        climb[other_scale] = GRADES[grade_idx][other_scale];
+    }
+
+    return data;
 }
