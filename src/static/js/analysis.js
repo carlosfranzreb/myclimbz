@@ -15,6 +15,8 @@ let svg = d3.select("#chart")
 // Create the variables where the data and grades will be stored
 let DATA = null;
 let GRADES = null;
+let GRADE_SCALE = "font";  // Scale chosen with the toggle button
+let DATA_GRADE_SCALE = "font";  // Scale used in the CSV file
 
 // Plot the data with D3.js
 window.onload = function() {
@@ -69,6 +71,9 @@ function plot_data() {
     else
         out = new Map([...unsorted_out].sort());
     
+    console.log(out);
+    console.log(DATA);
+    
     let x = d3.scaleBand()
         .range([ 0, width ])
         .domain(out.keys())
@@ -86,7 +91,7 @@ function plot_data() {
         .range([height, 0]);
 
     if (y_axis_options[y_axis]["axis_labels"] != null) { 
-        let y_labels = y_axis_options[y_axis]["axis_labels"]("font");
+        let y_labels = y_axis_options[y_axis]["axis_labels"]();
         console.log(y_labels);
         let y_axis_obj = d3.axisLeft(y)
             .tickFormat(function(d){ return y_labels.get(d); })
