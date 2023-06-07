@@ -78,7 +78,7 @@ function plot_data() {
 
     // Sort the data
     let out = null;
-    if (x_axis == "Grade") {
+    if (x_axis == GRADE_SCALE) {
         out = new Map([...unsorted_out].sort(compare_grades));
         out = fill_grades(out);
     }
