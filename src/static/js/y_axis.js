@@ -60,7 +60,22 @@ function tries_per_climb(data) {
 
 // Compute the success rate per x-axis key: # sent climbs / # climbs
 function success_rate(data) {
-    return data;  // TODO: requires unsent boulders
+
+    if (! unsent_climbs_btn.checked) {
+        unsent_climbs_btn.click();
+        data = DATA;
+    }
+
+    out = new Map();
+    for (let [key, value] of data) {
+        let sent_climbs = value.filter(d => d.Sent == "yes");
+        if (value.length == 0)
+            out.set(key, 0);
+        else
+            out.set(key, sent_climbs.length / value.length);
+    }
+
+    return out;    
 }
 
 
