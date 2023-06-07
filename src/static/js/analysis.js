@@ -103,7 +103,6 @@ function plot_data() {
 
     if (y_axis_options[y_axis]["axis_labels"] != null) { 
         let y_labels = y_axis_options[y_axis]["axis_labels"]();
-        console.log(y_labels);
         let y_axis_obj = d3.axisLeft(y)
             .tickFormat(function(d){ return y_labels.get(d); })
         svg.append("g").call(y_axis_obj)
