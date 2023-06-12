@@ -72,6 +72,10 @@ function plot_data() {
     for (let [key, value] of ACTIVE_FILTERS)
         this_data = this_data.filter(d => value.includes(d[key]));
 
+    // If the data is empty, return without plotting
+    if (this_data.length == 0)
+        return;
+
     // Group the data by the selected x-axis key
     if (x_axis == "Grade")
         x_axis = GRADE_SCALE;
