@@ -1,18 +1,17 @@
 // set the dimensions and margins of the graph
-let margin = {top: 30, right: 30, bottom: 70, left: 60};
-let width = 460 - margin.left - margin.right;
-let height = 400 - margin.top - margin.bottom;
+let MARGIN = {top: 30, right: 30, bottom: 70, left: 60};
+let WIDTH = 460 - MARGIN.left - MARGIN.right;
+let HEIGHT = 400 - MARGIN.top - MARGIN.bottom;
 
 
 // append the svg object to the body of the page
-let svg = d3.select("#chart")
+let SVG = d3.select("#chart")
     .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", WIDTH + MARGIN.left + MARGIN.right)
+        .attr("height", HEIGHT + MARGIN.top + MARGIN.bottom)
     .append("g")
         .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
-
+            "translate(" + MARGIN.left + "," + MARGIN.top + ")");
 
 // Create the variables where the data and grades will be stored
 let DATA = null;
@@ -20,6 +19,7 @@ let GRADES = null;
 let GRADE_SCALE = "font";  // Scale chosen with the toggle button
 let DATA_GRADE_SCALE = "font";  // Scale used in the CSV file
 let INCLUDE_UNSENT_CLIMBS = false;
+let ACTIVE_FILTERS = new Map();
 
 
 // Plot the data with D3.js
@@ -55,7 +55,7 @@ window.onload = function() {
 function plot_data() {
 
     // Clear the previous plot
-    svg.selectAll("*").remove();
+    SVG.selectAll("*").remove();
 
     // Get the selected options
     let x_axis = document.getElementById("x-axis-select").value;
@@ -67,6 +67,10 @@ function plot_data() {
         this_data = DATA
     else
         this_data = DATA.filter(d => d.Sent == "yes");
+
+    // Filter the data according to the active filters
+    for (let [key, value] of ACTIVE_FILTERS)
+        this_data = this_data.filter(d => value.includes(d[key]));
 
     // Group the data by the selected x-axis key
     if (x_axis == "Grade")
@@ -86,12 +90,12 @@ function plot_data() {
         out = new Map([...unsorted_out].sort());
     
     let x = d3.scaleBand()
-        .range([ 0, width ])
+        .range([ 0, WIDTH ])
         .domain(out.keys())
         .padding(0.2);
 
-    svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
+    SVG.append("g")
+        .attr("transform", "translate(0," + HEIGHT + ")")
         .call(d3.axisBottom(x))
         .selectAll("text")
         .attr("transform", "translate(-10,0)rotate(-45)")
@@ -99,26 +103,26 @@ function plot_data() {
 
     let y = d3.scaleLinear()
         .domain([0, d3.max(out.values())])
-        .range([height, 0]);
+        .range([HEIGHT, 0]);
 
     if (y_axis_options[y_axis]["axis_labels"] != null) { 
         let y_labels = y_axis_options[y_axis]["axis_labels"]();
         let y_axis_obj = d3.axisLeft(y)
             .tickFormat(function(d){ return y_labels.get(d); })
-        svg.append("g").call(y_axis_obj)
+        SVG.append("g").call(y_axis_obj)
     }
     else {
-        svg.append("g")
+        SVG.append("g")
             .call(d3.axisLeft(y));
     }
 
-    svg.selectAll("mybar")
+    SVG.selectAll("mybar")
         .data(out)
         .enter()
         .append("rect")
             .attr("x", function(d) { return x(d[0]) })
             .attr("y", function(d) { return y(d[1]) })
             .attr("width", x.bandwidth())
-            .attr("height", function(d) { return height - y(d[1]) })
+            .attr("height", function(d) { return HEIGHT - y(d[1]) })
             .attr("fill", "#69b3a2");
 }

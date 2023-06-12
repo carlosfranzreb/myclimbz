@@ -2,34 +2,40 @@
 {% block content %}
     <h1>Analysis</h1>
 
-    <!-- Checkbox to exclude unsent climbs -->
-    <div>
-        <span>Include unsent boulders</span>
-        <input type="checkbox" id="include-unsent-climbs">
+    <!-- This div is used to display the data in the chart; it is centered -->
+    <div style="margin: auto; width: 500;">
+
+        <!-- Checkbox to exclude unsent climbs -->
+        <div>
+            <span>Include unsent boulders</span>
+            <input type="checkbox" id="include-unsent-climbs">
+        </div>
+
+        <!-- Switch to define the grade type -->
+        <div>
+            <span>Font</span>
+            <span>
+                <label class="switch">
+                    <input type="checkbox" id="grade-scale-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </span>
+            <span>Hueco</span>
+        </div>
+
+        <!-- D3.js chart-->
+        <div id="chart">
+        </div>
+
+        <!-- Markdown menus -->
+        <label for="x-axis-select">X Axis:</label>
+        <select id="x-axis-select" onchange="plot_data()"></select>
+        <label for="y-axis-select">Y Axis:</label>
+        <select id="y-axis-select" onchange="plot_data()"></select>
+
+
+        <button onclick="add_filter()">Add filter</button>
+        <div id="filterList"></div>
+
     </div>
-
-    <!-- Switch to define the grade type -->
-    <div>
-        <span>Font</span>
-        <span>
-            <label class="switch">
-                <input type="checkbox" id="grade-scale-toggle">
-                <span class="slider round"></span>
-            </label>
-        </span>
-        <span>Hueco</span>
-    </div>
-
-    <!-- D3.js chart-->
-    <div id="chart"></div>
-
-    <!-- Markdown menus -->
-    <label for="x-axis-select">X Axis:</label>
-    <select id="x-axis-select" onchange="plot_data()"></select>
-    <label for="y-axis-select">Y Axis:</label>
-    <select id="y-axis-select" onchange="plot_data()"></select>
-
-
-    <button onclick="add_filter()">Add filter</button>
-    <div id="filterList"></div>
 {% endblock content %}

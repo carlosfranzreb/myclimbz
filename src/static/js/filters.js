@@ -1,44 +1,45 @@
 // Functions related to filtering the data
 
 // List of available filters
-filter_options = [
-    "Grade",
-    "Area",
-    "Inclination",
-    "Landing",
-    "Date",
-    "Tries",
-    "Sit start",
-    "Height",
-    "Style",
-]
+FILTERS = {
+    // "Grade",
+    "Area": add_area_filter,
+    // "Inclination",
+    // "Landing",
+    // "Date",
+    // "Tries",
+    // "Sit start",
+    // "Height",
+    // "Style",
+}
 
 
 // Add a filter to the list of filters
 function add_filter() {
-    let filterList = document.getElementById("filterList");
-    let filterContainer = document.createElement("div");
-    filterContainer.classList.add("filter-container");
+    let filter_list = document.getElementById("filterList");
+    let filter_container = document.createElement("div");
+    filter_container.classList.add("filter-container");
 
     // add dropdown menu to select filter
     let filter_selection = document.createElement("select");
-    for (let option of filter_options)
+    for (let option of Object.keys(FILTERS))
         filter_selection.options.add(new Option(option, option));
-    filterContainer.appendChild(filter_selection);
+    filter_container.appendChild(filter_selection);
 
     // add dropdown menu to select filter value
-    let filter_values = document.createElement("select");
-    // TODO: fill with values
-    filterContainer.appendChild(filter_values);
+    let selected = filter_selection.options[filter_selection.selectedIndex].value;
+    let filter_options = document.createElement("div");
+    FILTERS[selected](filter_options);
+    filter_container.appendChild(filter_options);
 
     // add remove button to container
-    var removeButton = document.createElement("button");
-    removeButton.innerText = "Remove";
-    removeButton.onclick = function() {
-        filterList.removeChild(filterContainer);
+    var remove_button = document.createElement("button");
+    remove_button.innerText = "Remove";
+    remove_button.onclick = function() {
+        filter_list.removeChild(filter_container);
     };
-    filterContainer.appendChild(removeButton);
+    filter_container.appendChild(remove_button);
 
     // add container to list
-    filterList.appendChild(filterContainer);
+    filter_list.appendChild(filter_container);
 }

@@ -6,14 +6,22 @@
             type="text/css"
             href="{{ url_for('static', filename='css/slider_switch.css') }}"
         />
+        <link 
+            rel="stylesheet"
+            type="text/css"
+            href="{{ url_for('static', filename='css/select_multiple.css') }}"
+        />
     </head>
     <body>
+        
         {%block content %}
         {% endblock %}
+        
         <script src="https://d3js.org/d3.v7.min.js"></script>
         <script src="{{url_for('static', filename='js/analysis.js')}}"></script> 
         <script src="{{url_for('static', filename='js/grades.js')}}"></script>
         <script src="{{url_for('static', filename='js/y_axis.js')}}"></script>
+        <script src="{{url_for('static', filename='js/filter_areas.js')}}"></script>
         <script src="{{url_for('static', filename='js/filters.js')}}"></script>
         <script src="{{url_for('static', filename='js/grade_scale_switch.js')}}"></script>
         <script src="{{url_for('static', filename='js/include_unsent_climbs.js')}}"></script>

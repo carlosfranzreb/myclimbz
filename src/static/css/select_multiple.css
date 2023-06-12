@@ -1,0 +1,26 @@
+.select-multiple {
+    position: relative;
+    display: inline-block;
+}
+
+.select-multiple-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 200px;
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.select-multiple-content label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.select-multiple-content label input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.select-multiple:hover .dropdown-content {
+    display: block;
+}
