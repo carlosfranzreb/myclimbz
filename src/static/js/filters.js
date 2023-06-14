@@ -3,7 +3,7 @@
 // List of available filters
 FILTERS = {
     // "Grade",
-    "Area": add_area_filter,
+    "Area": add_filter_checkboxes,
     // "Inclination",
     // "Landing",
     // "Date",
@@ -29,7 +29,7 @@ function add_filter() {
     // add dropdown menu to select filter value
     let selected = filter_selection.options[filter_selection.selectedIndex].value;
     let filter_options = document.createElement("div");
-    FILTERS[selected](filter_options);
+    FILTERS[selected](filter_options, selected);
     filter_container.appendChild(filter_options);
 
     // add remove button to container
