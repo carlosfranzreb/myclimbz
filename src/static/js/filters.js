@@ -33,10 +33,12 @@ function add_filter() {
     filter_container.appendChild(filter_options);
 
     // add remove button to container
-    var remove_button = document.createElement("button");
+    let remove_button = document.createElement("button");
     remove_button.innerText = "Remove";
     remove_button.onclick = function() {
         filter_list.removeChild(filter_container);
+        ACTIVE_FILTERS.delete(selected);
+        plot_data();
     };
     filter_container.appendChild(remove_button);
 

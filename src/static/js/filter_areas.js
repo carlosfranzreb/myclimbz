@@ -75,6 +75,5 @@ function filter_data_by_area() {
             ACTIVE_FILTERS.set("Area", selected_options);
     }
 
-    console.log(ACTIVE_FILTERS);
     plot_data();
 }
