@@ -4,9 +4,8 @@ function add_filter_checkboxes(div, column) {
 
     // Add the multiple-choice selection menu
     let menu_div = document.createElement("div");
-    menu_div.setAttribute("id", column.toLowerCase() + "-select");
     menu_div.setAttribute("class", "select-multiple");
-    menu_div.setAttribute("onchange", "filter_data_by_checkboxes()");
+    menu_div.addEventListener("change", filter_data_by_checkboxes);
     div.appendChild(menu_div);
 
     // Get the values from DATA, and add "All" as an option
@@ -29,11 +28,8 @@ function add_filter_checkboxes(div, column) {
     }
 
     // Attrs to keep track of whether "All" was selected and the column name
-    menu_div.setAttribute("all-clicked", "true");
-    menu_div.setAttribute("column", column);
-
-    // Add an event listener to the menu
-    menu_div.addEventListener("change", filter_data_by_checkboxes);
+    menu_div.setAttribute("data-all_clicked", "true");
+    menu_div.setAttribute("data-column", column);
 }
 
 
@@ -43,18 +39,17 @@ function filter_data_by_checkboxes(event) {
 
     // Get the column and selected options
     let filter_div = event.target.parentNode.parentNode;;
-    let column = filter_div.getAttribute("column");
+    let column = filter_div.dataset.column;
     let selected_options = Array.from(filter_div.querySelectorAll("input:checked"))
         .map(function(checkbox) {
             return checkbox.value;
         });
-    
+
     // If "All" was selected before, and is not selected anymore, uncheck all
-    if (filter_div.getAttribute("all-clicked") == "true" && !("All" in selected_options)) {
-        filter_div.setAttribute("all-clicked", "false");
+    if (filter_div.dataset.all_clicked == "true" && !("All" in selected_options)) {
+        filter_div.dataset.all_clicked = "false";
         for (let checkbox of filter_div.querySelectorAll("input"))
             checkbox.checked = false;
-        
         ACTIVE_FILTERS.set(column, []);
     }
 
@@ -68,7 +63,7 @@ function filter_data_by_checkboxes(event) {
                     return checkbox.value;
                 });
             ACTIVE_FILTERS.set(column, all_options);
-            filter_div.setAttribute("all-clicked", "true");
+            filter_div.dataset.all_clicked = true;
             selected_options = selected_options.filter(option => option != "All");
         }
 
@@ -77,5 +72,6 @@ function filter_data_by_checkboxes(event) {
             ACTIVE_FILTERS.set(column, selected_options);
     }
 
+    console.log(ACTIVE_FILTERS);
     plot_data();
 }
