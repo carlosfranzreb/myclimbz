@@ -72,6 +72,5 @@ function filter_data_by_checkboxes(event) {
             ACTIVE_FILTERS.set(column, selected_options);
     }
 
-    console.log(ACTIVE_FILTERS);
     plot_data();
 }

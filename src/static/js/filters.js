@@ -6,7 +6,7 @@ FILTERS = {
     "Area": add_filter_checkboxes,
     "Inclination": add_filter_checkboxes,
     "Landing": add_filter_checkboxes,
-    // "Date",
+    "Date": add_filter_dates,
     // "Tries",
     "Sit start": add_filter_checkboxes,
     "Height": add_filter_checkboxes,
@@ -58,11 +58,9 @@ function change_filter(event) {
     let selected_option = event.target.options[event.target.selectedIndex].value;
 
     // remove old filter options and the filter from the list of active filters
-    console.log(old_selected_option);
     ACTIVE_FILTERS.delete(old_selected_option);
     plot_data();
     filter_container.removeChild(filter_options);
-    console.log(ACTIVE_FILTERS);
 
     // add new filter options
     filter_options = document.createElement("div");
