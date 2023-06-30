@@ -58,6 +58,7 @@ function change_filter(event) {
     let selected_option = event.target.options[event.target.selectedIndex].value;
 
     // remove old filter options and the filter from the list of active filters
+    console.log(old_selected_option);
     ACTIVE_FILTERS.delete(old_selected_option);
     plot_data();
     filter_container.removeChild(filter_options);

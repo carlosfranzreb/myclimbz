@@ -15,7 +15,7 @@ function add_filter_dates(div, column) {
 
 // Add the checkbox filters and plot the data if options are selected
 // This function is called every time a checkbox is checked or unchecked
-function filter_data_by_dates(event) {
+function filter_data_by_dates() {
 
     // Get the selected dates
     let start_date = new Date(document.getElementById("start-date").value);
