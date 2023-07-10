@@ -13,8 +13,7 @@ function add_filter_dates(div, column) {
 }
 
 
-// Add the checkbox filters and plot the data if options are selected
-// This function is called every time a checkbox is checked or unchecked
+// Get the selected dates and filter the data
 function filter_data_by_dates() {
 
     // Get the selected dates
@@ -36,6 +35,5 @@ function filter_data_by_dates() {
 
     // Add the filter
     ACTIVE_FILTERS.set("Date", selected_dates);
-    console.log(ACTIVE_FILTERS);
     plot_data();
 }
