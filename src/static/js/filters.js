@@ -2,7 +2,7 @@
 
 // List of available filters
 FILTERS = {
-    // "Grade",
+    "Grade": add_filter_grades,
     "Area": add_filter_checkboxes,
     "Inclination": add_filter_checkboxes,
     "Landing": add_filter_checkboxes,
