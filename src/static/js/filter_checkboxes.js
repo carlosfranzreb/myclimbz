@@ -38,7 +38,7 @@ function add_filter_checkboxes(div, column) {
 function filter_data_by_checkboxes(event) {
 
     // Get the column and selected options
-    let filter_div = event.target.parentNode.parentNode;;
+    let filter_div = event.target.parentNode.parentNode;
     let column = filter_div.dataset.column;
     let selected_options = Array.from(filter_div.querySelectorAll("input:checked"))
         .map(function(checkbox) {

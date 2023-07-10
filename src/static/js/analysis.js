@@ -33,6 +33,9 @@ window.onload = function() {
         GRADES = grades;
         DATA = write_both_grade_scales(data, DATA_GRADE_SCALE);
 
+        // Convert the date strings from format "DD/MM/YYYY" to format "YYYY-MM-DD"
+        DATA.forEach(d => d.Date = moment(d.Date, "DD/MM/YYYY").format("YYYY-MM-DD"));
+
         // Add the x-axis options to the menu, as defined in y_axis.js
         for (let key of Object.keys(y_axis_options))
             document.getElementById("y-axis-select").options.add(
