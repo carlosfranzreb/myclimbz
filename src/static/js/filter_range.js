@@ -1,3 +1,21 @@
+// The Grade class is used to compare grades in filter_data_by_range()
+// It is a wrapper class for the GRADES list
+class Grade {
+    constructor(grade) {
+        this.scale = GRADE_SCALE;
+        this.grade_dict = GRADES.find(obj => obj[this.scale] === grade);
+    }
+}
+
+Grade.prototype.valueOf = function() {
+    return this.grade_dict.level;
+}
+
+// The Tries class is used to compare numbers of tries in filter_data_by_range()#
+// It is a wrapper around the Number datatype
+class Tries extends Number {}
+
+
 // Add a filter with a range
 function add_filter_range(div, column) {
 
@@ -31,6 +49,7 @@ function filter_data_by_range(event) {
         if (! isNaN(end_value) && value > end_value)
             continue;
         selected_values.push(climb[column_str]);
+        // console.log(value);
     }
 
     // Add the filter
@@ -87,6 +106,38 @@ function get_filter_range_date() {
         date_input.setAttribute("class", menu + "-range");
 
         div.appendChild(date_input);
+    }
+
+    return div;
+}
+
+
+// Function called by add_filter_range to create the range filter for this column.
+// It returns a div with two number inputs, one for the start and one for the end.
+// The start input must have the class "start-range" and the end input must have
+// the class "end-range".
+function get_filter_range_tries() {
+
+    let div = document.createElement("div");
+
+    // Add the start- and end-range inputs
+    for (let menu of ["start", "end"]) {
+        let tries_input = document.createElement("input");
+        tries_input.setAttribute("type", "number");
+        tries_input.setAttribute("class", menu + "-range");
+
+        // If this is the end-range input, set it to the the max. number of tries
+        if (menu == "end") {
+            let max_tries = 0;
+            for (let climb of DATA) {
+                let tries = new Tries(climb["Tries"]);
+                if (tries > max_tries)
+                    max_tries = tries;
+            }
+            tries_input.value = max_tries;
+        }
+
+        div.appendChild(tries_input);
     }
 
     return div;

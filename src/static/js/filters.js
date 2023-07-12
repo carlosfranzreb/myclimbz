@@ -7,7 +7,7 @@ FILTERS = {
     "Inclination": add_filter_checkboxes,
     "Landing": add_filter_checkboxes,
     "Date": add_filter_range,
-    // "Tries",
+    "Tries": add_filter_range,
     "Sit start": add_filter_checkboxes,
     "Height": add_filter_checkboxes,
     "Style": add_filter_checkboxes,
