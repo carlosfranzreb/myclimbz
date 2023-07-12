@@ -22,13 +22,14 @@ def format_file(file):
     df["Sent"] = df["Sent"].fillna("no")
 
     # find the rows where the 'Boulder' column is null
-    null = df[df["Boulder"].isnull()]["Tries"]
+    null = df[df["Line"].isnull()]["Tries"]
 
     # add the previous value of the 'Tries' column to the rows where null is True
     for i in range(len(null)):
         df.loc[null.index[i], "Tries"] += df.loc[null.index[i] - 1, "Tries"]
 
-    # fill NaN values with the the values from the previous row and
+    # fill NaN values with the the values from the previous row
+    # TODO: don't do this for all columns!
     df = df.fillna(method="ffill")
 
     # set 'Grade' column to type string
