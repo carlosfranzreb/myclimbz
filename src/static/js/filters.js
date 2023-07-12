@@ -33,9 +33,10 @@ function add_filter() {
 
     // add dropdown menu to select filter value
     let selected = filter_selection.options[filter_selection.selectedIndex].value;
-    let filter_options = document.createElement("div");
-    FILTERS[selected](filter_options, selected);
-    filter_container.appendChild(filter_options);
+    let filter_div = document.createElement("div");
+    filter_div.classList.add("filter_div");
+    FILTERS[selected](filter_div, selected);
+    filter_container.appendChild(filter_div);
 
     // add remove button to container
     let remove_button = document.createElement("button");
@@ -53,19 +54,21 @@ function change_filter(event) {
 
     // get the filter container and the old and new selected filters
     let filter_container = event.target.parentNode;
-    let filter_options = filter_container.querySelector("div");
-    let old_selected_option = filter_options.dataset.column;
+    let filter_div = filter_container.querySelector(".filter_div");
+    let old_selected_option = filter_div.querySelector("div").dataset.column;
     let selected_option = event.target.options[event.target.selectedIndex].value;
 
-    // remove old filter options and the filter from the list of active filters
+    // remove the filter from the list of active filters
     ACTIVE_FILTERS.delete(old_selected_option);
-    plot_data();
-    filter_container.removeChild(filter_options);
 
-    // add new filter options
-    filter_options = document.createElement("div");
-    FILTERS[selected_option](filter_options, selected_option);
-    filter_container.insertBefore(filter_options, filter_container.childNodes[1]);
+    // add new filter and remove the old one
+    let new_filter_div = document.createElement("div");
+    new_filter_div.classList.add("filter_div");
+    FILTERS[selected_option](new_filter_div, selected_option);
+    filter_container.insertBefore(new_filter_div, filter_div);
+    filter_container.removeChild(filter_div);
+
+    plot_data();
 }
 
 
