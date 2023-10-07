@@ -1,14 +1,14 @@
-from flask import render_template, url_for, redirect, send_from_directory
+from flask import Blueprint, render_template, url_for, redirect, send_from_directory
 
-from climbs import app
 from climbs.forms import FileForm
 from climbs.utils import format_file
 
 
+routes = Blueprint("routes", __name__)
 FILE = "src/static/data/boulders.csv"
 
 
-@app.route("/", methods=["GET", "POST"])
+@routes.route("/", methods=["GET", "POST"])
 def home():
     form = FileForm()
     if form.validate_on_submit():
@@ -18,12 +18,12 @@ def home():
     return render_template("home.html", title="Home", form=form)
 
 
-@app.route("/analysis")
+@routes.route("/analysis")
 def analysis():
     format_file(FILE)
     return render_template("analysis.html", title="Analysis")
 
 
-@app.route("/data/<file>")
+@routes.route("/data/<file>")
 def send_file(file):
     return send_from_directory("static", f"data/{file}")
