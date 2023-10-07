@@ -1,8 +1,8 @@
 from flask import render_template, url_for, redirect, send_from_directory
 
-from src import app
-from src.forms import FileForm
-from src.utils import format_file
+from climbs import app
+from climbs.forms import FileForm
+from climbs.utils import format_file
 
 
 FILE = "src/static/data/boulders.csv"

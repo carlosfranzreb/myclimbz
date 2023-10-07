@@ -1,4 +1,7 @@
-from src import app
+from climbs import create_app
+
+
+app = create_app()
 
 
 if __name__ == "__main__":
