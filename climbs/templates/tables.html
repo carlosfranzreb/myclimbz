@@ -4,20 +4,18 @@
     <table>
         <tr>
             <th>Name</th>
+            <th>Sector</th>
             <th>Height</th>
             <th>Landing</th>
             <th>Inclination</th>
-            <th>Crux</th>
-            <th>Sector</th>
         </tr>
         {% for climb in climbs.items %}
             <tr>
                 <td>{{ climb.name }}</td>
+                <td>{{ climb.sector.name }}</td>
                 <td>{{ climb.height }}</td>
                 <td>{{ climb.landing }}</td>
                 <td>{{ climb.inclination }}</td>
-                <!-- <td>{{ climb.crux }}</td>
-                <td>{{ climb.sector.name }}</td> -->
             </tr>
         {% endfor %}
     </table>
