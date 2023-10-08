@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from datetime import datetime
 from climbs import db, create_app, models
 
 
@@ -62,6 +63,7 @@ GRADES = [
 
 
 def add_debug_data(db):
+    print("Adding debug data")
     db.session.add(models.Area(name="A1", rock_type_id=0))
     db.session.add(models.Area(name="A2", rock_type_id=1))
 
@@ -93,9 +95,9 @@ def add_debug_data(db):
         )
     )
 
-    db.session.add(models.Session(date="2023-01-01", conditions=7, area_id=0))
-    db.session.add(models.Session(date="2023-01-03", conditions=6, area_id=0))
-    db.session.add(models.Session(date="2023-01-08", conditions=4, area_id=1))
+    db.session.add(models.Session(date=datetime(2023, 1, 1), conditions=7, area_id=0))
+    db.session.add(models.Session(date=datetime(2023, 1, 3), conditions=6, area_id=0))
+    db.session.add(models.Session(date=datetime(2023, 1, 8), conditions=4, area_id=1))
 
     db.session.add(
         models.Climb(
@@ -125,5 +127,7 @@ if __name__ == "__main__":
         for level, (french, hueco) in enumerate(GRADES):
             db.session.add(models.Grade(level=level, french=french, hueco=hueco))
 
-        if not args.debug:
+        if args.debug is True:
             add_debug_data(db)
+
+        db.session.commit()

@@ -10,11 +10,13 @@ route_crux_association = db.Table(
 
 class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200), nullable=False)
-    height = db.Column(db.Integer, nullable=False)
-    landing = db.Column(db.Integer, nullable=False)
-    inclination = db.Column(db.Integer, nullable=False)
-    sector_id = db.Column(db.Integer, db.ForeignKey("sector.id"), nullable=False)
+    name = db.Column(db.String(200))
+    grade_id = db.Column(db.Integer, db.ForeignKey("grade.id"))
+    grade = db.relationship("Grade", backref="routes")
+    height = db.Column(db.Integer)
+    landing = db.Column(db.Integer)
+    inclination = db.Column(db.Integer)
+    sector_id = db.Column(db.Integer, db.ForeignKey("sector.id"))
     sector = db.relationship("Sector", backref="routes")
     cruxes = db.relationship(
         "Crux",
