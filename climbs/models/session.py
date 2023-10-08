@@ -7,4 +7,3 @@ class Session(db.Model):
     conditions = db.Column(db.Integer, nullable=False)
     area_id = db.Column(db.Integer, db.ForeignKey("area.id"), nullable=False)
     area = db.relationship("Area", backref="sessions")
-    climbs = db.relationship("Climb", backref="session", lazy=True)
