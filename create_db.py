@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from climbs import db, create_app, models
 
 
@@ -59,8 +60,62 @@ GRADES = [
     ("9B", "V19"),
 ]
 
+
+def add_debug_data(db):
+    db.session.add(models.Area(name="A1", rock_type_id=0))
+    db.session.add(models.Area(name="A2", rock_type_id=1))
+
+    db.session.add(models.Sector(name="A1_S1", area_id=0))
+    db.session.add(models.Sector(name="A1_S2", area_id=0))
+    db.session.add(models.Sector(name="A2_S1", area_id=1))
+
+    db.session.add(
+        models.Route(
+            name="A1_S1_R1",
+            sector_id=0,
+            grade_id=8,
+            height=3,
+            landing=7,
+            inclination=30,
+        )
+    )
+    db.session.add(
+        models.Route(name="A1_S1_R2", sector_id=0, grade_id=3, height=3, landing=7)
+    )
+    db.session.add(
+        models.Route(
+            name="A1_S2_R1", sector_id=1, grade_id=12, landing=4, inclination=-5
+        )
+    )
+    db.session.add(
+        models.Route(
+            name="A2_S1_R1", sector_id=2, grade_id=15, height=6, inclination=40
+        )
+    )
+
+    db.session.add(models.Session(date="2023-01-01", conditions=7, area_id=0))
+    db.session.add(models.Session(date="2023-01-03", conditions=6, area_id=0))
+    db.session.add(models.Session(date="2023-01-08", conditions=4, area_id=1))
+
+    db.session.add(
+        models.Climb(
+            session_id=0, route_id=0, n_attempts=3, climbed=True, grade_felt_id=7
+        )
+    )
+    db.session.add(models.Climb(session_id=0, route_id=1, n_attempts=12, climbed=False))
+    db.session.add(models.Climb(session_id=1, route_id=1, n_attempts=5, climbed=True))
+    db.session.add(
+        models.Climb(
+            session_id=2, route_id=3, n_attempts=1, climbed=True, grade_felt_id=14
+        )
+    )
+
+
 if __name__ == "__main__":
-    app = create_app()
+    parser = ArgumentParser()
+    parser.add_argument("--debug", type=bool, default=False)
+    args = parser.parse_args()
+    app = create_app(args.debug)
     with app.app_context():
         db.create_all()
         for rock_type in ROCKS:
@@ -69,3 +124,6 @@ if __name__ == "__main__":
             db.session.add(models.Crux(name=crux_type))
         for level, (french, hueco) in enumerate(GRADES):
             db.session.add(models.Grade(level=level, french=french, hueco=hueco))
+
+        if not args.debug:
+            add_debug_data(db)
