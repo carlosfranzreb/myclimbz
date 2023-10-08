@@ -1,0 +1,35 @@
+{% extends "main.html" %}
+{% block content %}
+
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Height</th>
+            <th>Landing</th>
+            <th>Inclination</th>
+            <th>Crux</th>
+            <th>Sector</th>
+        </tr>
+        {% for climb in climbs.items %}
+            <tr>
+                <td>{{ climb.name }}</td>
+                <td>{{ climb.height }}</td>
+                <td>{{ climb.landing }}</td>
+                <td>{{ climb.inclination }}</td>
+                <!-- <td>{{ climb.crux }}</td>
+                <td>{{ climb.sector.name }}</td> -->
+            </tr>
+        {% endfor %}
+    </table>
+
+    <div>
+        {% if climbs.has_prev %}
+            <a href="{{ url_for('show_climbs', page=climbs.prev_num) }}">Previous</a>
+        {% endif %}
+        Page {{ climbs.page }} of {{ climbs.pages }}
+        {% if climbs.has_next %}
+            <a href="{{ url_for('show_climbs', page=climbs.next_num) }}">Next</a>
+        {% endif %}
+    </div>
+
+{% endblock content %}
