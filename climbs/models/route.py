@@ -23,3 +23,7 @@ class Route(db.Model):
         secondary=route_crux_association,
         backref=db.backref("routes", lazy="dynamic"),
     )
+
+    @property
+    def sent(self):
+        return any(climb.climbed for climb in self.climbs)
