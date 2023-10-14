@@ -23,34 +23,23 @@ let ACTIVE_FILTERS = new Map();
 
 
 // Plot the data with D3.js
-window.onload = function() {
+function start_analysis(data, grades) {
     
-    let data_promise = d3.csv("data/boulders.csv");
-    let grades_promise = d3.json("data/grades.json");
+    DATA = data;
+    GRADES = grades;
 
-    Promise.all([data_promise, grades_promise]).then(function([data, grades]) {
-        
-        GRADES = grades;
-        DATA = write_both_grade_scales(data, DATA_GRADE_SCALE);
+    // Add the x-axis options to the menu, as defined in y_axis.js
+    for (let key of Object.keys(y_axis_options))
+        document.getElementById("y-axis-select").options.add(
+            new Option(key, key)
+        );
 
-        // Convert the date strings from format "DD/MM/YYYY" to format "YYYY-MM-DD"
-        DATA.forEach(d => d.Date = moment(d.Date, "DD/MM/YYYY").format("YYYY-MM-DD"));
+    // Fill the x-axis options with the keys of the first data element
+    for (let key of Object.keys(DATA[0]))
+        document.getElementById("x-axis-select").options.add(new Option(key, key));
+    document.getElementById("x-axis-select").value = "font";
 
-        // Add the x-axis options to the menu, as defined in y_axis.js
-        for (let key of Object.keys(y_axis_options))
-            document.getElementById("y-axis-select").options.add(
-                new Option(key, key)
-            );
-
-        // Fill the x-axis options with the keys of the first data element
-        for (let key of Object.keys(DATA[0]))
-            document.getElementById("x-axis-select").options.add(new Option(key, key));
-
-        // Select the "Grade" option by default in the x-axis menu
-        document.getElementById("x-axis-select").value = "Grade";
-
-        plot_data();
-    });
+    plot_data();
 }
 
 
@@ -64,12 +53,17 @@ function plot_data() {
     let x_axis = document.getElementById("x-axis-select").value;
     let y_axis = document.getElementById("y-axis-select").value;
 
+    console.log("x-axis: " + x_axis);
+    console.log("y-axis: " + y_axis);
+
     // Remove unsent climbs if the corresponding button is unchecked
     let this_data = null;
     if (INCLUDE_UNSENT_CLIMBS)
         this_data = DATA
     else
-        this_data = DATA.filter(d => d.Sent == "yes");
+        this_data = DATA.filter(d => d.sent === true);
+
+    console.log(this_data);
 
     // Filter the data according to the active filters
     for (let [key, value] of ACTIVE_FILTERS)
@@ -80,12 +74,12 @@ function plot_data() {
         return;
 
     // Group the data by the selected x-axis key
-    if (x_axis == "Grade")
-        x_axis = GRADE_SCALE;
     let unsorted_out = d3.group(this_data, d => d[x_axis]);
+    console.log(unsorted_out);
 
     // Compute the data to be plotted according to the selected y-axis option
     unsorted_out = y_axis_options[y_axis]["data"](unsorted_out);
+    console.log(unsorted_out);
 
     // Sort the data
     let out = null;

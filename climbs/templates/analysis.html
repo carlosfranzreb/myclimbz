@@ -1,5 +1,12 @@
 {% extends "main.html" %}
 {% block content %}
+
+    <script>
+        window.addEventListener('load', function() {
+            start_analysis({{ routes | tojson }} , {{ grades | tojson }});
+        });
+    </script>
+
     <h1>Analysis</h1>
 
     <!-- This div is used to display the data in the chart; it is centered -->

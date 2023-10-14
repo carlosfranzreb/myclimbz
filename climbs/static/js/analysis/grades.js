@@ -5,6 +5,7 @@
 function compare_grades(a, b) {
     let a_level = GRADES.find(obj => obj[GRADE_SCALE] == a[0]).level;
     let b_level = GRADES.find(obj => obj[GRADE_SCALE] == b[0]).level;
+    console.log(a_level, b_level);
     return a_level - b_level;
 }
 
@@ -18,6 +19,10 @@ function fill_grades(sorted_map) {
     let first_idx = GRADES.findIndex(obj => obj[GRADE_SCALE] == first_key);
     let last_idx = GRADES.findIndex(obj => obj[GRADE_SCALE] == last_key);
     let filled_map = new Map();
+
+    console.log(first_key, last_key);
+    console.log(first_idx, last_idx);
+    console.log(sorted_map);
 
     for (let i = first_idx; i < last_idx + 1; i++) {
         let grade = GRADES[i][GRADE_SCALE];

@@ -124,8 +124,8 @@ if __name__ == "__main__":
             db.session.add(models.RockType(name=rock_type))
         for crux_type in CRUXES:
             db.session.add(models.Crux(name=crux_type))
-        for level, (french, hueco) in enumerate(GRADES):
-            db.session.add(models.Grade(level=level, french=french, hueco=hueco))
+        for level, (font, hueco) in enumerate(GRADES):
+            db.session.add(models.Grade(level=level, font=font, hueco=hueco))
 
         if args.debug is True:
             add_debug_data(db)
