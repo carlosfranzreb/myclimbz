@@ -64,17 +64,17 @@ GRADES = [
 
 def add_debug_data(db):
     print("Adding debug data")
-    db.session.add(models.Area(name="A1", rock_type_id=0))
-    db.session.add(models.Area(name="A2", rock_type_id=1))
+    db.session.add(models.Area(name="A1", rock_type_id=1))
+    db.session.add(models.Area(name="A2", rock_type_id=2))
 
-    db.session.add(models.Sector(name="A1_S1", area_id=0))
-    db.session.add(models.Sector(name="A1_S2", area_id=0))
-    db.session.add(models.Sector(name="A2_S1", area_id=1))
+    db.session.add(models.Sector(name="A1_S1", area_id=1))
+    db.session.add(models.Sector(name="A1_S2", area_id=1))
+    db.session.add(models.Sector(name="A2_S1", area_id=2))
 
     db.session.add(
         models.Route(
             name="A1_S1_R1",
-            sector_id=0,
+            sector_id=1,
             grade_id=8,
             height=3,
             landing=7,
@@ -82,33 +82,33 @@ def add_debug_data(db):
         )
     )
     db.session.add(
-        models.Route(name="A1_S1_R2", sector_id=0, grade_id=3, height=3, landing=7)
+        models.Route(name="A1_S1_R2", sector_id=1, grade_id=3, height=3, landing=7)
     )
     db.session.add(
         models.Route(
-            name="A1_S2_R1", sector_id=1, grade_id=12, landing=4, inclination=-5
+            name="A1_S2_R1", sector_id=2, grade_id=12, landing=4, inclination=-5
         )
     )
     db.session.add(
         models.Route(
-            name="A2_S1_R1", sector_id=2, grade_id=15, height=6, inclination=40
+            name="A2_S1_R1", sector_id=3, grade_id=15, height=6, inclination=40
         )
     )
 
-    db.session.add(models.Session(date=datetime(2023, 1, 1), conditions=7, area_id=0))
-    db.session.add(models.Session(date=datetime(2023, 1, 3), conditions=6, area_id=0))
-    db.session.add(models.Session(date=datetime(2023, 1, 8), conditions=4, area_id=1))
+    db.session.add(models.Session(date=datetime(2023, 1, 1), conditions=7, area_id=1))
+    db.session.add(models.Session(date=datetime(2023, 1, 3), conditions=6, area_id=1))
+    db.session.add(models.Session(date=datetime(2023, 1, 8), conditions=4, area_id=2))
 
     db.session.add(
         models.Climb(
-            session_id=0, route_id=0, n_attempts=3, climbed=True, grade_felt_id=7
+            session_id=1, route_id=1, n_attempts=3, climbed=True, grade_felt_id=7
         )
     )
-    db.session.add(models.Climb(session_id=0, route_id=1, n_attempts=12, climbed=False))
-    db.session.add(models.Climb(session_id=1, route_id=1, n_attempts=5, climbed=True))
+    db.session.add(models.Climb(session_id=1, route_id=2, n_attempts=12, climbed=False))
+    db.session.add(models.Climb(session_id=2, route_id=2, n_attempts=5, climbed=True))
     db.session.add(
         models.Climb(
-            session_id=2, route_id=3, n_attempts=1, climbed=True, grade_felt_id=14
+            session_id=3, route_id=4, n_attempts=1, climbed=True, grade_felt_id=14
         )
     )
 

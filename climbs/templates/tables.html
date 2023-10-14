@@ -1,32 +1,36 @@
 {% extends "main.html" %}
 {% block content %}
 
-    <table>
+    <table class="table table-striped">
         <tr>
             <th>Name</th>
             <th>Sector</th>
+            <th>Area</th>
+            <th>Sessions</th>
             <th>Height</th>
             <th>Landing</th>
             <th>Inclination</th>
         </tr>
-        {% for climb in climbs.items %}
+        {% for route in routes.items %}
             <tr>
-                <td>{{ climb.name }}</td>
-                <td>{{ climb.sector.name }}</td>
-                <td>{{ climb.height }}</td>
-                <td>{{ climb.landing }}</td>
-                <td>{{ climb.inclination }}</td>
+                <td>{{ route.name }}</td>
+                <td>{{ route.sector.name }}</td>
+                <td>{{ route.sector.area.name }}</td>
+                <td>{{ route.climbs|length }}</td>
+                <td>{{ route.height }}</td>
+                <td>{{ route.landing }}</td>
+                <td>{{ route.inclination }}</td>
             </tr>
         {% endfor %}
     </table>
 
     <div>
-        {% if climbs.has_prev %}
-            <a href="{{ url_for('show_climbs', page=climbs.prev_num) }}">Previous</a>
+        {% if routes.has_prev %}
+            <a href="{{ url_for('show_routes', page=routes.prev_num) }}">Previous</a>
         {% endif %}
-        Page {{ climbs.page }} of {{ climbs.pages }}
-        {% if climbs.has_next %}
-            <a href="{{ url_for('show_climbs', page=climbs.next_num) }}">Next</a>
+        Page {{ routes.page }} of {{ routes.pages }}
+        {% if routes.has_next %}
+            <a href="{{ url_for('show_routes', page=routes.next_num) }}">Next</a>
         {% endif %}
     </div>
 
