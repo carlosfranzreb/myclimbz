@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request
-from climbs.models import Route, Grade, Area
+from climbs.models import Route, Grade, Area, Session
 
 routes = Blueprint("routes", __name__)
 FILE = "src/static/data/boulders.csv"
@@ -17,6 +17,13 @@ def table_areas():
     page = request.args.get("page", 1, type=int)
     page_areas = Area.query.paginate(page=page, per_page=10)
     return render_template("areas.html", areas=page_areas)
+
+
+@routes.route("/sessions")
+def table_sessions():
+    page = request.args.get("page", 1, type=int)
+    page_sessions = Session.query.paginate(page=page, per_page=10)
+    return render_template("sessions.html", sessions=page_sessions)
 
 
 @routes.route("/analysis")

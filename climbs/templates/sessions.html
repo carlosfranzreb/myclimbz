@@ -1,0 +1,38 @@
+{% extends "main.html" %}
+{% block content %}
+
+    <!-- Possible additional columns: 
+        - Max./Avg. grade/inclination 
+    -->
+
+
+    <table class="table table-striped">
+        <tr>
+            <th>Date</th>
+            <th>Area</th>
+            <th>Conditions</th>
+            <th># Routes</th>
+            <th># Sends</th>
+        </tr>
+        {% for session in sessions.items %}
+            <tr>
+                <td>{{ session.date }}</td>
+                <td>{{ session.area.name }}</td>
+                <td>{{ session.conditions }}</td>
+                <td>{{ session.climbs|length }}</td>
+                <td>{{ session.climbs|map(attribute='sent')|sum }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <div>
+        {% if sessions.has_prev %}
+            <a href="{{ url_for('show_sessions', page=sessions.prev_num) }}">Previous</a>
+        {% endif %}
+        Page {{ sessions.page }} of {{ sessions.pages }}
+        {% if sessions.has_next %}
+            <a href="{{ url_for('show_sessions', page=sessions.next_num) }}">Next</a>
+        {% endif %}
+    </div>
+
+{% endblock content %}
