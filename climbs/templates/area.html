@@ -28,7 +28,7 @@
             <th># sessions</th>
         </tr>
         {% for sector in area.sectors %}
-            <tr>
+            <tr  onclick="window.location=&quot;{{ url_for('areas.page_sector', sector_id=sector.id) }}&quot;">
                 <td>{{ sector.name }}</td>
                 <td>{{ sector.routes | length }}</td>
                 <td>{{ sector.sessions | length }}</td>
