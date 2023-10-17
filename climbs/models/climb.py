@@ -6,7 +6,7 @@ class Climb(db.Model):
     n_attempts = db.Column(db.Integer)
     grade_felt_id = db.Column(db.Integer, db.ForeignKey("grade.id"))
     grade_felt = db.relationship("Grade", backref="climbs_felt")
-    climbed = db.Column(db.Boolean, nullable=False)
+    sent = db.Column(db.Boolean, nullable=False)
     route_id = db.Column(db.Integer, db.ForeignKey("route.id"))
     route = db.relationship("Route", backref="climbs")
     session_id = db.Column(db.Integer, db.ForeignKey("session.id"), nullable=False)

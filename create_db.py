@@ -100,15 +100,13 @@ def add_debug_data(db):
     db.session.add(models.Session(date=datetime(2023, 1, 8), conditions=4, area_id=2))
 
     db.session.add(
-        models.Climb(
-            session_id=1, route_id=1, n_attempts=3, climbed=True, grade_felt_id=7
-        )
+        models.Climb(session_id=1, route_id=1, n_attempts=3, sent=True, grade_felt_id=7)
     )
-    db.session.add(models.Climb(session_id=1, route_id=2, n_attempts=12, climbed=False))
-    db.session.add(models.Climb(session_id=2, route_id=2, n_attempts=5, climbed=True))
+    db.session.add(models.Climb(session_id=1, route_id=2, n_attempts=12, sent=False))
+    db.session.add(models.Climb(session_id=2, route_id=2, n_attempts=5, sent=True))
     db.session.add(
         models.Climb(
-            session_id=3, route_id=4, n_attempts=1, climbed=True, grade_felt_id=14
+            session_id=3, route_id=4, n_attempts=1, sent=True, grade_felt_id=14
         )
     )
 

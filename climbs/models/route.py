@@ -27,7 +27,7 @@ class Route(db.Model):
     @property
     def sent(self) -> bool:
         """Whether this route has been sent."""
-        return any(climb.climbed for climb in self.climbs)
+        return any(climb.sent for climb in self.climbs)
 
     def as_dict(self) -> dict:
         """
