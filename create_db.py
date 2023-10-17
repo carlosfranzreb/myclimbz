@@ -79,6 +79,7 @@ def add_debug_data(db):
             height=3,
             landing=7,
             inclination=30,
+            grade_felt_id=7,
         )
     )
     db.session.add(
@@ -86,7 +87,12 @@ def add_debug_data(db):
     )
     db.session.add(
         models.Route(
-            name="A1_S2_R1", sector_id=2, grade_id=12, landing=4, inclination=-5
+            name="A1_S2_R1",
+            sector_id=2,
+            grade_id=12,
+            landing=4,
+            inclination=-5,
+            grade_felt_id=13,
         )
     )
     db.session.add(
@@ -99,16 +105,10 @@ def add_debug_data(db):
     db.session.add(models.Session(date=datetime(2023, 1, 3), conditions=6, area_id=1))
     db.session.add(models.Session(date=datetime(2023, 1, 8), conditions=4, area_id=2))
 
-    db.session.add(
-        models.Climb(session_id=1, route_id=1, n_attempts=3, sent=True, grade_felt_id=7)
-    )
+    db.session.add(models.Climb(session_id=1, route_id=1, n_attempts=3, sent=True))
     db.session.add(models.Climb(session_id=1, route_id=2, n_attempts=12, sent=False))
     db.session.add(models.Climb(session_id=2, route_id=2, n_attempts=5, sent=True))
-    db.session.add(
-        models.Climb(
-            session_id=3, route_id=4, n_attempts=1, sent=True, grade_felt_id=14
-        )
-    )
+    db.session.add(models.Climb(session_id=3, route_id=4, n_attempts=1, sent=True))
 
 
 if __name__ == "__main__":
