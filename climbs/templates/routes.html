@@ -1,30 +1,7 @@
 {% extends "main.html" %}
 {% block content %}
 
-    <table class="table table-striped">
-        <tr>
-            <th>Name</th>
-            <th>Sector</th>
-            <th>Area</th>
-            <th>Sessions</th>
-            <th>Sent</th>
-            <th>Height</th>
-            <th>Landing</th>
-            <th>Inclination</th>
-        </tr>
-        {% for route in routes.items %}
-            <tr onclick="window.location=&quot;{{ url_for('routes.page_route', route_id=route.id) }}&quot;">
-                <td>{{ route.name }}</td>
-                <td>{{ route.sector.name }}</td>
-                <td>{{ route.sector.area.name }}</td>
-                <td>{{ route.climbs|length }}</td>
-                <td>{{ route.sent }}</td>
-                <td>{{ route.height }}</td>
-                <td>{{ route.landing }}</td>
-                <td>{{ route.inclination }}</td>
-            </tr>
-        {% endfor %}
-    </table>
+    {% include 'table_routes.html' %}
 
     <div>
         {% if routes.has_prev %}
