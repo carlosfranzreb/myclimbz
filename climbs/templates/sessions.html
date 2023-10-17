@@ -15,7 +15,7 @@
             <th># Sends</th>
         </tr>
         {% for session in sessions.items %}
-            <tr>
+            <tr onclick="window.location=&quot;{{ url_for('sessions.page_session', session_id=session.id) }}&quot;">
                 <td>{{ session.date }}</td>
                 <td>{{ session.area.name }}</td>
                 <td>{{ session.conditions }}</td>

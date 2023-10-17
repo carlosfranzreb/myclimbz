@@ -1,0 +1,41 @@
+{% extends "main.html" %}
+{% block content %}
+
+    <!-- Possible additional columns: 
+        - avg. height/inclination/landing/grade of the session
+    -->
+
+    <div class="container text-center">
+        <div class="row">
+            <div class="col">
+                <div class="row">{{ session.area.name }} on {{ session.date }}</div>
+            </div>
+            <div class="col">
+                <div class="row"># climbs:  {{ session.climbs | length }}</div>
+                <div class="row"># sends: {{ session.climbs | map(attribute='sent') | sum }}</div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Climbs</h3>
+
+    <table class="table table-striped">
+        <tr>
+            <th>Route</th>
+            <th>Sector</th>
+            <th>Area</th>
+            <th># tries</th>
+            <th>Sent</th>
+        </tr>
+        {% for climb in session.climbs %}
+            <tr onclick="window.location=&quot;{{ url_for('routes.page_route', route_id=climb.route.id) }}&quot;">
+                <td>{{ climb.route.name }}</td>
+                <td>{{ climb.route.sector.name }}</td>
+                <td>{{ climb.route.sector.area.name }}</td>
+                <td>{{ climb.n_attempts }}</td>
+                <td>{{ climb.sent }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock content %}
