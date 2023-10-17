@@ -14,7 +14,7 @@
             <th># Routes</th>
         </tr>
         {% for area in areas.items %}
-            <tr onclick="window.location=&quot;{{ url_for('routes.page_area', area_id=area.id) }}&quot;">
+            <tr onclick="window.location=&quot;{{ url_for('areas.page_area', area_id=area.id) }}&quot;">
                 <td>{{ area.name }}</td>
                 <td>{{ area.rock_type.name }}</td>
                 <td>{{ area.sectors|length }}</td>
