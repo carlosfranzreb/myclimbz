@@ -25,6 +25,12 @@ def table_areas() -> str:
     return render_template("areas.html", areas=page_areas)
 
 
+@routes.route("/area/<int:area_id>")
+def page_area(area_id: int) -> str:
+    area = Area.query.get(area_id)
+    return render_template("area.html", area=area)
+
+
 @routes.route("/sessions")
 def table_sessions() -> str:
     page = request.args.get("page", 1, type=int)
