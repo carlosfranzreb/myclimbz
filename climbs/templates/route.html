@@ -1,0 +1,40 @@
+{% extends "main.html" %}
+{% block content %}
+
+    <div class="container text-center">
+        <div class="row">
+            <div class="col">
+                <div class="row">{{ route.name }}</div>
+                <div class="row">{{ route.grade.font }} / {{ route.grade.hueco }}</div>
+            </div>
+            <div class="col">
+                <div class="row">{{ route.sector.area.name }}, {{ route.sector.name }}</div>
+                <div class="row">Height: {{ route.height }} m</div>
+                <div class="row">Inclination: {{ route.inclination }} °</div>
+                <div class="row">Landing: {{ route.landing }} / 10</div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Sessions</h3>
+
+    <table class="table table-striped">
+        <tr>
+            <th>Date</th>
+            <th>Conditions</th>
+            <th># Attempts</th>
+            <th>Grade felt</th>
+            <th>Sent</th>
+        </tr>
+        {% for climb in route.climbs %}
+            <tr>
+                <td>{{ climb.session.date }}</td>
+                <td>{{ climb.session.conditions }}</td>
+                <td>{{ climb.n_attempts }}</td>
+                <td>{{ climb.grade_felt.font }}</td>
+                <td>{{ climb.sent }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock content %}

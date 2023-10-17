@@ -13,7 +13,7 @@
             <th>Inclination</th>
         </tr>
         {% for route in routes.items %}
-            <tr>
+            <tr onclick="window.location=&quot;{{ url_for('routes.page_route', route_id=route.id) }}&quot;">
                 <td>{{ route.name }}</td>
                 <td>{{ route.sector.name }}</td>
                 <td>{{ route.sector.area.name }}</td>
