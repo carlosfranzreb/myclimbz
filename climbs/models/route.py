@@ -36,20 +36,18 @@ class Route(db.Model):
         Return the relevant attributes of this route as a dictionary, focusing on
         those that are relevant for analysis.
         """
-        n_attempts, conditions, dates, grade_felt = 0, list(), list(), list()
+        n_attempts, conditions, dates = 0, list(), list()
         for climb in self.climbs:
             n_attempts += climb.n_attempts
             conditions.append(climb.session.conditions)
             dates.append(climb.session.date)
-            grade_felt.append(climb.grade_felt.font if climb.grade_felt else None)
 
         return {
             "name": self.name,
             "sector": self.sector.name,
             "area": self.sector.area.name,
-            "font": self.grade.font,
-            "hueco": self.grade.hueco,
             "level": self.grade.level,
+            "level_felt": self.grade_felt.level if self.grade_felt else None,
             "height": self.height,
             "landing": self.landing,
             "inclination": self.inclination,
@@ -59,5 +57,4 @@ class Route(db.Model):
             "n_attempts": n_attempts,
             "conditions": conditions,
             "dates": dates,
-            "grade_felt": grade_felt,
         }
