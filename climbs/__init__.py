@@ -12,13 +12,15 @@ def create_app(debug=False):
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_name}.db"
     db.init_app(app)
 
-    from climbs.analysis.routes import analysis
-    from climbs.areas.routes import areas
-    from climbs.sessions.routes import sessions
-    from climbs.routes.routes import routes
+    from climbs.blueprints.analysis.routes import analysis
+    from climbs.blueprints.areas.routes import areas
+    from climbs.blueprints.home.routes import home
+    from climbs.blueprints.sessions.routes import sessions
+    from climbs.blueprints.routes.routes import routes
 
     app.register_blueprint(areas)
     app.register_blueprint(analysis)
+    app.register_blueprint(home)
     app.register_blueprint(sessions)
     app.register_blueprint(routes)
 
