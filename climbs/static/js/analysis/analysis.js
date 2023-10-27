@@ -18,8 +18,8 @@ let DATA = null;
 let GRADES = null;
 let GRADE_SCALE = "font";  // Scale chosen with the toggle button
 let DATA_GRADE_SCALE = "font";  // Scale used in the CSV file
-let INCLUDE_UNSENT_CLIMBS = false;
 let ACTIVE_FILTERS = new Map();
+let INCLUDE_UNSENT_CLIMBS = false;
 
 
 // Plot the data with D3.js
@@ -37,7 +37,7 @@ function start_analysis(data, grades) {
     // Fill the x-axis options with the keys of the first data element
     for (let key of Object.keys(DATA[0]))
         document.getElementById("x-axis-select").options.add(new Option(key, key));
-    document.getElementById("x-axis-select").value = "font";
+    document.getElementById("x-axis-select").value = "level";
 
     plot_data();
 }
@@ -52,9 +52,10 @@ function plot_data() {
     // Get the selected options
     let x_axis = document.getElementById("x-axis-select").value;
     let y_axis = document.getElementById("y-axis-select").value;
-
-    console.log("x-axis: " + x_axis);
-    console.log("y-axis: " + y_axis);
+    if (y_axis == "Success rate" && ! unsent_climbs_btn.checked) {
+        document.getElementById("include-unsent-climbs").checked = true;
+        INCLUDE_UNSENT_CLIMBS = true;
+    }
 
     // Remove unsent climbs if the corresponding button is unchecked
     let this_data = null;
@@ -62,8 +63,6 @@ function plot_data() {
         this_data = DATA
     else
         this_data = DATA.filter(d => d.sent === true);
-
-    console.log(this_data);
 
     // Filter the data according to the active filters
     for (let [key, value] of ACTIVE_FILTERS)
@@ -75,20 +74,18 @@ function plot_data() {
 
     // Group the data by the selected x-axis key
     let unsorted_out = d3.group(this_data, d => d[x_axis]);
-    console.log(unsorted_out);
 
     // Compute the data to be plotted according to the selected y-axis option
     unsorted_out = y_axis_options[y_axis]["data"](unsorted_out);
-    console.log(unsorted_out);
 
     // Sort the data
     let out = null;
-    if (x_axis == GRADE_SCALE) {
-        out = new Map([...unsorted_out].sort(compare_grades));
+    if (x_axis == "level") {
+        out = new Map(Array.from(unsorted_out).sort((a, b) => a[0] - b[0]));
         out = fill_grades(out);
     }
     else
-        out = new Map([...unsorted_out].sort());
+        out = new Map(Array.from(unsorted_out).sort());
     
     let x = d3.scaleBand()
         .range([ 0, WIDTH ])
