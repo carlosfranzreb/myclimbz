@@ -80,10 +80,21 @@ def add_debug_data(db):
             landing=7,
             inclination=30,
             grade_felt_id=7,
+            cruxes=[models.Crux.query.filter_by(name="crimp").first()],
         )
     )
     db.session.add(
-        models.Route(name="A1_S1_R2", sector_id=1, grade_id=3, height=3, landing=7)
+        models.Route(
+            name="A1_S1_R2",
+            sector_id=1,
+            grade_id=3,
+            height=3,
+            landing=7,
+            cruxes=[
+                models.Crux.query.filter_by(name="crimp").first(),
+                models.Crux.query.filter_by(name="toe hook").first(),
+            ],
+        )
     )
     db.session.add(
         models.Route(
@@ -93,6 +104,7 @@ def add_debug_data(db):
             landing=4,
             inclination=-5,
             grade_felt_id=13,
+            cruxes=[models.Crux.query.filter_by(name="heel hook").first()],
         )
     )
     db.session.add(
