@@ -35,5 +35,9 @@
             <script src="{{url_for('static', filename='js/analysis/include_unsent_climbs.js')}}"></script>
         {% endif %}
 
+        {% if title == "Home" %}
+            <script src="{{url_for('static', filename='js/logging/record.js')}}"></script>
+        {% endif %}
+
     </body>
 </html>
