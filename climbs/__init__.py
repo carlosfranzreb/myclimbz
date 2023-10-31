@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -7,6 +8,10 @@ db = SQLAlchemy()
 
 def create_app(debug=False):
     app = Flask(__name__)
+    app.config[
+        "SECRET_KEY"
+    ] = "your-secret-key"  # replace 'your-secret-key' with your actual secret key
+    csrf = CSRFProtect(app)
 
     db_name = "climbs" if not debug else "debug"
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_name}.db"
