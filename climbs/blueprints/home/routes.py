@@ -70,16 +70,38 @@ def add_session() -> str:
     # if POST, i.e. a session form was submitted
     if request.method == "POST":
         session_form = SessionForm(request.form)
+
+        # TODO: these error catches are not working
+        # new_area and existing_area are mutually exclusive
+        if not session_form.existing_area.data and not session_form.new_area.data:
+            return render_template(
+                "session_form.html",
+                session_form=session_form,
+                error="Please enter an area",
+            )
+        if session_form.existing_area.data and session_form.new_area.data:
+            return render_template(
+                "session_form.html",
+                session_form=session_form,
+                error="Please enter only one area",
+            )
+
+        # if new_area, create new area; otherwise, get existing area
         if session_form.new_area.data != "":
-            # create new area and set as area attribute in form
-            pass
+            area = Area(name=session_form.new_area.data)
+            if session_form.rock_type.data != "":
+                rock_type = RockType.query.get(session_form.rock_type.data)
+                area.rock_type = rock_type
+            db.session.add(area)
+            db.session.commit()
         else:
-            # set existing area as area attribute in form
-            pass
+            area = Area.query.get(session_form.existing_area.data)
+
+        session_form.area = area
         session = Session(**session_form.data)
         db.session.add(session)
         db.session.commit()
-        return render_template("index.html", title="Home")
+        return redirect("/")
 
     # if GET, i.e. a recording was uploaded
     entities = flask_session["entities"]
@@ -99,10 +121,11 @@ def add_session() -> str:
         session_form.new_area.data = area.name
         session_form.existing_area.data = 0
         if "rock" in entities:
-            session_form.rock_type.data = entities["rock"]
+            rock_id = RockType.query.filter_by(name=entities["rock"]).first().id
+            session_form.rock_type.data = str(rock_id)
     else:
-        session_form.existing_area.data = area.id
-        session_form.rock_type.data = 0
+        session_form.existing_area.data = str(area.id)
+        session_form.rock_type.data = "0"
 
     return render_template("session_form.html", session_form=session_form)
 
@@ -116,9 +139,6 @@ def get_area(entities: dict) -> Area:
     if area is None:
         if "ROCK" in entities:
             rock_type = RockType.query.filter_by(name=entities["ROCK"]).first()
-            if rock_type is None:
-                rock_type = RockType(name=entities["ROCK"])
-                db.session.add(rock_type)
             area = Area(name=entities["AREA"], rock_type=rock_type)
         else:
             area = Area(name=entities["AREA"])
