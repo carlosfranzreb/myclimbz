@@ -26,8 +26,12 @@ Projects are climbs where N_TRIES = 0.
 """
 
 
+from datetime import datetime
+
 import torch
 from whisper import Whisper
+from parsedatetime import Calendar
+
 from climbs.ner.inference_model import ClimbsModel
 
 
@@ -93,6 +97,10 @@ def parse_climb(model: ClimbsModel, report: str) -> dict[str, str]:
     for key in TITLE_LABELS:
         if key in out:
             out[key] = out[key].title()
+
+    if "DATE" in out:
+        parsed_date = Calendar().parse(out["DATE"])
+        out["DATE"] = datetime(*parsed_date[0][:6])
 
     return out
 

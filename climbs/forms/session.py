@@ -8,4 +8,5 @@ class SessionForm(FlaskForm):
     conditions = IntegerField("Conditions", validators=[DataRequired()])
     existing_area = SelectField("Existing Area", validators=[Optional()])
     new_area = StringField("New Area", validators=[Optional()])
+    rock_type = SelectField("Rock Type of new area", validators=[Optional()])
     submit = SubmitField("Submit")
