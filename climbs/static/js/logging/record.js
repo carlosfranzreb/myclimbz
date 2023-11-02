@@ -48,7 +48,17 @@ function sendToServer() {
         method: 'POST',
         body: formData
     })
-    .then(response => response.text())
-    .then(data => alert(data))
+    .then(response => {
+        if (response.ok) {
+            if (document.getElementById('stopSession')) {
+                console.log('stopSession')
+                window.location.href = "/add_climb";
+            } else {
+                window.location.href = "/add_session";
+            }
+        } else {
+            console.error('Server error:', response.statusText);
+        }
+    })
     .catch(error => console.error('Error sending audio to server:', error));
 }

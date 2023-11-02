@@ -17,7 +17,7 @@
             <div class="row"><h2>Log data</h2></div>
 
                 {% if session_started %}
-                    <button id="stopSessionButton" class="btn btn-danger">Stop Session</button>
+                    <a id="stopSession" class="btn btn-danger" href="{{ url_for('home.stop_session') }}">Stop Session</a>
                 {% endif %}
                 <button id="startButton"  class="btn btn-primary">Start Recording</button>
                 <button id="stopButton" disabled class="btn btn-primary">Stop Recording</button>

@@ -4,9 +4,11 @@ from time import time
 from flask import (
     Blueprint,
     render_template,
+    url_for,
     redirect,
     request,
     session as flask_session,
+    jsonify,
 )
 import whisper
 from datetime import datetime
@@ -25,14 +27,23 @@ NER_MODEL = ClimbsModel.load_from_checkpoint(
 home = Blueprint("home", __name__)
 
 
-@home.route("/")
-def page_home(session_started: bool = False) -> str:
+@home.route("/", methods=["GET", "POST"])
+def page_home() -> str:
+    # POST: an audio file was uploaded
+    if request.method == "POST":
+        return redirect("/upload")
     return render_template(
         "index.html",
         title="Home",
-        session_started=session_started,
+        session_started=flask_session.get("session_started", False),
         error=flask_session.pop("error", None),
     )
+
+
+@home.route("/stop_session", methods=["GET", "POST"])
+def stop_session() -> str:
+    flask_session["session_started"] = False
+    return redirect("/")
 
 
 @home.route("/upload", methods=["GET", "POST"])
@@ -46,15 +57,9 @@ def upload_audio():
     timestamp = str(int(time()))
     filename = os.path.join("audios", f"{timestamp}.webm")
     audio_file.save(filename)
-    # transcript = transcribe(ASR_MODEL, filename)
-    # entities = parse_climb(NER_MODEL, transcript)
-    entities = {
-        "AREA": "La Faka",
-        "ROCK": "granite",
-        "CONDITIONS": 7,
-        "DATE": "January 18th 2023",
-    }
-    entities["DATE"] = datetime.strptime(entities["DATE"], "%B %dth %Y")
+    transcript = transcribe(ASR_MODEL, filename)
+    entities = parse_climb(NER_MODEL, transcript)
+
     flask_session["entities"] = entities
 
     if "AREA" in entities:
@@ -115,7 +120,8 @@ def add_session() -> str:
         )
         db.session.add(session)
         db.session.commit()
-        return redirect("/", session_started=True)
+        flask_session["session_started"] = True
+        return redirect("/")
 
     # GET: a recording was uploaded
     entities = flask_session["entities"]
@@ -144,6 +150,7 @@ def add_session() -> str:
     return render_template("session_form.html", session_form=session_form)
 
 
+@home.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
     pass
 
