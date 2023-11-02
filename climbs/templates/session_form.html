@@ -7,6 +7,12 @@
 
     <h2>Start Session</h2>
 
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+    {% endif %}
+
     <form method="POST" style="margin: 40px;">
         {{ session_form.hidden_tag() }}
     

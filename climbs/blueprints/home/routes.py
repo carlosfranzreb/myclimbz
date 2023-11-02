@@ -67,28 +67,38 @@ def process_audio(filename: str) -> str:
 
 @home.route("/add_session", methods=["GET", "POST"])
 def add_session() -> str:
-    # if POST, i.e. a session form was submitted
+    # POST: a session form was submitted
     if request.method == "POST":
         session_form = SessionForm(request.form)
 
-        # TODO: these error catches are not working
         # new_area and existing_area are mutually exclusive
-        if not session_form.existing_area.data and not session_form.new_area.data:
+        existing_area = session_form.existing_area.data != "0"
+        new_area = len(session_form.new_area.data) > 0
+        if not (existing_area or new_area):
             return render_template(
                 "session_form.html",
                 session_form=session_form,
                 error="Please enter an area",
             )
-        if session_form.existing_area.data and session_form.new_area.data:
+        elif existing_area and new_area:
             return render_template(
                 "session_form.html",
                 session_form=session_form,
                 error="Please enter only one area",
             )
+        # new_area name must be unique
+        elif new_area and not existing_area:
+            area = Area.query.filter_by(name=session_form.new_area.data.strip()).first()
+            if area is not None:
+                return render_template(
+                    "session_form.html",
+                    session_form=session_form,
+                    error="Area name already exists",
+                )
 
         # if new_area, create new area; otherwise, get existing area
-        if session_form.new_area.data != "":
-            area = Area(name=session_form.new_area.data)
+        if new_area:
+            area = Area(name=session_form.new_area.data.strip())
             if session_form.rock_type.data != "":
                 rock_type = RockType.query.get(session_form.rock_type.data)
                 area.rock_type = rock_type
@@ -97,13 +107,19 @@ def add_session() -> str:
         else:
             area = Area.query.get(session_form.existing_area.data)
 
-        session_form.area = area
-        session = Session(**session_form.data)
+        # create session
+        session = Session(
+            **{
+                "area_id": area.id,
+                "conditions": session_form.conditions.data,
+                "date": session_form.date.data,
+            }
+        )
         db.session.add(session)
         db.session.commit()
         return redirect("/")
 
-    # if GET, i.e. a recording was uploaded
+    # GET: a recording was uploaded
     entities = flask_session["entities"]
     area = get_area(entities)
     entities["AREA_ID"] = area.id
