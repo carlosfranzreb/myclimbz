@@ -1,6 +1,10 @@
 {% extends "main.html" %}
 {% block content %}
 
+<form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+</form>
+
 <div class="container text-center" style="margin-top: 50px;">
     <div class="row">
         <div class="col">
@@ -11,16 +15,20 @@
         </div>
         <div class="col">
             <div class="row"><h2>Log data</h2></div>
-            <button id="startButton">Start Recording</button>
-            <button id="stopButton" disabled>Stop Recording</button>
-            <button id="sendButton" disabled>Send to Server</button>
-            <audio id="audioPlayer" controls></audio>
-        </div>
-        <div class="col">
-            <div class="row"><h2>Analysis</h2></div>
-            <a class="btn btn-primary" href="{{ url_for('analysis.analyze') }}">Analysis</a>
+
+                {% if session_started %}
+                    <button id="stopSessionButton" class="btn btn-danger">Stop Session</button>
+                {% endif %}
+                <button id="startButton"  class="btn btn-primary">Start Recording</button>
+                <button id="stopButton" disabled class="btn btn-primary">Stop Recording</button>
+                <button id="sendButton" disabled  class="btn btn-success">Send to Server</button>
+                <audio id="audioPlayer" controls></audio>
+            </div>
+            <div class="col">
+                <div class="row"><h2>Analysis</h2></div>
+                <a class="btn btn-primary" href="{{ url_for('analysis.analyze') }}">Analysis</a>
+            </div>
         </div>
     </div>
-</div>
 
-{% endblock content %}
+    {% endblock content %}

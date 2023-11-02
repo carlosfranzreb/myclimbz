@@ -83,7 +83,10 @@ def parse_climb(model: ClimbsModel, report: str) -> dict[str, str]:
         del out["SEND"]
 
     for key, value in out.items():
-        out[key] = value.strip()
+        try:
+            out[key] = value.strip()
+        except AttributeError:
+            pass
 
     for key in INT_LABELS:
         if key in out:

@@ -17,6 +17,16 @@
     </head>
     <body>
         
+        {% if error %}
+            <script>
+                console.error("An error has occurred.");
+                console.error("{{ error }}");
+            </script>
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
+        
         {%block content %}
         {% endblock %}
         

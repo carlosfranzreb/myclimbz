@@ -39,10 +39,10 @@ function stopRecording() {
 }
 
 function sendToServer() {
-    console.log(audioChunks);
     let audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
     let formData = new FormData();
     formData.append('audioFile', audioBlob, 'recording.webm');
+    formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
 
     fetch('/upload', {
         method: 'POST',

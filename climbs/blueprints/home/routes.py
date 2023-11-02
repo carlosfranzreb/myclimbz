@@ -17,37 +17,36 @@ from climbs.forms import SessionForm
 from climbs import db
 
 
-# ASR_MODEL = whisper.load_model("base")
-# NER_MODEL = ClimbsModel.load_from_checkpoint(
-#     "climbs/ner/checkpoints/ner-0.ckpt", map_location="cpu"
-# )
+ASR_MODEL = whisper.load_model("base")
+NER_MODEL = ClimbsModel.load_from_checkpoint(
+    "climbs/ner/checkpoints/ner-0.ckpt", map_location="cpu"
+)
 
 home = Blueprint("home", __name__)
 
 
 @home.route("/")
-def page_home() -> str:
-    return render_template("index.html", title="Home")
+def page_home(session_started: bool = False) -> str:
+    return render_template(
+        "index.html",
+        title="Home",
+        session_started=session_started,
+        error=flask_session.pop("error", None),
+    )
 
 
 @home.route("/upload", methods=["GET", "POST"])
 def upload_audio():
-    # audio_file = request.files["audioFile"]
-    # os.makedirs("audios", exist_ok=True)
+    try:
+        audio_file = request.files["audioFile"]
+    except KeyError:
+        flask_session["error"] = "No audio file was uploaded."
+        return redirect("/")
 
-    return process_audio("audios/1698660651.webm")  # TODO
-
-    # if audio_file:
-    #     # Create a unique filename using Unix timestamp
-    #     timestamp = str(int(time()))
-    #     filename = os.path.join("audios", f"{timestamp}.webm")
-    #     audio_file.save(filename)
-    #     return process_audio(filename)
-
-
-def process_audio(filename: str) -> str:
+    timestamp = str(int(time()))
+    filename = os.path.join("audios", f"{timestamp}.webm")
+    audio_file.save(filename)
     # transcript = transcribe(ASR_MODEL, filename)
-    transcript = "On January 18th I climbed in La Faka, where there is granite, the conditions were a 7."
     # entities = parse_climb(NER_MODEL, transcript)
     entities = {
         "AREA": "La Faka",
@@ -59,7 +58,6 @@ def process_audio(filename: str) -> str:
     flask_session["entities"] = entities
 
     if "AREA" in entities:
-        # redirect to add_session
         return redirect("/add_session")
     else:
         return redirect("/add_climb")
@@ -117,7 +115,7 @@ def add_session() -> str:
         )
         db.session.add(session)
         db.session.commit()
-        return redirect("/")
+        return redirect("/", session_started=True)
 
     # GET: a recording was uploaded
     entities = flask_session["entities"]
