@@ -9,7 +9,7 @@ with string matching and the NER model:
 - N_TRIES (int): number of tries (BERT).
 - LANDING (int): landing quality out of 10 (BERT).
 - CRUX (list[str]): cruxes of the climb (BERT).
-- HEIGHT (int): height of the climb (manual, succeeded by "meters").
+- HEIGHT (float): height of the climb (manual, succeeded by "meters").
 - INCLINATION (int): inclination of the climb (manual, succeeded by "degrees").
 - SIT_START (bool): whether the climb starts sitting or not (manual, inclusion of "sit").
 - FLASH (bool): whether the climb was flashed (manual, inclusion of "flash").
