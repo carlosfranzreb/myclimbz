@@ -7,6 +7,7 @@ from wtforms import (
     FloatField,
     BooleanField,
     SelectMultipleField,
+    widgets,
 )
 from wtforms.validators import Optional
 
@@ -29,7 +30,12 @@ class ClimbForm(FlaskForm):
     inclination = IntegerField("Inclination", validators=[Optional()])
     landing = IntegerField("Landing", validators=[Optional()])
     sit_start = BooleanField("Sit Start", validators=[Optional()])
-    cruxes = SelectMultipleField("Cruxes", validators=[Optional()])
+    cruxes = SelectMultipleField(
+        "Cruxes",
+        validators=[Optional()],
+        widget=widgets.ListWidget(prefix_label=False),
+        option_widget=widgets.CheckboxInput(),
+    )
 
     submit = SubmitField("Submit")
 

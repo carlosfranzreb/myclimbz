@@ -148,7 +148,7 @@ def add_climb() -> str:
 
     # add crux choices
     cruxes = Crux.query.order_by(Crux.name).all()
-    climb_form.cruxes.choices = [(0, "")] + [(c.id, c.name) for c in cruxes]
+    climb_form.cruxes.choices = [(c.id, c.name) for c in cruxes]
 
     # add grade choices
     grade_scale = "font"
