@@ -6,7 +6,7 @@ with string matching and the NER model:
 - SECTOR (str): sector where the climb is located (BERT).
 - GRADE (Grade): grade of the climb (BERT).
 - GRADE_FELT (Grade): grade felt by the climber (BERT).
-- N_TRIES (int): number of tries (BERT).
+- N_ATTEMPTS (int): number of tries (BERT).
 - LANDING (int): landing quality out of 10 (BERT).
 - CRUX (list[str]): cruxes of the climb (BERT).
 - HEIGHT (float): height of the climb (manual, succeeded by "meters").
@@ -22,7 +22,7 @@ Given a session report (str), it extracts:
 - ROCK (str): rock type of the area (BERT).
 - CONDITIONS (int): rating of the conditions out of 10 (BERT).
 
-Projects are climbs where N_TRIES = 0.
+Projects are climbs where N_ATTEMPTS = 0.
 """
 
 
@@ -36,7 +36,7 @@ from climbs.ner.inference_model import ClimbsModel
 
 
 TITLE_LABELS = ["NAME", "SECTOR", "AREA", "ROCK"]
-INT_LABELS = ["N_TRIES", "LANDING", "INCLINATION", "CONDITIONS", "LANDING"]
+INT_LABELS = ["N_ATTEMPTS", "LANDING", "INCLINATION", "CONDITIONS", "LANDING"]
 FLOAT_LABELS = ["HEIGHT"]
 BOOL_LABELS = ["SIT_START", "FLASH", "SEND"]
 
