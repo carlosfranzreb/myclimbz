@@ -11,6 +11,7 @@ route_crux_association = db.Table(
 class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200))
+    sit_start = db.Column(db.Boolean)
     grade_id = db.Column(db.Integer, db.ForeignKey("grade.id"))
     grade = db.relationship("Grade", foreign_keys=[grade_id])
     grade_felt_id = db.Column(db.Integer, db.ForeignKey("grade.id"), nullable=True)

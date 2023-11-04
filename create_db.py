@@ -74,6 +74,7 @@ def add_debug_data(db):
     db.session.add(
         models.Route(
             name="A1_S1_R1",
+            sit_start=False,
             sector_id=1,
             grade_id=8,
             height=3,
@@ -86,6 +87,7 @@ def add_debug_data(db):
     db.session.add(
         models.Route(
             name="A1_S1_R2",
+            sit_start=True,
             sector_id=1,
             grade_id=3,
             height=3,
@@ -99,6 +101,7 @@ def add_debug_data(db):
     db.session.add(
         models.Route(
             name="A1_S2_R1",
+            sit_start=True,
             sector_id=2,
             grade_id=12,
             landing=4,
