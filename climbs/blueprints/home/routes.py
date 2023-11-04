@@ -129,78 +129,7 @@ def add_session() -> str:
 
 @home.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
-    # POST: a climb form was submitted => create climb or return error
-
-    # ! tmp
-    flask_session["entities"] = {
-        "NAME": "La Zorrera",
-        "SECTOR": "A2_S1",
-        "GRADE": "6C+",
-        "N_TRIES": 5,
-        "SENT": True,
-        "SIT_START": False,
-        "CRUX": ["crimp", "top out"],
-        "HEIGHT": 3.0,
-    }
-    flask_session["session_id"] = 3
-    flask_session["area_id"] = 2
-    # ! end tmp
-
-    if request.method == "POST":
-        climb_form = ClimbForm(request.form)
-        if not climb_form.validate():
-            return render_template(
-                "climb_form.html", climb_form=climb_form, error=climb_form.errors
-            )
-
-        # create new sector and new route if necessary
-        new_sector_data = climb_form.new_sector.data.strip()
-        existing_sector_data = climb_form.existing_sector.data
-        sector = None
-        if new_sector_data:
-            sector = Sector(
-                name=new_sector_data,
-                area_id=flask_session["area_id"],
-            )
-            db.session.add(sector)
-            db.session.commit()
-        elif existing_sector_data:
-            sector = Sector.query.get(existing_sector_data)
-
-        if climb_form.new_route.data:
-            route = Route(name=climb_form.new_route.data.strip(), sector=sector)
-            for field in [
-                "grade_id",
-                "grade_felt_id",
-                "height",
-                "inclination",
-                "landing",
-                "sit_start",
-                "send",
-            ]:
-                setattr(route, field, getattr(climb_form, field).data)
-            for crux_id in climb_form.cruxes.data:
-                crux = Crux.query.get(crux_id)
-                route.cruxes.append(crux)
-            db.session.add(route)
-            db.session.commit()
-        else:
-            route = Route.query.get(climb_form.existing_route.data)
-
-        # create climb
-        session = Climb(
-            **{
-                "n_attempts": climb_form.n_attempts.data,
-                "sent": climb_form.sent.data,
-                "route_id": route.id,
-                "session_id": flask_session["session_id"],
-            }
-        )
-        db.session.add(session)
-        db.session.commit()
-        return redirect("/")
-
-    # GET: a recording was uploaded => create climb form
+    # create form and add choices
     entities = flask_session["entities"]
     route = get_route(entities)
     climb_form = ClimbForm()
@@ -232,8 +161,69 @@ def add_climb() -> str:
             (g.id, getattr(g, grade_scale)) for g in grades
         ]
 
-    # if new_route, fill in all route fields when found in entities
+    # POST: a climb form was submitted => create climb or return error
+    if request.method == "POST":
+        climb_form.cruxes.data = [int(c) for c in climb_form.cruxes.data]
+        if not climb_form.validate():
+            return render_template(
+                "climb_form.html", climb_form=climb_form, error=climb_form.errors
+            )
+
+        # create new sector and new route if necessary
+        new_sector_data = climb_form.new_sector.data.strip()
+        existing_sector_data = climb_form.existing_sector.data
+        sector = None
+        if new_sector_data:
+            sector = Sector(
+                name=new_sector_data,
+                area_id=flask_session["area_id"],
+            )
+            db.session.add(sector)
+            db.session.commit()
+        elif existing_sector_data:
+            sector = Sector.query.get(existing_sector_data)
+
+        if climb_form.new_route.data:
+            route = Route(name=climb_form.new_route.data.strip(), sector=sector)
+            for field in [
+                "height",
+                "inclination",
+                "landing",
+                "sit_start",
+                "grade",
+                "grade_felt",
+            ]:
+                setattr(route, field, getattr(climb_form, field).data)
+
+            for crux_id in climb_form.cruxes.data:
+                crux = Crux.query.get(crux_id)
+                route.cruxes.append(crux)
+
+            db.session.add(route)
+            db.session.commit()
+        else:
+            route = Route.query.get(climb_form.existing_route.data)
+
+        # create climb
+        session = Climb(
+            **{
+                "n_attempts": climb_form.n_attempts.data,
+                "sent": climb_form.sent.data,
+                "route_id": route.id,
+                "session_id": flask_session["session_id"],
+            }
+        )
+        db.session.add(session)
+        db.session.commit()
+        return redirect("/")
+
+    # GET: a recording was uploaded => create climb form
     entities = {k.lower(): v for k, v in entities.items()}
+    for field in ["n_attempts", "sent"]:
+        if field in entities:
+            getattr(climb_form, field).data = entities[field]
+
+    # if new_route, fill in all route fields when found in entities
     if route.id is None:
         climb_form.new_route.data = route.name
         for field in ["grade", "grade_felt"]:
@@ -246,9 +236,20 @@ def add_climb() -> str:
                 getattr(climb_form, field).data = str(grade.id)
             else:
                 getattr(climb_form, field).data = 0
-        for field in ["height", "inclination", "landing", "sit_start", "sent"]:
+
+        for field in ["height", "inclination", "landing", "sit_start"]:
             if field in entities:
                 getattr(climb_form, field).data = entities[field]
+
+        if "crux" in entities:
+            climb_form.cruxes.data = list()
+            for crux in entities["crux"]:
+                climb_form.cruxes.data.append(
+                    str(Crux.query.filter_by(name=crux).first().id)
+                )
+
+    else:
+        climb_form.existing_route.data = str(route.id)
 
     # fill new_sector field or select existing sector
     if route.sector.id is None:

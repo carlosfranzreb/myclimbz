@@ -8,10 +8,10 @@ from wtforms import (
     BooleanField,
     SelectMultipleField,
 )
-from wtforms.validators import DataRequired, Optional
+from wtforms.validators import Optional
 
 from climbs.forms.check_exclusive import check_exclusivity
-from climbs.models import Route, Sector
+from climbs.models import Route, Sector, Grade
 
 
 class ClimbForm(FlaskForm):
@@ -20,7 +20,7 @@ class ClimbForm(FlaskForm):
     existing_sector = SelectField("Existing sector", validators=[Optional()])
     new_sector = StringField("New sector", validators=[Optional()])
     n_attempts = IntegerField("Number of attempts", validators=[Optional()])
-    sent = BooleanField("Sent", validators=[DataRequired()])
+    sent = BooleanField("Sent", validators=[Optional()])
 
     # fields for new route
     grade = SelectField("Grade", validators=[Optional()])
@@ -37,7 +37,7 @@ class ClimbForm(FlaskForm):
         """
         Ensure that only one of the new and existing fields is filled. Also ensure that
         the new field is not already in the database. If the form is valid, change the
-        grades to integers or None, so that they can be added to the database.
+        grades to their objects.
         """
         is_valid = True
         if not super().validate():
@@ -59,11 +59,9 @@ class ClimbForm(FlaskForm):
             self.new_sector.errors.append(error)
             is_valid = False
 
-        # if is_valid, change the grades to integers or None
+        # if is_valid, change the grades to their objects
         if is_valid:
-            self.grade.data = None if self.grade.data == "0" else int(self.grade.data)
-            self.grade_felt.data = (
-                None if self.grade_felt.data == "0" else int(self.grade_felt.data)
-            )
+            for field in ["grade", "grade_felt"]:
+                getattr(self, field).data = Grade.query.get(getattr(self, field).data)
 
         return is_valid

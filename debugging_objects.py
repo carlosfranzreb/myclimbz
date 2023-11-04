@@ -9,3 +9,18 @@ entities = {
     "DATE": "January 18th 2023",
 }
 entities["DATE"] = datetime.strptime(entities["DATE"], "%B %dth %Y")
+
+# ! tmp
+flask_session["entities"] = {
+    "NAME": "La Zorrera Sit",
+    "SECTOR": "A2_S1",
+    "GRADE": "7A",
+    "N_ATTEMPTS": 15,
+    "SENT": True,
+    "SIT_START": True,
+    "CRUX": ["crimp", "top out"],
+    "HEIGHT": 3.0,
+}
+flask_session["session_id"] = 3
+flask_session["area_id"] = 2
+# ! end tmp
