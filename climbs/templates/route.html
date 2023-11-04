@@ -13,6 +13,7 @@
                 <div class="row">Inclination: {{ route.inclination }} °</div>
                 <div class="row">Landing: {{ route.landing }} / 10</div>
                 <div class="row">Grade felt: {{ route.grade_felt.font }} / {{ route.grade_felt.hueco }}</div>
+                <div class="row">Cruxes: {{ route.cruxes|map(attribute="name")|join(", ") }}</div>
             </div>
         </div>
     </div>
