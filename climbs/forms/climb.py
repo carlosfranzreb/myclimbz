@@ -6,11 +6,12 @@ from wtforms import (
     SelectField,
     FloatField,
     BooleanField,
+    SelectMultipleField,
 )
 from wtforms.validators import DataRequired, Optional
 
 from climbs.forms.check_exclusive import check_exclusivity
-from climbs.models import Route, Sector, Grade
+from climbs.models import Route, Sector
 
 
 class ClimbForm(FlaskForm):
@@ -27,7 +28,8 @@ class ClimbForm(FlaskForm):
     height = FloatField("Height", validators=[Optional()])
     inclination = IntegerField("Inclination", validators=[Optional()])
     landing = IntegerField("Landing", validators=[Optional()])
-    sit_start = BooleanField("Sit Start", validators=[DataRequired()])
+    sit_start = BooleanField("Sit Start", validators=[Optional()])
+    cruxes = SelectMultipleField("Cruxes", validators=[Optional()])
 
     submit = SubmitField("Submit")
 
