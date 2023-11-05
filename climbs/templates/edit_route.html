@@ -7,7 +7,7 @@
         <div class="row">
             <div class="col-4 offset-md-2">
                 <div class="row"><div class="col-xs-12 center-block text-center">{{ route.name }}</div></div>
-                <div class="row"><div class="col-xs-12 center-block text-center">{{ route.grade.font }} / {{ route.grade.hueco }}</div></div>               
+                <div class="row"><div class="col-xs-12 center-block text-center">{{ route.grade.font }} / {{ route.grade.hueco }}</div></div>
             </div>
             <div class="col-4">
                 <div class="row"><div class="col-xs-12 center-block text-center">{{ route.sector.area.name }}, {{ route.sector.name }}</div></div>
@@ -16,14 +16,6 @@
                 <div class="row"><div class="col-xs-12 center-block text-center">Landing: {{ route.landing }} / 10</div></div>
                 <div class="row"><div class="col-xs-12 center-block text-center">Grade felt: {{ route.grade_felt.font }} / {{ route.grade_felt.hueco }}</div></div>
                 <div class="row"><div class="col-xs-12 center-block text-center">Cruxes: {{ route.cruxes|map(attribute="name")|join(", ") }}</div></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="row">
-            <div class="col-xs-12 center-block text-center">
-                <a href="{{ url_for('routes.edit_route', route_id=route.id) }}" class="btn btn-primary">Edit route</a>
             </div>
         </div>
     </div>

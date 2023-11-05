@@ -16,3 +16,9 @@ def table_routes() -> str:
 def page_route(route_id: int) -> str:
     route = Route.query.get(route_id)
     return render_template("route.html", route=route)
+
+
+@routes.route("/edit_route/<int:route_id>", methods=["GET", "POST"])
+def edit_route(route_id: int) -> str:
+    route = Route.query.get(route_id)
+    return render_template("edit_route.html", route=route)
