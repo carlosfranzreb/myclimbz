@@ -22,7 +22,7 @@ Given a session report (str), it extracts:
 - ROCK (str): rock type of the area (BERT).
 - CONDITIONS (int): rating of the conditions out of 10 (BERT).
 
-Projects are climbs where N_ATTEMPTS = 0.
+Projects are climbs where N_ATTEMPTS is not given or 0 and sent is false.
 """
 
 

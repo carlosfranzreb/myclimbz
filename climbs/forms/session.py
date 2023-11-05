@@ -2,7 +2,6 @@ from flask_wtf import FlaskForm
 from wtforms import IntegerField, DateField, StringField, SubmitField, SelectField
 from wtforms.validators import Optional
 
-from climbs.forms.check_exclusive import check_exclusivity
 from climbs.models import Session
 
 
@@ -15,7 +14,8 @@ class SessionForm(FlaskForm):
     submit = SubmitField("Submit")
 
     def validate(self):
-        """Ensure that only one of the new and existing fields is filled. Also ensure that
+        """
+        Ensure that only one of the new and existing fields is filled. Also ensure that
         the new field is not already in the database.
         """
         is_valid = True
