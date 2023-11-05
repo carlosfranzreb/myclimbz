@@ -1,44 +1,37 @@
 {% extends "main.html" %}
 {% block content %}
 
+    <!-- 
+        Display the form for adding a new climb.
 
+        - If is is an existing route, display only the route name and grade.
+        - If it is a new route, display all the fields.
+        - If it is a project, don't display the sent and n_attempts fields.
+    -->
 
-    <div class="container">
-        <div class="row">
-            <div class="col-4 offset-md-2">
-                <div class="row"><div class="col-xs-12 center-block text-center">{{ route.name }}</div></div>
-                <div class="row"><div class="col-xs-12 center-block text-center">{{ route.grade.font }} / {{ route.grade.hueco }}</div></div>
-            </div>
-            <div class="col-4">
-                <div class="row"><div class="col-xs-12 center-block text-center">{{ route.sector.area.name }}, {{ route.sector.name }}</div></div>
-                <div class="row"><div class="col-xs-12 center-block text-center">Height: {{ route.height }} m</div></div>
-                <div class="row"><div class="col-xs-12 center-block text-center">Inclination: {{ route.inclination }} °</div></div>
-                <div class="row"><div class="col-xs-12 center-block text-center">Landing: {{ route.landing }} / 10</div></div>
-                <div class="row"><div class="col-xs-12 center-block text-center">Grade felt: {{ route.grade_felt.font }} / {{ route.grade_felt.hueco }}</div></div>
-                <div class="row"><div class="col-xs-12 center-block text-center">Cruxes: {{ route.cruxes|map(attribute="name")|join(", ") }}</div></div>
-            </div>
-        </div>
-    </div>
+    <h2>Log climb</h2>
 
     <div class="container">
-        <h3>Sessions</h3>
-
-        <table class="table table-striped">
-            <tr>
-                <th>Date</th>
-                <th>Conditions</th>
-                <th># Attempts</th>
-                <th>Sent</th>
-            </tr>
-            {% for climb in route.climbs %}
-                <tr>
-                    <td>{{ climb.session.date }}</td>
-                    <td>{{ climb.session.conditions }}</td>
-                    <td>{{ climb.n_attempts }}</td>
-                    <td>{{ climb.sent }}</td>
-                </tr>
+        <h3>Route</h3>
+        <form method="POST" style="margin: 40px;">
+            {{ route_form.hidden_tag() }}
+            {% for field in route_form %}
+                {% if field.name != 'csrf_token' and field != route_form.existing_route %}
+                    <div class="form-group">
+                        <label for="{{ field.id }}">{{ field.label }}</label>
+                        {% if field.type == 'BooleanField' %}
+                            {{ field(id=field.id, class='form-check') }}
+                        {% else %}
+                            {{ field(id=field.id, class='form-control') }}
+                        {% endif %}
+                    </div>
+                {% endif %}
             {% endfor %}
-        </table>
+
+            <div class="form-group">
+                <input type="submit" name="btn" value="Save">
+            </div>
+        </form>
     </div>
 
 {% endblock content %}

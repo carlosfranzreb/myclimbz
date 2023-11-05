@@ -2,13 +2,12 @@ from datetime import datetime
 
 # to create a session
 transcript = "On January 18th I climbed in La Faka, where there is granite, the conditions were a 7."
-entities = {
+flask_session["entities"] = {
     "AREA": "La Faka",
     "ROCK": "granite",
     "CONDITIONS": 7,
-    "DATE": "January 18th 2023",
+    "DATE": datetime.strptime("January 18th 2023", "%B %dth %Y"),
 }
-entities["DATE"] = datetime.strptime(entities["DATE"], "%B %dth %Y")
 
 # ! tmp
 flask_session["entities"] = {

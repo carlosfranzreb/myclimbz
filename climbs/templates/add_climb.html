@@ -12,23 +12,24 @@
     <h2>Log climb</h2>
 
     <div class="container">
-        <h3>Route</h3>
-        <form method="POST" style="margin: 40px;">
+        <form method="POST" style="margin: 40px;" onkeydown="return event.key != 'Enter';">
             {{ route_form.hidden_tag() }}
 
             <div class="form-group">
-                <label for="{{ route_form.existing_route.id }}">{{ route_form.existing_route.label }}</label>
-                {{ route_form.existing_route(id=route_form.existing_route.id, class='form-control') }}
+                <label for="{{ route_form.name.id }}">{{ route_form.name.label }}</label>
+                {{ route_form.name(id=route_form.name.id, class='form-control', list='existingRoutes', autocomplete='off') }}
             </div>
 
-            <div id="new-route-form" class="container">
+            <div id="newRouteForm" class="container">
                 <h4>New route</h4>
 
                 {% for field in route_form %}
-                    {% if field.name != 'csrf_token' and field != route_form.existing_route and field != route_form.submit %}
+                    {% if field.name != 'csrf_token' and field != route_form.name %}
                         <div class="form-group">
                             <label for="{{ field.id }}">{{ field.label }}</label>
-                            {% if field.type == 'BooleanField' %}
+                            {% if field.id == 'sector' %}
+                                {{ field(id=field.id, class='form-control', list='existingSectors', autocomplete='off') }}
+                            {% elif field.type == 'BooleanField' %}
                                 {{ field(id=field.id, class='form-check') }}
                             {% else %}
                                 {{ field(id=field.id, class='form-control') }}
@@ -38,7 +39,18 @@
                 {% endfor %}
             </div>
 
-        <h3>Climb</h3>
+            <datalist id="existingRoutes">
+                {% for route_name in route_names %}
+                    <option value="{{ route_name }}"></option>
+                {% endfor %}
+            </datalist>
+            <datalist id="existingSectors">
+                {% for sector_name in sector_names %}
+                    <option value="{{ sector_name }}"></option>
+                {% endfor %}
+            </datalist>
+
+        <h4>Climb</h4>
         <form method="POST" style="margin: 40px;">
             {{ climb_form.hidden_tag() }}
             
@@ -47,7 +59,7 @@
                 {{ climb_form.is_project(id=climb_form.is_project.id, class='form-check') }}
             </div>
 
-            <div id="new-climb-form" class="container">
+            <div id="newClimbForm" class="container">
                 <div class="form-group">
                     <label for="{{ climb_form.n_attempts.id }}">{{ climb_form.n_attempts.label }}</label>
                     {{ climb_form.n_attempts(id=climb_form.n_attempts.id, class='form-control') }}
@@ -59,20 +71,27 @@
             </div>
 
             <div class="form-group">
-                <input type="submit" name="btn" value="Save">
+                <input type="submit" class="btn btn-success" value="Save">
             </div>
         </form>
     </div>
 
     <script>
-        let existingRoute = document.querySelector('#{{ route_form.existing_route.id }}');
+        let route = document.querySelector('#{{ route_form.name.id }}');
         let isProject = document.querySelector('#{{ climb_form.is_project.id }}');
-        let newRouteForm = document.querySelector('#new-route-form');
-        let newClimbForm = document.querySelector('#new-climb-form');
+        let newRouteForm = document.querySelector('#newRouteForm');
+        let newClimbForm = document.querySelector('#newClimbForm');
 
         function toggleNewRouteForm() {
-            newRouteForm.style.display = existingRoute.value == '0' ? 'block' : 'none';
-        }
+            let routeValue = route.value;
+            let routeExists = false;
+            for (let existingRoute of document.getElementById("existingRoutes").options) {
+                if (existingRoute.value == routeValue) {
+                    routeExists = true;
+                    break;
+                }
+            }
+            newRouteForm.style.display = routeExists ? "none" : "block";        }
 
         function toggleNewClimbForm() {
             newClimbForm.style.display = isProject.checked ? 'none' : 'block';
@@ -80,7 +99,7 @@
 
         toggleNewRouteForm();
         toggleNewClimbForm();
-        existingRoute.addEventListener('change', toggleNewRouteForm);
+        route.addEventListener('change', toggleNewRouteForm);
         isProject.addEventListener('change', toggleNewClimbForm);
     </script>
 

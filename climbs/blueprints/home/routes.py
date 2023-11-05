@@ -11,6 +11,7 @@ from flask import (
     jsonify,
 )
 import whisper
+from datetime import datetime
 
 from climbs.ner import transcribe, parse_climb, ClimbsModel
 from climbs.models import Area, Climb, Crux, Grade, RockType, Route, Session, Sector
@@ -65,25 +66,31 @@ def stop_session() -> str:
 
 @home.route("/add_session", methods=["GET", "POST"])
 def add_session() -> str:
+    area_names = [area.name for area in Area.query.order_by(Area.name).all()]
+    session_form = SessionForm()
+    session_form.add_choices()
+
     # POST: a session form was submitted => create session or return error
     if request.method == "POST":
-        session_form = SessionForm(request.form)
         if not session_form.validate():
             return render_template(
-                "session_form.html",
+                "add_session.html",
                 session_form=session_form,
                 error=session_form.errors,
             )
         # if new_area, create new area; otherwise, get existing area
-        if session_form.new_area.data:
-            area = Area(name=session_form.new_area.data.strip())
-            if session_form.rock_type.data != "":
-                rock_type = RockType.query.get(session_form.rock_type.data)
-                area.rock_type = rock_type
-            db.session.add(area)
-            db.session.commit()
-        else:
-            area = Area.query.get(session_form.existing_area.data)
+        area = None
+        if len(session_form.area.data) > 0:
+            area_name = session_form.area.data.strip()
+            area = Area.query.filter_by(name=area_name).first()
+            if area is None:
+                if session_form.rock_type.data != "":
+                    rock_type = RockType.query.get(session_form.rock_type.data)
+                    area = Area(name=area_name, rock_type=rock_type)
+                else:
+                    area = Area(name=area_name)
+                db.session.add(area)
+                db.session.commit()
 
         # create session
         session = Session(
@@ -108,77 +115,37 @@ def add_session() -> str:
 
     session = Session(**{k: v for k, v in entities.items() if k != "rock"})
     session_form = SessionForm(obj=session)
-    session_form.rock_type.choices = [(r.id, r.name) for r in RockType.query.all()]
-    session_form.existing_area.choices = [(a.id, a.name) for a in Area.query.all()]
-    session_form.existing_area.choices.insert(0, (0, ""))
-    session_form.rock_type.choices.insert(0, (0, ""))
+    session_form.add_choices()
+    session_form.area.data = area.name
 
-    if area.id is None:
-        session_form.new_area.data = area.name
-        session_form.existing_area.data = 0
-        if "rock" in entities:
-            rock_id = RockType.query.filter_by(name=entities["rock"]).first().id
-            session_form.rock_type.data = str(rock_id)
+    if area.id is None and "rock" in entities:
+        rock_id = RockType.query.filter_by(name=entities["rock"]).first().id
+        session_form.rock_type.data = str(rock_id)
     else:
-        session_form.existing_area.data = str(area.id)
         session_form.rock_type.data = "0"
 
-    return render_template("session_form.html", session_form=session_form)
+    return render_template(
+        "add_session.html",
+        session_form=session_form,
+        area_names=area_names,
+    )
 
 
 @home.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
-    # ! tmp
-    flask_session["entities"] = {
-        "NAME": "La Zorrera Sit",
-        "SECTOR": "A2_S1",
-        "GRADE": "7A",
-        "N_ATTEMPTS": 15,
-        "SENT": True,
-        "SIT_START": True,
-        "CRUX": ["crimp", "top out"],
-        "HEIGHT": 3.0,
-    }
-    flask_session["session_id"] = 3
-    flask_session["area_id"] = 2
-    # ! end tmp
-
     # create form and add choices
     entities = flask_session["entities"]
     route = get_route(entities)
     climb_form = ClimbForm()
     route_form = RouteForm()
-
-    # add sector choices
-    area_id = flask_session["area_id"]
-    sectors = Sector.query.filter_by(area_id=area_id).order_by(Sector.name).all()
-    route_form.existing_sector.choices = [(0, "")] + [(s.id, s.name) for s in sectors]
-
-    # add route choices
-    routes = list()
-    for sector in sectors:
-        routes.extend(sector.routes)
-    routes = sorted(routes, key=lambda r: r.name)
-    route_form.existing_route.choices = [(0, "")] + [(r.id, r.name) for r in routes]
-
-    # add crux choices
-    cruxes = Crux.query.order_by(Crux.name).all()
-    route_form.cruxes.choices = [(c.id, c.name) for c in cruxes]
-
-    # add grade choices
     grade_scale = "font"
     for field in ["GRADE", "GRADE_FELT"]:
         if field in entities:
             grade_scale = "hueco" if entities[field][0] == "V" else "font"
-    grades = Grade.query.order_by(Grade.level).all()
-    for field in ["grade", "grade_felt"]:
-        getattr(route_form, field).choices = [(0, "")] + [
-            (g.id, getattr(g, grade_scale)) for g in grades
-        ]
+    route_form.add_choices(grade_scale)
 
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
-        route_form.cruxes.data = [int(c) for c in route_form.cruxes.data]
         if not route_form.validate() or not climb_form.validate():
             return render_template(
                 "add_climb.html",
@@ -188,23 +155,18 @@ def add_climb() -> str:
             )
 
         # create new sector and new route if necessary
-        new_sector_data = route_form.new_sector.data
-        existing_sector_data = route_form.existing_sector.data
         sector = None
-        if existing_sector_data != "0":
-            sector = Sector.query.get(existing_sector_data)
-        elif new_sector_data:
-            sector = Sector(
-                name=new_sector_data.strip(),
-                area_id=flask_session["area_id"],
-            )
-            db.session.add(sector)
-            db.session.commit()
+        if len(route_form.sector.data) > 0:
+            sector_name = route_form.sector.data.strip()
+            sector = Sector.query.filter_by(name=sector_name).first()
+            if sector is None:
+                sector = Sector(name=sector_name, area_id=flask_session["area_id"])
+                db.session.add(sector)
+                db.session.commit()
 
-        if route_form.existing_route.data != "0":
-            route = Route.query.get(route_form.existing_route.data)
-        else:
-            route = Route(name=route_form.new_route.data.strip(), sector=sector)
+        route = Route.query.filter_by(name=route_form.name.data.strip()).first()
+        if route is None:
+            route = Route(name=route_form.name.data.strip(), sector=sector)
             for field in [
                 "height",
                 "inclination",
@@ -236,51 +198,32 @@ def add_climb() -> str:
         return redirect("/")
 
     # GET: a recording was uploaded => create climb form
-    entities = {k.lower(): v for k, v in entities.items()}
-    for field in ["n_attempts", "sent"]:
-        if field in entities:
-            getattr(climb_form, field).data = entities[field]
-    climb_form.is_project.data = (
-        "n_attempts" not in entities or entities["n_attempts"] == 0
-    ) and entities["sent"] is False
-
-    # if new_route, fill in all route fields when found in entities
+    climb_form = ClimbForm(n_attempts=entities["N_ATTEMPTS"], sent=entities["SENT"])
     if route.id is None:
-        route_form.new_route.data = route.name
-        for field in ["grade", "grade_felt"]:
-            value = entities.get(field, None)
-            if value is not None:
-                if grade_scale == "hueco":
-                    grade = Grade.query.filter_by(hueco=value).first()
-                else:
-                    grade = Grade.query.filter_by(font=value).first()
-                getattr(route_form, field).data = str(grade.id)
-            else:
-                getattr(route_form, field).data = 0
-
-        for field in ["height", "inclination", "landing", "sit_start"]:
-            if field in entities:
-                getattr(route_form, field).data = entities[field]
-
-        if "crux" in entities:
-            route_form.cruxes.data = list()
-            for crux in entities["crux"]:
-                route_form.cruxes.data.append(
-                    str(Crux.query.filter_by(name=crux).first().id)
-                )
-
+        route_form = RouteForm()
+        route_form.add_choices(grade_scale)
+        route_form.populate_from_entities(entities, grade_scale)
     else:
-        route_form.existing_route.data = str(route.id)
+        route_form = RouteForm()
+        route_form.name.data = route.name
+        route_form.add_choices(grade_scale)
 
-    # fill new_sector field or select existing sector
-    if route.sector.id is None:
-        route_form.new_sector.data = route.sector.name
-        route_form.existing_sector.data = 0
-    else:
-        route_form.existing_sector.data = str(route.sector.id)
-
+    sectors = (
+        Sector.query.filter_by(area_id=flask_session["area_id"])
+        .order_by(Sector.name)
+        .all()
+    )
+    sector_names = [sector.name for sector in sectors]
+    routes = list()
+    for sector in sectors:
+        routes += sector.routes
+    route_names = sorted([route.name for route in routes])
     return render_template(
-        "add_climb.html", route_form=route_form, climb_form=climb_form
+        "add_climb.html",
+        route_form=route_form,
+        climb_form=climb_form,
+        route_names=route_names,
+        sector_names=sector_names,
     )
 
 
