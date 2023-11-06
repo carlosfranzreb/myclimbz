@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from flask_wtf import FlaskForm
 from wtforms import (
     IntegerField,
@@ -63,39 +65,56 @@ class RouteForm(FlaskForm):
                 (g.id, getattr(g, grade_scale)) for g in grades
             ]
 
-    def populate_from_obj(self, obj: Route):
+    @classmethod
+    def create_empty(cls, grade_scale: str = "font") -> RouteForm:
         """
-        Select options of select fields with the values of the given object.
+        Create the form and add choices to the select fields.
         """
+        form = cls()
+        form.add_choices(grade_scale)
+        return form
 
+    @classmethod
+    def create_from_obj(cls, obj: Route, grade_scale: str = "font") -> RouteForm:
+        """
+        Create the form with data from the route object.
+        """
+        form = cls()
+        form.add_choices(grade_scale)
         for field in ["name", "height", "inclination", "landing", "sit_start"]:
-            getattr(self, field).data = getattr(obj, field)
+            getattr(form, field).data = getattr(obj, field)
 
         if obj.sector is not None:
-            self.sector.data = obj.sector.name
+            form.sector.data = obj.sector.name
 
         if obj.grade is not None:
-            self.grade.data = obj.grade.id
+            form.grade.data = obj.grade.id
         if obj.grade_felt is not None:
-            self.grade_felt.data = obj.grade_felt.id
+            form.grade_felt.data = obj.grade_felt.id
 
-        self.cruxes.data = list()
+        form.cruxes.data = list()
         for crux in obj.cruxes:
-            self.cruxes.data.append(str(crux.id))
+            form.cruxes.data.append(str(crux.id))
 
-    def populate_from_entities(self, entities: dict, grade_scale: str):
+        return form
+
+    @classmethod
+    def create_from_entities(cls, entities: dict, grade_scale: str) -> RouteForm:
         """
-        Select options of select fields with the given entities.
+        Create the form with the given entities.
 
         Args:
             entities: Dictionary of entities to select options from.
             grade_scale: The grade scale to use.
         """
+
+        form = cls()
+        form.add_choices(grade_scale)
         entities = {k.lower(): v for k, v in entities.items()}
 
         for field in ["name", "name", "height", "inclination", "landing", "sit_start"]:
             if field in entities:
-                getattr(self, field).data = entities[field]
+                getattr(form, field).data = entities[field]
 
         for field in ["grade", "grade_felt"]:
             value = entities.get(field, None)
@@ -104,15 +123,59 @@ class RouteForm(FlaskForm):
                     grade = Grade.query.filter_by(hueco=value).first()
                 else:
                     grade = Grade.query.filter_by(font=value).first()
-                getattr(self, field).data = str(grade.id)
+                getattr(form, field).data = str(grade.id)
             else:
-                getattr(self, field).data = 0
+                getattr(form, field).data = 0
 
         for field in ["height", "inclination", "landing", "sit_start"]:
             if field in entities:
-                getattr(self, field).data = entities[field]
+                getattr(form, field).data = entities[field]
 
         if "crux" in entities:
-            self.cruxes.data = list()
+            form.cruxes.data = list()
             for crux in entities["crux"]:
-                self.cruxes.data.append(str(Crux.query.filter_by(name=crux).first().id))
+                form.cruxes.data.append(str(Crux.query.filter_by(name=crux).first().id))
+
+        return form
+
+    def get_sector(self, area_id: str) -> Sector:
+        """
+        - If the sector field is empty, return None.
+        - If the sector is new, create it and return it, without adding it to the DB.
+        - If the sector exists, return it.
+        """
+        sector = None
+        if len(self.sector.data) > 0:
+            sector_name = self.sector.data.strip()
+            sector = Sector.query.filter_by(name=sector_name).first()
+            if sector is None:
+                sector = Sector(name=sector_name, area_id=area_id)
+        return sector
+
+    def get_route(self) -> Route:
+        """
+        If the route field is empty, return None.
+        If the route is new, create it and return it, without adding it to the DB.
+        If the route exists, return it.
+        """
+        route = None
+        if len(self.name.data) > 0:
+            route_name = self.name.data.strip()
+            route = Route.query.filter_by(name=route_name).first()
+            if route is None:
+                route = Route(name=route_name)
+            for field in [
+                "height",
+                "inclination",
+                "landing",
+                "sit_start",
+                "grade",
+                "grade_felt",
+            ]:
+                setattr(route, field, getattr(self, field).data)
+
+            for crux_id in self.cruxes.data:
+                crux = Crux.query.get(crux_id)
+                route.cruxes.append(crux)
+
+        return route
