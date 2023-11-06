@@ -152,7 +152,7 @@ class RouteForm(FlaskForm):
                 sector = Sector(name=sector_name, area_id=area_id)
         return sector
 
-    def get_route(self) -> Route:
+    def get_route(self, sector: Sector) -> Route:
         """
         If the route field is empty, return None.
         If the route is new, create it and return it, without adding it to the DB.
@@ -163,7 +163,7 @@ class RouteForm(FlaskForm):
             route_name = self.name.data.strip()
             route = Route.query.filter_by(name=route_name).first()
             if route is None:
-                route = Route(name=route_name)
+                route = Route(name=route_name, sector=sector)
             for field in [
                 "height",
                 "inclination",

@@ -136,12 +136,12 @@ def add_climb() -> str:
             )
 
         # create new sector and new route if necessary
-        sector = route_form.get_sector()
+        sector = route_form.get_sector(flask_session["area_id"])
         if sector is not None and sector.id is None:
             db.session.add(sector)
             db.session.commit()
 
-        route = route_form.get_route()
+        route = route_form.get_route(sector)
         if route is not None and route.id is None:
             db.session.add(route)
             db.session.commit()
