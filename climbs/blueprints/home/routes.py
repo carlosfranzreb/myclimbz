@@ -4,21 +4,15 @@ from time import time
 from flask import (
     Blueprint,
     render_template,
-    url_for,
     redirect,
     request,
     session as flask_session,
-    jsonify,
 )
 import whisper
-from datetime import datetime
 
 from climbs.ner import transcribe, parse_climb, ClimbsModel
-from climbs.ner.entities_to_objects import (
-    get_area_from_entities,
-    get_route_from_entities,
-)
-from climbs.models import Area, Climb, Crux, Grade, RockType, Route, Session, Sector
+from climbs.ner.entities_to_objects import get_route_from_entities
+from climbs.models import Area, Climb, Session, Sector
 from climbs.forms import ClimbForm, SessionForm, RouteForm
 from climbs import db
 
