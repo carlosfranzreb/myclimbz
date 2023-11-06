@@ -13,7 +13,7 @@ with string matching and the NER model:
 - INCLINATION (int): inclination of the climb (manual, succeeded by "degrees").
 - SIT_START (bool): whether the climb starts sitting or not (manual, inclusion of "sit").
 - FLASH (bool): whether the climb was flashed (manual, inclusion of "flash").
-- SEND (bool): whether the climb was sent or not (BERT).
+- SENT (bool): whether the climb was sent or not (BERT).
 
 Given a session report (str), it extracts:
 
@@ -30,15 +30,15 @@ from datetime import datetime
 
 import torch
 from whisper import Whisper
-from parsedatetime import Calendar
+from dateutil.parser import parse as parse_date
 
 from climbs.ner.inference_model import ClimbsModel
 
 
-TITLE_LABELS = ["NAME", "SECTOR", "AREA", "ROCK"]
-INT_LABELS = ["N_ATTEMPTS", "LANDING", "INCLINATION", "CONDITIONS", "LANDING"]
-FLOAT_LABELS = ["HEIGHT"]
-BOOL_LABELS = ["SIT_START", "FLASH", "SEND"]
+TITLE_LABELS = ["name", "sector", "area", "rock"]
+INT_LABELS = ["n_attempts", "landing", "inclination", "conditions", "landing"]
+FLOAT_LABELS = ["height"]
+BOOL_LABELS = ["sit_start", "flash", "sent"]
 
 
 def transcribe(model: Whisper, audio_file: str) -> str:
@@ -71,16 +71,16 @@ def parse_climb(model: ClimbsModel, report: str) -> dict[str, str]:
     words = report.split()
     out = predict(model, report)
 
-    if "AREA" not in out:
-        out["SIT_START"] = "sit" in words
-        out["FLASH"] = "flash" in report.lower()
-        manual_labels = [("HEIGHT", "meter"), ("INCLINATION", "degree")]
+    if "area" not in out:
+        out["sit_start"] = "sit" in words
+        out["flash"] = "flash" in report.lower()
+        manual_labels = [("height", "meter"), ("inclination", "degree")]
         for key, suffix in manual_labels:
             suffix_idx = max(get_index(words, suffix), get_index(words, suffix + "s"))
             if suffix_idx > 0:
                 out[key] = int(words[suffix_idx - 1])
     else:
-        del out["SEND"]
+        del out["sent"]
 
     for key, value in out.items():
         try:
@@ -101,9 +101,9 @@ def parse_climb(model: ClimbsModel, report: str) -> dict[str, str]:
         if key in out:
             out[key] = out[key].title()
 
-    if "DATE" in out:
-        parsed_date = Calendar().parse(out["DATE"])
-        out["DATE"] = datetime(*parsed_date[0][:6])
+    if "date" in out:
+        out["date_string"] = out["date"]
+        out["date"] = parse_date(out["date"])
 
     return out
 
@@ -136,7 +136,7 @@ def predict(model: ClimbsModel, text: str) -> dict[str, str]:
     active_logits = token_logits.view(-1, len(model.token_labels))
     token_pred = torch.argmax(active_logits, axis=1)
 
-    out = {"SEND": (text_logits[0, 0] > text_logits[0, 1]).item()}
+    out = {"sent": (text_logits[0, 0] > text_logits[0, 1]).item()}
     prev_label = "O"
     for token, label_idx in zip(tokens, token_pred):
         label = model.token_labels[label_idx.item()]
@@ -149,4 +149,4 @@ def predict(model: ClimbsModel, text: str) -> dict[str, str]:
             out[label] = text
         prev_label = label
 
-    return out
+    return {k.lower(): v for k, v in out.items()}

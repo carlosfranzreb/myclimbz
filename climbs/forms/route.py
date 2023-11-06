@@ -110,7 +110,6 @@ class RouteForm(FlaskForm):
 
         form = cls()
         form.add_choices(grade_scale)
-        entities = {k.lower(): v for k, v in entities.items()}
 
         for field in ["name", "name", "height", "inclination", "landing", "sit_start"]:
             if field in entities:

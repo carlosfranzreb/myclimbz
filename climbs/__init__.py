@@ -13,7 +13,7 @@ def create_app(debug=False):
     ] = "your-secret-key"  # replace 'your-secret-key' with your actual secret key
     csrf = CSRFProtect(app)
 
-    db_name = "climbs" if not debug else "debug"
+    db_name = "carlos" if not debug else "debug"
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_name}.db"
     db.init_app(app)
 

@@ -17,7 +17,7 @@ from climbs.forms import ClimbForm, SessionForm, RouteForm
 from climbs import db
 
 
-ASR_MODEL = whisper.load_model("tiny")
+ASR_MODEL = whisper.load_model("small.en")
 NER_MODEL = ClimbsModel.load_from_checkpoint(
     "climbs/ner/checkpoints/ner-0.ckpt", map_location="cpu"
 )
@@ -43,7 +43,7 @@ def page_home() -> str:
 
         flask_session["entities"] = entities
 
-        if "AREA" in entities:
+        if "area" in entities:
             return redirect("/add_session")
         else:
             return redirect("/add_climb")
@@ -110,7 +110,7 @@ def add_climb() -> str:
     # define the grade scale
     entities = flask_session["entities"]
     grade_scale = "font"
-    for field in ["GRADE", "GRADE_FELT"]:
+    for field in ["grade", "grade_felt"]:
         if field in entities:
             grade_scale = "hueco" if entities[field][0] == "V" else "font"
             break
@@ -155,7 +155,7 @@ def add_climb() -> str:
 
     # GET: a recording was uploaded => create forms
     climb_form = ClimbForm(
-        n_attempts=entities.get("N_ATTEMPTS", None), sent=entities["SENT"]
+        n_attempts=entities.get("n_attempts", None), sent=entities["sent"]
     )
     route = get_route_from_entities(entities, flask_session["area_id"])
     if route.id is None:

@@ -36,7 +36,6 @@ class SessionForm(FlaskForm):
         """
         form = cls()
         form.add_choices()
-        entities = {k.lower(): v for k, v in entities.items()}
         for field in ["date", "conditions", "area"]:
             if field in entities:
                 getattr(form, field).data = entities[field]

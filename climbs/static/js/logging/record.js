@@ -44,11 +44,12 @@ function sendToServer() {
     formData.append('audioFile', audioBlob, 'recording.webm');
     formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
 
-    fetch('/upload', {
+    fetch('/', {
         method: 'POST',
         body: formData
     })
     .then(response => {
+        console.log(response);
         if (response.ok)
             if (document.getElementById('stopSession'))
                 window.location.href = "/add_climb";

@@ -11,7 +11,7 @@ FILE = "src/static/data/boulders.csv"
 def table_routes() -> str:
     page = request.args.get("page", 1, type=int)
     page_routes = Route.query.paginate(page=page, per_page=10)
-    return render_template("routes.html", routes=page_routes)
+    return render_template("routes.html", title="Routes", routes=page_routes)
 
 
 @routes.route("/route/<int:route_id>")
@@ -27,11 +27,11 @@ def edit_route(route_id: int) -> str:
     # POST: a route form was submitted => edit route or return error
     if request.method == "POST":
         if not route_form.validate():
-            return render_template("route.html", route_id=route_id)
+            return render_template("route.html", title="Route", route_id=route_id)
         route = route_form.get_route()
         db.session.add(route)
         db.session.commit()
 
     # GET: return the edit route page
     route_form = RouteForm.create_from_obj(route)
-    return render_template("edit_route.html", route_form=route_form)
+    return render_template("edit_route.html", title="Edit Route", route_form=route_form)
