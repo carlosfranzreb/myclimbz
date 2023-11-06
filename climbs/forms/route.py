@@ -88,9 +88,9 @@ class RouteForm(FlaskForm):
             form.sector.data = obj.sector.name
 
         if obj.grade is not None:
-            form.grade.data = obj.grade.id
+            form.grade.data = str(obj.grade.id)
         if obj.grade_felt is not None:
-            form.grade_felt.data = obj.grade_felt.id
+            form.grade_felt.data = str(obj.grade_felt.id)
 
         form.cruxes.data = list()
         for crux in obj.cruxes:
@@ -152,7 +152,7 @@ class RouteForm(FlaskForm):
                 sector = Sector(name=sector_name, area_id=area_id)
         return sector
 
-    def get_route(self, sector: Sector) -> Route:
+    def get_route(self, sector: Sector = None) -> Route:
         """
         If the route field is empty, return None.
         If the route is new, create it and return it, without adding it to the DB.
