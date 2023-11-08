@@ -40,12 +40,14 @@ class SessionForm(FlaskForm):
             if field in entities:
                 getattr(form, field).data = entities[field]
 
-        area = get_area_from_entities(entities)
-        if area.id is None and "rock" in entities:
-            rock_id = RockType.query.filter_by(name=entities["rock"]).first().id
-            form.rock_type.data = str(rock_id)
-        else:
-            form.rock_type.data = "0"
+        if "area" in entities:
+            area = get_area_from_entities(entities)
+            if area.id is None and "rock" in entities:
+                rock = RockType.query.filter_by(name=entities["rock"]).first()
+                if rock is not None:
+                    form.rock_type.data = str(rock.id)
+            else:
+                form.rock_type.data = "0"
 
         return form
 

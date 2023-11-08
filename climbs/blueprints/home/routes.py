@@ -47,10 +47,18 @@ def page_home() -> str:
             return redirect("/add_session")
         else:
             return redirect("/add_climb")
+
+    current_session_id = flask_session.get("session_id", -1)
+    if current_session_id > 0:
+        last_session = Session.query.get(current_session_id)
+    else:
+        # get the session with the largest ID
+        last_session = Session.query.order_by(Session.id.desc()).first()
     return render_template(
         "index.html",
         title="Home",
-        session_started=flask_session.get("session_id", -1) > 0,
+        session_started=current_session_id > 0,
+        last_session=last_session,
         error=flask_session.pop("error", None),
     )
 
@@ -131,7 +139,7 @@ def add_climb() -> str:
 
         # create new sector and new route if necessary
         sector = route_form.get_sector(flask_session["area_id"])
-        if sector is not None and sector.id is None:
+        if sector.id is None:
             db.session.add(sector)
             db.session.commit()
 
