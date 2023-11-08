@@ -49,7 +49,6 @@ function sendToServer() {
         body: formData
     })
     .then(response => {
-        console.log(response);
         if (response.ok)
             if (document.getElementById('stopSession'))
                 window.location.href = "/add_climb";
