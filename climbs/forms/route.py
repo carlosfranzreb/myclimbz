@@ -145,10 +145,13 @@ class RouteForm(FlaskForm):
         """
         sector = None
         if len(self.sector.data) > 0:
-            sector_name = self.sector.data.strip()
-            sector = Sector.query.filter_by(name=sector_name).first()
-            if sector is None:
-                sector = Sector(name=sector_name, area_id=area_id)
+            sector_name = self.sector.data.strip().title()
+        else:
+            sector_name = "Unknown"
+
+        sector = Sector.query.filter_by(name=sector_name).first()
+        if sector is None:
+            sector = Sector(name=sector_name, area_id=area_id)
         return sector
 
     def get_route(self, sector: Sector = None) -> Route:
@@ -159,7 +162,7 @@ class RouteForm(FlaskForm):
         """
         route = None
         if len(self.name.data) > 0:
-            route_name = self.name.data.strip()
+            route_name = self.name.data.strip().title()
             route = Route.query.filter_by(name=route_name).first()
             if route is None:
                 route = Route(name=route_name, sector=sector)
