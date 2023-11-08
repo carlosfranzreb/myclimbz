@@ -26,8 +26,6 @@ Projects are climbs where N_ATTEMPTS is not given or 0 and sent is false.
 """
 
 
-from datetime import datetime
-
 import torch
 from whisper import Whisper
 from dateutil.parser import parse as parse_date
