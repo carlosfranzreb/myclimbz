@@ -38,6 +38,20 @@ INT_LABELS = ["n_attempts", "landing", "inclination", "conditions", "landing"]
 FLOAT_LABELS = ["height"]
 BOOL_LABELS = ["sit_start", "flash", "sent"]
 
+WRITTEN_NUMBERS = {
+    "zero": 0,
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+}
+
 
 def transcribe(model: Whisper, audio_file: str) -> str:
     """Transcribe an audio file with Whisper."""
@@ -88,7 +102,13 @@ def parse_climb(model: ClimbsModel, report: str) -> dict[str, str]:
 
     for key in INT_LABELS:
         if key in out:
-            out[key] = int(out[key])
+            try:
+                out[key] = int(out[key])
+            except ValueError:
+                if out[key].lower() in WRITTEN_NUMBERS:
+                    out[key] = WRITTEN_NUMBERS[out[key].lower()]
+                else:
+                    del out[key]
     for key in FLOAT_LABELS:
         if key in out:
             out[key] = float(out[key])
