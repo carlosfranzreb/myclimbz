@@ -1,5 +1,6 @@
 import os
 from time import time
+import json
 
 from flask import (
     Blueprint,
@@ -12,7 +13,7 @@ import whisper
 
 from climbs.ner import transcribe, parse_climb, ClimbsModel
 from climbs.ner.entities_to_objects import get_route_from_entities
-from climbs.models import Area, Climb, Session, Sector
+from climbs.models import Area, Climb, Session, Sector, Predictions
 from climbs.forms import ClimbForm, SessionForm, RouteForm
 from climbs import db
 
@@ -42,6 +43,11 @@ def page_home() -> str:
         entities = parse_climb(NER_MODEL, transcript)
 
         flask_session["entities"] = entities
+        flask_session["predictions"] = Predictions(
+            audiofile=filename,
+            transcript=transcript,
+            entities=json.dumps({k: v[0] for k, v in entities.items() if k != "date"}),
+        )
 
         if "area" in entities:
             return redirect("/add_session")
@@ -88,6 +94,7 @@ def add_session() -> str:
         if area is not None and area.id is None:
             db.session.add(area)
             db.session.commit()
+            flask_session["predictions"].area_id = area.id
         area_id = area.id if area is not None else None
 
         # create session
@@ -100,6 +107,13 @@ def add_session() -> str:
         )
         db.session.add(session)
         db.session.commit()
+
+        # dump predictions to DB
+        flask_session["predictions"].session_id = session.id
+        db.session.add(flask_session["predictions"])
+        db.session.commit()
+        flask_session["predictions"] = None
+
         flask_session["session_id"] = session.id
         flask_session["area_id"] = area_id
         return redirect("/")
@@ -142,11 +156,13 @@ def add_climb() -> str:
         if sector.id is None:
             db.session.add(sector)
             db.session.commit()
+            flask_session["predictions"].sector_id = sector.id
 
         route = route_form.get_route(sector)
         if route is not None and route.id is None:
             db.session.add(route)
             db.session.commit()
+            flask_session["predictions"].route_id = route.id
 
         # create climb
         climb = Climb(
@@ -159,6 +175,13 @@ def add_climb() -> str:
         )
         db.session.add(climb)
         db.session.commit()
+
+        # dump predictions to DB
+        flask_session["predictions"].climb_id = climb.id
+        db.session.add(flask_session["predictions"])
+        db.session.commit()
+        flask_session["predictions"] = None
+
         return redirect("/")
 
     # GET: a recording was uploaded => create forms
