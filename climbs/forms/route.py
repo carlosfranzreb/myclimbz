@@ -122,7 +122,8 @@ class RouteForm(FlaskForm):
                     grade = Grade.query.filter_by(hueco=value).first()
                 else:
                     grade = Grade.query.filter_by(font=value).first()
-                getattr(form, field).data = str(grade.id)
+                if grade is not None:
+                    getattr(form, field).data = str(grade.id)
             else:
                 getattr(form, field).data = 0
 
