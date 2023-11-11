@@ -31,13 +31,15 @@
         </div>
     </div>
 
-    <div class="container">
-        {% set session_status = 'Current' if session_started else 'Last' %}
-        {% set date = 'on ' + last_session.date|string if last_session.date else '' %}
-        <h2>{{ session_status }} session: {{ last_session.area.name }} {{ date }}</h2>
+    {% if last_session %}
+        <div class="container">
+            {% set session_status = 'Current' if session_started else 'Last' %}
+            {% set date = 'on ' + last_session.date|string if last_session.date else '' %}
+            <h2>{{ session_status }} session: {{ last_session.area.name }} {{ date }}</h2>
 
-        {% set climbs = last_session.climbs  %}
-        {% include 'table_climbs.html' %}
-    </div>
+            {% set climbs = last_session.climbs  %}
+            {% include 'table_climbs.html' %}
+        </div>
+    {% endif %}
 
     {% endblock content %}
