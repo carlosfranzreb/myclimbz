@@ -26,6 +26,8 @@ Projects are climbs where N_ATTEMPTS is not given or 0 and sent is false.
 """
 
 
+from datetime import datetime
+
 import torch
 from whisper import Whisper
 from dateutil.parser import parse as parse_date
@@ -121,8 +123,16 @@ def parse_climb(model: ClimbsModel, report: str) -> dict[str, str]:
 
     if "date" in out:
         out["date_string"] = out["date"]
-        out["date"] = parse_date(out["date"])
-
+        try:
+            out["date"] = parse_date(out["date"])
+        except Exception:
+            date = out["date"].lower()
+            if date in ["today", "yesterday"]:
+                today = datetime.today()
+                if date == "yesterday":
+                    out["date"] = today.replace(day=today.day - 1)
+                else:
+                    out["date"] = today
     return out
 
 
