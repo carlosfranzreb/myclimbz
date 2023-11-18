@@ -13,7 +13,7 @@
     {% for route in routes %}
         <tr onclick="window.location=&quot;{{ url_for('routes.page_route', route_id=route.id) }}&quot;">
             <td>{{ route.name }}</td>
-            <td>{{ route.grade }}</td>
+            <td>{{ route.grade.font }} / {{ route.grade.hueco }}</td>
             <td>{{ route.sector.name }}</td>
             <td>{{ route.sector.area.name }}</td>
             <td>{{ route.climbs|length }}</td>

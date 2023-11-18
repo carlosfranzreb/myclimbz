@@ -5,11 +5,11 @@
 
     <div>
         {% if routes.has_prev %}
-            <a href="{{ url_for('show_routes', page=routes.prev_num) }}">Previous</a>
+            <a href="{{ url_for('routes.table_routes', page=routes.prev_num) }}">Previous</a>
         {% endif %}
         Page {{ routes.page }} of {{ routes.pages }}
         {% if routes.has_next %}
-            <a href="{{ url_for('show_routes', page=routes.next_num) }}">Next</a>
+            <a href="{{ url_for('routes.table_routes', page=routes.next_num) }}">Next</a>
         {% endif %}
     </div>
 

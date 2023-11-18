@@ -31,7 +31,7 @@ class RouteForm(FlaskForm):
         option_widget=widgets.CheckboxInput(),
     )
 
-    def validate(self):
+    def validate(self) -> bool:
         """
         Check that only one of the new and existing fields is filled. Sector is only
         checked if a new route is given. If the form is valid, change the grades to
@@ -133,8 +133,12 @@ class RouteForm(FlaskForm):
 
         if "crux" in entities:
             form.cruxes.data = list()
+            if isinstance(entities["crux"], str):
+                entities["crux"] = [entities["crux"]]
             for crux in entities["crux"]:
-                form.cruxes.data.append(str(Crux.query.filter_by(name=crux).first().id))
+                crux_obj = Crux.query.filter_by(name=crux).first()
+                if crux_obj is not None:
+                    form.cruxes.data.append(str(crux_obj.id))
 
         return form
 
@@ -155,11 +159,14 @@ class RouteForm(FlaskForm):
             sector = Sector(name=sector_name, area_id=area_id)
         return sector
 
-    def get_route(self, sector: Sector = None) -> Route:
+    def get_route_from_climb_form(self, sector: Sector = None) -> Route:
         """
-        If the route field is empty, return None.
-        If the route is new, create it and return it, without adding it to the DB.
-        If the route exists, return it.
+        This function is used when a new climb is added. It only checks the name field
+        and returns a route object.
+
+        - If the route field is empty, return None.
+        - If the route is new, create it and return it, without adding it to the DB.
+        - If the route exists, return it.
         """
         route = None
         if len(self.name.data) > 0:
@@ -167,6 +174,38 @@ class RouteForm(FlaskForm):
             route = Route.query.filter_by(name=route_name).first()
             if route is None:
                 route = Route(name=route_name, sector=sector)
+            for field in [
+                "height",
+                "inclination",
+                "landing",
+                "sit_start",
+                "grade",
+                "grade_felt",
+            ]:
+                setattr(route, field, getattr(self, field).data)
+
+            for crux_id in self.cruxes.data:
+                crux = Crux.query.get(crux_id)
+                route.cruxes.append(crux)
+
+        return route
+
+    def get_edited_route(self, route_id: int) -> Route:
+        """
+        This function is used when a route is edited. It checks all fields and returns
+        a route object.
+        """
+        route = Route.query.get(route_id)
+        if len(self.name.data) > 0:
+            route_name = self.name.data.strip().title()
+            route.name = route_name
+
+            sector_name = self.sector.data.strip().title()
+            sector = Sector.query.filter_by(name=sector_name).first()
+            if sector is None:
+                sector = Sector(name=sector_name, area_id=route.sector.area_id)
+            route.sector = sector
+
             for field in [
                 "height",
                 "inclination",

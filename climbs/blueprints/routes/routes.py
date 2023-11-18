@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, url_for, redirect
 from climbs.models import Route
 from climbs.forms import RouteForm
 from climbs import db
@@ -28,10 +28,12 @@ def edit_route(route_id: int) -> str:
     if request.method == "POST":
         if not route_form.validate():
             return render_template("route.html", title="Route", route_id=route_id)
-        route = route_form.get_route()
+        route = route_form.get_edited_route(route_id)
         db.session.add(route)
         db.session.commit()
+        return redirect(url_for("routes.page_route", route_id=route.id))
 
     # GET: return the edit route page
+    route = Route.query.get(route_id)
     route_form = RouteForm.create_from_obj(route)
     return render_template("edit_route.html", title="Edit Route", route_form=route_form)

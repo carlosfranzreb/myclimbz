@@ -10,7 +10,7 @@
     {% for climb in climbs %}
         <tr onclick="window.location=&quot;{{ url_for('routes.page_route', route_id=climb.route.id) }}&quot;">
             <td>{{ climb.route.name }}</td>
-            <td>{{ climb.route.grade }}</td>
+            <td>{{ climb.route.grade.font }} / {{ climb.route.grade.hueco }}</td>
             <td>{{ climb.route.sector.name }}</td>
             <td>{{ climb.route.climbs|length }}</td>
             <td>{{ climb.n_attempts }}</td>
