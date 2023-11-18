@@ -12,7 +12,7 @@ TOKEN_LABELS = [
     "SECTOR",
     "CRUX",
     "LANDING",
-    "N_TRIES",
+    "N_ATTEMPTS",
     "AREA",
     "ROCK",
     "CONDITIONS",

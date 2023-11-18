@@ -15,10 +15,6 @@
         </div>
         <div class="col">
             <div class="row"><h2>Log data</h2></div>
-
-                {% if session_started %}
-                    <a id="stopSession" class="btn btn-danger" href="{{ url_for('home.stop_session') }}">Stop Session</a>
-                {% endif %}
                 <button id="startButton"  class="btn btn-primary">Start Recording</button>
                 <button id="stopButton" disabled class="btn btn-primary">Stop Recording</button>
                 <button id="sendButton" disabled  class="btn btn-success">Send to Server</button>
@@ -31,11 +27,21 @@
         </div>
     </div>
 
+    {% if session_started %}
+        <div class="container">
+            <a id="stopSession" class="btn btn-danger" href="{{ url_for('home.stop_session') }}">Stop Session</a>
+        </div>
+    {% endif %}
+
     {% if last_session %}
         <div class="container">
             {% set session_status = 'Current' if session_started else 'Last' %}
             {% set date = 'on ' + last_session.date|string if last_session.date else '' %}
             <h2>{{ session_status }} session: {{ last_session.area.name }} {{ date }}</h2>
+
+            {% if not session_started %}
+                <a id="startSession" class="btn btn-success" href="{{ url_for('home.reopen_session', session_id=last_session.id) }}">Re-open session</a>
+            {% endif %}
 
             {% set climbs = last_session.climbs  %}
             {% include 'table_climbs.html' %}

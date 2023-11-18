@@ -35,10 +35,10 @@ from dateutil.parser import parse as parse_date
 from climbs.ner.inference_model import ClimbsModel
 
 
+GRADE_LABELS = ["grade", "grade_felt"]
 TITLE_LABELS = ["name", "sector", "area", "rock"]
 INT_LABELS = ["n_attempts", "landing", "inclination", "conditions", "landing"]
 FLOAT_LABELS = ["height"]
-BOOL_LABELS = ["sit_start", "flash", "sent"]
 
 WRITTEN_NUMBERS = {
     "zero": 0,
@@ -102,6 +102,9 @@ def parse_climb(model: ClimbsModel, report: str) -> dict[str, str]:
         except AttributeError:
             pass
 
+    for key in GRADE_LABELS:
+        if key in out:
+            out[key] = out[key].upper().replace(" ", "").replace("PLUS", "+")
     for key in INT_LABELS:
         if key in out:
             try:
@@ -114,9 +117,6 @@ def parse_climb(model: ClimbsModel, report: str) -> dict[str, str]:
     for key in FLOAT_LABELS:
         if key in out:
             out[key] = float(out[key])
-    for key in BOOL_LABELS:
-        if key in out:
-            out[key] = out[key] == "True"
     for key in TITLE_LABELS:
         if key in out:
             out[key] = out[key].title()
