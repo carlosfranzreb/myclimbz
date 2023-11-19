@@ -32,8 +32,21 @@
             <a id="stopSession" class="btn btn-danger" href="{{ url_for('home.stop_session') }}">Stop Session</a>
         </div>
     {% endif %}
+    {% if project_search_started %}
+        <div class="container">
+            <a id="stopSession" class="btn btn-danger" href="{{ url_for('home.stop_session') }}">Stop Project Search</a>
+        </div>
+    {% endif %}
 
-    {% if last_session %}
+    {% if project_search_started %}
+        <div class="container">
+            <h2>Project search on {{ area_name }}</h2>
+
+            {% set routes = projects  %}
+            {% include 'table_routes.html' %}
+        </div>
+
+    {% elif last_session %}
         <div class="container">
             {% set session_status = 'Current' if session_started else 'Last' %}
             {% set date = 'on ' + last_session.date|string if last_session.date else '' %}

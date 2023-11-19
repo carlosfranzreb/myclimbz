@@ -21,6 +21,8 @@ Given a session report (str), it extracts:
 - AREA (str): area of the session (BERT).
 - ROCK (str): rock type of the area (BERT).
 - CONDITIONS (int): rating of the conditions out of 10 (BERT).
+- IS_PROJECT_SEARCH (bool): whether this is a session or a search for projects,
+    where the user does not climb (manual, inclusion of "project").
 
 Projects are climbs where N_ATTEMPTS is not given or 0 and sent is false.
 """
@@ -31,40 +33,21 @@ from datetime import datetime
 import torch
 from whisper import Whisper
 from dateutil.parser import parse as parse_date
+from text_to_num import text2num
 
 from climbs.ner.inference_model import ClimbsModel
 
 
 GRADE_LABELS = ["grade", "grade_felt"]
 TITLE_LABELS = ["name", "sector", "area", "rock"]
+CAPITAL_LABELS = ["crux"]
 INT_LABELS = ["n_attempts", "landing", "inclination", "conditions", "landing"]
 FLOAT_LABELS = ["height"]
-
-WRITTEN_NUMBERS = {
-    "zero": 0,
-    "one": 1,
-    "two": 2,
-    "three": 3,
-    "four": 4,
-    "five": 5,
-    "six": 6,
-    "seven": 7,
-    "eight": 8,
-    "nine": 9,
-    "ten": 10,
-}
 
 
 def transcribe(model: Whisper, audio_file: str) -> str:
     """Transcribe an audio file with Whisper."""
     return model.transcribe(audio_file)["text"]
-
-
-def remove_punctuation(sentence: str, punctuation: str) -> str:
-    """
-    Remove punctuation from a sentence.
-    """
-    return sentence.translate(str.maketrans("", "", punctuation))
 
 
 def parse_climb(model: ClimbsModel, report: str) -> dict[str, str]:
@@ -84,17 +67,19 @@ def parse_climb(model: ClimbsModel, report: str) -> dict[str, str]:
     out = dict()
     words = report.split()
     out = predict(model, report)
+    report = report.lower()
 
     if "area" not in out:
         out["sit_start"] = "sit" in words
-        out["flash"] = "flash" in report.lower()
+        out["flash"] = "flash" in report
         manual_labels = [("height", "meter"), ("inclination", "degree")]
         for key, suffix in manual_labels:
             suffix_idx = max(get_index(words, suffix), get_index(words, suffix + "s"))
             if suffix_idx > 0:
-                out[key] = int(words[suffix_idx - 1])
+                out[key] = words[suffix_idx - 1]
     else:
         del out["sent"]
+        out["is_project_search"] = "project" in report
 
     for key, value in out.items():
         try:
@@ -107,12 +92,12 @@ def parse_climb(model: ClimbsModel, report: str) -> dict[str, str]:
             out[key] = out[key].upper().replace(" ", "").replace("PLUS", "+")
     for key in INT_LABELS:
         if key in out:
-            try:
+            if out[key].isdigit():
                 out[key] = int(out[key])
-            except ValueError:
-                if out[key].lower() in WRITTEN_NUMBERS:
-                    out[key] = WRITTEN_NUMBERS[out[key].lower()]
-                else:
+            else:
+                try:
+                    out[key] = text2num(out[key], "en")
+                except ValueError:
                     del out[key]
     for key in FLOAT_LABELS:
         if key in out:
@@ -120,6 +105,9 @@ def parse_climb(model: ClimbsModel, report: str) -> dict[str, str]:
     for key in TITLE_LABELS:
         if key in out:
             out[key] = out[key].title()
+    for key in CAPITAL_LABELS:
+        if key in out:
+            out[key] = out[key].capitalize()
 
     if "date" in out:
         out["date_string"] = out["date"]

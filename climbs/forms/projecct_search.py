@@ -1,21 +1,16 @@
 from __future__ import annotations
 
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, DateField, StringField, SelectField, BooleanField
+from wtforms import SelectField, StringField
 from wtforms.validators import Optional
 
 from climbs.models import Area, RockType
 from climbs.ner.entities_to_objects import get_area_from_entities
 
 
-class SessionForm(FlaskForm):
-    date = DateField("Date", validators=[Optional()])
-    conditions = IntegerField("Conditions", validators=[Optional()])
+class ProjectSearchForm(FlaskForm):
     area = StringField("Area name", validators=[Optional()])
     rock_type = SelectField("Rock Type of new area", validators=[Optional()])
-    is_project_search = BooleanField(
-        "Looking for projects (not a session)", validators=[Optional()]
-    )
 
     def add_choices(self):
         """Add choices to select fields: rock types."""
@@ -24,7 +19,7 @@ class SessionForm(FlaskForm):
         ]
 
     @classmethod
-    def create_empty(cls) -> SessionForm:
+    def create_empty(cls) -> ProjectSearchForm:
         """
         Create the form and add choices to the select fields.
         """
@@ -33,15 +28,12 @@ class SessionForm(FlaskForm):
         return form
 
     @classmethod
-    def create_from_entities(cls, entities: dict) -> SessionForm:
+    def create_from_entities(cls, entities: dict) -> ProjectSearchForm:
         """
         Create the form with data from the entities.
         """
         form = cls()
         form.add_choices()
-        for field in ["date", "conditions", "area", "is_project_search"]:
-            if field in entities:
-                getattr(form, field).data = entities[field]
 
         if "area" in entities:
             area = get_area_from_entities(entities)

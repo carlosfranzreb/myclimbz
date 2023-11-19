@@ -9,7 +9,11 @@
         - If it is a project, don't display the sent and n_attempts fields.
     -->
 
-    <h2>Log climb</h2>
+    {% if climb_form %}
+        <h2>Log climb</h2>
+    {% else %}
+        <h2>Add project</h2>
+    {% endif %}
 
     <div class="container">
         <form method="POST" style="margin: 40px;" onkeydown="return event.key != 'Enter';">
@@ -50,25 +54,26 @@
                 {% endfor %}
             </datalist>
 
-        <h4>Climb</h4>
-        <form method="POST" style="margin: 40px;">
-            {{ climb_form.hidden_tag() }}
-            
-            <div class="form-group">
-                <label for="{{ climb_form.is_project.id }}">{{ climb_form.is_project.label }}</label>
-                {{ climb_form.is_project(id=climb_form.is_project.id, class='form-check') }}
-            </div>
+            {% if climb_form %}
+                <h4>Climb</h4>
+                {{ climb_form.hidden_tag() }}
+                
+                <div id="isProject" class="form-group">
+                    <label for="{{ climb_form.is_project.id }}">{{ climb_form.is_project.label }}</label>
+                    {{ climb_form.is_project(id=climb_form.is_project.id, class='form-check') }}
+                </div>
 
-            <div id="newClimbForm" class="container">
-                <div class="form-group">
-                    <label for="{{ climb_form.n_attempts.id }}">{{ climb_form.n_attempts.label }}</label>
-                    {{ climb_form.n_attempts(id=climb_form.n_attempts.id, class='form-control') }}
+                <div id="newClimbForm" class="container">
+                    <div class="form-group">
+                        <label for="{{ climb_form.n_attempts.id }}">{{ climb_form.n_attempts.label }}</label>
+                        {{ climb_form.n_attempts(id=climb_form.n_attempts.id, class='form-control') }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ climb_form.sent.id }}">{{ climb_form.sent.label }}</label>
+                        {{ climb_form.sent(id=climb_form.sent.id, class='form-check') }}
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="{{ climb_form.sent.id }}">{{ climb_form.sent.label }}</label>
-                    {{ climb_form.sent(id=climb_form.sent.id, class='form-check') }}
-                </div>
-            </div>
+            {% endif %}
 
             <div class="form-group">
                 <input type="submit" class="btn btn-success" value="Save">
@@ -77,10 +82,12 @@
     </div>
 
     <script>
-        let route = document.querySelector('#{{ route_form.name.id }}');
-        let isProject = document.querySelector('#{{ climb_form.is_project.id }}');
-        let newRouteForm = document.querySelector('#newRouteForm');
-        let newClimbForm = document.querySelector('#newClimbForm');
+        let route = document.querySelector("#{{ route_form.name.id }}");
+        let newRouteForm = document.querySelector("#newRouteForm");
+        let newClimbForm = document.querySelector("#newClimbForm");
+        if (newClimbForm !== null) {
+            let isProject = document.querySelector("#isProject");
+        }
 
         function toggleNewRouteForm() {
             let routeValue = route.value;
@@ -94,13 +101,16 @@
             newRouteForm.style.display = routeExists ? "none" : "block";        }
 
         function toggleNewClimbForm() {
-            newClimbForm.style.display = isProject.checked ? 'none' : 'block';
+            newClimbForm.style.display = isProject.checked ? "none" : "block";
         }
 
         toggleNewRouteForm();
-        toggleNewClimbForm();
-        route.addEventListener('change', toggleNewRouteForm);
-        isProject.addEventListener('change', toggleNewClimbForm);
+        route.addEventListener("change", toggleNewRouteForm);
+        if (newClimbForm !== null) {
+            toggleNewClimbForm();
+            isProject.addEventListener("change", toggleNewClimbForm);
+        }
+
     </script>
 
 {% endblock content %}

@@ -4,31 +4,31 @@ from climbs import db, create_app, models
 
 
 ROCKS = [
-    "granite",
-    "limestone",
-    "sandstone",
-    "basalt",
-    "quartzite",
-    "gneiss",
+    "Granite",
+    "Limestone",
+    "Sandstone",
+    "Basalt",
+    "Quartzite",
+    "Gneiss",
 ]
 
 CRUXES = [
-    "crimp",
-    "sloper",
-    "pocket",
-    "tension",
-    "compression",
-    "heel hook",
-    "toe hook",
-    "undercling",
-    "shoulder",
-    "wrist",
-    "drag",
-    "power",
-    "lock-off",
-    "top out",
-    "feet",
-    "mantel",
+    "Crimp",
+    "Sloper",
+    "Pocket",
+    "Tension",
+    "Compression",
+    "Heel hook",
+    "Toe hook",
+    "Undercling",
+    "Shoulder",
+    "Wrist",
+    "Drag",
+    "Power",
+    "Lock-off",
+    "Top out",
+    "Feet",
+    "Mantel",
 ]
 
 GRADES = [
