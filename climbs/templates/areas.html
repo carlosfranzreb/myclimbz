@@ -7,11 +7,12 @@
 
     <table class="table table-striped">
         <tr>
-            <th>Name</th>
-            <th>Rock type</th>
-            <th># Sectors</th>
-            <th># Sessions</th>
-            <th># Routes</th>
+            <th>
+                <a class="action_icon icon" href="{{ url_for('areas.table_areas', sort_column=name) }}">Name</a>
+            </th>
+            {% for row_name in ["Rock Type", "# Sectors", "# Sessions", "# Routes"] %}
+                <th>{{ row_name }}</th>
+            {% endfor %}
         </tr>
         {% for area in areas.items %}
             <tr onclick="window.location=&quot;{{ url_for('areas.page_area', area_id=area.id) }}&quot;">
