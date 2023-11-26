@@ -162,7 +162,7 @@ def add_climb() -> str:
             break
 
     # create forms and add choices
-    climb_form = ClimbForm() if flask_session.get("project_search", False) else None
+    climb_form = None if flask_session.get("project_search", False) else ClimbForm()
     route_form = RouteForm.create_empty(grade_scale=grade_scale)
 
     # POST: a climb form was submitted => create climb or return error

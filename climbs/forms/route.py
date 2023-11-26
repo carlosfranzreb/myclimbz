@@ -174,19 +174,19 @@ class RouteForm(FlaskForm):
             route = Route.query.filter_by(name=route_name).first()
             if route is None:
                 route = Route(name=route_name, sector=sector)
-            for field in [
-                "height",
-                "inclination",
-                "landing",
-                "sit_start",
-                "grade",
-                "grade_felt",
-            ]:
-                setattr(route, field, getattr(self, field).data)
+                for field in [
+                    "height",
+                    "inclination",
+                    "landing",
+                    "sit_start",
+                    "grade",
+                    "grade_felt",
+                ]:
+                    setattr(route, field, getattr(self, field).data)
 
-            for crux_id in self.cruxes.data:
-                crux = Crux.query.get(crux_id)
-                route.cruxes.append(crux)
+                for crux_id in self.cruxes.data:
+                    crux = Crux.query.get(crux_id)
+                    route.cruxes.append(crux)
 
         return route
 

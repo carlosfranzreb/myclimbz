@@ -92,7 +92,9 @@ def parse_climb(model: ClimbsModel, report: str) -> dict[str, str]:
             out[key] = out[key].upper().replace(" ", "").replace("PLUS", "+")
     for key in INT_LABELS:
         if key in out:
-            if out[key].isdigit():
+            if isinstance(out[key], int):
+                continue
+            elif out[key].isdigit():
                 out[key] = int(out[key])
             else:
                 try:
