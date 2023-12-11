@@ -62,8 +62,8 @@ GRADES = [
 ]
 
 
-def add_debug_data(db):
-    print("Adding debug data")
+def add_testing_data(db):
+    print("Adding testing data")
     db.session.add(models.Area(name="A1", rock_type_id=1))
     db.session.add(models.Area(name="A2", rock_type_id=2))
 
@@ -128,9 +128,9 @@ def add_debug_data(db):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--debug", type=bool, default=False)
+    parser.add_argument("--test", type=bool, default=False)
     args = parser.parse_args()
-    app = create_app(args.debug)
+    app = create_app(args.test)
     with app.app_context():
         db.create_all()
         for rock_type in ROCKS:
@@ -140,7 +140,7 @@ if __name__ == "__main__":
         for level, (font, hueco) in enumerate(GRADES):
             db.session.add(models.Grade(level=level, font=font, hueco=hueco))
 
-        if args.debug is True:
-            add_debug_data(db)
+        if args.test is True:
+            add_testing_data(db)
 
         db.session.commit()
