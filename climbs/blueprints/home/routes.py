@@ -226,7 +226,7 @@ def add_climb() -> str:
         route_form.name.data = route.name
 
     # if no sector was found, add the last sector of the current session if possible
-    if route.sector_id is None and flask_session["session_id"] > 0:
+    if route.sector_id is None and flask_session.get("session_id", False) > 0:
         session = Session.query.get(flask_session["session_id"])
         sectors = [c.route.sector for c in session.climbs]
         if len(sectors) > 0:
