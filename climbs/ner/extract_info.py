@@ -40,7 +40,7 @@ from climbs.ner.inference_model import ClimbsModel
 
 GRADE_LABELS = ["grade", "grade_felt"]
 TITLE_LABELS = ["name", "sector", "area", "rock"]
-CAPITAL_LABELS = ["crux"]
+CAPITAL_LABELS = ["cruxes"]
 INT_LABELS = ["n_attempts", "landing", "inclination", "conditions", "landing"]
 FLOAT_LABELS = ["height"]
 

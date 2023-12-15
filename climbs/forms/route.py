@@ -131,11 +131,11 @@ class RouteForm(FlaskForm):
             if field in entities:
                 getattr(form, field).data = entities[field]
 
-        if "crux" in entities:
+        if "cruxes" in entities:
             form.cruxes.data = list()
-            if isinstance(entities["crux"], str):
-                entities["crux"] = [entities["crux"]]
-            for crux in entities["crux"]:
+            if isinstance(entities["cruxes"], str):
+                entities["cruxes"] = [entities["cruxes"]]
+            for crux in entities["cruxes"]:
                 crux_obj = Crux.query.filter_by(name=crux).first()
                 if crux_obj is not None:
                     form.cruxes.data.append(str(crux_obj.id))
