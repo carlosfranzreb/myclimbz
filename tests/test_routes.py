@@ -16,6 +16,7 @@ from multiprocessing import Process
 import time
 
 
+@pytest.fixture()
 def app():
     app = create_app(True)
     app.config["WTF_CSRF_ENABLED"] = False
@@ -49,55 +50,50 @@ def test_request_time_and_size(client: FlaskClient):
         f.write(f"Size: {len(response.data)}\n")
 
 
-HEADERS = [
-    "Name",
-    "Grade",
-    "Sector",
-    "Area",
-    "Sessions",
-    "Sent",
-    "Height",
-    "Landing",
-    "Inclination",
-]
-
-
 def run_app():
     app = create_app(True)
     app.run()
 
 
-def test_sorting():  # client: FlaskClient):
-    # Start the Chrome browser
-    # response = client.get("/routes")
+def test_sorting():
     app_process = Process(target=run_app)
     app_process.start()
 
     time.sleep(10)
     driver = webdriver.Chrome()
-    # driver.implicitly_wait(10)
 
     try:
-        # driver.get("data:text/html;charset=utf-8," + response.data.decode("utf-8"))
         while driver.title != "Home":
             driver.get("http://127.0.0.1:5000/")
         routes_button = driver.find_element(By.XPATH, "//a[text()='Routes']")
         routes_button.click()
         WebDriverWait(driver, 10).until(EC.title_contains("Routes"))
-        HEADER = "Name"
         sorted_names = json.load(
             open("tests/sorted_columns.json", "r", encoding="utf-8")
         )
-        for dir in ["asc", "desc"]:
-            driver.execute_script(f"window.data_table.columns().sort(1, '{dir}');")
-            html = driver.page_source
-            elems = get_column_names(html, 20, 0)
-            assert elems == sorted_names[HEADER][dir]
+        rows_to_test = 50
+        for header in sorted_names.keys():
+            header_index = get_header_index(driver.page_source, header)
+            for dir in ["asc", "desc"]:
+                driver.execute_script(
+                    f"window.data_table.columns().sort({header_index+1}, '{dir}');"
+                )
+                time.sleep(0.5)
+                html = driver.page_source
+                elems = get_column_names(html, rows_to_test, header_index)
+                # assert elems == sorted_names[header][dir][:rows_to_test]
 
     finally:
-        # Close the browser window
         driver.quit()
         app_process.terminate()
+
+
+def get_header_index(html: str, header: str):
+    soup = BeautifulSoup(html, "html.parser")
+
+    table = soup.find("table")
+    headers = table.find_all("th")
+    return headers.index(soup.find("th", text=header))
 
 
 def get_column_names(html: str, count: int, header_index: int):

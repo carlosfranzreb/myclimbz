@@ -1,12 +1,4 @@
-/*!
- *
- * Vanilla-DataTables
- * Copyright (c) 2015-2017 Karl Saunders (http://mobius.ovh)
- * Licensed under MIT (http://www.opensource.org/licenses/mit-license.php)
- *
- * Version: 1.6.16
- *
- */
+// TODO: minify for distribution
 (function(root, factory) {
     var plugin = "DataTable";
 
@@ -236,36 +228,6 @@
                     !!s.className &&
                     !!s.className.match(new RegExp("(\\s|^)" + a + "(\\s|$)"));
         }
-    };
-
-    /**
-     * Bubble sort algorithm
-     */
-    var sortItems = function (a, b) {
-        var c, d;
-        if (1 === b) {
-            c = 0;
-            d = a.length;
-        } else {
-            if (b === -1) {
-                c = a.length - 1;
-                d = -1;
-            }
-        }
-        for (var e = !0; e;) {
-            e = !1;
-            for (var f = c; f != d; f += b) {
-                if (a[f + b] && a[f].value > a[f + b].value) {
-                    var g = a[f],
-                        h = a[f + b],
-                        i = g;
-                    a[f] = h;
-                    a[f + b] = i;
-                    e = !0;
-                }
-            }
-        }
-        return a;
     };
 
     /**
@@ -682,10 +644,10 @@
         }
 
         dt.sorting = true;
-
+        
         // Convert to zero-indexed
         column = column - 1;
-
+        
         var dir,
             rows = dt.data,
             alpha = [],
@@ -694,26 +656,15 @@
             n = 0,
             th = dt.activeHeadings[column];
 
-        column = th.originalCellIndex;
+            column = th.originalCellIndex;
+        
 
         each(rows, function (tr) {
             var cell = tr.cells[column];
             var content = cell.hasAttribute('data-content') ? cell.getAttribute('data-content') : cell.data;
             var num = content.replace(/(\$|\,|\s|%)/g, "");
 
-            // Check for date format and moment.js
-            if (th.getAttribute("data-type") === "date" && win.moment) {
-                var format = false,
-                    formatted = th.hasAttribute("data-format");
-
-                if (formatted) {
-                    format = th.getAttribute("data-format");
-                }
-
-                num = parseDate(content, format);
-            }
-
-            if (parseFloat(num) == num) {
+            if (parseFloat(num) == num && num !== "Infinity") {
                 numeric[n++] = {
                     value: Number(num),
                     row: tr
@@ -724,25 +675,34 @@
                     row: tr
                 };
             }
+
         });
 
-        /* Sort according to direction (ascending or descending) */
-        var top, btm;
-        if (classList.contains(th, "asc") || direction == "asc") {
-            top = sortItems(alpha, -1);
-            btm = sortItems(numeric, -1);
+        var entries = [];
+        // Sets ascending as default if not specified
+        if (classList.contains(th, "asc")) {
+            entries = numeric.concat(alpha).reverse();
             dir = "descending";
             classList.remove(th, "asc");
             classList.add(th, "desc");
-        } else {
-            top = sortItems(numeric, 1);
-            btm = sortItems(alpha, 1);
+        }
+        else if (classList.contains(th, "desc")) {
+            entries = alpha.concat(numeric).reverse();
             dir = "ascending";
             classList.remove(th, "desc");
             classList.add(th, "asc");
         }
+        else{
+            const collator = new Intl.Collator('en', {sensitivity: 'base' })
+            alpha.sort((a, b) => {
+                return collator.compare(a.value, b.value);
+              });
+            numeric.sort((a,b) => (a.value > b.value) ? 1 : ((b.value > a.value) ? -1 : 0));
+            entries = numeric.concat(alpha);
+            dir = "ascending";
+            classList.add(th, "asc");
+        }
 
-        /* Clear asc/desc class names from the last sorted column's th if it isn't the same as the one that was just clicked */
         if (dt.lastTh && th != dt.lastTh) {
             classList.remove(dt.lastTh, "desc");
             classList.remove(dt.lastTh, "asc");
@@ -751,7 +711,7 @@
         dt.lastTh = th;
 
         /* Reorder the table */
-        rows = top.concat(btm);
+        rows = entries
 
         dt.data = [];
         var indexes = [];
@@ -1929,7 +1889,6 @@
                     that.headings = [].slice.call(tr.cells);
                     that.hasHeadings = true;
 
-                    // Re-enable sorting if it was disabled due
                     // to missing header
                     that.options.sortable = that.initialSortable;
 

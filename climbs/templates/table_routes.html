@@ -1,18 +1,17 @@
-<div class="container">
+<div class="container-fluid">
 	<div class="row">
-		<div class="col-md-16">
 			<table class="table table-striped" id="routes_table">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Grade</th>
+            <th class="col-md-3">Name</th>
+            <th class="col-md-1">Grade</th>
             <th>Sector</th>
             <th>Area</th>
-            <th>Sessions</th>
-            <th>Sent</th>
-            <th>Height</th>
-            <th>Landing</th>
-            <th>Inclination</th>
+            <th class="col-md-1">Sessions</th>
+            <th class="col-md-1">Sent</th>
+            <th class="col-md-1">Height</th>
+            <th class="col-md-1">Landing</th>
+            <th class="col-md-1">Inclination</th>
         </tr>
     </thead>
     <tbody>
@@ -31,10 +30,9 @@
     {% endfor %}
     </tbody>
 </table>
-        </div>
     </div>
 </div>
 
 <script>
-    window.onload = () => {window.data_table = new DataTable("#routes_table", {perPage: 200, perPageSelect: false, searchable:false, nextPrev:false})};
+    window.onload = () => {window.data_table = new DataTable("#routes_table", {perPage: 100, perPageSelect: false, searchable:true, nextPrev:false})};
 </script>

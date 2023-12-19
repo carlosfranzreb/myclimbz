@@ -1,4 +1,6 @@
-<table class="table table-striped">
+<div class="container">
+	<div class="row">
+<table class="table table-striped" id="climbs_table">
     <tr>
         <th>Name</th>
         <th>Grade</th>
@@ -18,3 +20,9 @@
         </tr>
     {% endfor %}
 </table>
+    </div>
+</div>
+
+<script>
+window.onload = () => {window.data_table = new DataTable("#climbs_table", {perPage: 20, perPageSelect: false, searchable:false, nextPrev:false})};
+</script>

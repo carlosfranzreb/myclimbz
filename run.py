@@ -1,7 +1,7 @@
 from climbs import create_app
 
 
-TEST = False
+TEST = True
 app = create_app(TEST)
 
 
