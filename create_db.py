@@ -81,7 +81,7 @@ def add_debug_data(db):
             landing=7,
             inclination=30,
             grade_felt_id=7,
-            cruxes=[models.Crux.query.filter_by(name="crimp").first()],
+            cruxes=[models.Crux.query.filter_by(name="Crimp").first()],
         )
     )
     db.session.add(
@@ -93,8 +93,8 @@ def add_debug_data(db):
             height=3,
             landing=7,
             cruxes=[
-                models.Crux.query.filter_by(name="crimp").first(),
-                models.Crux.query.filter_by(name="toe hook").first(),
+                models.Crux.query.filter_by(name="Crimp").first(),
+                models.Crux.query.filter_by(name="Toe hook").first(),
             ],
         )
     )
@@ -107,7 +107,7 @@ def add_debug_data(db):
             landing=4,
             inclination=-5,
             grade_felt_id=13,
-            cruxes=[models.Crux.query.filter_by(name="heel hook").first()],
+            cruxes=[models.Crux.query.filter_by(name="Heel hook").first()],
         )
     )
     db.session.add(

@@ -41,7 +41,7 @@ class RouteForm(FlaskForm):
             is_edit: Whether the form is used for editing a route. If so, the route
                 name is allowed to be the same as the name of an existing route.
         """
-        self.cruxes.data = [int(c) for c in self.cruxes.data]
+        # self.cruxes.data = [int(c) for c in self.cruxes.data]
         is_valid = True
         if not super().validate():
             is_valid = False
@@ -57,7 +57,7 @@ class RouteForm(FlaskForm):
         Add choices to select fields: grades and cruxes.
         """
         cruxes = Crux.query.order_by(Crux.name).all()
-        self.cruxes.choices = [(c.id, c.name) for c in cruxes]
+        self.cruxes.choices = [(str(c.id), c.name) for c in cruxes]
 
         grades = Grade.query.order_by(Grade.level).all()
         for field in ["grade", "grade_felt"]:
@@ -131,11 +131,11 @@ class RouteForm(FlaskForm):
             if field in entities:
                 getattr(form, field).data = entities[field]
 
-        if "crux" in entities:
+        if "cruxes" in entities:
             form.cruxes.data = list()
-            if isinstance(entities["crux"], str):
-                entities["crux"] = [entities["crux"]]
-            for crux in entities["crux"]:
+            if isinstance(entities["cruxes"], str):
+                entities["cruxes"] = [entities["cruxes"]]
+            for crux in entities["cruxes"]:
                 crux_obj = Crux.query.filter_by(name=crux).first()
                 if crux_obj is not None:
                     form.cruxes.data.append(str(crux_obj.id))

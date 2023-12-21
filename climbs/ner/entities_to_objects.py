@@ -16,7 +16,11 @@ def get_area_from_entities(entities: dict) -> Area:
 
 
 def get_route_from_entities(entities: dict, area_id: int) -> Route:
-    route = Route.query.filter_by(name=entities["name"]).first()
+    if "name" in entities:
+        route = Route.query.filter_by(name=entities["name"]).first()
+    else:
+        entities["name"] = ""
+        route = None
     if route is None:
         sector = None
         if "sector" in entities:
@@ -24,8 +28,8 @@ def get_route_from_entities(entities: dict, area_id: int) -> Route:
             if sector is None:
                 sector = Sector(name=entities["sector"], area_id=area_id)
         cruxes = list()
-        if "crux" in entities:
-            for crux_name in entities["crux"]:
+        if "cruxes" in entities:
+            for crux_name in entities["cruxes"]:
                 cruxes.append(Crux.query.filter_by(name=crux_name).first())
         route = Route(name=entities["name"], sector=sector)
     return route
