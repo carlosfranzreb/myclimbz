@@ -20,6 +20,7 @@ let GRADE_SCALE = "font";  // Scale chosen with the toggle button
 let DATA_GRADE_SCALE = "font";  // Scale used in the CSV file
 let ACTIVE_FILTERS = new Map();
 let INCLUDE_UNSENT_CLIMBS = false;
+let PLOTTED_DATA = null;
 
 
 // Plot the data with D3.js
@@ -65,6 +66,8 @@ function plot_data() {
         this_data = DATA.filter(d => d.sent === true);
 
     // Filter the data according to the active filters
+    console.log(this_data);
+    console.log(ACTIVE_FILTERS);
     for (let [key, value] of ACTIVE_FILTERS)
         this_data = this_data.filter(d => value.includes(d[key]));
 
@@ -78,12 +81,26 @@ function plot_data() {
     // Compute the data to be plotted according to the selected y-axis option
     unsorted_out = y_axis_options[y_axis]["data"](unsorted_out);
 
+    // If the map contains lists of numbers as keys, replace them with their averages
+    let first_key = Array.from(unsorted_out.keys())[0];
+    if (Array.isArray(first_key) && isNumeric(first_key[0])) {
+        let newOut = new Map();
+        for (let [key, value] of unsorted_out.entries()) {
+            let sum = key.reduce((a, b) => a + b, 0);
+            let avg = sum / key.length;
+            newOut.set(avg, value);
+        }
+        unsorted_out = newOut; 
+    } 
+
     // Sort the data
     let out = null;
     if (x_axis == "level") {
         out = new Map(Array.from(unsorted_out).sort((a, b) => a[0] - b[0]));
         out = fill_grades(out);
     }
+    else if (isNumeric(Array.from(unsorted_out.keys())[0]))    
+        out = new Map(Array.from(unsorted_out).sort((a, b) => parseFloat(a[0]) - parseFloat(b[0])));
     else
         out = new Map(Array.from(unsorted_out).sort());
     
@@ -123,4 +140,12 @@ function plot_data() {
             .attr("width", x.bandwidth())
             .attr("height", function(d) { return HEIGHT - y(d[1]) })
             .attr("fill", "#69b3a2");
+    
+    // Store the plotted data in a global variable
+    PLOTTED_DATA = out;
+}
+
+
+function isNumeric(s) {
+    return !isNaN(s - parseFloat(s));
 }
