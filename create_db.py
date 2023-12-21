@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from datetime import datetime
 from climbs import db, create_app, models
+import random
 
 
 ROCKS = [
@@ -62,14 +63,40 @@ GRADES = [
 ]
 
 
-def add_debug_data(db):
-    print("Adding debug data")
+def add_testing_data(db):
+    print("Adding testing data")
     db.session.add(models.Area(name="A1", rock_type_id=1))
     db.session.add(models.Area(name="A2", rock_type_id=2))
 
     db.session.add(models.Sector(name="A1_S1", area_id=1))
     db.session.add(models.Sector(name="A1_S2", area_id=1))
     db.session.add(models.Sector(name="A2_S1", area_id=2))
+
+    sector_ids = models.Sector.query.with_entities(models.Sector.id).distinct()
+    sector_ids = [sector_id for sector_id, in sector_ids]
+
+    with open("climb_names.txt", "r", encoding="utf-8") as f:
+        for i, name in enumerate(f.readlines()):
+            if i > 1995:
+                break
+            db.session.add(
+                models.Route(
+                    name=name.strip(),
+                    sit_start=bool(i % 3),
+                    sector_id=random.choice(sector_ids),
+                    grade_id=i % 15 + 1,
+                    height=i % 5 + 1,
+                    landing=i % 10 + 1,
+                    inclination=random.randrange(-10, 90, 5),
+                    grade_felt_id=i % 24 + 1,
+                    cruxes=[
+                        models.Crux.query.filter_by(
+                            name=CRUXES[random.randint(0, len(CRUXES) - 1)]
+                        ).first()
+                        for _ in range(random.randint(1, 5))
+                    ],
+                )
+            )
 
     db.session.add(
         models.Route(
@@ -128,9 +155,9 @@ def add_debug_data(db):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--debug", type=bool, default=False)
+    parser.add_argument("--test", type=bool, default=False)
     args = parser.parse_args()
-    app = create_app(args.debug)
+    app = create_app(args.test)
     with app.app_context():
         db.create_all()
         for rock_type in ROCKS:
@@ -140,7 +167,7 @@ if __name__ == "__main__":
         for level, (font, hueco) in enumerate(GRADES):
             db.session.add(models.Grade(level=level, font=font, hueco=hueco))
 
-        if args.debug is True:
-            add_debug_data(db)
+        if args.test is True:
+            add_testing_data(db)
 
         db.session.commit()

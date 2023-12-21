@@ -7,10 +7,9 @@ routes = Blueprint("routes", __name__)
 FILE = "src/static/data/boulders.csv"
 
 
-@routes.route("/routes")
+@routes.route("/routes")  # ? Missing "methods" argument
 def table_routes() -> str:
-    page = request.args.get("page", 1, type=int)
-    page_routes = Route.query.paginate(page=page, per_page=10)
+    page_routes = Route.query.all()
     return render_template("routes.html", title="Routes", routes=page_routes)
 
 

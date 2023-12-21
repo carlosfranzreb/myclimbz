@@ -1,15 +1,20 @@
-<table class="table table-striped">
-    <tr>
-        <th>Name</th>
-        <th>Grade</th>
-        <th>Sector</th>
-        <th>Area</th>
-        <th>Sessions</th>
-        <th>Sent</th>
-        <th>Height</th>
-        <th>Landing</th>
-        <th>Inclination</th>
-    </tr>
+<div class="container-fluid">
+	<div class="row">
+			<table class="table table-striped" id="routes_table">
+    <thead>
+        <tr>
+            <th class="col-md-3">Name</th>
+            <th class="col-md-1">Grade</th>
+            <th>Sector</th>
+            <th>Area</th>
+            <th class="col-md-1">Sessions</th>
+            <th class="col-md-1">Sent</th>
+            <th class="col-md-1">Height</th>
+            <th class="col-md-1">Landing</th>
+            <th class="col-md-1">Inclination</th>
+        </tr>
+    </thead>
+    <tbody>
     {% for route in routes %}
         <tr onclick="window.location=&quot;{{ url_for('routes.page_route', route_id=route.id) }}&quot;">
             <td>{{ route.name }}</td>
@@ -23,4 +28,11 @@
             <td>{{ route.inclination }}</td>
         </tr>
     {% endfor %}
+    </tbody>
 </table>
+    </div>
+</div>
+
+<script>
+    window.onload = () => {window.data_table = new DataTable("#routes_table", {perPage: 100, perPageSelect: false, searchable:true, nextPrev:false})};
+</script>
