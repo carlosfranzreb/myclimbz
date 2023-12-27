@@ -75,14 +75,10 @@ def get_plotted_data(x_axis: str, y_axis: str) -> list:
 
 def test_climbs_per_area(app) -> None:
     """Ensures that the correct data is plotted for the 'Climbs per Area' graph."""
-
     with app.app_context():
         areas = Area.query.all()
         n_sent_routes = {area.name: area.n_sent_routes for area in areas}
-
     plotted_data = get_plotted_data("area", "# of climbs")
-
     assert len(plotted_data) == len(areas)
-
     for area, n_sent_routes_plotted in plotted_data:
         assert n_sent_routes_plotted == n_sent_routes[area]
