@@ -61,7 +61,7 @@ function plot_data() {
     // Remove unsent climbs if the corresponding button is unchecked
     let this_data = null;
     if (INCLUDE_UNSENT_CLIMBS)
-        this_data = DATA
+        this_data = DATA;
     else
         this_data = DATA.filter(d => d.sent === true);
 
