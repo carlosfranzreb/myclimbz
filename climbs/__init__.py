@@ -6,19 +6,13 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-def create_app(test=False, short=False):
+def create_app(db_name: str):
     app = Flask(__name__)
     app.config[
         "SECRET_KEY"
     ] = "your-secret-key"  # replace 'your-secret-key' with your actual secret key
     csrf = CSRFProtect(app)
 
-    if not test:
-        db_name = "carlos"
-    elif not short:
-        db_name = "test"
-    else:
-        db_name = "test_short"
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_name}.db"
     db.init_app(app)
 
