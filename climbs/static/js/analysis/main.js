@@ -44,7 +44,22 @@ function start_analysis(data, grades) {
 }
 
 
-// Plot the data (a Map object) with D3.js
+/**
+ * The plot_data function performs the following steps:
+ * 
+ * 1. Clear the previous plot by removing all elements from the SVG.
+ * 2. Get the selected x- and y-axis from the corresponding dropdown menus.
+ * 3. If the y-axis is "Success rate", check the "include-unsent-climbs" checkbox.
+ * 4. Filter the data based on whether unsent climbs should be included or not.
+ * 5. Filter the data based on the active filters stored in the ACTIVE_FILTERS map.
+ * 6. If the filtered data is empty, return without plotting.
+ * 7. Group the data by the selected x-axis key.
+ * 8. Compute the data to be plotted based on the selected y-axis option.
+ * 9. If the map contains lists of numbers as keys, replace them with their averages.
+ * 10. Sort the data based on the x-axis key.
+ * 11. Plot the data with D3.js.
+ * 12. Store the plotted data in the PLOTTED_DATA global variable.
+ */
 function plot_data() {
 
     // Clear the previous plot

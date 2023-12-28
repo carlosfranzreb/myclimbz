@@ -22,6 +22,10 @@ let y_axis_options = {
         "data": avg_grade,
         "axis_labels": grade_axis,
     },
+    "Max. grade": {
+        "data": max_grade,
+        "axis_labels": grade_axis,
+    },
 }
 
 
@@ -38,7 +42,7 @@ function count_climbs(data) {
 function count_tries(data) {
     out = new Map();
     for (let [key, value] of data) {
-        let tries = value.map(d => d.Tries);
+        let tries = value.map(d => d.n_attempts_send);
         tries = tries.reduce((a, b) => parseInt(a) + parseInt(b));
         out.set(key, tries);
     }
@@ -48,12 +52,11 @@ function count_tries(data) {
 
 // Compute the tries per climb per x-axis key
 function tries_per_climb(data) {
+    climbs_count = count_climbs(data);
+    tries_count = count_tries(data);
     out = new Map();
-    for (let [key, value] of data) {
-        let tries = value.map(d => d.Tries);
-        tries = tries.reduce((a, b) => parseInt(a) + parseInt(b));
-        out.set(key, tries / value.length);
-    }
+    for (let [key, value] of data)
+        out.set(key, tries_count.get(key) / climbs_count.get(key));
     return out;
 }
 
@@ -78,8 +81,16 @@ function success_rate(data) {
 // Compute the average grade per x-axis key
 function avg_grade(data) {
     out = new Map();
-    for (let [key, value] of data) {
+    for (let [key, value] of data)
         out.set(key, get_avg_level(value));
-    }
+    return out;
+}
+
+
+// Compute the max grade per x-axis key
+function max_grade(data) {
+    out = new Map();
+    for (let [key, value] of data)
+        out.set(key, get_max_level(value));
     return out;
 }

@@ -31,6 +31,13 @@ function get_avg_level(climbs) {
     return avg_level;
 }
 
+// Return the max. level of a list of climbs
+function get_max_level(climbs) {
+    let levels = climbs.map(d => d.level);
+    let max_level = Math.max(...levels);
+    return max_level;
+}
+
 
 // Return a map of levels to grades of the given type (font or hueco)
 function grade_axis() {
