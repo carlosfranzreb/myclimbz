@@ -120,7 +120,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                     ],
                 )
             )
-            # with p=0.8, add climb to the session
+            # with p=0.6, add climb to the session
             if random.random() < 0.6:
                 session_id = random.randint(1, 3) if area_id == 1 else 4
                 db.session.add(
