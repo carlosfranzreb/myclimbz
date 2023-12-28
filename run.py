@@ -1,8 +1,7 @@
 from climbs import create_app
 
 
-TEST = True
-app = create_app(TEST)
+app = create_app("test_100")
 
 
 if __name__ == "__main__":

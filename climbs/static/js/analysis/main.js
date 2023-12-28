@@ -53,7 +53,8 @@ function start_analysis(data, grades) {
  * 4. Filter the data based on whether unsent climbs should be included or not.
  * 5. Filter the data based on the active filters stored in the ACTIVE_FILTERS map.
  * 6. If the filtered data is empty, return without plotting.
- * 7. Group the data by the selected x-axis key.
+ * 7. Group the data by the selected x-axis key. If the key is "cruxes", count the
+ *   number of climbs per unique crux.
  * 8. Compute the data to be plotted based on the selected y-axis option.
  * 9. If the map contains lists of numbers as keys, replace them with their averages.
  * 10. Sort the data based on the x-axis key.
@@ -68,7 +69,7 @@ function plot_data() {
     // Get the selected options
     let x_axis = document.getElementById("x-axis-select").value;
     let y_axis = document.getElementById("y-axis-select").value;
-    if (y_axis == "Success rate" && ! unsent_climbs_btn.checked) {
+    if (y_axis == "Climbs: success rate" && ! unsent_climbs_btn.checked) {
         document.getElementById("include-unsent-climbs").checked = true;
         INCLUDE_UNSENT_CLIMBS = true;
     }
@@ -81,8 +82,6 @@ function plot_data() {
         this_data = DATA.filter(d => d.sent === true);
 
     // Filter the data according to the active filters
-    console.log(this_data);
-    console.log(ACTIVE_FILTERS);
     for (let [key, value] of ACTIVE_FILTERS)
         this_data = this_data.filter(d => value.includes(d[key]));
 
@@ -90,8 +89,21 @@ function plot_data() {
     if (this_data.length == 0)
         return;
 
-    // Group the data by the selected x-axis key
-    let unsorted_out = d3.group(this_data, d => d[x_axis]);
+    // Group the data by the selected x-axis key. Cruxes are split into unique cruxes.
+    let unsorted_out = null;
+    if (x_axis == "cruxes") {
+        groups = d3.group(this_data, d => d[x_axis]);
+        unsorted_out = new Map();
+        for (let [key, value] of groups.entries()) {
+            for (let crux of key) {
+                if (unsorted_out.has(crux))
+                    unsorted_out.set(crux, unsorted_out.get(crux).concat(value));
+                else
+                    unsorted_out.set(crux, value);
+            }
+        }
+    } else
+        unsorted_out = d3.group(this_data, d => d[x_axis]);
 
     // Compute the data to be plotted according to the selected y-axis option
     unsorted_out = y_axis_options[y_axis]["data"](unsorted_out);

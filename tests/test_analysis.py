@@ -33,13 +33,22 @@ def test_page_request(test_client: FlaskClient):
     assert b"Analysis" in response.data
 
 
-def get_plotted_data(x_axis: str, y_axis: str) -> list:
+def get_plotted_data(
+    x_axis: str,
+    y_axis: str,
+    check_unsent: bool = False,
+    toggle_grade_scale: bool = False,
+    active_filters: dict = dict(),
+) -> list:
     """
     Returns the plotted data for the given x- and y-axes.
 
     Args:
         x_axis: the x-axis value
         y_axis: the y-axis value
+        check_unsent: whether to check the "Include unsent boulders" checkbox
+        toggle_grade_scale: whether to toggle the scale switch, i.e. change to V-scale
+        active_filters: the active filters
 
     Returns:
         the plotted data as a list of tuples, where each tuple is of the form
@@ -56,6 +65,11 @@ def get_plotted_data(x_axis: str, y_axis: str) -> list:
     driver = webdriver.Chrome(options=driver_options)
     driver.get("http://127.0.0.1:5000/analysis")
     WebDriverWait(driver, 10).until(EC.title_is("Analysis"))
+
+    if check_unsent:
+        driver.find_element(By.XPATH, "//input[@id='include-unsent-climbs']").click()
+    if toggle_grade_scale:
+        driver.find_element(By.XPATH, "//span[@id='grade-scale-toggle']").click()
 
     x_axis_select = driver.find_element(By.XPATH, "//select[@id='x-axis-select']")
     x_axis_select.click()
@@ -90,12 +104,12 @@ def test_climbs_per_area(app) -> None:
         area.name: n_sent_routes[area.name] / n_routes[area.name] for area in areas
     }
 
-    plotted_data = get_plotted_data("area", "# of climbs")
+    plotted_data = get_plotted_data("area", "Climbs: total")
     assert len(plotted_data) == len(areas)
     for area, n_sent_routes_plotted in plotted_data:
         assert n_sent_routes_plotted == n_sent_routes[area]
 
-    plotted_data = get_plotted_data("area", "Success rate")
+    plotted_data = get_plotted_data("area", "Climbs: success rate")
     assert len(plotted_data) == len(areas)
     for area, success_rate_plotted in plotted_data:
         assert success_rate_plotted == success_rates[area]
@@ -104,32 +118,47 @@ def test_climbs_per_area(app) -> None:
     assert [area for area, _ in plotted_data] == sorted(area_names)
 
 
-def test_tries_per_area(app) -> None:
+def test_attempts_per_area(app) -> None:
     """
-    Ensures that the correct data is plotted for the 'Tries per Area' graph. Here we
-    want to know how many tries it took to send a route. Routes that have not been
-    sent are not included in the graph.
+    Ensures that the correct data is plotted for all four 'Attempts per Area' graphs: with
+    total, avg. min. and max. values. Here we want to know how many attempts it took to send
+    a route. Routes that have not been sent are not included in the graph.
     """
     with app.app_context():
         areas = Area.query.all()
-        n_tries = dict()
+        n_attempts = dict()
         for area in areas:
-            n_tries[area.name] = 0
+            n_attempts[area.name] = list()
             for sector in area.sectors:
                 for route in sector.routes:
                     if not route.sent:
                         continue
-                    route_tries = 0
+                    route_attempts = 0
                     for climb in route.climbs:
-                        route_tries += climb.n_attempts
+                        route_attempts += climb.n_attempts
                         if climb.sent:
                             break
-                    n_tries[area.name] += route_tries
+                    n_attempts[area.name].append(route_attempts)
 
-    plotted_data = get_plotted_data("area", "# of tries")
+    plotted_data = get_plotted_data("area", "Attempts: total")
     assert len(plotted_data) == len(areas)
     for area, n_sent_routes_plotted in plotted_data:
-        assert n_sent_routes_plotted == n_tries[area]
+        assert n_sent_routes_plotted == sum(n_attempts[area])
+
+    plotted_data = get_plotted_data("area", "Attempts: avg.")
+    assert len(plotted_data) == len(areas)
+    for area, avg_attempts_plotted in plotted_data:
+        assert avg_attempts_plotted == sum(n_attempts[area]) / len(n_attempts[area])
+
+    plotted_data = get_plotted_data("area", "Attempts: min.")
+    assert len(plotted_data) == len(areas)
+    for area, min_attempts_plotted in plotted_data:
+        assert min_attempts_plotted == min(n_attempts[area])
+
+    plotted_data = get_plotted_data("area", "Attempts: max.")
+    assert len(plotted_data) == len(areas)
+    for area, max_attempts_plotted in plotted_data:
+        assert max_attempts_plotted == max(n_attempts[area])
 
 
 def test_grade_per_area(app) -> None:
@@ -150,12 +179,12 @@ def test_grade_per_area(app) -> None:
         area_grades_avg[name] = sum(area_levels[name]) / len(area_levels[name])
         area_grades_max[name] = max(area_levels[name])
 
-    plotted_data = get_plotted_data("area", "Avg. grade")
+    plotted_data = get_plotted_data("area", "Grade: avg.")
     assert len(plotted_data) == len(areas)
     for area, avg_grade_plotted in plotted_data:
         assert avg_grade_plotted == area_grades_avg[area]
 
-    plotted_data = get_plotted_data("area", "Max. grade")
+    plotted_data = get_plotted_data("area", "Grade: max.")
     assert len(plotted_data) == len(areas)
     for area, max_grade_plotted in plotted_data:
         assert max_grade_plotted == area_grades_max[area]
@@ -170,7 +199,7 @@ def test_climbs_per_sector(app) -> None:
         sectors = Sector.query.all()
         n_sent_routes = {sector.name: sector.n_sent_routes for sector in sectors}
 
-    plotted_data = get_plotted_data("sector", "# of climbs")
+    plotted_data = get_plotted_data("sector", "Climbs: total")
     assert len(plotted_data) == len(sectors)
     for sector, n_sent_routes_plotted in plotted_data:
         assert n_sent_routes_plotted == n_sent_routes[sector]
@@ -193,7 +222,7 @@ def test_climbs_per_grade(app):
     all_levels = [grade.level for grade in grades if n_sent_routes[grade.font] > 0]
     n_columns = max(all_levels) - min(all_levels) + 1
 
-    plotted_data = get_plotted_data("level", "# of climbs")
+    plotted_data = get_plotted_data("level", "Climbs: total")
     assert len(plotted_data) == n_columns
     for grade, n_sent_routes_plotted in plotted_data:
         assert n_sent_routes_plotted == n_sent_routes[grade]
@@ -215,7 +244,6 @@ def test_climbs_per_route_chars(app):
             "inclination": dict(),
             "height": dict(),
         }
-        climbs_per_crux = dict()
         for route in routes:
             if not route.sent:
                 continue
@@ -224,20 +252,33 @@ def test_climbs_per_route_chars(app):
                 if char_value not in climbs_per_chars[char]:
                     climbs_per_chars[char][char_value] = 0
                 climbs_per_chars[char][char_value] += 1
-            for crux in route.cruxes:
-                if crux.name not in climbs_per_crux:
-                    climbs_per_crux[crux.name] = 0
-                climbs_per_crux[crux.name] += 1
 
     for char in climbs_per_chars:
-        plotted_data = get_plotted_data(char, "# of climbs")
+        plotted_data = get_plotted_data(char, "Climbs: total")
         assert len(plotted_data) == len(climbs_per_chars[char])
         for char_value, n_sent_routes_plotted in plotted_data:
             assert n_sent_routes_plotted == climbs_per_chars[char][char_value]
         char_values = [char_value for char_value, _ in plotted_data]
         assert [char_value for char_value, _ in plotted_data] == sorted(char_values)
 
-    plotted_data = get_plotted_data("cruxes", "# of climbs")
+
+def test_climbs_per_crux(app) -> None:
+    """
+    Ensures that the correct data is plotted for the 'Climbs per Crux' graphs. The
+    characteristics are sorted alphabetically by name.
+    """
+    with app.app_context():
+        routes = Route.query.all()
+        climbs_per_crux = dict()
+        for route in routes:
+            if not route.sent:
+                continue
+            for crux in route.cruxes:
+                if crux.name not in climbs_per_crux:
+                    climbs_per_crux[crux.name] = 0
+                climbs_per_crux[crux.name] += 1
+
+    plotted_data = get_plotted_data("cruxes", "Climbs: total")
     assert len(plotted_data) == len(climbs_per_crux)
     for crux, n_sent_routes_plotted in plotted_data:
         assert n_sent_routes_plotted == climbs_per_crux[crux]

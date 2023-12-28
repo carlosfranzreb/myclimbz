@@ -2,27 +2,35 @@
 // the data to be plotted according to the selected option.
 
 let y_axis_options = {
-    "# of climbs": {
+    "Attempts: total": {
+        "data": count_attempts,
+        "axis_labels": null,
+    },
+    "Attempts: avg.": {
+        "data": avg_attempts_per_climb,
+        "axis_labels": null,
+    },
+    "Attempts: min.": {
+        "data": min_attempts_per_climb,
+        "axis_labels": null,
+    },
+    "Attempts: max.": {
+        "data": max_attempts_per_climb,
+        "axis_labels": null,
+    },
+    "Climbs: total": {
         "data": count_climbs,
         "axis_labels": null,
     },
-    "# of tries": {
-        "data": count_tries,
-        "axis_labels": null,
-    },
-    "Tries per climb": {
-        "data": tries_per_climb,
-        "axis_labels": null,
-    },
-    "Success rate": {
+    "Climbs: success rate": {
         "data": success_rate,
         "axis_labels": null,
     },
-    "Avg. grade": {
+    "Grade: avg.": {
         "data": avg_grade,
         "axis_labels": grade_axis,
     },
-    "Max. grade": {
+    "Grade: max.": {
         "data": max_grade,
         "axis_labels": grade_axis,
     },
@@ -38,25 +46,46 @@ function count_climbs(data) {
 }
 
 
-// Count the number of tries per x-axis key
-function count_tries(data) {
+// Count the number of attempts per x-axis key
+function count_attempts(data) {
     out = new Map();
     for (let [key, value] of data) {
-        let tries = value.map(d => d.n_attempts_send);
-        tries = tries.reduce((a, b) => parseInt(a) + parseInt(b));
-        out.set(key, tries);
+        let attempts = value.map(d => d.n_attempts_send);
+        attempts = attempts.reduce((a, b) => parseInt(a) + parseInt(b));
+        out.set(key, attempts);
     }
     return out;
 }
 
 
-// Compute the tries per climb per x-axis key
-function tries_per_climb(data) {
+// Compute the attempts per climb per x-axis key
+function avg_attempts_per_climb(data) {
     climbs_count = count_climbs(data);
-    tries_count = count_tries(data);
+    attempts_count = count_attempts(data);
     out = new Map();
     for (let [key, value] of data)
-        out.set(key, tries_count.get(key) / climbs_count.get(key));
+        out.set(key, attempts_count.get(key) / climbs_count.get(key));
+    return out;
+}
+
+// Compute the min attempts per climb per x-axis key
+function min_attempts_per_climb(data) { 
+    out = new Map();
+    for (let [key, value] of data) {
+        let attempts = value.map(d => d.n_attempts_send);
+        out.set(key, Math.min(...attempts));
+    }
+    return out;
+}
+
+
+// Compute the max attempts per climb per x-axis key
+function max_attempts_per_climb(data) { 
+    out = new Map();
+    for (let [key, value] of data) {
+        let attempts = value.map(d => d.n_attempts_send);
+        out.set(key, Math.max(...attempts));
+    }
     return out;
 }
 
