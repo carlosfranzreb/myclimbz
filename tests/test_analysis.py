@@ -69,7 +69,8 @@ def get_plotted_data(
     if check_unsent:
         driver.find_element(By.XPATH, "//input[@id='include-unsent-climbs']").click()
     if toggle_grade_scale:
-        driver.find_element(By.XPATH, "//span[@id='grade-scale-toggle']").click()
+        btn = driver.find_element(By.XPATH, "//input[@id='grade-scale-toggle']")
+        btn.find_element(By.XPATH, "..").click()
 
     x_axis_select = driver.find_element(By.XPATH, "//select[@id='x-axis-select']")
     x_axis_select.click()
@@ -94,7 +95,9 @@ def get_plotted_data(
 def test_climbs_per_area(app) -> None:
     """
     Ensures that the correct data is plotted for the 'Climbs per Area' and 'Success
-    rate per Area' graphs. The areas are sorted alphabetically by name.
+    rate per Area' graphs. The areas are sorted alphabetically by name. Check also
+    the 'Climbs per Area' numbers when the "Include unsent boulders" checkbox is
+    checked.
     """
     with app.app_context():
         areas = Area.query.all()
@@ -108,14 +111,18 @@ def test_climbs_per_area(app) -> None:
     assert len(plotted_data) == len(areas)
     for area, n_sent_routes_plotted in plotted_data:
         assert n_sent_routes_plotted == n_sent_routes[area]
+    area_names = [area for area, _ in plotted_data]
+    assert [area for area, _ in plotted_data] == sorted(area_names)
 
     plotted_data = get_plotted_data("area", "Climbs: success rate")
     assert len(plotted_data) == len(areas)
     for area, success_rate_plotted in plotted_data:
         assert success_rate_plotted == success_rates[area]
 
-    area_names = [area for area, _ in plotted_data]
-    assert [area for area, _ in plotted_data] == sorted(area_names)
+    plotted_data = get_plotted_data("area", "Climbs: total", check_unsent=True)
+    assert len(plotted_data) == len(areas)
+    for area, n_routes_plotted in plotted_data:
+        assert n_routes_plotted == n_routes[area]
 
 
 def test_attempts_per_area(app) -> None:
@@ -213,22 +220,52 @@ def test_climbs_per_grade(app):
     Ensures that the correct data is plotted for the 'Climbs per Grade' graph. The
     grades are sorted by level. The number of columns in the graph is equal to the
     number of grades between the lowest and highest level that have climbs, inclusive.
+    Check also the 'Climbs per Grade' numbers when the "Grade scale" switch is toggled,
+    i.e. change to V-scale,
     """
     with app.app_context():
         grades = Grade.query.all()
-        n_sent_routes = {
-            grade.font: sum([route.sent for route in grade.routes]) for grade in grades
-        }
-    all_levels = [grade.level for grade in grades if n_sent_routes[grade.font] > 0]
-    n_columns = max(all_levels) - min(all_levels) + 1
+        n_sent_routes = {"font": dict(), "hueco": dict()}
+        first_nonzero = None
+        last_nonzero = 0
+        for grade in grades:
+            value = sum([route.sent for route in grade.routes])
+            n_sent_routes["font"][grade.font] = value
+            n_sent_routes["hueco"][grade.hueco] = value + n_sent_routes["hueco"].get(
+                grade.hueco, 0
+            )
+            if value > 0 and first_nonzero is None:
+                first_nonzero = grade.level
+            elif value > 0 and last_nonzero < grade.level:
+                last_nonzero = grade.level
 
-    plotted_data = get_plotted_data("level", "Climbs: total")
-    assert len(plotted_data) == n_columns
-    for grade, n_sent_routes_plotted in plotted_data:
-        assert n_sent_routes_plotted == n_sent_routes[grade]
+        hueco_grades_unique = set()
+        for level in range(first_nonzero, last_nonzero + 1):
+            hueco_grade = grades[level].hueco
+            hueco_grades_unique.add(hueco_grade)
 
-    grades = [grade for grade, _ in plotted_data]
-    assert [grade for grade, _ in plotted_data] == sorted(grades)
+    n_columns = {
+        "font": last_nonzero - first_nonzero + 1,
+        "hueco": len(hueco_grades_unique),
+    }
+
+    for scale in n_sent_routes:
+        plotted_data = get_plotted_data(
+            "level", "Climbs: total", toggle_grade_scale=scale == "hueco"
+        )
+        assert len(plotted_data) == n_columns[scale]
+        for grade, n_sent_routes_plotted in plotted_data:
+            assert n_sent_routes_plotted == n_sent_routes[scale][grade]
+        plotted_grades = [grade for grade, _ in plotted_data]
+        grades_sorted = list()
+        for grade in grades:
+            grade = getattr(grade, scale)
+            if grade in grades_sorted:
+                continue
+            grades_sorted.append(grade)
+            if len(grades_sorted) == n_columns[scale]:
+                break
+        assert plotted_grades == grades_sorted
 
 
 def test_climbs_per_route_chars(app):

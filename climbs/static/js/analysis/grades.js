@@ -12,14 +12,11 @@ function fill_grades(sorted_map) {
 
     for (let level = first_idx; level < last_idx + 1; level++) {
         let grade = GRADES[level][GRADE_SCALE];
-        if (filled_map.has(grade))
-            continue;
-        if (!sorted_map.has(level))
-            filled_map.set(grade, 0);
-        else
-            filled_map.set(grade, sorted_map.get(level));
+        let old_value = sorted_map.has(level) ? sorted_map.get(level) : 0;
+        let new_value = filled_map.has(grade) ? filled_map.get(grade) : 0;
+        filled_map.set(grade, old_value + new_value);
     }
-
+    console.log(filled_map);
     return filled_map;
 }
 

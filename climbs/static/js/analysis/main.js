@@ -17,7 +17,6 @@ let SVG = d3.select("#chart")
 let DATA = null;
 let GRADES = null;
 let GRADE_SCALE = "font";  // Scale chosen with the toggle button
-let DATA_GRADE_SCALE = "font";  // Scale used in the CSV file
 let ACTIVE_FILTERS = new Map();
 let INCLUDE_UNSENT_CLIMBS = false;
 let PLOTTED_DATA = null;
@@ -104,7 +103,7 @@ function plot_data() {
         }
     } else
         unsorted_out = d3.group(this_data, d => d[x_axis]);
-
+    
     // Compute the data to be plotted according to the selected y-axis option
     unsorted_out = y_axis_options[y_axis]["data"](unsorted_out);
 
@@ -153,10 +152,8 @@ function plot_data() {
             .tickFormat(function(d){ return y_labels.get(d); })
         SVG.append("g").call(y_axis_obj)
     }
-    else {
-        SVG.append("g")
-            .call(d3.axisLeft(y));
-    }
+    else
+        SVG.append("g").call(d3.axisLeft(y));
 
     SVG.selectAll("mybar")
         .data(out)
