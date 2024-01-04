@@ -36,7 +36,7 @@ let x_axis_options = {
     "sent": "Sent",
     "cruxes": "Crux",
     "n_sessions": "No. of sessions",
-    "n_attempts": "No. of attempts",
+    "n_attempts_send": "No. of attempts",
 }
 
 
@@ -135,6 +135,8 @@ function plot_data() {
     }
     else
         unsorted_out = d3.group(this_data, d => d[x_axis]);
+
+    console.log(unsorted_out);
 
     // Compute the data to be plotted according to the selected y-axis option
     unsorted_out = y_axis_options[y_axis]["data"](unsorted_out);
