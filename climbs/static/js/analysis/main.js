@@ -47,7 +47,6 @@ function start_analysis(data, grades) {
     DATA = data;
 
     // Parse the dates and format them to YYYY-MM
-    console.log(DATA[0].dates[0])
     let parseTime = d3.timeParse("%a, %d %b %Y %H:%M:%S");
     let formatDate = d3.timeFormat("%Y-%m");
     DATA = DATA.map(d => {
@@ -56,7 +55,6 @@ function start_analysis(data, grades) {
         );
         return d;
     });
-    console.log(DATA[0].dates[0])
 
     // Add the x-axis options to the menu, as defined in y_axis.js
     for (let key of Object.keys(y_axis_options))
@@ -121,9 +119,9 @@ function plot_data() {
         return;
 
     // Group the data by the selected x-axis key.
-    // Cruxes and dates are split into unique cruxes.
+    // Cruxes, dates and conditions are split into unique keys.
     let unsorted_out = null;
-    if (x_axis == "cruxes" || x_axis == "dates") {
+    if (x_axis == "cruxes" || x_axis == "dates" || x_axis == "conditions") {
         groups = d3.group(this_data, d => d[x_axis]);
         unsorted_out = new Map();
         for (let [key, value] of groups.entries()) {
@@ -140,18 +138,6 @@ function plot_data() {
 
     // Compute the data to be plotted according to the selected y-axis option
     unsorted_out = y_axis_options[y_axis]["data"](unsorted_out);
-
-    // If the map contains lists of numbers as keys, replace them with their averages
-    let first_key = Array.from(unsorted_out.keys())[0];
-    if (Array.isArray(first_key) && isNumeric(first_key[0])) {
-        let newOut = new Map();
-        for (let [key, value] of unsorted_out.entries()) {
-            let sum = key.reduce((a, b) => a + b, 0);
-            let avg = sum / key.length;
-            newOut.set(avg, value);
-        }
-        unsorted_out = newOut;
-    }
 
     // Sort the data
     let out = null;

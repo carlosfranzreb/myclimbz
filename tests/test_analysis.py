@@ -345,3 +345,28 @@ def test_climbs_per_month(app) -> None:
         assert n_sent_routes_plotted == climbs_per_month[month]
     months = [month for month, _ in plotted_data]
     assert [month for month, _ in plotted_data] == sorted(months)
+
+
+def test_climbs_per_conditions(app) -> None:
+    """
+    Ensures that the correct data is plotted for the 'Climbs per Conditions' graph.
+    Conditions are sorted alphabetically by name.
+    """
+    with app.app_context():
+        routes = Route.query.all()
+        climbs_per_conditions = dict()
+        for route in routes:
+            if not route.sent:
+                continue
+            for climb in route.climbs:
+                conditions = climb.session.conditions
+                if conditions not in climbs_per_conditions:
+                    climbs_per_conditions[conditions] = 0
+                climbs_per_conditions[conditions] += 1
+
+    plotted_data = get_plotted_data("Conditions", "Climbs: total")
+    assert len(plotted_data) == len(climbs_per_conditions)
+    for conditions, n_sent_routes_plotted in plotted_data:
+        assert n_sent_routes_plotted == climbs_per_conditions[conditions]
+    conditions = [conditions for conditions, _ in plotted_data]
+    assert [conditions for conditions, _ in plotted_data] == sorted(conditions)
