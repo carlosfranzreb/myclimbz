@@ -46,6 +46,8 @@ function start_analysis(data, grades) {
     GRADES = grades;
     DATA = data;
 
+    // TODO: define the min. and max. grades for the filter range
+
     // Parse the dates and format them to YYYY-MM
     let parseTime = d3.timeParse("%a, %d %b %Y %H:%M:%S");
     let formatDate = d3.timeFormat("%Y-%m");
@@ -135,8 +137,6 @@ function plot_data() {
     }
     else
         unsorted_out = d3.group(this_data, d => d[x_axis]);
-
-    console.log(unsorted_out);
 
     // Compute the data to be plotted according to the selected y-axis option
     unsorted_out = y_axis_options[y_axis]["data"](unsorted_out);
