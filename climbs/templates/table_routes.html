@@ -1,25 +1,6 @@
 <div class="container-fluid">
   <div class="row">
-    <div id="result_slider_1">Min: 1 Max: 10</div>
-    <div
-      id="slider_1"
-      se-min="1"
-      se-step="1"
-      se-min-value="1"
-      se-max-value="10"
-      se-max="10"
-      class="slider"
-    ></div>
-    <div id="result_slider_2">Min: 1 Max: 10</div>
-    <div
-      id="slider_2"
-      se-min="1"
-      se-step="1"
-      se-min-value="1"
-      se-max-value="10"
-      se-max="10"
-      class="slider"
-    ></div>
+    <div id="slider_1"></div>
     <table class="table table-striped" id="routes_table">
       <thead>
         <tr>
@@ -57,8 +38,7 @@
 
 <script>
   window.onload = () => {
-    (window.slider_1 = new DoubleRangeSlider("slider_1", 300, 200)),
-    (window.slider_2 = new DoubleRangeSlider("slider_2", 1400, 100)),
+    (window.slider_1 = new DoubleRangeSlider("slider_1", 300, 50, 1, 10, 1)),
       (window.data_table = new DataTable("#routes_table", {
         perPage: 100,
         perPageSelect: false,

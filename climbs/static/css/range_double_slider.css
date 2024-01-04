@@ -1,3 +1,12 @@
+.slider-title {
+	display: block;
+	position: relative;
+	font-size: 16px;
+	font-weight: bold;
+	text-align: center;
+	width: 100%;
+}
+
 .slider {
 	display: block;
 	position: relative;
@@ -31,7 +40,7 @@
 		width: calc(100% - 36px);
 		left: 18px;
 		top: 16px;
-		height: 4px;
+		height: 6px;
 		border-radius: 4px;
 		background: #F0F0F0;
 		z-index: 0;
@@ -41,7 +50,7 @@
 			display: block;
 			height: 100%;
 			width: 0%;
-			background: orange;
+			background: rgb(0, 47, 255);
 		}
 	}
 }

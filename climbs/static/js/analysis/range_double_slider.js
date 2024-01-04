@@ -1,50 +1,37 @@
 // THIS IS THE RANGE SLIDER LOGIC DO NOT CHANGE !!
-var DoubleRangeSlider = function(id, width, left) { 
+var DoubleRangeSlider = function(id, width, left, min, max, step) { 
   var self = this;
   var startX = 0, x = 0;
   self.width = width;
   self.left = left;
+  var wrapper = document.getElementById(id);
+  wrapper.style.width = width + 'px';
+  wrapper.style.left = left + 'px';
+  wrapper.style.position = 'relative';
 
   // retrieve touch button
-  var slider = document.getElementById(id)
+  var inner_html = `<div class=slider-title id=title_${id}>${min} - ${max}</div>`
+  + `<div id=widget_${id} se-min="${min}"`
+  + `se-step="${step}"`
+  + `se-max="${max}" class="slider"></div>`;
+  wrapper.innerHTML = inner_html;
+  var slider = document.getElementById(`widget_${id}`);
   slider.style.width = width + 'px';
-  slider.style.left = left + 'px';
-  var inner_html = "<div class='slider-touch-left'><span></span></div>"
+
+  inner_html = "<div class='slider-touch-left'><span></span></div>"
   + "<div class='slider-touch-right'><span></span></div>"
   + "<div class='slider-line'><span></span></div></div>";
   slider.innerHTML = inner_html;
-
+  
+  self.wrapper = wrapper;
+  self.slider = slider;
   var touchLeft  = slider.querySelector('.slider-touch-left');
   var touchRight = slider.querySelector('.slider-touch-right');
   var lineSpan   = slider.querySelector('.slider-line span');
 
-  // get some properties
-  var min   = parseFloat(slider.getAttribute('se-min'));
-  var max   = parseFloat(slider.getAttribute('se-max'));
-
   // retrieve default values
   var defaultMinValue = min;
-  if(slider.hasAttribute('se-min-value'))
-  {
-    defaultMinValue = parseFloat(slider.getAttribute('se-min-value'));  
-  }
   var defaultMaxValue = max;
-
-  if(slider.hasAttribute('se-max-value'))
-  {
-    defaultMaxValue = parseFloat(slider.getAttribute('se-max-value'));  
-  }
-
-  // check values are correct
-  if(defaultMinValue < min)
-  {
-    defaultMinValue = min;
-  }
-
-  if(defaultMaxValue > max)
-  {
-    defaultMaxValue = max;
-  }
 
   if(defaultMinValue > defaultMaxValue)
   {
@@ -57,39 +44,53 @@ var DoubleRangeSlider = function(id, width, left) {
   {
     step  = Math.abs(parseFloat(slider.getAttribute('se-step')));
   }
-
+  
   // normalize flag
-  var normalizeFact = 26;
+  
+  self.slider.setAttribute('se-min-current', defaultMinValue);
+  self.slider.setAttribute('se-max-current', defaultMaxValue);
 
-  self.slider = slider;
-  var left_button_x, right_button_x;
+  var left_button_x, right_button_x, current_min, current_max;
+  var newWidth = self.width;
+  self.newWidth = newWidth;
+  
   self.reset = function() {
-    left_button_x = Math.floor((parseInt(touchLeft.style.left, 10))*self.newWidth/(self.widthChange + self.newWidth));
-    right_button_x = Math.floor((parseInt(touchRight.style.left, 10))*self.newWidth/(self.widthChange + self.newWidth));
+    current_min = parseInt(slider.getAttribute('se-min-current'));
+    current_max = parseInt(slider.getAttribute('se-max-current'));
+    left_button_x = Math.floor((self.newWidth-36)*(current_min - min)/(max - min));
+    right_button_x = Math.floor((self.newWidth-36)*(current_max - min)/(max - min));
+    if (left_button_x === right_button_x) {
+      if (left_button_x <= 50) {
+        right_button_x += 36;
+      }
+      else{
+        left_button_x -= 36;
+      }
+    }
     touchLeft.style.left = left_button_x + 'px';
     touchRight.style.left = right_button_x + 'px';
     lineSpan.style.marginLeft = left_button_x + 'px';
     lineSpan.style.width = right_button_x - left_button_x + 'px';
     startX = 0;
     x = 0;
+    maxX = slider.offsetWidth - touchRight.offsetWidth;
+    line_max_width = (self.newWidth - 36 );
   };
 
   self.setMinValue = function(minValue)
   {
     var ratio = ((minValue - min) / (max - min));
-    touchLeft.style.left = Math.ceil(ratio * (slider.offsetWidth - (touchLeft.offsetWidth + normalizeFact))) + 'px';
+    touchLeft.style.left = Math.ceil(ratio * (slider.offsetWidth - (touchLeft.offsetWidth ))) + 'px';
     lineSpan.style.marginLeft = touchLeft.offsetLeft + 'px';
     lineSpan.style.width = (touchRight.offsetLeft - touchLeft.offsetLeft) + 'px';
-    slider.setAttribute('se-min-value', minValue);
   }
 
   self.setMaxValue = function(maxValue)
   {
     var ratio = ((maxValue - min) / (max - min));
-    touchRight.style.left = Math.ceil(ratio * (slider.offsetWidth - (touchLeft.offsetWidth + normalizeFact)) + normalizeFact) + 'px';
+    touchRight.style.left = Math.ceil(ratio * (slider.offsetWidth - (touchLeft.offsetWidth )) ) + 'px';
     lineSpan.style.marginLeft = touchLeft.offsetLeft + 'px';
     lineSpan.style.width = (touchRight.offsetLeft - touchLeft.offsetLeft) + 'px';
-    slider.setAttribute('se-max-value', maxValue);
   }
 
   // initial reset
@@ -98,7 +99,7 @@ var DoubleRangeSlider = function(id, width, left) {
   // usefull values, min, max, normalize fact is the width of both touch buttons
   var maxX = slider.offsetWidth - touchRight.offsetWidth;
   var selectedTouch = null;
-  var initialValue = (lineSpan.offsetWidth - normalizeFact);
+  var line_max_width = (lineSpan.offsetWidth );
 
   // set defualt values
   self.setMinValue(defaultMinValue);
@@ -182,12 +183,12 @@ var DoubleRangeSlider = function(id, width, left) {
     if(slider.getAttribute('on-change'))
     {
       var fn = new Function('min, max', slider.getAttribute('on-change'));
-      fn(slider.getAttribute('se-min-value'), slider.getAttribute('se-max-value'));
+      fn(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
     }
     
     if(self.onChange)
     {
-      self.onChange(slider.getAttribute('se-min-value'), slider.getAttribute('se-max-value'));
+      self.onChange(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
     }
     
   }
@@ -207,18 +208,18 @@ var DoubleRangeSlider = function(id, width, left) {
     if(slider.getAttribute('did-changed'))
     {
       var fn = new Function('min, max', slider.getAttribute('did-changed'));
-      fn(slider.getAttribute('se-min-value'), slider.getAttribute('se-max-value'));
+      fn(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
     }
     
     if(self.didChanged)
     {
-      self.didChanged(slider.getAttribute('se-min-value'), slider.getAttribute('se-max-value'));
+      self.didChanged(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
     }
   }
 
   function calculateValue() {
-    var newValue = (lineSpan.offsetWidth - normalizeFact) / initialValue;
-    var minValue = lineSpan.offsetLeft / initialValue;
+    var newValue = (lineSpan.offsetWidth ) / line_max_width;
+    var minValue = lineSpan.offsetLeft / line_max_width;
     var maxValue = minValue + newValue;
 
     var minValue = minValue * (max - min) + min;
@@ -226,15 +227,15 @@ var DoubleRangeSlider = function(id, width, left) {
     
     if (step !== 0.0)
     {
-      var multi = Math.floor((minValue / step));
+      var multi = Math.round((minValue / step));
       minValue = step * multi;
       
-      multi = Math.floor((maxValue / step));
+      multi = Math.round((maxValue / step));
       maxValue = step * multi;
     }
     
-    slider.setAttribute('se-min-value', minValue);
-    slider.setAttribute('se-max-value', maxValue);
+    slider.setAttribute('se-min-current', minValue);
+    slider.setAttribute('se-max-current', maxValue);
   }
 
   // link events
@@ -242,22 +243,18 @@ var DoubleRangeSlider = function(id, width, left) {
   touchRight.addEventListener('mousedown', onStart);
   touchLeft.addEventListener('touchstart', onStart);
   touchRight.addEventListener('touchstart', onStart);
-  var newWidth;
-  var widthChange;
-  self.widthChange = widthChange;
-  self.newWidth = newWidth;
 
   self.adjustWidth = function() {
     // Check if the right edge of the element is past the right edge of the window
     if (self.left+self.width + 50 > window.innerWidth) {
         // Reset the width of the element
         self.newWidth = window.innerWidth - self.left - 50
-        self.widthChange = parseInt(self.slider.style.width, 10) - self.newWidth;
+        self.wrapper.style.width = self.newWidth + "px";
         self.slider.style.width = self.newWidth + "px";
         self.reset();
     } else if (self.slider.style.width !== self.width + "px" && window.innerWidth > self.width + self.left) {
         self.newWidth = self.width;
-        self.widthChange = parseInt(self.slider.style.width, 10) - self.newWidth;
+        self.wrapper.style.width = self.newWidth + "px";
         self.slider.style.width = self.newWidth + "px";
         self.reset();
     }
@@ -268,12 +265,12 @@ var DoubleRangeSlider = function(id, width, left) {
 
   self.onChange = function(min, max)
   {
-    document.getElementById("result_slider_1").innerHTML = 'Min: ' + min + ' Max: ' + max;
+    document.getElementById(`title_${id}`).innerHTML = `${min} - ${max}`;
   }
     
   self.didChanged = function(min, max)
   {
-    document.getElementById("result_slider_1").innerHTML = 'Min: ' + min + ' Max: ' + max;
+    document.getElementById(`title_${id}`).innerHTML = `${min} - ${max}`;
   }
 
 };
