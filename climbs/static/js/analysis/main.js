@@ -82,8 +82,8 @@ function start_analysis(data, grades) {
  * 4. Filter the data based on whether unsent climbs should be included or not.
  * 5. Filter the data based on the active filters stored in the ACTIVE_FILTERS map.
  * 6. If the filtered data is empty, return without plotting.
- * 7. Group the data by the selected x-axis key. If the key is "cruxes", count the
- *   number of climbs per unique crux.
+ * 7. Group the data by the selected x-axis key. If the key is "cruxes", "dates" or
+ *   "conditions", count the number of values per unique key.
  * 8. Compute the data to be plotted based on the selected y-axis option.
  * 9. If the map contains lists of numbers as keys, replace them with their averages.
  * 10. Sort the data based on the x-axis key.
