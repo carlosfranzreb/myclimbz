@@ -16,7 +16,6 @@ function fill_grades(sorted_map) {
         let new_value = filled_map.has(grade) ? filled_map.get(grade) : 0;
         filled_map.set(grade, old_value + new_value);
     }
-    console.log(filled_map);
     return filled_map;
 }
 

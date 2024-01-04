@@ -107,19 +107,19 @@ def test_climbs_per_area(app) -> None:
         area.name: n_sent_routes[area.name] / n_routes[area.name] for area in areas
     }
 
-    plotted_data = get_plotted_data("area", "Climbs: total")
+    plotted_data = get_plotted_data("Area", "Climbs: total")
     assert len(plotted_data) == len(areas)
     for area, n_sent_routes_plotted in plotted_data:
         assert n_sent_routes_plotted == n_sent_routes[area]
     area_names = [area for area, _ in plotted_data]
     assert [area for area, _ in plotted_data] == sorted(area_names)
 
-    plotted_data = get_plotted_data("area", "Climbs: success rate")
+    plotted_data = get_plotted_data("Area", "Climbs: success rate")
     assert len(plotted_data) == len(areas)
     for area, success_rate_plotted in plotted_data:
         assert success_rate_plotted == success_rates[area]
 
-    plotted_data = get_plotted_data("area", "Climbs: total", check_unsent=True)
+    plotted_data = get_plotted_data("Area", "Climbs: total", check_unsent=True)
     assert len(plotted_data) == len(areas)
     for area, n_routes_plotted in plotted_data:
         assert n_routes_plotted == n_routes[area]
@@ -147,22 +147,22 @@ def test_attempts_per_area(app) -> None:
                             break
                     n_attempts[area.name].append(route_attempts)
 
-    plotted_data = get_plotted_data("area", "Attempts: total")
+    plotted_data = get_plotted_data("Area", "Attempts: total")
     assert len(plotted_data) == len(areas)
     for area, n_sent_routes_plotted in plotted_data:
         assert n_sent_routes_plotted == sum(n_attempts[area])
 
-    plotted_data = get_plotted_data("area", "Attempts: avg.")
+    plotted_data = get_plotted_data("Area", "Attempts: avg.")
     assert len(plotted_data) == len(areas)
     for area, avg_attempts_plotted in plotted_data:
         assert avg_attempts_plotted == sum(n_attempts[area]) / len(n_attempts[area])
 
-    plotted_data = get_plotted_data("area", "Attempts: min.")
+    plotted_data = get_plotted_data("Area", "Attempts: min.")
     assert len(plotted_data) == len(areas)
     for area, min_attempts_plotted in plotted_data:
         assert min_attempts_plotted == min(n_attempts[area])
 
-    plotted_data = get_plotted_data("area", "Attempts: max.")
+    plotted_data = get_plotted_data("Area", "Attempts: max.")
     assert len(plotted_data) == len(areas)
     for area, max_attempts_plotted in plotted_data:
         assert max_attempts_plotted == max(n_attempts[area])
@@ -186,12 +186,12 @@ def test_grade_per_area(app) -> None:
         area_grades_avg[name] = sum(area_levels[name]) / len(area_levels[name])
         area_grades_max[name] = max(area_levels[name])
 
-    plotted_data = get_plotted_data("area", "Grade: avg.")
+    plotted_data = get_plotted_data("Area", "Grade: avg.")
     assert len(plotted_data) == len(areas)
     for area, avg_grade_plotted in plotted_data:
         assert avg_grade_plotted == area_grades_avg[area]
 
-    plotted_data = get_plotted_data("area", "Grade: max.")
+    plotted_data = get_plotted_data("Area", "Grade: max.")
     assert len(plotted_data) == len(areas)
     for area, max_grade_plotted in plotted_data:
         assert max_grade_plotted == area_grades_max[area]
@@ -206,7 +206,7 @@ def test_climbs_per_sector(app) -> None:
         sectors = Sector.query.all()
         n_sent_routes = {sector.name: sector.n_sent_routes for sector in sectors}
 
-    plotted_data = get_plotted_data("sector", "Climbs: total")
+    plotted_data = get_plotted_data("Sector", "Climbs: total")
     assert len(plotted_data) == len(sectors)
     for sector, n_sent_routes_plotted in plotted_data:
         assert n_sent_routes_plotted == n_sent_routes[sector]
@@ -251,7 +251,7 @@ def test_climbs_per_grade(app):
 
     for scale in n_sent_routes:
         plotted_data = get_plotted_data(
-            "level", "Climbs: total", toggle_grade_scale=scale == "hueco"
+            "Grade", "Climbs: total", toggle_grade_scale=scale == "hueco"
         )
         assert len(plotted_data) == n_columns[scale]
         for grade, n_sent_routes_plotted in plotted_data:
@@ -291,7 +291,7 @@ def test_climbs_per_route_chars(app):
                 climbs_per_chars[char][char_value] += 1
 
     for char in climbs_per_chars:
-        plotted_data = get_plotted_data(char, "Climbs: total")
+        plotted_data = get_plotted_data(char.capitalize(), "Climbs: total")
         assert len(plotted_data) == len(climbs_per_chars[char])
         for char_value, n_sent_routes_plotted in plotted_data:
             assert n_sent_routes_plotted == climbs_per_chars[char][char_value]
@@ -301,8 +301,7 @@ def test_climbs_per_route_chars(app):
 
 def test_climbs_per_crux(app) -> None:
     """
-    Ensures that the correct data is plotted for the 'Climbs per Crux' graphs. The
-    characteristics are sorted alphabetically by name.
+    Ensures that the correct data is plotted for the 'Climbs per Crux' graph.
     """
     with app.app_context():
         routes = Route.query.all()
@@ -315,9 +314,34 @@ def test_climbs_per_crux(app) -> None:
                     climbs_per_crux[crux.name] = 0
                 climbs_per_crux[crux.name] += 1
 
-    plotted_data = get_plotted_data("cruxes", "Climbs: total")
+    plotted_data = get_plotted_data("Crux", "Climbs: total")
     assert len(plotted_data) == len(climbs_per_crux)
     for crux, n_sent_routes_plotted in plotted_data:
         assert n_sent_routes_plotted == climbs_per_crux[crux]
     cruxes = [crux for crux, _ in plotted_data]
     assert [crux for crux, _ in plotted_data] == sorted(cruxes)
+
+
+def test_climbs_per_month(app) -> None:
+    """
+    Ensures that the correct data is plotted for the 'Climbs per Month' graph.
+    Dates are aggregated by month and year, and sorted chronologically.
+    """
+    with app.app_context():
+        routes = Route.query.all()
+        climbs_per_month = dict()
+        for route in routes:
+            if not route.sent:
+                continue
+            for climb in route.climbs:
+                month = climb.session.date.strftime("%Y-%m")
+                if month not in climbs_per_month:
+                    climbs_per_month[month] = 0
+                climbs_per_month[month] += 1
+
+    plotted_data = get_plotted_data("Date: month", "Climbs: total")
+    assert len(plotted_data) == len(climbs_per_month)
+    for month, n_sent_routes_plotted in plotted_data:
+        assert n_sent_routes_plotted == climbs_per_month[month]
+    months = [month for month, _ in plotted_data]
+    assert [month for month, _ in plotted_data] == sorted(months)
