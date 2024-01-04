@@ -40,7 +40,6 @@ function filter_data_by_range(event) {
     let selected_values = [];
     for (let climb of DATA) {
         let value = new column_cls(climb[column_str]);
-        console.log(column_str, climb[column_str], value);
         if (isNaN(value))
             continue;
         if (! isNaN(start_value) && value < start_value)
