@@ -48,9 +48,9 @@ function start_analysis(data, grades) {
 
     // TODO: define the min. and max. grades for the filter range
 
-    // Parse the dates and format them to YYYY-MM
+    // Parse the dates and format them to YYYY-MM-DD
     let parseTime = d3.timeParse("%a, %d %b %Y %H:%M:%S");
-    let formatDate = d3.timeFormat("%Y-%m");
+    let formatDate = d3.timeFormat("%Y-%m-%d");
     DATA = DATA.map(d => {
         d.dates = d.dates.map(date => formatDate(
             parseTime(date.substring(0, date.length - 4)))
@@ -113,8 +113,27 @@ function plot_data() {
         this_data = DATA.filter(d => d.sent === true);
 
     // Filter the data according to the active filters
-    for (let [key, value] of ACTIVE_FILTERS)
-        this_data = this_data.filter(d => value.includes(d[key]));
+    let filtered_data = [];
+    for (let climb of this_data) {
+        let include = true;
+        for (let [filter_key, filter_value] of ACTIVE_FILTERS) {
+            let climb_values = climb[filter_key];
+            if (!Array.isArray(climb_values))
+                climb_values = [climb_values];
+            for (let climb_value of climb_values) {
+                // console.log(climb_value, filter_value.includes(climb_value));
+                if (!filter_value.includes(climb_value)) {
+                    include = false;
+                    break;
+                }
+            }
+            if (!include)
+                break;
+        }
+        if (include)
+            filtered_data.push(climb);
+    }
+    this_data = filtered_data;
 
     // If the data is empty, return without plotting
     if (this_data.length == 0)
@@ -122,8 +141,14 @@ function plot_data() {
 
     // Group the data by the selected x-axis key.
     // Cruxes, dates and conditions are split into unique keys.
+    // Dates are grouped by month.
     let unsorted_out = null;
     if (x_axis == "cruxes" || x_axis == "dates" || x_axis == "conditions") {
+        if (x_axis == "dates")
+            this_data = this_data.map(d => {
+                d.dates = d.dates.map(date => date.substring(0, 7));
+                return d;
+            });
         groups = d3.group(this_data, d => d[x_axis]);
         unsorted_out = new Map();
         for (let [key, value] of groups.entries()) {

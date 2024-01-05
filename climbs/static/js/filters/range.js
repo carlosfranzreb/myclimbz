@@ -2,17 +2,18 @@
 // It is a wrapper class for the GRADES list
 class Grade {
     constructor(grade) {
+        this.grade_dict = GRADES.find(
+            obj => obj[GRADE_SCALE] === grade
+        );
         this.scale = GRADE_SCALE;
-        this.grade_dict = GRADES.find(obj => obj[this.scale] === grade); 
     }
 }
 
-Grade.prototype.valueOf = function() {
+Grade.prototype.valueOf = function () {
     if (this.grade_dict === undefined)
         return NaN;
     return this.grade_dict.level;
 }
-
 
 // Add a filter with a range
 function add_filter_range(div, column) {
@@ -24,7 +25,6 @@ function add_filter_range(div, column) {
     div.appendChild(range_div);
 }
 
-
 // Add the range filter and plot the data
 // This function is called every time the range is changed
 function filter_data_by_range(event) {
@@ -33,24 +33,46 @@ function filter_data_by_range(event) {
     let range_div = event.target.parentNode;
     let column_str = range_div.dataset.column;
     let column_cls = eval(column_str);
-    let start_value = new column_cls(range_div.getElementsByClassName("start-range")[0].value);
-    let end_value = new column_cls(range_div.getElementsByClassName("end-range")[0].value);
+    let column_attr = FILTER_ATTRS[column_str];
+
+    let start_value = new column_cls(
+        range_div.getElementsByClassName("start-range")[0].value
+    );
+    let end_value = new column_cls(
+        range_div.getElementsByClassName("end-range")[0].value
+    );
 
     // Find the column values that are within the selected range
     let selected_values = [];
     for (let climb of DATA) {
-        let value = new column_cls(climb[column_str]);
-        if (isNaN(value))
-            continue;
-        if (! isNaN(start_value) && value < start_value)
-            continue;
-        if (! isNaN(end_value) && value > end_value)
-            continue;
-        selected_values.push(climb[column_str]);
+        // if climb[column_attr] is not a list (e.g. dates), convert it to a list
+        values = climb[column_attr];
+        if (!Array.isArray(values))
+            values = [values];
+
+        for (value_str of values) {
+            let value = null;
+            if (column_attr == "level") {
+                grade = GRADES.find(obj => obj["level"] === value_str);
+                value = new column_cls(grade[GRADE_SCALE]);
+            }
+            else
+                value = new column_cls(value_str);
+            console.log(value_str, value);
+
+            if (isNaN(value))
+                continue;
+            if (!isNaN(start_value) && value < start_value)
+                continue;
+            if (!isNaN(end_value) && value > end_value)
+                continue;
+            if (!selected_values.includes(value_str))
+                selected_values.push(value_str);
+        }
     }
 
     // Add the filter
-    ACTIVE_FILTERS.set(column_str, selected_values);
+    ACTIVE_FILTERS.set(column_attr, selected_values);
     plot_data();
 }
 

@@ -3,7 +3,7 @@
 
 // Add an event listener to the checkbox "Include unsent climbs"
 let unsent_climbs_btn = document.getElementById("include-unsent-climbs");
-unsent_climbs_btn.addEventListener("change", function() {
+unsent_climbs_btn.addEventListener("change", function () {
     INCLUDE_UNSENT_CLIMBS = unsent_climbs_btn.checked;
     plot_data();
 });
@@ -11,7 +11,7 @@ unsent_climbs_btn.addEventListener("change", function() {
 
 // Add an event listener to the checkbox "Grade scale"
 let grade_scale_toggle = document.getElementById("grade-scale-toggle");
-grade_scale_toggle.addEventListener("change", function() {
+grade_scale_toggle.addEventListener("change", function () {
     GRADE_SCALE = grade_scale_toggle.checked ? "hueco" : "font";
     plot_data();
 });
@@ -28,6 +28,13 @@ FILTERS = {
     "Sit start": add_filter_checkboxes,
     "Height": add_filter_checkboxes,
     "Style": add_filter_checkboxes,
+}
+
+// Map filter names, which are the same as the classes used to parse the data,
+// and the data attributes used to filter the data
+const FILTER_ATTRS = {
+    "Grade": "level",
+    "Date": "dates",
 }
 
 
@@ -76,7 +83,7 @@ function change_filter(event) {
     let selected_option = event.target.options[event.target.selectedIndex].value;
 
     // remove the filter from the list of active filters
-    ACTIVE_FILTERS.delete(old_selected_option);
+    ACTIVE_FILTERS.delete(FILTER_ATTRS[old_selected_option]);
 
     // add new filter and remove the old one
     let new_filter_div = document.createElement("div");
@@ -96,7 +103,7 @@ function remove_filter(event) {
     let filter_container = event.target.parentNode;
     let select_menu = filter_container.querySelector("select")
     let selected_option = select_menu.options[select_menu.selectedIndex].value;
-    ACTIVE_FILTERS.delete(selected_option);
+    ACTIVE_FILTERS.delete(FILTER_ATTRS[selected_option]);
     plot_data();
 
     // remove the filter from the list of filters
