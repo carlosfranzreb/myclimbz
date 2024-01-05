@@ -3,17 +3,15 @@
 class Grade {
     constructor(grade) {
         this.scale = GRADE_SCALE;
-        this.grade_dict = GRADES.find(obj => obj[this.scale] === grade);
+        this.grade_dict = GRADES.find(obj => obj[this.scale] === grade); 
     }
 }
 
 Grade.prototype.valueOf = function() {
+    if (this.grade_dict === undefined)
+        return NaN;
     return this.grade_dict.level;
 }
-
-// The Tries class is used to compare numbers of tries in filter_data_by_range()#
-// It is a wrapper around the Number datatype
-class Tries extends Number {}
 
 
 // Add a filter with a range
@@ -49,7 +47,6 @@ function filter_data_by_range(event) {
         if (! isNaN(end_value) && value > end_value)
             continue;
         selected_values.push(climb[column_str]);
-        // console.log(value);
     }
 
     // Add the filter

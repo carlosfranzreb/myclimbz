@@ -1,19 +1,17 @@
-import pytest
-from climbs import create_app
-from flask.testing import FlaskClient
-from timeit import default_timer as timer
 import json
+from multiprocessing import Process
+from timeit import default_timer as timer
+import time
 
+from bs4 import BeautifulSoup
+from flask.testing import FlaskClient
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import pytest
 
-from bs4 import BeautifulSoup
-
-from multiprocessing import Process
-
-import time
+from climbs import create_app
 
 
 @pytest.fixture()

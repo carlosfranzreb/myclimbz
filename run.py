@@ -2,8 +2,7 @@ from climbs import create_app
 import argparse
 
 
-TEST = False
-SHORT = False
+app = create_app("test_100")
 
 
 if __name__ == "__main__":

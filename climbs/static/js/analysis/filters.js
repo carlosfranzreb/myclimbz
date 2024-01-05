@@ -1,6 +1,23 @@
-// Functions related to filtering the data
+// --- Buttons at the top of the page
 
-// List of available filters
+
+// Add an event listener to the checkbox "Include unsent climbs"
+let unsent_climbs_btn = document.getElementById("include-unsent-climbs");
+unsent_climbs_btn.addEventListener("change", function() {
+    INCLUDE_UNSENT_CLIMBS = unsent_climbs_btn.checked;
+    plot_data();
+});
+
+
+// Add an event listener to the checkbox "Grade scale"
+let grade_scale_toggle = document.getElementById("grade-scale-toggle");
+grade_scale_toggle.addEventListener("change", function() {
+    GRADE_SCALE = grade_scale_toggle.checked ? "hueco" : "font";
+    plot_data();
+});
+
+
+// --- List of available filters and their corresponding functions
 FILTERS = {
     "Grade": add_filter_range,
     "Area": add_filter_checkboxes,
