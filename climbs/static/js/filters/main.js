@@ -110,3 +110,38 @@ function remove_filter(event) {
     let filter_list = filter_container.parentNode;
     filter_list.removeChild(filter_container);
 }
+
+
+// Filter the global data according to the active filters
+function filter_data() {
+
+    // Remove unsent climbs if the corresponding button is unchecked
+    let this_data = null;
+    if (INCLUDE_UNSENT_CLIMBS)
+        this_data = DATA;
+    else
+        this_data = DATA.filter(d => d.sent === true);
+
+    // Apply the active filters
+    let filtered_data = [];
+    for (let climb of this_data) {
+        let include = true;
+        for (let [filter_key, filter_value] of ACTIVE_FILTERS) {
+            let climb_values = climb[filter_key];
+            if (!Array.isArray(climb_values))
+                climb_values = [climb_values];
+            for (let climb_value of climb_values) {
+                // console.log(climb_value, filter_value.includes(climb_value));
+                if (!filter_value.includes(climb_value)) {
+                    include = false;
+                    break;
+                }
+            }
+            if (!include)
+                break;
+        }
+        if (include)
+            filtered_data.push(climb);
+    }
+    return filtered_data;
+}

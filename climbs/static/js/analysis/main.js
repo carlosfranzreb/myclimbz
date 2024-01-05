@@ -58,7 +58,7 @@ function start_analysis(data, grades) {
         return d;
     });
 
-    // Add the x-axis options to the menu, as defined in y_axis.js
+    // Add the y-axis options to the menu, as defined in y_axis.js
     for (let key of Object.keys(y_axis_options))
         document.getElementById("y-axis-select").options.add(
             new Option(key, key)
@@ -105,35 +105,8 @@ function plot_data() {
         INCLUDE_UNSENT_CLIMBS = true;
     }
 
-    // Remove unsent climbs if the corresponding button is unchecked
-    let this_data = null;
-    if (INCLUDE_UNSENT_CLIMBS)
-        this_data = DATA;
-    else
-        this_data = DATA.filter(d => d.sent === true);
-
     // Filter the data according to the active filters
-    let filtered_data = [];
-    for (let climb of this_data) {
-        let include = true;
-        for (let [filter_key, filter_value] of ACTIVE_FILTERS) {
-            let climb_values = climb[filter_key];
-            if (!Array.isArray(climb_values))
-                climb_values = [climb_values];
-            for (let climb_value of climb_values) {
-                // console.log(climb_value, filter_value.includes(climb_value));
-                if (!filter_value.includes(climb_value)) {
-                    include = false;
-                    break;
-                }
-            }
-            if (!include)
-                break;
-        }
-        if (include)
-            filtered_data.push(climb);
-    }
-    this_data = filtered_data;
+    this_data = filter_data();
 
     // If the data is empty, return without plotting
     if (this_data.length == 0)
