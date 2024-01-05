@@ -12,14 +12,10 @@ function fill_grades(sorted_map) {
 
     for (let level = first_idx; level < last_idx + 1; level++) {
         let grade = GRADES[level][GRADE_SCALE];
-        if (filled_map.has(grade))
-            continue;
-        if (!sorted_map.has(level))
-            filled_map.set(grade, 0);
-        else
-            filled_map.set(grade, sorted_map.get(level));
+        let old_value = sorted_map.has(level) ? sorted_map.get(level) : 0;
+        let new_value = filled_map.has(grade) ? filled_map.get(grade) : 0;
+        filled_map.set(grade, old_value + new_value);
     }
-
     return filled_map;
 }
 
@@ -29,6 +25,13 @@ function get_avg_level(climbs) {
     let levels = climbs.map(d => d.level);
     let avg_level = levels.reduce((a, b) => a + b) / levels.length;
     return avg_level;
+}
+
+// Return the max. level of a list of climbs
+function get_max_level(climbs) {
+    let levels = climbs.map(d => d.level);
+    let max_level = Math.max(...levels);
+    return max_level;
 }
 
 

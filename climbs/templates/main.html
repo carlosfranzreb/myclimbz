@@ -39,14 +39,12 @@
 
         {% if title == "Analysis" %}
             <script src="https://d3js.org/d3.v7.min.js"></script>
-            <script src="{{url_for('static', filename='js/analysis/analysis.js')}}"></script> 
+            <script src="{{url_for('static', filename='js/analysis/main.js')}}"></script> 
             <script src="{{url_for('static', filename='js/analysis/grades.js')}}"></script>
             <script src="{{url_for('static', filename='js/analysis/y_axis.js')}}"></script>
             <script src="{{url_for('static', filename='js/analysis/filter_checkboxes.js')}}"></script>
             <script src="{{url_for('static', filename='js/analysis/filter_range.js')}}"></script>
             <script src="{{url_for('static', filename='js/analysis/filters.js')}}"></script>
-            <script src="{{url_for('static', filename='js/analysis/grade_scale_switch.js')}}"></script>
-            <script src="{{url_for('static', filename='js/analysis/include_unsent_climbs.js')}}"></script>
         {% endif %}
 
         {% if title == "Home" %}

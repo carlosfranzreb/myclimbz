@@ -2,7 +2,6 @@
   "python.testing.cwd": "${workspaceFolder}",
   "python.testing.pytestEnabled": true,
   "python.testing.unittestEnabled": false,
-  "python.linting.enabled": true,
   "flake8.args": ["--max-line-length=120", "--ignore=E203"],
   "python.analysis.diagnosticSeverityOverrides": {
     "reportShadowedImports": "none"

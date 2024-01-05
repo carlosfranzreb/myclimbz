@@ -11,3 +11,8 @@ class Area(db.Model):
     def n_routes(self) -> int:
         """Return the number of routes in all sectors of this area."""
         return sum(len(sector.routes) for sector in self.sectors)
+
+    @property
+    def n_sent_routes(self) -> int:
+        """Return the number of sent routes in all sectors of this area."""
+        return sum(sector.n_sent_routes for sector in self.sectors)

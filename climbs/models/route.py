@@ -13,9 +13,11 @@ class Route(db.Model):
     name = db.Column(db.String(200))
     sit_start = db.Column(db.Boolean)
     grade_id = db.Column(db.Integer, db.ForeignKey("grade.id"))
-    grade = db.relationship("Grade", foreign_keys=[grade_id])
+    grade = db.relationship("Grade", foreign_keys=[grade_id], backref="routes")
     grade_felt_id = db.Column(db.Integer, db.ForeignKey("grade.id"), nullable=True)
-    grade_felt = db.relationship("Grade", foreign_keys=[grade_felt_id])
+    grade_felt = db.relationship(
+        "Grade", foreign_keys=[grade_felt_id], backref="routes_felt"
+    )
     height = db.Column(db.Integer)
     landing = db.Column(db.Integer)
     inclination = db.Column(db.Integer)
@@ -37,9 +39,13 @@ class Route(db.Model):
         Return the relevant attributes of this route as a dictionary, focusing on
         those that are relevant for analysis.
         """
-        n_attempts, conditions, dates = 0, list(), list()
+        n_attempts_all, n_attempts_send, conditions, dates = 0, 0, list(), list()
+        first_send = False
         for climb in self.climbs:
-            n_attempts += climb.n_attempts
+            n_attempts_all += climb.n_attempts
+            if not first_send:
+                n_attempts_send += climb.n_attempts
+            first_send = first_send or climb.sent
             conditions.append(climb.session.conditions)
             dates.append(climb.session.date)
 
@@ -55,7 +61,8 @@ class Route(db.Model):
             "cruxes": [crux.name for crux in self.cruxes],
             "sent": self.sent,
             "n_sessions": len(self.climbs),
-            "n_attempts": n_attempts,
+            "n_attempts_all": n_attempts_all,
+            "n_attempts_send": n_attempts_send,
             "conditions": conditions,
             "dates": dates,
         }

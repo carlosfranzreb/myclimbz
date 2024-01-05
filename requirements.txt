@@ -4,6 +4,11 @@ Flask-WTF==1.2.1
 python-dateutil==1.16.0
 text2num==2.5.0
 
+# for testing
+pytest==7.4.3
+selenium==4.16.0
+beautifulsoup4==4.12.2
+
 # for the NER model
 torch==2.0.1
 pytorch_lightning==2.0.6
