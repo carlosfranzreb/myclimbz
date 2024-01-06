@@ -21,12 +21,12 @@ grade_scale_toggle.addEventListener("change", function () {
 FILTERS = {
     "Grade": add_filter_range,
     "Area": add_filter_checkboxes,
-    "Inclination": add_filter_checkboxes,
-    "Landing": add_filter_checkboxes,
+    "Inclination": add_filter_range,
+    "Landing": add_filter_range,
     "Date": add_filter_range,
-    "Tries": add_filter_range,
+    "Attempts": add_filter_range,
     "Sit start": add_filter_checkboxes,
-    "Height": add_filter_checkboxes,
+    "Height": add_filter_range,
     "Style": add_filter_checkboxes,
 }
 
@@ -35,6 +35,10 @@ FILTERS = {
 const FILTER_ATTRS = {
     "Grade": "level",
     "Date": "dates",
+    "Attempts": "n_attempts_send",
+    "Landing": "landing",
+    "Inclination": "inclination",
+    "Height": "height",
 }
 
 

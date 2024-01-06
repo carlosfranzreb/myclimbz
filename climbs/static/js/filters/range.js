@@ -7,13 +7,33 @@ class Grade {
         );
         this.scale = GRADE_SCALE;
     }
+
+    valueOf() {
+        if (this.grade_dict === undefined)
+            return NaN;
+        return this.grade_dict.level;
+    }
 }
 
-Grade.prototype.valueOf = function () {
-    if (this.grade_dict === undefined)
-        return NaN;
-    return this.grade_dict.level;
+function createNumericClass(parseFunction) {
+    return class {
+        constructor(value) {
+            this.value = parseFunction(value);
+            this.function_str = parseFunction.name;
+        }
+
+        valueOf() {
+            return this.value;
+        }
+    };
 }
+
+const Attempts = createNumericClass(parseInt);
+const Landing = createNumericClass(parseInt);
+const Inclination = createNumericClass(parseInt);
+const Height = createNumericClass(parseFloat);
+
+
 
 // Add a filter with a range
 function add_filter_range(div, column) {
@@ -134,29 +154,51 @@ function get_filter_range_date() {
 // It returns a div with two number inputs, one for the start and one for the end.
 // The start input must have the class "start-range" and the end input must have
 // the class "end-range".
-function get_filter_range_tries() {
+function get_filter_range_numeric(class_const) {
 
     let div = document.createElement("div");
+    let parse_function = new class_const(0).function_str;
 
     // Add the start- and end-range inputs
     for (let menu of ["start", "end"]) {
-        let tries_input = document.createElement("input");
-        tries_input.setAttribute("type", "number");
-        tries_input.setAttribute("class", menu + "-range");
+        let attempts_input = document.createElement("input");
+        attempts_input.setAttribute("type", "number");
+        attempts_input.setAttribute("class", menu + "-range");
+        if (parse_function == "parseFloat")
+            attempts_input.setAttribute("step", "0.5");
 
-        // If this is the end-range input, set it to the the max. number of tries
+
+        // If this is the end-range input, set it to the the max. number of attempts
         if (menu == "end") {
-            let max_tries = 0;
+            let max_attempts = 0;
             for (let climb of DATA) {
-                let tries = new Tries(climb["Tries"]);
-                if (tries > max_tries)
-                    max_tries = tries;
+                let attempts = new class_const(climb["n_attempts_send"]);
+                if (attempts > max_attempts)
+                    max_attempts = attempts;
             }
-            tries_input.value = max_tries;
+            attempts_input.value = max_attempts;
         }
 
-        div.appendChild(tries_input);
+        div.appendChild(attempts_input);
     }
 
     return div;
+}
+
+
+// Call the numeric range filter function with the correct class
+function get_filter_range_attempts() {
+    return get_filter_range_numeric(Attempts);
+}
+
+function get_filter_range_landing() {
+    return get_filter_range_numeric(Landing);
+}
+
+function get_filter_range_inclination() {
+    return get_filter_range_numeric(Inclination);
+}
+
+function get_filter_range_height() {
+    return get_filter_range_numeric(Height);
 }
