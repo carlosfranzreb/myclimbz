@@ -1,38 +1,38 @@
 <div class="container-fluid">
-	<div class="row">
-			<table class="table table-striped" id="routes_table">
-    <thead>
-        <tr>
-            <th class="col-md-3">Name</th>
-            <th class="col-md-1">Grade</th>
-            <th>Sector</th>
-            <th>Area</th>
-            <th class="col-md-1">Sessions</th>
-            <th class="col-md-1">Sent</th>
-            <th class="col-md-1">Height</th>
-            <th class="col-md-1">Landing</th>
-            <th class="col-md-1">Inclination</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for route in routes %}
-        <tr onclick="window.location=&quot;{{ url_for('routes.page_route', route_id=route.id) }}&quot;">
-            <td>{{ route.name }}</td>
-            <td>{{ route.grade.font }} / {{ route.grade.hueco }}</td>
-            <td>{{ route.sector.name }}</td>
-            <td>{{ route.sector.area.name }}</td>
-            <td>{{ route.climbs|length }}</td>
-            <td>{{ route.sent }}</td>
-            <td>{{ route.height }}</td>
-            <td>{{ route.landing }}</td>
-            <td>{{ route.inclination }}</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+    <div class="row">
+        <table class="table table-striped" id="routes_table">
+            <thead>
+                <tr>
+                    <th class="col-md-3">Name</th>
+                    <th class="col-md-1">Grade</th>
+                    <th>Sector</th>
+                    <th>Area</th>
+                    <th class="col-md-1">Sessions</th>
+                    <th class="col-md-1">Sent</th>
+                    <th class="col-md-1">Height</th>
+                    <th class="col-md-1">Landing</th>
+                    <th class="col-md-1">Inclination</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for route in routes %}
+                <tr onclick="window.location=&quot;{{ url_for('routes.page_route', route_id=route.id) }}&quot;">
+                    <td>{{ route.name }}</td>
+                    <td>{{ route.grade.font }} / {{ route.grade.hueco }}</td>
+                    <td>{{ route.sector.name }}</td>
+                    <td>{{ route.sector.area.name }}</td>
+                    <td>{{ route.climbs|length }}</td>
+                    <td>{{ route.sent }}</td>
+                    <td>{{ route.height }}</td>
+                    <td>{{ route.landing }}</td>
+                    <td>{{ route.inclination }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
 <script>
-    window.onload = () => {window.data_table = new DataTable("#routes_table", {perPage: 100, perPageSelect: false, searchable:true, nextPrev:false})};
+    window.onload = () => { window.data_table = new DataTable("#routes_table", { perPage: 100, perPageSelect: false, searchable: true, nextPrev: false }) };
 </script>
