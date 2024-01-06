@@ -46,8 +46,8 @@ function add_filter() {
 
     // add dropdown menu to select filter
     let filter_selection = document.createElement("select");
-    for (let option of Object.keys(FILTERS)) {
-        if (ACTIVE_FILTERS.has(option))
+    for (let [option, value] of Object.entries(FILTER_ATTRS)) {
+        if (ACTIVE_FILTERS.has(value))
             continue;
         else
             filter_selection.options.add(new Option(option, option));
@@ -104,11 +104,12 @@ function remove_filter(event) {
     let select_menu = filter_container.querySelector("select")
     let selected_option = select_menu.options[select_menu.selectedIndex].value;
     ACTIVE_FILTERS.delete(FILTER_ATTRS[selected_option]);
-    plot_data();
 
     // remove the filter from the list of filters
     let filter_list = filter_container.parentNode;
     filter_list.removeChild(filter_container);
+
+    plot_data();
 }
 
 

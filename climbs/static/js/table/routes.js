@@ -29,12 +29,16 @@ function show_routes(data, grades) {
 // Create the table with the routes
 function plot_data() {
 
+    // Remove the previous table
+    d3.select("#content_div").selectAll("*").remove();
+
     // Filter the data according to the active filters
     let this_data = filter_data();
 
     // Create the table
-    let table = d3.select("#content_table").append("table")
-        .attr("class", "table table-striped table-hover table-sm table-responsive");
+    let table = d3.select("#content_div").append("table")
+        .attr("id", "content_table")
+        .attr("class", "table table-striped");
 
     // Create the table head
     let thead = table.append("thead");
@@ -55,13 +59,7 @@ function plot_data() {
     let rows = tbody.selectAll("tr")
         .data(this_data)
         .enter()
-        .append("tr")
-        .attr("class", "route-row")
-        .on("click", function (d) {
-            // When a row is clicked, display the route information
-            // in the modal
-            display_route(d);
-        });
+        .append("tr");
 
     // Add the cells to the rows
     rows.append("td").text(d => d.name);

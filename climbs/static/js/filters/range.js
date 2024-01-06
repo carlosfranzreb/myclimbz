@@ -58,7 +58,6 @@ function filter_data_by_range(event) {
             }
             else
                 value = new column_cls(value_str);
-            console.log(value_str, value);
 
             if (isNaN(value))
                 continue;
