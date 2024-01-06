@@ -27,7 +27,7 @@ FILTERS = {
     "Attempts": add_filter_range,
     "Sit start": add_filter_checkboxes,
     "Height": add_filter_range,
-    "Style": add_filter_checkboxes,
+    "Crux": add_filter_checkboxes,
 }
 
 // Map filter names, which are the same as the classes used to parse the data,
@@ -39,8 +39,9 @@ const FILTER_ATTRS = {
     "Landing": "landing",
     "Inclination": "inclination",
     "Height": "height",
+    "Crux": "cruxes",
+    "Area": "area",
 }
-
 
 // Add a filter to the list of filters
 function add_filter() {
