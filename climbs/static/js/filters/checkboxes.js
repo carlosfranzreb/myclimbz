@@ -9,7 +9,7 @@ function add_filter_checkboxes(div, column) {
     div.appendChild(menu_div);
 
     // Get the values from DATA, and add "All" as an option
-    let data_column = FILTER_ATTRS[column];
+    let data_column = FILTERS[column].data_column;
     let values = new Set();
     for (let climb of DATA) {
         // if climb[data_column] is not a list (e.g. dates), convert it to a list
@@ -46,7 +46,7 @@ function filter_data_by_checkboxes(event) {
 
     // Get the column and selected options
     let filter_div = event.target.parentNode.parentNode;
-    let column = FILTER_ATTRS[filter_div.dataset.column];
+    let column = FILTERS[filter_div.dataset.column].data_column;
     let selected_options = Array.from(filter_div.querySelectorAll("input:checked"))
         .map(function (checkbox) {
             return checkbox.value;

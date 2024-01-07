@@ -19,28 +19,44 @@ grade_scale_toggle.addEventListener("change", function () {
 
 // --- List of available filters and their corresponding functions
 FILTERS = {
-    "Grade": add_filter_range,
-    "Area": add_filter_checkboxes,
-    "Inclination": add_filter_range,
-    "Landing": add_filter_range,
-    "Date": add_filter_range,
-    "Attempts": add_filter_range,
-    "Sit start": add_filter_checkboxes,
-    "Height": add_filter_range,
-    "Crux": add_filter_checkboxes,
-}
-
-// Map filter names, which are the same as the classes used to parse the data,
-// and the data attributes used to filter the data
-const FILTER_ATTRS = {
-    "Grade": "level",
-    "Date": "dates",
-    "Attempts": "n_attempts_send",
-    "Landing": "landing",
-    "Inclination": "inclination",
-    "Height": "height",
-    "Crux": "cruxes",
-    "Area": "area",
+    "Grade": {
+        "filter_type": "range",
+        "data_class": Grade,
+        "data_column": "level",
+    },
+    "Date": {
+        "filter_type": "range",
+        "data_class": Date,
+        "data_column": "dates",
+    },
+    "Inclination": {
+        "filter_type": "range",
+        "data_class": Number,
+        "data_column": "inclination",
+    },
+    "Landing": {
+        "filter_type": "range",
+        "data_class": Number,
+        "data_column": "landing",
+    },
+    "Attempts": {
+        "filter_type": "range",
+        "data_class": Number,
+        "data_column": "n_attempts_send",
+    },
+    "Height": {
+        "filter_type": "range",
+        "data_class": Number,
+        "data_column": "height",
+    },
+    "Area": {
+        "filter_type": "checkboxes",
+        "data_column": "area",
+    },
+    "Crux": {
+        "filter_type": "checkboxes",
+        "data_column": "cruxes",
+    },
 }
 
 // Add a filter to the list of filters
@@ -51,8 +67,8 @@ function add_filter() {
 
     // add dropdown menu to select filter
     let filter_selection = document.createElement("select");
-    for (let [option, value] of Object.entries(FILTER_ATTRS)) {
-        if (ACTIVE_FILTERS.has(value))
+    for (let option of Object.keys(FILTERS)) {
+        if (ACTIVE_FILTERS.has(FILTERS[option].data_column))
             continue;
         else
             filter_selection.options.add(new Option(option, option));
@@ -63,8 +79,7 @@ function add_filter() {
     // add dropdown menu to select filter value
     let selected = filter_selection.options[filter_selection.selectedIndex].value;
     let filter_div = document.createElement("div");
-    filter_div.classList.add("filter_div");
-    FILTERS[selected](filter_div, selected);
+    create_filter(filter_div, selected);
     filter_container.appendChild(filter_div);
 
     // add remove button to container
@@ -77,6 +92,16 @@ function add_filter() {
     filter_list.appendChild(filter_container);
 }
 
+function create_filter(div, filter_key) {
+    div.classList.add("filter_div");
+    div.dataset.column = filter_key;
+    let filter_type = FILTERS[filter_key]["filter_type"];
+    if (filter_type == "range")
+        add_filter_range(div, filter_key);
+    else if (filter_type == "checkboxes")
+        add_filter_checkboxes(div, filter_key);
+}
+
 
 // Change the filter options when a new filter is selected
 function change_filter(event) {
@@ -84,19 +109,18 @@ function change_filter(event) {
     // get the filter container and the old and new selected filters
     let filter_container = event.target.parentNode;
     let filter_div = filter_container.querySelector(".filter_div");
-    let old_selected_option = filter_div.querySelector("div").dataset.column;
+    let old_selected_option = filter_div.dataset.column;
     let selected_option = event.target.options[event.target.selectedIndex].value;
 
     // remove the filter from the list of active filters
-    ACTIVE_FILTERS.delete(FILTER_ATTRS[old_selected_option]);
+    ACTIVE_FILTERS.delete(FILTERS[old_selected_option].data_column);
 
     // add new filter and remove the old one
     let new_filter_div = document.createElement("div");
-    new_filter_div.classList.add("filter_div");
-    FILTERS[selected_option](new_filter_div, selected_option);
+    create_filter(new_filter_div, selected_option);
+
     filter_container.insertBefore(new_filter_div, filter_div);
     filter_container.removeChild(filter_div);
-
     plot_data();
 }
 
@@ -108,7 +132,7 @@ function remove_filter(event) {
     let filter_container = event.target.parentNode;
     let select_menu = filter_container.querySelector("select")
     let selected_option = select_menu.options[select_menu.selectedIndex].value;
-    ACTIVE_FILTERS.delete(FILTER_ATTRS[selected_option]);
+    ACTIVE_FILTERS.delete(FILTERS[selected_option].data_column);
 
     // remove the filter from the list of filters
     let filter_list = filter_container.parentNode;
@@ -137,7 +161,6 @@ function filter_data() {
             if (!Array.isArray(climb_values))
                 climb_values = [climb_values];
             for (let climb_value of climb_values) {
-                // console.log(climb_value, filter_value.includes(climb_value));
                 if (!filter_value.includes(climb_value)) {
                     include = false;
                     break;
