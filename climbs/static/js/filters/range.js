@@ -49,32 +49,45 @@ function add_filter_range(div, filter_key) {
         if ("is_float" in filter && filter.is_float)
             input.setAttribute("step", "0.5");
 
-        // Select the min. and max. values for the inputs
-        if (menu == "end") {
-            // For grades, select the last grade
-            if (filter.data_class == Grade)
-                input.selectedIndex = input.options.length - 1;
+        // Define a comparison function based on the menu
+        function get_comparison_function(menu) {
+            if (menu === "start")
+                return (value, minValue) => value < minValue;
+            else if (menu === "end")
+                return (value, maxValue) => value > maxValue;
+        }
 
-            // For numbers, select the max. number
-            if (filter.data_class == Number || filter.data_class == Date) {
-                let max_value = new filter.data_class(0);
-                let is_float = false;
-                for (let climb of DATA) {
-                    let values = climb[filter.data_column];
-                    if (!Array.isArray(values))
-                        values = [values];
-                    for (let value_str of values) {
-                        let value = new filter.data_class(value_str);
-                        if (value > max_value)
-                            max_value = value;
-                        if (value % 1 != 0)
-                            is_float = true;
-                    }
+        // Select the min. and max. values for the inputs
+
+        // For grades, select the last grade
+        if (filter.data_class === Grade) {
+            let option = menu === "start" ? 0 : input.options.length - 1;
+            input.selectedIndex = option;
+        }
+
+        // For numbers and dates, select the min. or max. value
+        if (filter.data_class === Number || filter.data_class === Date) {
+            let compare_func = get_comparison_function(menu);
+            let extreme;
+            if (filter.data_class === Number)
+                extreme = menu === "start" ? Number.MAX_SAFE_INTEGER : 0;
+            else if (filter.data_class === Date)
+                extreme = menu === "start" ? new Date(8640000000000000) : new Date(0);
+
+            for (let climb of DATA) {
+                let values = climb[filter.data_column];
+                if (!Array.isArray(values))
+                    values = [values];
+
+                for (let valueStr of values) {
+                    let value = new filter.data_class(valueStr);
+                    if (compare_func(value, extreme))
+                        extreme = value;
                 }
-                input.value = max_value;
-                if (filter.data_class == Date)
-                    input.value = max_value.toISOString().substring(0, 10);
             }
+            input.value = extreme;
+            if (filter.data_class === Date)
+                input.value = extreme.toISOString().substring(0, 10);
         }
         div.appendChild(input);
     }
