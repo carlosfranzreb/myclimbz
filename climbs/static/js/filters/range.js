@@ -42,51 +42,38 @@ function add_filter_range(div, filter_key) {
                 input.setAttribute("type", "number");
             else if ("data_class" in filter && filter.data_class == Date)
                 input.setAttribute("type", "date");
-            else
-                input.setAttribute("type", "text");
         }
         input.setAttribute("class", menu + "-range");
 
-        // If this is the end input, select the last option
+        // If the filter is about floats, add the step attribute
+        if ("is_float" in filter && filter.is_float)
+            input.setAttribute("step", "0.5");
+
+        // Select the min. and max. values for the inputs
         if (menu == "end") {
             // For grades, select the last grade
             if (filter.data_class == Grade)
                 input.selectedIndex = input.options.length - 1;
 
             // For numbers, select the max. number
-            if (filter.data_class == Number) {
-                let max_value = 0;
+            if (filter.data_class == Number || filter.data_class == Date) {
+                let max_value = new filter.data_class(0);
                 let is_float = false;
                 for (let climb of DATA) {
-                    let value = climb[filter.data_column];
-                    if (value > max_value)
-                        max_value = value;
-                    if (value % 1 != 0)
-                        is_float = true;
-                }
-                input.value = max_value;
-
-                // If a float is found, set the step to 0.5
-                if (is_float) {
-                    input.setAttribute("step", "0.5");
-                    range_div.getElementsByClassName(
-                        "start-range"
-                    )[0].setAttribute("step", "0.5");
-                }
-            }
-
-            // For dates, select the last date
-            if (filter.data_class == Date) {
-                let max_date = new Date(0);
-                for (let climb of DATA) {
-                    let dates = climb[filter.data_column];
-                    for (let date_str of dates) {
-                        let date = new Date(date_str);
-                        if (date > max_date)
-                            max_date = date;
+                    let values = climb[filter.data_column];
+                    if (!Array.isArray(values))
+                        values = [values];
+                    for (let value_str of values) {
+                        let value = new filter.data_class(value_str);
+                        if (value > max_value)
+                            max_value = value;
+                        if (value % 1 != 0)
+                            is_float = true;
                     }
                 }
-                input.value = max_date.toISOString().substring(0, 10);
+                input.value = max_value;
+                if (filter.data_class == Date)
+                    input.value = max_value.toISOString().substring(0, 10);
             }
         }
         div.appendChild(input);

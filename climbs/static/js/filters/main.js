@@ -48,6 +48,7 @@ FILTERS = {
         "filter_type": "range",
         "data_class": Number,
         "data_column": "height",
+        "is_float": true,
     },
     "Area": {
         "filter_type": "checkboxes",
