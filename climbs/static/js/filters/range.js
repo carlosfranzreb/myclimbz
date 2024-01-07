@@ -140,5 +140,5 @@ function filter_data_by_range(event) {
 
     // Add the filter
     ACTIVE_FILTERS.set(attr, selected_values);
-    plot_data();
+    display_data();
 }

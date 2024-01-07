@@ -5,7 +5,7 @@
 let unsent_climbs_btn = document.getElementById("include-unsent-climbs");
 unsent_climbs_btn.addEventListener("change", function () {
     INCLUDE_UNSENT_CLIMBS = unsent_climbs_btn.checked;
-    plot_data();
+    display_data();
 });
 
 
@@ -13,7 +13,7 @@ unsent_climbs_btn.addEventListener("change", function () {
 let grade_scale_toggle = document.getElementById("grade-scale-toggle");
 grade_scale_toggle.addEventListener("change", function () {
     GRADE_SCALE = grade_scale_toggle.checked ? "hueco" : "font";
-    plot_data();
+    display_data();
 });
 
 
@@ -122,7 +122,7 @@ function change_filter(event) {
 
     filter_container.insertBefore(new_filter_div, filter_div);
     filter_container.removeChild(filter_div);
-    plot_data();
+    display_data();
 }
 
 
@@ -139,7 +139,7 @@ function remove_filter(event) {
     let filter_list = filter_container.parentNode;
     filter_list.removeChild(filter_container);
 
-    plot_data();
+    display_data();
 }
 
 

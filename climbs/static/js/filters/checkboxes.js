@@ -79,5 +79,5 @@ function filter_data_by_checkboxes(event) {
             ACTIVE_FILTERS.set(column, selected_options);
     }
 
-    plot_data();
+    display_data();
 }

@@ -71,7 +71,7 @@ function start_analysis(data, grades) {
         );
     }
     document.getElementById("x-axis-select").value = "level";
-    plot_data();
+    display_data();
 }
 
 
@@ -92,7 +92,7 @@ function start_analysis(data, grades) {
  * 11. Plot the data with D3.js.
  * 12. Store the plotted data in the PLOTTED_DATA global variable.
  */
-function plot_data() {
+function display_data() {
 
     // Clear the previous plot
     SVG.selectAll("*").remove();

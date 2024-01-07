@@ -22,12 +22,12 @@ function show_routes(data, grades) {
         return d;
     });
 
-    plot_data();
+    display_data();
 }
 
 
 // Create the table with the routes
-function plot_data() {
+function display_data() {
 
     // Remove the previous table
     d3.select("#content_div").selectAll("*").remove();
