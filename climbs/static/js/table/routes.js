@@ -2,6 +2,7 @@
 
 let DATA = null;
 let GRADES = null;
+let DISPLAYED_DATA = null;
 
 let GRADE_SCALE = "font";  // Scale chosen with the toggle button
 let ACTIVE_FILTERS = new Map();
@@ -80,4 +81,7 @@ function display_data() {
         searchable: true,
         nextPrev: false,
     });
+
+    // Store the displayed data
+    DISPLAYED_DATA = this_data;
 }
