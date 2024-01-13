@@ -6,6 +6,7 @@ global variable ACTIVE_FILTERS.
 
 from multiprocessing import Process
 from time import sleep
+from datetime import datetime
 
 from flask.testing import FlaskClient
 from selenium import webdriver
@@ -45,10 +46,9 @@ def get_filtered_data(
     sleep(10)
 
     # start a headless Chrome browser
-    # driver_options = webdriver.ChromeOptions()
-    # driver_options.add_argument("--headless=new")
-    # driver = webdriver.Chrome(options=driver_options)
-    driver = webdriver.Chrome()
+    driver_options = webdriver.ChromeOptions()
+    driver_options.add_argument("--headless=new")
+    driver = webdriver.Chrome(options=driver_options)
     driver.get("http://127.0.0.1:5000/table")
     WebDriverWait(driver, 10).until(EC.title_is("Table"))
 
@@ -73,11 +73,18 @@ def get_filtered_data(
         By.XPATH, ".//div[contains(@class, 'filter_div')][1]"
     )
     for name, value in zip(["start", "end"], [start_value, end_value]):
-        input_field = filter_div.find_element(
-            By.XPATH, f".//{filter_element}[contains(@class, '{name}-range')][1]"
-        )
-        input_field.click()
-        input_field.find_element(By.XPATH, f".//option[. = '{value}']").click()
+        if filter_element == "input":
+            field = filter_div.find_element(
+                By.XPATH, f".//{filter_element}[contains(@class, '{name}-range')][1]"
+            )
+            field.clear()
+            field.send_keys(value)
+        elif filter_element == "select":
+            field = filter_div.find_element(
+                By.XPATH, f".//{filter_element}[contains(@class, '{name}-range')][1]"
+            )
+            field.click()
+            field.find_element(By.XPATH, f".//option[. = '{value}']").click()
     sleep(1)
 
     # get the content of the ACTIVE_FILTERS global variable of JavaScript
@@ -101,16 +108,57 @@ def get_filtered_data(
 def test_grade_filter(app) -> None:
     grades = ["6A", "6A+", "6B"]
     with app.app_context():
-        grade_levels = [Grade.query.filter_by(font=grade).first() for grade in grades]
+        grade_levels = [
+            Grade.query.filter_by(font=grade).first().level for grade in grades
+        ]
         routes = Route.query.all()
         sent_routes = [
-            route for route in routes if route.sent and route.grade.font in grades
+            route.name for route in routes if route.sent and route.grade.font in grades
         ]
     active_filters, displayed_data = get_filtered_data(
         "Grade", "select", grades[0], grades[-1]
     )
+    active_filters = active_filters[0]
     assert len(active_filters) == 1
-    assert active_filters["Grade"] == grade_levels
+    assert active_filters[0][0] == "level"
+    assert active_filters[0][1] == grade_levels
     assert len(displayed_data) == len(sent_routes)
     for route in displayed_data:
-        assert route in sent_routes
+        assert route["name"] in sent_routes
+
+
+def test_date_filter(app) -> None:
+    dates_str = ["01/05/2023", "01/12/2023"]
+    dates_obj = [datetime.strptime(date, "%d/%m/%Y") for date in dates_str]
+    with app.app_context():
+        all_routes = Route.query.all()
+        filtered_routes, filtered_dates = list(), set()
+        for route in all_routes:
+            if not route.sent:
+                continue
+            route_date = datetime.max
+            add_climb = False
+            for climb in route.climbs:
+                if (
+                    climb.sent
+                    and climb.session.date >= dates_obj[0].date()
+                    and climb.session.date <= dates_obj[-1].date()
+                ):
+                    route_date = min(route_date.date(), climb.session.date)
+                    add_climb = True
+            if add_climb:
+                filtered_routes.append(route.name)
+                filtered_dates.add(route_date)
+
+    active_filters, displayed_data = get_filtered_data(
+        "Date", "input", dates_str[0], dates_str[-1]
+    )
+    assert len(active_filters) == 1
+    assert active_filters[0][0] == "dates"
+    returned_dates = [
+        datetime.strptime(date, "%Y-%m-%d").date() for date in active_filters[0][1]
+    ]
+    assert returned_dates == list(filtered_dates)
+    assert len(displayed_data) == len(filtered_routes)
+    for route in displayed_data:
+        assert route["name"] in filtered_routes
