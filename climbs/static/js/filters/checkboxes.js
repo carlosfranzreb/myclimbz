@@ -45,6 +45,7 @@ function add_filter_checkboxes(div, column) {
 function filter_data_by_checkboxes(event) {
 
     // Get the column and selected options
+    let clicked_checkbox = event.target;
     let filter_div = event.target.parentNode.parentNode;
     let column = FILTERS[filter_div.dataset.column].data_column;
     let selected_options = Array.from(filter_div.querySelectorAll("input:checked"))
@@ -52,12 +53,15 @@ function filter_data_by_checkboxes(event) {
             return checkbox.value;
         });
 
-    // If "All" was selected before, and is not selected anymore, uncheck all
-    if (filter_div.dataset.all_clicked == "true" && !("All" in selected_options)) {
+    // If "All" was selected before, and another option is clicked
+    // check only the clicked option
+    if (filter_div.dataset.all_clicked == "true" && clicked_checkbox.value != "All") {
         filter_div.dataset.all_clicked = "false";
         for (let checkbox of filter_div.querySelectorAll("input"))
             checkbox.checked = false;
+        clicked_checkbox.checked = true;
         ACTIVE_FILTERS.set(column, []);
+        ACTIVE_FILTERS.get(column).push(clicked_checkbox.value);
     }
 
     else {
