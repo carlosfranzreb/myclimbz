@@ -15,7 +15,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from climbs.models import Area, Sector, Grade, Route, Crux
+from climbs.models import Grade, Route, Crux
 from tests.conftest import run_app
 
 
@@ -159,10 +159,10 @@ def test_attempt_filters(app) -> None:
                         break
 
     active_filters, displayed_data = get_filtered_data(
-        "n_attempts_send", "input", str(values[0]), str(values[-1])
+        "Attempts", "input", str(values[0]), str(values[-1])
     )
     assert len(active_filters) == 1
-    assert active_filters[0][0] == "Attempts"
+    assert active_filters[0][0] == "n_attempts_send"
     assert min(active_filters[0][1]) >= values[0]
     assert max(active_filters[0][1]) <= values[-1]
     assert len(displayed_data) == len(filtered_routes)
