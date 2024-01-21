@@ -28,8 +28,8 @@ def test_page_request(test_client: FlaskClient):
 def get_filtered_data(
     filter_key: str,
     filter_element: str,
-    start_value: str,
-    end_value: str,
+    start_value: str | list,
+    end_value: str = None,
 ) -> list:
     """
     Returns the active filters for the given x- and y-axes.
@@ -68,23 +68,35 @@ def get_filtered_data(
     filter_select.find_element(By.XPATH, f".//option[. = '{filter_key}']").click()
     sleep(1)
 
-    # select the start value
+    # select the values
     filter_div = filter_container.find_element(
         By.XPATH, ".//div[contains(@class, 'filter_div')][1]"
     )
-    for name, value in zip(["start", "end"], [start_value, end_value]):
-        if filter_element == "input":
-            field = filter_div.find_element(
-                By.XPATH, f".//{filter_element}[contains(@class, '{name}-range')][1]"
-            )
-            field.clear()
-            field.send_keys(value)
-        elif filter_element == "select":
-            field = filter_div.find_element(
-                By.XPATH, f".//{filter_element}[contains(@class, '{name}-range')][1]"
-            )
-            field.click()
-            field.find_element(By.XPATH, f".//option[. = '{value}']").click()
+    if filter_element == "checkbox":
+        if isinstance(start_value, str):
+            start_value = [start_value]
+        for label in filter_div.find_elements(By.XPATH, ".//label"):
+            if label.text in start_value:
+                label.click()
+    else:
+        for name, value in zip(["start", "end"], [start_value, end_value]):
+            if filter_element == "input":
+                field = filter_div.find_element(
+                    By.XPATH,
+                    f".//{filter_element}[contains(@class, '{name}-range')][1]",
+                )
+                field.clear()
+                field.send_keys(value)
+            elif filter_element == "select":
+                field = filter_div.find_element(
+                    By.XPATH,
+                    f".//{filter_element}[contains(@class, '{name}-range')][1]",
+                )
+                field.click()
+                field.find_element(By.XPATH, f".//option[. = '{value}']").click()
+
+    # click outside the filter to close it
+    driver.find_element(By.XPATH, "//h1").click()
     sleep(1)
 
     # get the content of the ACTIVE_FILTERS global variable of JavaScript
@@ -111,9 +123,11 @@ def test_grade_filter(app) -> None:
         grade_levels = [
             Grade.query.filter_by(font=grade).first().level for grade in grades
         ]
-        routes = Route.query.all()
-        sent_routes = [
-            route.name for route in routes if route.sent and route.grade.font in grades
+        all_routes = Route.query.all()
+        filtered_routes = [
+            route.name
+            for route in all_routes
+            if route.sent and route.grade.font in grades
         ]
     active_filters, displayed_data = get_filtered_data(
         "Grade", "select", grades[0], grades[-1]
@@ -122,9 +136,35 @@ def test_grade_filter(app) -> None:
     assert len(active_filters) == 1
     assert active_filters[0][0] == "level"
     assert active_filters[0][1] == grade_levels
-    assert len(displayed_data) == len(sent_routes)
+    assert len(displayed_data) == len(filtered_routes)
     for route in displayed_data:
-        assert route["name"] in sent_routes
+        assert route["name"] in filtered_routes
+
+
+def test_number_filters(app) -> None:
+    """Test height, landing and inclination filters."""
+    for name, values in zip(
+        ["height", "landing", "inclination"], [[4.5, 6], [7, 10], [20, 40]]
+    ):
+        with app.app_context():
+            all_routes = Route.query.all()
+            filtered_routes = [
+                route.name
+                for route in all_routes
+                if route.sent
+                and getattr(route, name) >= values[0]
+                and getattr(route, name) <= values[-1]
+            ]
+        active_filters, displayed_data = get_filtered_data(
+            name.capitalize(), "input", str(values[0]), str(values[-1])
+        )
+        assert len(active_filters) == 1
+        assert active_filters[0][0] == name
+        assert min(active_filters[0][1]) >= values[0]
+        assert max(active_filters[0][1]) <= values[-1]
+        assert len(displayed_data) == len(filtered_routes)
+        for route in displayed_data:
+            assert route["name"] in filtered_routes
 
 
 def test_date_filter(app) -> None:
@@ -159,6 +199,24 @@ def test_date_filter(app) -> None:
         datetime.strptime(date, "%Y-%m-%d").date() for date in active_filters[0][1]
     ]
     assert returned_dates == list(filtered_dates)
+    assert len(displayed_data) == len(filtered_routes)
+    for route in displayed_data:
+        assert route["name"] in filtered_routes
+
+
+def test_area_filter(app) -> None:
+    area = "A1"
+    with app.app_context():
+        all_routes = Route.query.all()
+        filtered_routes = [
+            route.name
+            for route in all_routes
+            if route.sent and route.sector.area.name == area
+        ]
+    active_filters, displayed_data = get_filtered_data("Area", "checkbox", [area])
+    assert len(active_filters) == 1
+    assert active_filters[0][0] == "area"
+    assert active_filters[0][1] == [area]
     assert len(displayed_data) == len(filtered_routes)
     for route in displayed_data:
         assert route["name"] in filtered_routes
