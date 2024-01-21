@@ -1,6 +1,7 @@
 """
-Test the filters used for the tables and plots. The filters are stored in the JS
-global variable ACTIVE_FILTERS.
+Test the filters used for the tables and plots. Each filter is tested individually,
+and for the checkbox filters, only one option is selected. Multiple filters, multiple
+checkboxes, and removing filters are not tested.
 """
 
 
@@ -14,7 +15,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from climbs.models import Area, Sector, Grade, Route
+from climbs.models import Area, Sector, Grade, Route, Crux
 from tests.conftest import run_app
 
 
@@ -48,7 +49,8 @@ def get_filtered_data(
     # start a headless Chrome browser
     driver_options = webdriver.ChromeOptions()
     driver_options.add_argument("--headless=new")
-    driver = webdriver.Chrome(options=driver_options)
+    # driver = webdriver.Chrome(options=driver_options)
+    driver = webdriver.Chrome()
     driver.get("http://127.0.0.1:5000/table")
     WebDriverWait(driver, 10).until(EC.title_is("Table"))
 
@@ -132,10 +134,37 @@ def test_grade_filter(app) -> None:
     active_filters, displayed_data = get_filtered_data(
         "Grade", "select", grades[0], grades[-1]
     )
-    active_filters = active_filters[0]
     assert len(active_filters) == 1
     assert active_filters[0][0] == "level"
     assert active_filters[0][1] == grade_levels
+    assert len(displayed_data) == len(filtered_routes)
+    for route in displayed_data:
+        assert route["name"] in filtered_routes
+
+
+def test_attempt_filters(app) -> None:
+    values = [1, 4]
+    with app.app_context():
+        all_routes = Route.query.all()
+        filtered_routes = list()
+        for route in all_routes:
+            if not route.sent:
+                continue
+            n_attempts = 0
+            for climb in route.climbs:
+                n_attempts += climb.n_attempts
+                if climb.sent:
+                    if n_attempts >= values[0] and n_attempts <= values[-1]:
+                        filtered_routes.append(route.name)
+                        break
+
+    active_filters, displayed_data = get_filtered_data(
+        "n_attempts_send", "input", str(values[0]), str(values[-1])
+    )
+    assert len(active_filters) == 1
+    assert active_filters[0][0] == "Attempts"
+    assert min(active_filters[0][1]) >= values[0]
+    assert max(active_filters[0][1]) <= values[-1]
     assert len(displayed_data) == len(filtered_routes)
     for route in displayed_data:
         assert route["name"] in filtered_routes
@@ -217,6 +246,25 @@ def test_area_filter(app) -> None:
     assert len(active_filters) == 1
     assert active_filters[0][0] == "area"
     assert active_filters[0][1] == [area]
+    assert len(displayed_data) == len(filtered_routes)
+    for route in displayed_data:
+        assert route["name"] in filtered_routes
+
+
+def test_crux_filter(app) -> None:
+    crux = "Drag"
+    with app.app_context():
+        crux_obj = Crux.query.filter_by(name=crux).first()
+        all_routes = Route.query.all()
+        filtered_routes = [
+            route.name
+            for route in all_routes
+            if route.sent and crux_obj in route.cruxes
+        ]
+    active_filters, displayed_data = get_filtered_data("Crux", "checkbox", [crux])
+    assert len(active_filters) == 1
+    assert active_filters[0][0] == "cruxes"
+    assert active_filters[0][1] == [crux]
     assert len(displayed_data) == len(filtered_routes)
     for route in displayed_data:
         assert route["name"] in filtered_routes

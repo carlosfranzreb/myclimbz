@@ -156,22 +156,23 @@ function filter_data() {
     // Apply the active filters
     let filtered_data = [];
     for (let climb of this_data) {
-        let include = true;
+        let include = false;
         for (let [filter_key, filter_value] of ACTIVE_FILTERS) {
             let climb_values = climb[filter_key];
             if (!Array.isArray(climb_values))
                 climb_values = [climb_values];
             for (let climb_value of climb_values) {
-                if (!filter_value.includes(climb_value)) {
-                    include = false;
+                if (filter_value.includes(climb_value)) {
+                    include = true;
+                    filtered_data.push(climb);
                     break;
                 }
             }
-            if (!include)
+            if (include)
                 break;
         }
         if (include)
-            filtered_data.push(climb);
+            continue;
     }
     return filtered_data;
 }
