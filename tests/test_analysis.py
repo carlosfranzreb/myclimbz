@@ -38,7 +38,6 @@ def get_plotted_data(
     y_axis: str,
     check_unsent: bool = False,
     toggle_grade_scale: bool = False,
-    active_filters: dict = dict(),
 ) -> list:
     """
     Returns the plotted data for the given x- and y-axes.
@@ -48,7 +47,6 @@ def get_plotted_data(
         y_axis: the y-axis value
         check_unsent: whether to check the "Include unsent boulders" checkbox
         toggle_grade_scale: whether to toggle the scale switch, i.e. change to V-scale
-        active_filters: the active filters
 
     Returns:
         the plotted data as a list of tuples, where each tuple is of the form

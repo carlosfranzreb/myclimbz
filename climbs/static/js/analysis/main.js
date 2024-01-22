@@ -48,9 +48,9 @@ function start_analysis(data, grades) {
 
     // TODO: define the min. and max. grades for the filter range
 
-    // Parse the dates and format them to YYYY-MM
+    // Parse the dates and format them to YYYY-MM-DD
     let parseTime = d3.timeParse("%a, %d %b %Y %H:%M:%S");
-    let formatDate = d3.timeFormat("%Y-%m");
+    let formatDate = d3.timeFormat("%Y-%m-%d");
     DATA = DATA.map(d => {
         d.dates = d.dates.map(date => formatDate(
             parseTime(date.substring(0, date.length - 4)))
@@ -58,7 +58,7 @@ function start_analysis(data, grades) {
         return d;
     });
 
-    // Add the x-axis options to the menu, as defined in y_axis.js
+    // Add the y-axis options to the menu, as defined in y_axis.js
     for (let key of Object.keys(y_axis_options))
         document.getElementById("y-axis-select").options.add(
             new Option(key, key)
@@ -71,7 +71,7 @@ function start_analysis(data, grades) {
         );
     }
     document.getElementById("x-axis-select").value = "level";
-    plot_data();
+    display_data();
 }
 
 
@@ -92,7 +92,7 @@ function start_analysis(data, grades) {
  * 11. Plot the data with D3.js.
  * 12. Store the plotted data in the PLOTTED_DATA global variable.
  */
-function plot_data() {
+function display_data() {
 
     // Clear the previous plot
     SVG.selectAll("*").remove();
@@ -105,16 +105,8 @@ function plot_data() {
         INCLUDE_UNSENT_CLIMBS = true;
     }
 
-    // Remove unsent climbs if the corresponding button is unchecked
-    let this_data = null;
-    if (INCLUDE_UNSENT_CLIMBS)
-        this_data = DATA;
-    else
-        this_data = DATA.filter(d => d.sent === true);
-
     // Filter the data according to the active filters
-    for (let [key, value] of ACTIVE_FILTERS)
-        this_data = this_data.filter(d => value.includes(d[key]));
+    this_data = filter_data();
 
     // If the data is empty, return without plotting
     if (this_data.length == 0)
@@ -122,8 +114,14 @@ function plot_data() {
 
     // Group the data by the selected x-axis key.
     // Cruxes, dates and conditions are split into unique keys.
+    // Dates are grouped by month.
     let unsorted_out = null;
     if (x_axis == "cruxes" || x_axis == "dates" || x_axis == "conditions") {
+        if (x_axis == "dates")
+            this_data = this_data.map(d => {
+                d.dates = d.dates.map(date => date.substring(0, 7));
+                return d;
+            });
         groups = d3.group(this_data, d => d[x_axis]);
         unsorted_out = new Map();
         for (let [key, value] of groups.entries()) {

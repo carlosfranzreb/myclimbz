@@ -9,9 +9,16 @@ function add_filter_checkboxes(div, column) {
     div.appendChild(menu_div);
 
     // Get the values from DATA, and add "All" as an option
+    let data_column = FILTERS[column].data_column;
     let values = new Set();
-    for (let climb of DATA)
-        values.add(climb[column]);
+    for (let climb of DATA) {
+        // if climb[data_column] is not a list (e.g. dates), convert it to a list
+        let climb_values = climb[data_column];
+        if (!Array.isArray(climb_values))
+            climb_values = [climb_values];
+        for (let value of climb_values)
+            values.add(value);
+    }
     values = Array.from(values).sort();
     values.unshift("All");
 
@@ -38,19 +45,23 @@ function add_filter_checkboxes(div, column) {
 function filter_data_by_checkboxes(event) {
 
     // Get the column and selected options
+    let clicked_checkbox = event.target;
     let filter_div = event.target.parentNode.parentNode;
-    let column = filter_div.dataset.column;
+    let column = FILTERS[filter_div.dataset.column].data_column;
     let selected_options = Array.from(filter_div.querySelectorAll("input:checked"))
-        .map(function(checkbox) {
+        .map(function (checkbox) {
             return checkbox.value;
         });
 
-    // If "All" was selected before, and is not selected anymore, uncheck all
-    if (filter_div.dataset.all_clicked == "true" && !("All" in selected_options)) {
+    // If "All" was selected before, and another option is clicked
+    // check only the clicked option
+    if (filter_div.dataset.all_clicked == "true" && clicked_checkbox.value != "All") {
         filter_div.dataset.all_clicked = "false";
         for (let checkbox of filter_div.querySelectorAll("input"))
             checkbox.checked = false;
+        clicked_checkbox.checked = true;
         ACTIVE_FILTERS.set(column, []);
+        ACTIVE_FILTERS.get(column).push(clicked_checkbox.value);
     }
 
     else {
@@ -59,7 +70,7 @@ function filter_data_by_checkboxes(event) {
             for (let checkbox of filter_div.querySelectorAll("input"))
                 checkbox.checked = true;
             let all_options = Array.from(filter_div.querySelectorAll("input"))
-                .map(function(checkbox) {
+                .map(function (checkbox) {
                     return checkbox.value;
                 });
             ACTIVE_FILTERS.set(column, all_options);
@@ -72,5 +83,5 @@ function filter_data_by_checkboxes(event) {
             ACTIVE_FILTERS.set(column, selected_options);
     }
 
-    plot_data();
+    display_data();
 }
