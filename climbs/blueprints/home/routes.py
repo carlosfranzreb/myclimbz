@@ -13,7 +13,7 @@ import whisper
 
 from climbs.ner import transcribe, parse_climb, ClimbsModel
 from climbs.ner.entities_to_objects import get_route_from_entities
-from climbs.models import Area, Climb, Session, Sector, Predictions, Route
+from climbs.models import Area, Climb, Session, Sector, Predictions, Route, Grade
 from climbs.forms import ClimbForm, SessionForm, RouteForm
 from climbs import db
 
@@ -30,6 +30,9 @@ home = Blueprint("home", __name__)
 def page_home() -> str:
     current_session_id = flask_session.get("session_id", -1)
     project_search = flask_session.get("project_search", False)
+
+    routes_dict = [route.as_dict() for route in Route.query.all()]
+    grades_dict = [grade.as_dict() for grade in Grade.query.all()]
 
     # POST: an audio file was uploaded
     if request.method == "POST":
@@ -69,6 +72,8 @@ def page_home() -> str:
             area_name=area.name,
             projects=projects,
             error=flask_session.pop("error", None),
+            routes=routes_dict,
+            grades=grades_dict,
         )
     else:
         if current_session_id > 0:
@@ -82,6 +87,8 @@ def page_home() -> str:
             session_started=current_session_id > 0,
             last_session=last_session,
             error=flask_session.pop("error", None),
+            routes=routes_dict,
+            grades=grades_dict,
         )
 
 
@@ -142,7 +149,9 @@ def add_session() -> str:
         flask_session["area_id"] = area_id
         return redirect("/")
 
-    # GET: a recording was uploaded => create session form
+    # GET: the user has uploaded a recording or wants to start a session
+    if "entities" not in flask_session:
+        flask_session["entities"] = dict()
     session_form = SessionForm.create_from_entities(flask_session["entities"])
     return render_template(
         "add_session.html",

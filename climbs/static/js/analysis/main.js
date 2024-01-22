@@ -13,14 +13,6 @@ let SVG = d3.select("#chart")
     .attr("transform",
         "translate(" + MARGIN.left + "," + MARGIN.top + ")");
 
-// Create the variables where the data and grades will be stored
-let DATA = null;
-let GRADES = null;
-let GRADE_SCALE = "font";  // Scale chosen with the toggle button
-let ACTIVE_FILTERS = new Map();
-let INCLUDE_UNSENT_CLIMBS = false;
-let PLOTTED_DATA = null;
-
 // Define the options for the x-axis
 let x_axis_options = {
     "level": "Grade",

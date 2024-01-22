@@ -1,13 +1,5 @@
 // Display and manage the routes table
 
-let DATA = null;
-let GRADES = null;
-let DISPLAYED_DATA = null;
-
-let GRADE_SCALE = "font";  // Scale chosen with the toggle button
-let ACTIVE_FILTERS = new Map();
-let INCLUDE_UNSENT_CLIMBS = false;
-
 
 function show_routes(data, grades) {
     DATA = data;
