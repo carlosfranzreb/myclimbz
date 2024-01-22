@@ -17,12 +17,12 @@ function show_routes(data, grades) {
     let parseTime = d3.timeParse("%a, %d %b %Y %H:%M:%S");
     let formatDate = d3.timeFormat("%Y-%m-%d");
     DATA = DATA.map(d => {
-        d.dates = d.dates.map(date => formatDate(
-            parseTime(date.substring(0, date.length - 4)))
-        );
+        let parsed_dates = d.dates.map(date => parseTime(date.substring(0, date.length - 4)))
+        d.dates = parsed_dates.map(date => formatDate(date));
+        let max_date = Math.max(...parsed_dates);
+        d.last_climbed = formatDate(max_date);
         return d;
     });
-
     display_data();
 }
 
@@ -52,6 +52,7 @@ function display_data() {
     tr.append("th").text("Inclination");
     tr.append("th").text("Landing");
     tr.append("th").text("Sent");
+    tr.append("th").text("Last climbed");
 
     // Create the table body
     let tbody = table.append("tbody");
@@ -73,6 +74,7 @@ function display_data() {
     rows.append("td").text(d => d.inclination);
     rows.append("td").text(d => d.landing);
     rows.append("td").text(d => d.sent);
+    rows.append("td").text(d => d.last_climbed);
 
     // Initialize the DataTable
     window.data_table = new DataTable("#content_table", {
