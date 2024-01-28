@@ -37,19 +37,10 @@
                     </a>
 
                 </li>
-                <li class="nav-item">
-                    {% if session_started %}
-                    <a class="nav-link" href="{{ url_for('home.add_climb') }}">Add climb</a>
-                    {% endif %}
-                    {% if project_search_started %}
-                    <a class="nav-link" href="{{ url_for('home.add_climb') }}">Add project</a>
-                    {% endif %}
-                    {% if not session_started and not project_search_started %}
-                    <a class="nav-link" href="{{ url_for('home.add_session') }}">Start session</a>
-                    {% endif %}
-                </li>
+
+                {% if open_session%}
+                <li><a class="nav-link" href="{{ url_for('home.add_climb') }}">Add climb</a></li>
                 <li>
-                    {% if open_session%}
                     <a class="nav-link" href="{{ url_for('home.stop_session') }}">
                         Stop
                         {% if open_session.is_project_search %}
@@ -58,8 +49,12 @@
                         session
                         {% endif %}
                     </a>
-                    {% endif %}
                 </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('home.add_session') }}">Start session</a>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </nav>

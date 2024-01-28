@@ -154,7 +154,7 @@ def cancel_form() -> None:
 @home.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
     # define the grade scale
-    entities = flask_session["entities"]
+    entities = flask_session.get("entities", dict())
     grade_scale = "font"
     for field in ["grade", "grade_felt"]:
         if field in entities:
@@ -182,13 +182,16 @@ def add_climb() -> str:
         if sector.id is None:
             db.session.add(sector)
             db.session.commit()
-            flask_session["predictions"]["sector_id"] = sector.id
+            if "predictions" in flask_session:
+                flask_session["predictions"]["sector_id"] = sector.id
 
         route = route_form.get_route_from_climb_form(sector)
         if route is not None and route.id is None:
             db.session.add(route)
             db.session.commit()
-            flask_session["predictions"]["route_id"] = route.id
+            if "predictions" in flask_session:
+                flask_session["predictions"]["route_id"] = route.id
+
         if flask_session.get("project_search", False) is True:
             if "project_ids" not in flask_session:
                 flask_session["project_ids"] = list()
