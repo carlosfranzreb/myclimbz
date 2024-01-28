@@ -1,7 +1,7 @@
 {% extends "main.html" %}
 {% block content %}
 
-    <!-- 
+<!-- 
         Display the form for adding a new climb.
 
         - If is is an existing route, display only the route name and grade.
@@ -9,108 +9,113 @@
         - If it is a project, don't display the sent and n_attempts fields.
     -->
 
-    {% if climb_form %}
-        <h2>Log climb</h2>
-    {% else %}
-        <h2>Add project</h2>
-    {% endif %}
+{% if climb_form %}
+<h2>Log climb</h2>
+{% else %}
+<h2>Add project</h2>
+{% endif %}
 
-    <div class="container">
-        <form method="POST" style="margin: 40px;" onkeydown="return event.key != 'Enter';">
-            {{ route_form.hidden_tag() }}
+<div class="container">
+    <form method="POST" style="margin: 40px;" onkeydown="return event.key != 'Enter';">
+        {{ route_form.hidden_tag() }}
 
+        <div class="form-group">
+            <label for="{{ route_form.name.id }}">{{ route_form.name.label }}</label>
+            {{ route_form.name(id=route_form.name.id, class='form-control', list='existingRoutes', autocomplete='off')
+            }}
+        </div>
+
+        <div id="newRouteForm" class="container">
+            <h4>New route</h4>
+
+            {% for field in route_form %}
+            {% if field.name != 'csrf_token' and field != route_form.name %}
             <div class="form-group">
-                <label for="{{ route_form.name.id }}">{{ route_form.name.label }}</label>
-                {{ route_form.name(id=route_form.name.id, class='form-control', list='existingRoutes', autocomplete='off') }}
+                <label for="{{ field.id }}">{{ field.label }}</label>
+                {% if field.id == 'sector' %}
+                {{ field(id=field.id, class='form-control', list='existingSectors', autocomplete='off') }}
+                {% elif field.type == 'BooleanField' %}
+                {{ field(id=field.id, class='form-check') }}
+                {% else %}
+                {{ field(id=field.id, class='form-control') }}
+                {% endif %}
             </div>
-
-            <div id="newRouteForm" class="container">
-                <h4>New route</h4>
-
-                {% for field in route_form %}
-                    {% if field.name != 'csrf_token' and field != route_form.name %}
-                        <div class="form-group">
-                            <label for="{{ field.id }}">{{ field.label }}</label>
-                            {% if field.id == 'sector' %}
-                                {{ field(id=field.id, class='form-control', list='existingSectors', autocomplete='off') }}
-                            {% elif field.type == 'BooleanField' %}
-                                {{ field(id=field.id, class='form-check') }}
-                            {% else %}
-                                {{ field(id=field.id, class='form-control') }}
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-
-            <datalist id="existingRoutes">
-                {% for route_name in route_names %}
-                    <option value="{{ route_name }}"></option>
-                {% endfor %}
-            </datalist>
-            <datalist id="existingSectors">
-                {% for sector_name in sector_names %}
-                    <option value="{{ sector_name }}"></option>
-                {% endfor %}
-            </datalist>
-
-            {% if climb_form %}
-                <h4>Climb</h4>
-                {{ climb_form.hidden_tag() }}
-                
-                <div id="isProject" class="form-group">
-                    <label for="{{ climb_form.is_project.id }}">{{ climb_form.is_project.label }}</label>
-                    {{ climb_form.is_project(id=climb_form.is_project.id, class='form-check') }}
-                </div>
-
-                <div id="newClimbForm" class="container">
-                    <div class="form-group">
-                        <label for="{{ climb_form.n_attempts.id }}">{{ climb_form.n_attempts.label }}</label>
-                        {{ climb_form.n_attempts(id=climb_form.n_attempts.id, class='form-control') }}
-                    </div>
-                    <div class="form-group">
-                        <label for="{{ climb_form.sent.id }}">{{ climb_form.sent.label }}</label>
-                        {{ climb_form.sent(id=climb_form.sent.id, class='form-check') }}
-                    </div>
-                </div>
             {% endif %}
+            {% endfor %}
+        </div>
 
+        <datalist id="existingRoutes">
+            {% for route_name in route_names %}
+            <option value="{{ route_name }}"></option>
+            {% endfor %}
+        </datalist>
+        <datalist id="existingSectors">
+            {% for sector_name in sector_names %}
+            <option value="{{ sector_name }}"></option>
+            {% endfor %}
+        </datalist>
+
+        {% if climb_form %}
+        <h4>Climb</h4>
+        {{ climb_form.hidden_tag() }}
+
+        <div id="isProject" class="form-group">
+            <label for="{{ climb_form.is_project.id }}">{{ climb_form.is_project.label }}</label>
+            {{ climb_form.is_project(id=climb_form.is_project.id, class='form-check') }}
+        </div>
+
+        <div id="newClimbForm" class="container">
             <div class="form-group">
-                <input type="submit" class="btn btn-success" value="Save">
+                <label for="{{ climb_form.n_attempts.id }}">{{ climb_form.n_attempts.label }}</label>
+                {{ climb_form.n_attempts(id=climb_form.n_attempts.id, class='form-control') }}
             </div>
-        </form>
-    </div>
+            <div class="form-group">
+                <label for="{{ climb_form.sent.id }}">{{ climb_form.sent.label }}</label>
+                {{ climb_form.sent(id=climb_form.sent.id, class='form-check') }}
+            </div>
+        </div>
+        {% endif %}
 
-    <script>
-        let route = document.querySelector("#{{ route_form.name.id }}");
-        let newRouteForm = document.querySelector("#newRouteForm");
-        let newClimbForm = document.querySelector("#newClimbForm");
-        if (newClimbForm !== null) {
-            let isProject = document.querySelector("#isProject");
-        }
+        <div class="form-group">
+            <input type="submit" class="btn btn-success" value="Save">
+            <a type="button" class="btn btn-danger" value="Cancel" href="{{ url_for('home.cancel_session') }}">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
 
-        function toggleNewRouteForm() {
-            let routeValue = route.value;
-            let routeExists = false;
-            for (let existingRoute of document.getElementById("existingRoutes").options) {
-                if (existingRoute.value == routeValue) {
-                    routeExists = true;
-                    break;
-                }
+<script>
+    let route = document.querySelector("#{{ route_form.name.id }}");
+    let newRouteForm = document.querySelector("#newRouteForm");
+    let newClimbForm = document.querySelector("#newClimbForm");
+    if (newClimbForm !== null) {
+        let isProject = document.querySelector("#isProject");
+    }
+
+    function toggleNewRouteForm() {
+        let routeValue = route.value;
+        let routeExists = false;
+        for (let existingRoute of document.getElementById("existingRoutes").options) {
+            if (existingRoute.value == routeValue) {
+                routeExists = true;
+                break;
             }
-            newRouteForm.style.display = routeExists ? "none" : "block";        }
-
-        function toggleNewClimbForm() {
-            newClimbForm.style.display = isProject.checked ? "none" : "block";
         }
+        newRouteForm.style.display = routeExists ? "none" : "block";
+    }
 
-        toggleNewRouteForm();
-        route.addEventListener("change", toggleNewRouteForm);
-        if (newClimbForm !== null) {
-            toggleNewClimbForm();
-            isProject.addEventListener("change", toggleNewClimbForm);
-        }
+    function toggleNewClimbForm() {
+        newClimbForm.style.display = isProject.checked ? "none" : "block";
+    }
 
-    </script>
+    toggleNewRouteForm();
+    route.addEventListener("change", toggleNewRouteForm);
+    if (newClimbForm !== null) {
+        toggleNewClimbForm();
+        isProject.addEventListener("change", toggleNewClimbForm);
+    }
+
+</script>
 
 {% endblock content %}

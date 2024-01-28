@@ -166,6 +166,14 @@ def add_session() -> str:
     )
 
 
+@home.route("/cancel_form")
+def cancel_form() -> None:
+    """Cancel the addition of a session."""
+    flask_session.pop("entities", None)
+    flask_session.pop("predictions", None)
+    return redirect("/")
+
+
 @home.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
     # define the grade scale
