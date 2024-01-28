@@ -1,46 +1,22 @@
 {% extends "main.html" %}
 {% block content %}
 
-    <script>
-        window.addEventListener('load', function() {
-            start_analysis({{ routes | tojson }} , {{ grades | tojson }});
+<script>
+    window.addEventListener('load', function () {
+        start_analysis({{ routes | tojson }} , {{ grades | tojson }});
         });
-    </script>
+</script>
 
-    <!-- This div is used to display the data in the chart; it is centered -->
-    <div style="margin: auto; width: 500;">
+<!-- This div is used to display the data in the chart; it is centered -->
+<div class="row gy-1">
 
-        <!-- Checkbox to include unsent climbs -->
-        <div>
-            <span>Include unsent boulders</span>
-            <input type="checkbox" id="include-unsent-climbs">
-        </div>
+    {% include 'filters.html' %}
 
-        <!-- Switch to define the grade type -->
-        <div>
-            <span>Font</span>
-            <span>
-                <label class="switch">
-                    <input type="checkbox" id="grade-scale-toggle">
-                    <span class="slider round"></span>
-                </label>
-            </span>
-            <span>Hueco</span>
-        </div>
+    <!-- D3.js chart-->
+    <div id="chart" class="row"></div>
 
-        <!-- D3.js chart-->
-        <div id="chart">
-        </div>
-
-        <!-- Markdown menus -->
-        <label for="x-axis-select">X Axis:</label>
-        <select id="x-axis-select" onchange="plot_data()"></select>
-        <label for="y-axis-select">Y Axis:</label>
-        <select id="y-axis-select" onchange="plot_data()"></select>
+    <!-- Markdown menus -->
 
 
-        <button onclick="add_filter()">Add filter</button>
-        <div id="filterList"></div>
-
-    </div>
+</div>
 {% endblock content %}

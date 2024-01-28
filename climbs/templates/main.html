@@ -55,6 +55,9 @@
                     <a class="nav-link" href="{{ url_for('home.add_session') }}">Start session</a>
                 </li>
                 {% endif %}
+                <li>
+                    <a class="nav-link" href="#">List sessions</a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -112,6 +115,9 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="{{url_for('static', filename='js/table/routes.js')}}"></script>
     <script src="{{url_for('static', filename='js/table/vanilla-dataTables.js')}}" type="text/javascript"></script>
+
+    <!-- Scripts for tables + plots -->
+    <script src="{{url_for('static', filename='js/data.js')}}"></script>
 
 </body>
 

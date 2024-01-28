@@ -3,16 +3,6 @@ let MARGIN = { top: 30, right: 30, bottom: 70, left: 60 };
 let WIDTH = 460 - MARGIN.left - MARGIN.right;
 let HEIGHT = 400 - MARGIN.top - MARGIN.bottom;
 
-
-// append the svg object to the body of the page
-let SVG = d3.select("#chart")
-    .append("svg")
-    .attr("width", WIDTH + MARGIN.left + MARGIN.right)
-    .attr("height", HEIGHT + MARGIN.top + MARGIN.bottom)
-    .append("g")
-    .attr("transform",
-        "translate(" + MARGIN.left + "," + MARGIN.top + ")");
-
 // Define the options for the x-axis
 let x_axis_options = {
     "level": "Grade",
@@ -31,46 +21,10 @@ let x_axis_options = {
     "n_attempts_send": "No. of attempts",
 }
 
-
-// Plot the data with D3.js
-function start_analysis(data, grades) {
-
-    GRADES = grades;
-    DATA = data;
-
-    // TODO: define the min. and max. grades for the filter range
-
-    // Parse the dates and format them to YYYY-MM-DD
-    let parseTime = d3.timeParse("%a, %d %b %Y %H:%M:%S");
-    let formatDate = d3.timeFormat("%Y-%m-%d");
-    DATA = DATA.map(d => {
-        d.dates = d.dates.map(date => formatDate(
-            parseTime(date.substring(0, date.length - 4)))
-        );
-        return d;
-    });
-
-    // Add the y-axis options to the menu, as defined in y_axis.js
-    for (let key of Object.keys(y_axis_options))
-        document.getElementById("y-axis-select").options.add(
-            new Option(key, key)
-        );
-
-    // Add the x-axis options to the menu
-    for (let [key, value] of Object.entries(x_axis_options)) {
-        document.getElementById("x-axis-select").options.add(
-            new Option(value, key)
-        );
-    }
-    document.getElementById("x-axis-select").value = "level";
-    display_data();
-}
-
-
 /**
- * The plot_data function performs the following steps:
+ * The show_plot function performs the following steps:
  * 
- * 1. Clear the previous plot by removing all elements from the SVG.
+ * 1. Clear the previous plot by removing all elements from the svg.
  * 2. Get the selected x- and y-axis from the corresponding dropdown menus.
  * 3. If the y-axis is "Success rate", check the "include-unsent-climbs" checkbox.
  * 4. Filter the data based on whether unsent climbs should be included or not.
@@ -84,10 +38,28 @@ function start_analysis(data, grades) {
  * 11. Plot the data with D3.js.
  * 12. Store the plotted data in the PLOTTED_DATA global variable.
  */
-function display_data() {
+function show_plot() {
 
-    // Clear the previous plot
-    SVG.selectAll("*").remove();
+    // Add the axis options to the menu
+    for (let key of Object.keys(y_axis_options))
+        document.getElementById("y-axis-select").options.add(
+            new Option(key, key)
+        );
+    for (let [key, value] of Object.entries(x_axis_options)) {
+        document.getElementById("x-axis-select").options.add(
+            new Option(value, key)
+        );
+    }
+    document.getElementById("x-axis-select").value = "level";
+
+    // append the svg object to the body of the page
+    let svg = d3.select("#content_div")
+        .append("svg")
+        .attr("width", WIDTH + MARGIN.left + MARGIN.right)
+        .attr("height", HEIGHT + MARGIN.top + MARGIN.bottom)
+        .append("g")
+        .attr("transform",
+            "translate(" + MARGIN.left + "," + MARGIN.top + ")");
 
     // Get the selected options
     let x_axis = document.getElementById("x-axis-select").value;
@@ -97,10 +69,8 @@ function display_data() {
         INCLUDE_UNSENT_CLIMBS = true;
     }
 
-    // Filter the data according to the active filters
-    this_data = filter_data();
-
     // If the data is empty, return without plotting
+    let this_data = DISPLAYED_DATA;
     if (this_data.length == 0)
         return;
 
@@ -147,7 +117,7 @@ function display_data() {
         .domain(out.keys())
         .padding(0.2);
 
-    SVG.append("g")
+    svg.append("g")
         .attr("transform", "translate(0," + HEIGHT + ")")
         .call(d3.axisBottom(x))
         .selectAll("text")
@@ -162,12 +132,12 @@ function display_data() {
         let y_labels = y_axis_options[y_axis]["axis_labels"]();
         let y_axis_obj = d3.axisLeft(y)
             .tickFormat(function (d) { return y_labels.get(d); })
-        SVG.append("g").call(y_axis_obj)
+        svg.append("g").call(y_axis_obj)
     }
     else
-        SVG.append("g").call(d3.axisLeft(y));
+        svg.append("g").call(d3.axisLeft(y));
 
-    SVG.selectAll("mybar")
+    svg.selectAll("mybar")
         .data(out)
         .enter()
         .append("rect")
@@ -176,9 +146,6 @@ function display_data() {
         .attr("width", x.bandwidth())
         .attr("height", function (d) { return HEIGHT - y(d[1]) })
         .attr("fill", "#69b3a2");
-
-    // Store the plotted data in a global variable
-    PLOTTED_DATA = out;
 }
 
 

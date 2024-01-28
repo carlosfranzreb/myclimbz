@@ -64,7 +64,7 @@ def page_home() -> str:
     else:
         session = None
     return render_template(
-        "table.html",
+        "data.html",
         title="Table",
         open_session=session,
         error=flask_session.pop("error", None),

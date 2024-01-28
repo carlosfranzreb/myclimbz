@@ -1,32 +1,5 @@
-// Display and manage the routes table
-
-
-function show_routes(data, grades) {
-    DATA = data;
-    GRADES = grades;
-
-    // Parse the dates and format them to YYYY-MM-DD
-    let parseTime = d3.timeParse("%a, %d %b %Y %H:%M:%S");
-    let formatDate = d3.timeFormat("%Y-%m-%d");
-    DATA = DATA.map(d => {
-        let parsed_dates = d.dates.map(date => parseTime(date.substring(0, date.length - 4)))
-        d.dates = parsed_dates.map(date => formatDate(date));
-        let max_date = Math.max(...parsed_dates);
-        d.last_climbed = formatDate(max_date);
-        return d;
-    });
-    display_data();
-}
-
-
 // Create the table with the routes
-function display_data() {
-
-    // Remove the previous table
-    d3.select("#content_div").selectAll("*").remove();
-
-    // Filter the data according to the active filters
-    let this_data = filter_data();
+function show_table() {
 
     // Create the table
     let table = d3.select("#content_div").append("table")
@@ -51,7 +24,7 @@ function display_data() {
 
     // Create the rows
     let rows = tbody.selectAll("tr")
-        .data(this_data)
+        .data(DISPLAYED_DATA)
         .enter()
         .append("tr");
 
@@ -75,7 +48,4 @@ function display_data() {
         searchable: true,
         nextPrev: false,
     });
-
-    // Store the displayed data
-    DISPLAYED_DATA = this_data;
 }

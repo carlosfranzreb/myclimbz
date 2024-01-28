@@ -1,12 +1,3 @@
-// Global variables shared by tables and plots
-let DATA = null;
-let GRADES = null;
-let DISPLAYED_DATA = null;
-
-let GRADE_SCALE = "font";  // Scale chosen with the toggle button
-let ACTIVE_FILTERS = new Map();
-let INCLUDE_UNSENT_CLIMBS = false;
-
 // --- Buttons at the top of the page
 
 // Add an event listener to the checkbox "Include unsent climbs"
