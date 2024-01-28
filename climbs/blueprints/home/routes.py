@@ -1,6 +1,7 @@
 import os
 from time import time
 import json
+from datetime import datetime
 
 from flask import (
     Blueprint,
@@ -153,6 +154,11 @@ def add_session() -> str:
     if "entities" not in flask_session:
         flask_session["entities"] = dict()
     session_form = SessionForm.create_from_entities(flask_session["entities"])
+
+    # if date is null, set it to today
+    if session_form.date.data is None:
+        session_form.date.data = datetime.today()
+
     return render_template(
         "add_session.html",
         session_form=session_form,
