@@ -25,11 +25,6 @@
         {{ session_form.rock_type(id=session_form.rock_type.id, class='form-control') }}
     </div>
 
-    <div class="form-group">
-        <label for="{{ session_form.is_project_search.id }}">{{ session_form.is_project_search.label }}</label>
-        {{ session_form.is_project_search(id=session_form.is_project_search.id, class='form-check') }}
-    </div>
-
     <div id="date-container" class="form-group">
         <label for="{{ session_form.date.id }}">{{ session_form.date.label }}</label>
         {{ session_form.date(id=session_form.date.id, class='form-control') }}
@@ -41,8 +36,13 @@
     </div>
 
     <div class="form-group">
+        <label for="{{ session_form.is_project_search.id }}">{{ session_form.is_project_search.label }}</label>
+        {{ session_form.is_project_search(id=session_form.is_project_search.id, class='form-check') }}
+    </div>
+
+    <div class="form-group">
         <input type="submit" class="btn btn-success" value="Save">
-        <a type="button" class="btn btn-danger" value="Cancel" href="{{ url_for('home.cancel_session') }}">
+        <a type="button" class="btn btn-danger" value="Cancel" href="{{ url_for('home.cancel_form') }}">
             Cancel
         </a>
     </div>

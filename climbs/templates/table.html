@@ -1,3 +1,6 @@
+{% extends "main.html" %}
+{% block content %}
+
 <script>
     window.addEventListener('load', function () {
         show_routes({{ routes | tojson }} , {{ grades | tojson }});
@@ -33,3 +36,5 @@
     <div id="content_div"></div>
 
 </div>
+
+{% endblock content %}

@@ -39,16 +39,25 @@
                 </li>
                 <li class="nav-item">
                     {% if session_started %}
-                    <a class="nav-link" href="#">Add climb</a>
+                    <a class="nav-link" href="{{ url_for('home.add_climb') }}">Add climb</a>
                     {% endif %}
                     {% if project_search_started %}
-                    <a class="nav-link" href="#">Add project</a>
+                    <a class="nav-link" href="{{ url_for('home.add_climb') }}">Add project</a>
                     {% endif %}
                     {% if not session_started and not project_search_started %}
-                    <a class="nav-link" href="{{ url_for('home.add_session') }}">Start Session</a>
+                    <a class="nav-link" href="{{ url_for('home.add_session') }}">Start session</a>
                     {% endif %}
-                    {% if session_started or project_search_started %}
-                    <a class="nav-link" href="{{ url_for('home.stop_session') }}">Stop Session</a>
+                </li>
+                <li>
+                    {% if open_session%}
+                    <a class="nav-link" href="{{ url_for('home.stop_session') }}">
+                        Stop
+                        {% if open_session.is_project_search %}
+                        project search
+                        {% else %}
+                        session
+                        {% endif %}
+                    </a>
                     {% endif %}
                 </li>
             </ul>
@@ -62,6 +71,19 @@
     </script>
     <div class="alert alert-danger" role="alert">
         {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Show the current session / project search, if any-->
+    {% if open_session %}
+
+    <div class="alert alert-success" role="alert">
+        {% if open_session.is_project_search %}
+        Project search
+        {% else %}
+        Session
+        {% endif %}
+        in {{ open_session.area.name }}
     </div>
     {% endif %}
 

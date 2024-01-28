@@ -14,7 +14,7 @@ class SessionForm(FlaskForm):
     area = StringField("Area name", validators=[Optional()])
     rock_type = SelectField("Rock Type of new area", validators=[Optional()])
     is_project_search = BooleanField(
-        "Looking for projects (not a session)", validators=[Optional()]
+        "Only adding projects (not climbing)", validators=[Optional()]
     )
 
     def add_choices(self):
