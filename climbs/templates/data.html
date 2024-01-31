@@ -1,14 +1,21 @@
 {% extends "main.html" %}
 {% block content %}
 
+<!-- If a session is open, show only the climbs of that session -->
+{% if open_session and not open_session.is_project_search %}
+{% set session_date = open_session.date.strftime("%Y-%m-%d") %}
+{% else %}
+{% set session_date = None %}
+{% endif %}
+
 <script>
     window.addEventListener('load', function () {
-        start_display({{ routes | tojson }} , {{ grades | tojson }});
+        start_display({{ routes | tojson }} , {{ grades | tojson }}, "{{ session_date }}");
         });
 </script>
 
 <!-- This div is used to display the data in the chart; it is centered -->
-<div class="row gy-1">
+<div class="row-sm gy-1">
 
     <!-- Switch to define the display form -->
     <div class="row-sm">
@@ -22,12 +29,6 @@
         <span>Plot</span>
     </div>
 
-    <!-- Checkbox to include unsent climbs -->
-    <div class="row-sm">
-        <span>Include unsent boulders</span>
-        <input type="checkbox" id="include-unsent-climbs">
-    </div>
-
     <!-- Switch to define the grade type -->
     <div class="row-sm">
         <span>Font</span>
@@ -38,6 +39,12 @@
             </label>
         </span>
         <span>Hueco</span>
+    </div>
+
+    <!-- Checkbox to include unsent climbs -->
+    <div class="row-sm">
+        <input type="checkbox" id="include-unsent-climbs">
+        <span>Include unsent boulders</span>
     </div>
 
     <!-- Filters -->
