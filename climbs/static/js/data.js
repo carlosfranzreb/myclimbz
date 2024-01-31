@@ -18,7 +18,7 @@ display_form_toggle.addEventListener("change", function () {
     display_data();
 });
 
-function start_display(data, grades) {
+function start_display(data, grades, session_date) {
     DATA = data;
     GRADES = grades;
 
@@ -32,6 +32,25 @@ function start_display(data, grades) {
         d.last_climbed = formatDate(max_date);
         return d;
     });
+
+    // If session date is given, filter the data on the session date
+    if (session_date != null) {
+        add_filter();
+
+        // Create the filter and change it to "Date"
+        let filter_list = document.getElementById("filterList");
+        let filter = filter_list.children[0];
+        let select = filter.getElementsByTagName("select")[0];
+        select.value = "Date";
+        let event = new Event("change");
+        select.dispatchEvent(event);
+
+        // Set the start date
+        let start_date = filter.getElementsByClassName("start-range")[0];
+        start_date.value = session_date;
+        start_date.addEventListener("change", filter_data_by_range);
+        start_date.dispatchEvent(event);
+    }
 
     display_data();
 }
