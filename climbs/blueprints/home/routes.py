@@ -65,7 +65,7 @@ def page_home() -> str:
         session = None
     return render_template(
         "data.html",
-        title="Table",
+        title="Routes",
         open_session=session,
         error=flask_session.pop("error", None),
         routes=routes_dict,

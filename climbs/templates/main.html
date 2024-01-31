@@ -56,7 +56,7 @@
                 </li>
                 {% endif %}
                 <li>
-                    <a class="nav-link" href="#">List sessions</a>
+                    <a class="nav-link" href="{{ url_for('sessions.table_sessions') }}">List sessions</a>
                 </li>
             </ul>
         </div>
@@ -90,34 +90,34 @@
         {% endblock %}
     </div>
 
-    <!-- Main libraries: Bootstrap and D3.js-->
+    <!-- Bootstrap & DataTable -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
         crossorigin="anonymous"></script>
+    <script src="{{url_for('static', filename='js/table/vanilla-dataTables.js')}}" type="text/javascript"></script>
+
+    <!-- Scripts for recording -->
+    <script src="{{url_for('static', filename='js/logging/record.js')}}"></script>
+
+    <!-- Scripts for routes -->
+    {% if title == "Routes" %}
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://momentjs.com/downloads/moment.js"></script>
+    <script src="{{url_for('static', filename='js/data.js')}}"></script>
 
-
-    <!-- Scripts for filters -->
-    <script src="{{url_for('static', filename='js/filters/checkboxes.js')}}"></script>
-    <script src="{{url_for('static', filename='js/filters/range.js')}}"></script>
-    <script src="{{url_for('static', filename='js/filters/main.js')}}"></script>
+    <!-- Scripts for table -->
+    <script src="{{url_for('static', filename='js/table/routes.js')}}"></script>
 
     <!-- Scripts for plotting -->
     <script src="{{url_for('static', filename='js/analysis/main.js')}}"></script>
     <script src="{{url_for('static', filename='js/analysis/grades.js')}}"></script>
     <script src="{{url_for('static', filename='js/analysis/y_axis.js')}}"></script>
 
-    <!-- Scripts for recording -->
-    <script src="{{url_for('static', filename='js/logging/record.js')}}"></script>
-
-    <!-- Scripts for tables -->
-    <script src="https://momentjs.com/downloads/moment.js"></script>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="{{url_for('static', filename='js/table/routes.js')}}"></script>
-    <script src="{{url_for('static', filename='js/table/vanilla-dataTables.js')}}" type="text/javascript"></script>
-
-    <!-- Scripts for tables + plots -->
-    <script src="{{url_for('static', filename='js/data.js')}}"></script>
+    <!-- Scripts for filters -->
+    <script src="{{url_for('static', filename='js/filters/checkboxes.js')}}"></script>
+    <script src="{{url_for('static', filename='js/filters/range.js')}}"></script>
+    <script src="{{url_for('static', filename='js/filters/main.js')}}"></script>
+    {% endif %}
 
 </body>
 

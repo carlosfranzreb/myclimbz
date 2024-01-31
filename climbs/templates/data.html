@@ -5,7 +5,7 @@
 {% if open_session and not open_session.is_project_search %}
 {% set session_date = open_session.date.strftime("%Y-%m-%d") %}
 {% else %}
-{% set session_date = None %}
+{% set session_date = null %}
 {% endif %}
 
 <script>

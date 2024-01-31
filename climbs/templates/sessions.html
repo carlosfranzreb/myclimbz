@@ -1,12 +1,15 @@
 {% extends "main.html" %}
 {% block content %}
 
-    <!-- Possible additional columns: 
+<!-- Possible additional columns: 
         - Max./Avg. grade/inclination 
     -->
 
 
-    <table class="table table-striped">
+<h1>Sessions</h1>
+
+<table id="content_table" class="table table-striped">
+    <thead>
         <tr>
             <th>Date</th>
             <th>Area</th>
@@ -14,25 +17,30 @@
             <th># Routes</th>
             <th># Sends</th>
         </tr>
-        {% for session in sessions.items %}
-            <tr onclick="window.location=&quot;{{ url_for('sessions.page_session', session_id=session.id) }}&quot;">
-                <td>{{ session.date }}</td>
-                <td>{{ session.area.name }}</td>
-                <td>{{ session.conditions }}</td>
-                <td>{{ session.climbs|length }}</td>
-                <td>{{ session.climbs|map(attribute='sent')|sum }}</td>
-            </tr>
+    </thead>
+    <tbody>
+        {% for session in sessions %}
+        <tr onclick="window.location=&quot;{{ url_for('sessions.page_session', session_id=session.id) }}&quot;">
+            <td>{{ session.date }}</td>
+            <td>{{ session.area.name }}</td>
+            <td>{{ session.conditions }}</td>
+            <td>{{ session.climbs|length }}</td>
+            <td>{{ session.climbs|map(attribute='sent')|sum }}</td>
+        </tr>
         {% endfor %}
-    </table>
+    </tbody>
+</table>
 
-    <div>
-        {% if sessions.has_prev %}
-            <a href="{{ url_for('show_sessions', page=sessions.prev_num) }}">Previous</a>
-        {% endif %}
-        Page {{ sessions.page }} of {{ sessions.pages }}
-        {% if sessions.has_next %}
-            <a href="{{ url_for('show_sessions', page=sessions.next_num) }}">Next</a>
-        {% endif %}
-    </div>
+<script>
+    window.addEventListener('load', function () {
+        window.data_table = new DataTable("#content_table", {
+            perPage: 100,
+            perPageSelect: false,
+            searchable: false,
+            nextPrev: false,
+        });
+    });
+</script>
+
 
 {% endblock content %}
