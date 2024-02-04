@@ -1,10 +1,11 @@
 from __future__ import annotations
+from datetime import datetime
 
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, DateField, StringField, SelectField, BooleanField
 from wtforms.validators import Optional
 
-from climbs.models import Area, RockType
+from climbs.models import Area, RockType, Session
 from climbs.ner.entities_to_objects import get_area_from_entities
 
 
@@ -52,7 +53,27 @@ class SessionForm(FlaskForm):
             else:
                 form.rock_type.data = "0"
 
+        # if date is null, set it to today
+        if form.date.data is None:
+            form.date.data = datetime.today()
+
         return form
+
+    @classmethod
+    def create_from_object(cls, session: Session) -> SessionForm:
+        """
+        Create an "entities" dictionary from the session object and call
+        create_from_entities.
+        """
+        entities = {
+            "date": session.date,
+            "conditions": session.conditions,
+            "area": session.area.name if session.area is not None else None,
+            "is_project_search": session.is_project_search,
+        }
+        if session.area is not None and session.area.rock_type is not None:
+            entities["rock"] = session.area.rock_type.name
+        return cls.create_from_entities(entities)
 
     def get_area(self) -> Area:
         """
@@ -71,3 +92,16 @@ class SessionForm(FlaskForm):
                 else:
                     area = Area(name=area_name)
         return area
+
+    def get_object(self, area_id: int, obj: Session = None) -> Session:
+        """
+        Return a Session object from the form data. If an object is passed, update it.
+        If not, create a new one.
+        """
+        if obj is None:
+            obj = Session()
+        obj.area_id = area_id
+        obj.date = self.date.data
+        obj.conditions = self.conditions.data
+        obj.is_project_search = self.is_project_search.data
+        return obj
