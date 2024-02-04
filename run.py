@@ -1,4 +1,4 @@
-from climbs import create_app
+from climbz import create_app
 
 
 app = create_app("test_100")

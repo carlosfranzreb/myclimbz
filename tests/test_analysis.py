@@ -12,7 +12,6 @@ Useful commands when implementing tests:
 - Command to kill process on port: kill $(lsof -t -i:5000)
 """
 
-
 from multiprocessing import Process
 from time import sleep
 
@@ -22,7 +21,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from climbs.models import Area, Sector, Grade, Route
+from climbz.models import Area, Sector, Grade, Route
 from tests.conftest import run_app
 
 

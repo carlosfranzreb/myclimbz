@@ -5,7 +5,7 @@ import pytest
 from flask.testing import FlaskClient
 from selenium import webdriver
 
-from climbs import create_app
+from climbz import create_app
 
 
 @pytest.fixture()

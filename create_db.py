@@ -2,14 +2,13 @@
 Script to create the database and populate it with testing data.
 """
 
-
 from argparse import ArgumentParser
 from datetime import datetime
 import random
 
 from flask_sqlalchemy import SQLAlchemy
 
-from climbs import db, create_app, models
+from climbz import db, create_app, models
 
 
 ROCKS = [
