@@ -21,7 +21,9 @@ class RouteForm(FlaskForm):
     grade = SelectField("Grade", validators=[Optional()])
     grade_felt = SelectField("Grade felt", validators=[Optional()])
     height = FloatField("Height", validators=[Optional()])
-    inclination = IntegerField("Inclination", validators=[Optional()])
+    inclination = IntegerField(
+        "Inclination", validators=[Optional()], render_kw={"step": "5"}
+    )
     landing = IntegerField("Landing", validators=[Optional()])
     sit_start = BooleanField("Sit Start", validators=[Optional()])
     cruxes = SelectMultipleField(
@@ -159,7 +161,9 @@ class RouteForm(FlaskForm):
             sector = Sector(name=sector_name, area_id=area_id)
         return sector
 
-    def get_route_from_climb_form(self, sector: Sector = None) -> Route:
+    def get_route_from_climb_form(
+        self, sector: Sector = None, route: Route = None
+    ) -> Route:
         """
         This function is used when a new climb is added. It only checks the name field
         and returns a route object.
