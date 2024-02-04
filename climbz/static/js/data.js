@@ -34,7 +34,7 @@ function start_display(data, grades, session_date) {
     });
 
     // If session date is given, filter the data on the session date
-    if (session_date != null) {
+    if (session_date != "") {
         add_filter();
 
         // Create the filter and change it to "Date"
