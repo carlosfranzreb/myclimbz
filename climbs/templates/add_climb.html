@@ -2,6 +2,10 @@
 {% block content %}
 
 <!-- 
+        This template is used both for adding a new climb and for editing an existing one.
+        If an existing climb is editing, there is no route form, only the name, as the route
+        cannot be changed.
+
         Display the form for adding a new climb.
 
         - If is is an existing route, display only the route name and grade.
@@ -9,14 +13,23 @@
         - If it is a project, don't display the sent and n_attempts fields.
     -->
 
+
 {% if climb_form %}
+{% if not route_form %}
+<h2>Edit climb on {{ route_name }}</h2>
+{% else %}
 <h2>Log climb</h2>
+{% endif %}
+
 {% else %}
 <h2>Add project</h2>
 {% endif %}
 
 <div class="container">
     <form method="POST" style="margin: 40px;" onkeydown="return event.key != 'Enter';">
+
+
+        {% if route_form %}
         {{ route_form.hidden_tag() }}
 
         <div class="form-group">
@@ -54,15 +67,18 @@
             <option value="{{ sector_name }}"></option>
             {% endfor %}
         </datalist>
+        {% endif %}
 
         {% if climb_form %}
-        <h4>Climb</h4>
         {{ climb_form.hidden_tag() }}
 
+        {% if route_form %}
+        <h4>Climb</h4>
         <div id="isProject" class="form-group">
             <label for="{{ climb_form.is_project.id }}">{{ climb_form.is_project.label }}</label>
             {{ climb_form.is_project(id=climb_form.is_project.id, class='form-check') }}
         </div>
+        {% endif %}
 
         <div id="newClimbForm" class="container">
             <div class="form-group">
@@ -85,6 +101,7 @@
     </form>
 </div>
 
+{% if route_form %}
 <script>
     let route = document.querySelector("#{{ route_form.name.id }}");
     let newRouteForm = document.querySelector("#newRouteForm");
@@ -117,5 +134,6 @@
     }
 
 </script>
+{% endif %}
 
 {% endblock content %}

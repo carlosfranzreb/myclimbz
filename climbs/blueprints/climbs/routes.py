@@ -124,8 +124,32 @@ def add_climb() -> str:
 
 @climbs.route("/edit_climb/<int:climb_id>", methods=["GET", "POST"])
 def edit_climb(climb_id: int) -> str:
-    # TODO: implement this route
-    pass
+    climb = Climb.query.get(climb_id)
+    # POST: a climb form was submitted => edit climb or return error
+    if request.method == "POST":
+        climb_form = ClimbForm()
+        # remove the is_project field from the form
+        if not climb_form.validate():
+            return render_template(
+                "edit_climb.html",
+                climb_form=climb_form,
+                error=climb_form.errors,
+            )
+        climb.sent = climb_form.sent.data
+        climb.n_attempts = climb_form.n_attempts.data
+        db.session.commit()
+        return redirect(f"/session/{climb.session_id}")
+
+    # GET: the user wants to edit a climb
+    climb_form = ClimbForm(
+        n_attempts=climb.n_attempts,
+        sent=climb.sent,
+    )
+    return render_template(
+        "add_climb.html",
+        climb_form=climb_form,
+        route_name=climb.route.name,
+    )
 
 
 @climbs.route("/delete_climb/<int:climb_id>")
