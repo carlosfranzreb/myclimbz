@@ -55,12 +55,21 @@
                     <a class="nav-link" href="{{ url_for('sessions.add_session') }}">Start session</a>
                 </li>
                 {% endif %}
-                <li>
-                    <a class="nav-link" href="{{ url_for('sessions.table_sessions') }}">List sessions</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        Lists
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('sessions.table_sessions') }}">Sessions</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('areas.table_areas') }}">Areas</a></li>
+                    </ul>
                 </li>
             </ul>
         </div>
     </nav>
+
+
 
     {% if error %}
     <script>
@@ -118,7 +127,6 @@
     <script src="{{url_for('static', filename='js/filters/range.js')}}"></script>
     <script src="{{url_for('static', filename='js/filters/main.js')}}"></script>
     {% endif %}
-
 </body>
 
 </html>

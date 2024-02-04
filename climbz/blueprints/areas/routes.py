@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session as flask_session
+from flask import Blueprint, render_template
 from climbz.models import Area, Sector
 
 
@@ -7,19 +7,7 @@ areas = Blueprint("areas", __name__)
 
 @areas.route("/areas")
 def table_areas() -> str:
-    page = request.args.get("page", 1, type=int)
-    sort_column = request.args.get("sort_column", None, type=str)
-
-    if sort_column is not None:
-        attribute = getattr(Area, sort_column)
-        if flask_session.pop("last_sort_column", None) == sort_column:
-            attribute = attribute.desc()
-        else:
-            flask_session["last_sort_column"] = sort_column
-        page_areas = Area.query.order_by(attribute).paginate(page=1, per_page=20)
-    else:
-        page_areas = Area.query.paginate(page=page, per_page=20)
-    return render_template("areas.html", title="Areas", areas=page_areas)
+    return render_template("areas.html", title="Areas", areas=Area.query.all())
 
 
 @areas.route

@@ -1,38 +1,42 @@
 {% extends "main.html" %}
 {% block content %}
 
-    <!-- Possible additional columns: 
+<!-- Possible additional columns: 
         - avg. height/inclination/landing/conditions 
     -->
 
-    <table class="table table-striped">
+<h1>Areas</h1>
+
+<table id="content_table" class="table table-striped table-hover">
+    <thead>
         <tr>
-            <th>
-                <a class="action_icon icon" href="{{ url_for('areas.table_areas', sort_column=name) }}">Name</a>
-            </th>
-            {% for row_name in ["Rock Type", "# Sectors", "# Sessions", "# Routes"] %}
-                <th>{{ row_name }}</th>
+            {% for row_name in ["Name", "Rock Type", "# Sectors", "# Sessions", "# Routes"] %}
+            <th>{{ row_name }}</th>
             {% endfor %}
         </tr>
-        {% for area in areas.items %}
-            <tr onclick="window.location=&quot;{{ url_for('areas.page_area', area_id=area.id) }}&quot;">
-                <td>{{ area.name }}</td>
-                <td>{{ area.rock_type.name }}</td>
-                <td>{{ area.sectors|length }}</td>
-                <td>{{ area.sessions|length }}</td>
-                <td>{{ area.sectors|map(attribute='routes')|map('length')|sum }}</td>
-            </tr>
+    </thead>
+    <tbody>
+        {% for area in areas %}
+        <tr onclick="window.location=&quot;{{ url_for('areas.page_area', area_id=area.id) }}&quot;">
+            <td>{{ area.name }}</td>
+            <td>{{ area.rock_type.name }}</td>
+            <td>{{ area.sectors|length }}</td>
+            <td>{{ area.sessions|length }}</td>
+            <td>{{ area.sectors|map(attribute='routes')|map('length')|sum }}</td>
+        </tr>
         {% endfor %}
-    </table>
+    </tbody>
+</table>
 
-    <div>
-        {% if areas.has_prev %}
-            <a href="{{ url_for('show_areas', page=areas.prev_num) }}">Previous</a>
-        {% endif %}
-        Page {{ areas.page }} of {{ areas.pages }}
-        {% if areas.has_next %}
-            <a href="{{ url_for('show_areas', page=areas.next_num) }}">Next</a>
-        {% endif %}
-    </div>
+<script>
+    window.addEventListener('load', function () {
+        window.data_table = new DataTable("#content_table", {
+            perPage: 100,
+            perPageSelect: false,
+            searchable: false,
+            nextPrev: false,
+        });
+    });
+</script>
 
 {% endblock content %}
