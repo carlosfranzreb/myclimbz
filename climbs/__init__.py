@@ -20,10 +20,12 @@ def create_app(db_name: str):
     from climbs.blueprints.home.routes import home
     from climbs.blueprints.sessions.routes import sessions
     from climbs.blueprints.routes.routes import routes
+    from climbs.blueprints.climbs.routes import climbs
 
     app.register_blueprint(areas)
     app.register_blueprint(home)
     app.register_blueprint(sessions)
     app.register_blueprint(routes)
+    app.register_blueprint(climbs)
 
     return app

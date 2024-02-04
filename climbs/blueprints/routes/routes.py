@@ -21,9 +21,9 @@ def page_route(route_id: int) -> str:
 
 @routes.route("/edit_route/<int:route_id>", methods=["GET", "POST"])
 def edit_route(route_id: int) -> str:
-    route_form = RouteForm.create_empty()
 
     # POST: a route form was submitted => edit route or return error
+    route_form = RouteForm.create_empty()
     if request.method == "POST":
         if not route_form.validate():
             return render_template("route.html", title="Route", route_id=route_id)
