@@ -176,3 +176,6 @@
 	content: " ";
 	display: table;
 }
+
+/* Added by me */
+tr { cursor: pointer; }

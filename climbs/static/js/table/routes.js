@@ -4,7 +4,7 @@ function show_table() {
     // Create the table
     let table = d3.select("#content_div").append("table")
         .attr("id", "content_table")
-        .attr("class", "table table-striped");
+        .attr("class", "table table-striped table-hover");
 
     // Create the table head
     let thead = table.append("thead");
