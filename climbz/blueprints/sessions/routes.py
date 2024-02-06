@@ -43,8 +43,6 @@ def reopen_session(session_id: int) -> str:
 
 @sessions.route("/add_session", methods=["GET", "POST"])
 def add_session() -> str:
-    area_names = [area.name for area in Area.query.order_by(Area.name).all()]
-
     # POST: a session form was submitted => create session or return error
     if request.method == "POST":
         session_form = SessionForm.create_empty()
@@ -83,13 +81,12 @@ def add_session() -> str:
     return render_template(
         "add_session.html",
         session_form=session_form,
-        area_names=area_names,
+        area_names=[area.name for area in Area.query.order_by(Area.name).all()],
     )
 
 
 @sessions.route("/edit_session/<int:session_id>", methods=["GET", "POST"])
 def edit_session(session_id: int) -> str:
-    area_names = [area.name for area in Area.query.order_by(Area.name).all()]
     session = Session.query.get(session_id)
 
     # POST: a session form was submitted => create session or return error
@@ -119,5 +116,5 @@ def edit_session(session_id: int) -> str:
     return render_template(
         "add_session.html",
         session_form=session_form,
-        area_names=area_names,
+        area_names=[area.name for area in Area.query.order_by(Area.name).all()],
     )

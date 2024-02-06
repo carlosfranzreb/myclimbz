@@ -22,17 +22,32 @@ def page_route(route_id: int) -> str:
 @routes.route("/edit_route/<int:route_id>", methods=["GET", "POST"])
 def edit_route(route_id: int) -> str:
 
+    route = Route.query.get(route_id)
     # POST: a route form was submitted => edit route or return error
     route_form = RouteForm.create_empty()
     if request.method == "POST":
         if not route_form.validate():
             return render_template("route.html", title="Route", route_id=route_id)
+
+        # if the name has changed, check if it already exists
+        if route_form.name.data != route.name:
+            if Route.query.filter_by(name=route_form.name.data).first() is not None:
+                return render_template(
+                    "edit_route.html",
+                    route_form=route_form,
+                    error="A route with that name already exists.",
+                )
+
         route = route_form.get_edited_route(route_id)
         db.session.add(route)
         db.session.commit()
         return redirect(url_for("routes.page_route", route_id=route.id))
 
     # GET: return the edit route page
-    route = Route.query.get(route_id)
     route_form = RouteForm.create_from_obj(route)
     return render_template("edit_route.html", title="Edit Route", route_form=route_form)
+
+
+@routes.route("/delete_route/<int:route_id>", methods=["GET", "POST"])
+def delete_route(route_id: int) -> str:
+    return redirect(url_for("routes.page_route", route_id=route_id))
