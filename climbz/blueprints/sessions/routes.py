@@ -32,7 +32,7 @@ def page_session(session_id: int) -> str:
 def stop_session() -> str:
     flask_session["session_id"] = -1
     flask_session["project_ids"] = list()
-    return redirect("/")
+    return redirect(flask_session.pop("call_from_url"))
 
 
 @sessions.route("/reopen_session/<int:session_id>", methods=["GET", "POST"])
