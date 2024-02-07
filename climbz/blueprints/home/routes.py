@@ -10,7 +10,7 @@ from flask import (
 import whisper
 
 from climbz.ner import transcribe, parse_climb, ClimbsModel
-from climbz.models import Session, Route, Grade
+from climbz.models import Route, Grade
 from climbz.blueprints.render import render
 
 
