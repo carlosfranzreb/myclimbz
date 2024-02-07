@@ -35,6 +35,11 @@
                 <a href="{{ url_for('sessions.delete_session', session_id=session.id) }}">
                     {% include 'icons/delete.html' %}
                 </a>
+                {% if not open_session %}
+                <a href="{{ url_for('sessions.reopen_session', session_id=session.id) }}">
+                    {% include 'icons/reopen.html' %}
+                </a>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}
