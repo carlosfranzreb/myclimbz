@@ -69,7 +69,9 @@ def edit_area(area_id: int) -> str:
     )
 
 
-@areas.route("/edit_area/<int:area_id>", methods=["GET", "POST"])
+@areas.route("/delete_area/<int:area_id>", methods=["GET", "POST"])
 def delete_area(area_id: int) -> str:
-    # TODO: mark as deleted instead of deleting
+    area = Area.query.get(area_id)
+    db.session.delete(area)
+    db.session.commit()
     return redirect(flask_session.pop("call_from_url"))

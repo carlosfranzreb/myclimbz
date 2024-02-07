@@ -155,7 +155,6 @@ def edit_climb(climb_id: int) -> str:
 @climbs.route("/delete_climb/<int:climb_id>")
 def delete_climb(climb_id: int) -> str:
     climb = Climb.query.get(climb_id)
-    session_id = climb.session_id
     db.session.delete(climb)
     db.session.commit()
-    return redirect(f"/session/{session_id}")
+    return redirect(flask_session.pop("call_from_url"))

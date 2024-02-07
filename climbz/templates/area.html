@@ -33,21 +33,25 @@
 <div class="container">
     <h3>Routes</h3>
 
-    <table class="table table-striped table-hover">
+    <table id="content_table" class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Route</th>
+                <th>Sector</th>
+                <th>Grade</th>
+                <th>Sent</th>
+                <th>Actions</th>
+            </tr>
+            {% for sector in area.sectors %}
+            {% for route in sector.routes %}
+            {% set onclick = "window.location=\"" + url_for('routes.page_route', route_id=route.id) + "\"" %}
+        </thead>
+        </tbody>
         <tr>
-            <th>Route</th>
-            <th>Sector</th>
-            <th>Grade</th>
-            <th>Sent</th>
-            <th>Actions</th>
-        </tr>
-        {% for sector in area.sectors %}
-        {% for route in sector.routes %}
-        <tr onclick="window.location=&quot;{{ url_for('routes.page_route', route_id=route.id) }}&quot;">
-            <td>{{ route.name }}</td>
-            <td>{{ route.sector.name }}</td>
-            <td>{{ route.grade.font }} / {{ route.grade.hueco }}</td>
-            <td>{{ route.sent }}</td>
+            <td onclick={{ onclick }}>{{ route.name }}</td>
+            <td onclick={{ onclick }}>{{ route.sector.name }}</td>
+            <td onclick={{ onclick }}>{{ route.grade.font }} / {{ route.grade.hueco }}</td>
+            <td onclick={{ onclick }}>{{ route.sent }}</td>
             <td>
                 <a href="{{ url_for('routes.edit_route', route_id=route.id) }}">
                     {% include 'icons/edit.html' %}
@@ -59,7 +63,20 @@
         </tr>
         {% endfor %}
         {% endfor %}
+        </tbody>
     </table>
 </div>
+
+<script>
+    // TODO: this is not working
+    window.addEventListener('load', function () {
+        window.data_table = new DataTable("#content_table", {
+            perPage: 100,
+            perPageSelect: false,
+            searchable: true,
+            nextPrev: false,
+        });
+    });
+</script>
 
 {% endblock content %}

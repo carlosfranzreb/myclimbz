@@ -31,11 +31,11 @@
 </div>
 
 <div class="container">
-    <div class="row">
-        <div class="col-xs-12 center-block text-center">
-            <a href="{{ url_for('sessions.edit_session', session_id=session.id) }}" class="btn btn-primary">Edit
-                session</a>
-        </div>
+    <div class="col-xs-12 center-block text-center">
+        <a href="{{ url_for('sessions.edit_session', session_id=session.id) }}" class="btn btn-primary">Edit
+            session</a>
+        <a href="{{ url_for('sessions.delete_session', session_id=session.id) }}" class="btn btn-danger">Delete
+            session</a>
     </div>
 </div>
 
@@ -52,12 +52,13 @@
             <th>Actions</th>
         </tr>
         {% for climb in session.climbs %}
+        {% set onclick = "window.location=\"" + url_for('routes.page_route', route_id=climb.route.id) + "\"" %}
         <tr onclick="window.location=&quot;{{ url_for('routes.page_route', route_id=climb.route.id) }}&quot;">
-            <td>{{ climb.route.name }}</td>
-            <td>{{ climb.route.sector.name }}</td>
-            <td>{{ climb.route.sector.area.name }}</td>
-            <td>{{ climb.n_attempts }}</td>
-            <td>{{ climb.sent }}</td>
+            <td onclick={{ onclick }}>{{ climb.route.name }}</td>
+            <td onclick={{ onclick }}>{{ climb.route.sector.name }}</td>
+            <td onclick={{ onclick }}>{{ climb.route.sector.area.name }}</td>
+            <td onclick={{ onclick }}>{{ climb.n_attempts }}</td>
+            <td onclick={{ onclick }}>{{ climb.sent }}</td>
             <td>
                 <a href="{{ url_for('climbs.edit_climb', climb_id=climb.id) }}">
                     {% include 'icons/edit.html' %}
@@ -70,18 +71,5 @@
         {% endfor %}
     </table>
 </div>
-
-<script>
-    // If the user clicks on the button to delete a climb, a confirmation dialog is shown
-    let deleteButtons = document.querySelectorAll("a[href*='delete_climb']");
-    for (let deleteButton of deleteButtons) {
-        deleteButton.addEventListener("click", function (event) {
-            if (!confirm("Are you sure you want to delete this climb?")) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-        });
-    }
-</script>
 
 {% endblock content %}

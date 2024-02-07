@@ -21,12 +21,13 @@
     </thead>
     <tbody>
         {% for session in sessions %}
-        <tr onclick="window.location=&quot;{{ url_for('sessions.page_session', session_id=session.id) }}&quot;">
-            <td>{{ session.date }}</td>
-            <td>{{ session.area.name }}</td>
-            <td>{{ session.conditions }}</td>
-            <td>{{ session.climbs|length }}</td>
-            <td>{{ session.climbs|map(attribute='sent')|sum }}</td>
+        {% set onclick = "window.location=\"" + url_for('sessions.page_session', session_id=session.id) + "\"" %}
+        <tr>
+            <td onclick={{ onclick }}>{{ session.date }}</td>
+            <td onclick={{ onclick }}>{{ session.area.name }}</td>
+            <td onclick={{ onclick }}>{{ session.conditions }}</td>
+            <td onclick={{ onclick }}>{{ session.climbs|length }}</td>
+            <td onclick={{ onclick }}>{{ session.climbs|map(attribute='sent')|sum }}</td>
             <td>
                 <a href="{{ url_for('sessions.edit_session', session_id=session.id) }}">
                     {% include 'icons/edit.html' %}

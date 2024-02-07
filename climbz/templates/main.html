@@ -105,8 +105,9 @@
         crossorigin="anonymous"></script>
     <script src="{{url_for('static', filename='js/table/vanilla-dataTables.js')}}" type="text/javascript"></script>
 
-    <!-- Scripts for recording -->
+    <!-- Scripts for recording & confirming deletes -->
     <script src="{{url_for('static', filename='js/logging/record.js')}}"></script>
+    <script src="{{url_for('static', filename='js/confirm_deletion.js')}}"></script>
 
     <!-- Scripts for routes -->
     {% if title == "Routes" %}

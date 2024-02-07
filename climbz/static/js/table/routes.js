@@ -22,11 +22,14 @@ function show_table() {
     // Create the table body
     let tbody = table.append("tbody");
 
-    // Create the rows
+    // Create the rows with onclick attribute
     let rows = tbody.selectAll("tr")
         .data(DISPLAYED_DATA)
         .enter()
-        .append("tr");
+        .append("tr")
+        .attr("onclick", function (d) {
+            return "window.location = '/route/" + d.id + "';";
+        });
 
     // Add the cells to the rows
     rows.append("td").text(d => d.name);

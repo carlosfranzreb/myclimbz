@@ -17,12 +17,13 @@
     </thead>
     <tbody>
         {% for area in areas %}
-        <tr onclick="window.location=&quot;{{ url_for('areas.page_area', area_id=area.id) }}&quot;">
-            <td>{{ area.name }}</td>
-            <td>{{ area.rock_type.name }}</td>
-            <td>{{ area.sectors|length }}</td>
-            <td>{{ area.sessions|length }}</td>
-            <td>{{ area.sectors|map(attribute='routes')|map('length')|sum }}</td>
+        {% set onclick = "window.location=\"" + url_for('areas.page_area', area_id=area.id) + "\"" %}
+        <tr>
+            <td onclick={{ onclick }}>{{ area.name }}</td>
+            <td onclick={{ onclick }}>{{ area.rock_type.name }}</td>
+            <td onclick={{ onclick }}>{{ area.sectors|length }}</td>
+            <td onclick={{ onclick }}>{{ area.sessions|length }}</td>
+            <td onclick={{ onclick }}>{{ area.sectors|map(attribute='routes')|map('length')|sum }}</td>
             <td>
                 <a href="{{ url_for('areas.edit_area', area_id=area.id) }}">
                     {% include 'icons/edit.html' %}
