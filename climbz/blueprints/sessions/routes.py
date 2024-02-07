@@ -48,7 +48,9 @@ def add_session() -> str:
         session_form = SessionForm.create_empty()
         if not session_form.validate():
             flask_session["error"] = session_form.errors
-            return render("add_session.html", session_form=session_form)
+            return render(
+                "add_session.html", title="Add session", session_form=session_form
+            )
 
         # if new_area, create new area; otherwise, get existing area
         area = session_form.get_area()
@@ -77,6 +79,7 @@ def add_session() -> str:
 
     return render(
         "add_session.html",
+        title="Add session",
         session_form=session_form,
         area_names=[area.name for area in Area.query.order_by(Area.name).all()],
     )
@@ -91,7 +94,9 @@ def edit_session(session_id: int) -> str:
         session_form = SessionForm.create_empty()
         if not session_form.validate():
             flask_session["error"] = session_form.errors
-            return render("add_session.html", session_form=session_form)
+            return render(
+                "add_session.html", title="Edit session", session_form=session_form
+            )
 
         # if new_area, create new area; otherwise, get existing area
         area = session_form.get_area()
@@ -109,6 +114,7 @@ def edit_session(session_id: int) -> str:
     session_form = SessionForm.create_from_object(session)
     return render(
         "add_session.html",
+        title="Edit session",
         session_form=session_form,
         area_names=[area.name for area in Area.query.order_by(Area.name).all()],
     )

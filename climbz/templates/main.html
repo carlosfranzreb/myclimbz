@@ -24,6 +24,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
+        {% if not "Add" in title and not "Edit" in title %}
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
@@ -38,7 +39,7 @@
 
                 </li>
 
-                {% if open_session%}
+                {% if open_session %}
                 <li><a class="nav-link" href="{{ url_for('climbs.add_climb') }}">Add climb</a></li>
                 <li>
                     <a class="nav-link" href="{{ url_for('sessions.stop_session') }}">
@@ -67,6 +68,7 @@
                 </li>
             </ul>
         </div>
+        {% endif %}
     </nav>
 
 

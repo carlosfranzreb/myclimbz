@@ -37,7 +37,10 @@ def add_climb() -> str:
         if not route_form.validate() or invalid_climb:
             flask_session["error"] = route_form.errors or climb_form.errors
             return render(
-                "add_climb.html", climb_form=climb_form, route_form=route_form
+                "add_climb.html",
+                title="Add climb",
+                climb_form=climb_form,
+                route_form=route_form,
             )
 
         # create new sector and new route if necessary
@@ -113,6 +116,7 @@ def add_climb() -> str:
 
     return render(
         "add_climb.html",
+        title="Add climb",
         route_form=route_form,
         climb_form=climb_form,
         route_names=route_names,
@@ -129,7 +133,7 @@ def edit_climb(climb_id: int) -> str:
         # remove the is_project field from the form
         if not climb_form.validate():
             flask_session["error"] = climb_form.errors
-            return render("edit_climb.html", climb_form=climb_form)
+            return render("edit_climb.html", title="Edit climb", climb_form=climb_form)
         climb.sent = climb_form.sent.data
         climb.n_attempts = climb_form.n_attempts.data
         db.session.commit()
@@ -140,7 +144,12 @@ def edit_climb(climb_id: int) -> str:
         n_attempts=climb.n_attempts,
         sent=climb.sent,
     )
-    return render("add_climb.html", climb_form=climb_form, route_name=climb.route.name)
+    return render(
+        "add_climb.html",
+        title="Edit climb",
+        climb_form=climb_form,
+        route_name=climb.route.name,
+    )
 
 
 @climbs.route("/delete_climb/<int:climb_id>")

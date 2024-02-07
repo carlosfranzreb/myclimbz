@@ -37,7 +37,7 @@ def edit_area(area_id: int) -> str:
     if request.method == "POST":
         if not area_form.validate():
             flask_session["error"] = area_form.errors
-            return render("edit_area.html", area_form=area_form)
+            return render("edit_area.html", title="Edit area", area_form=area_form)
 
         # if the name has changed, check if it already exists
         if area_form.name.data != area.name:
@@ -57,6 +57,7 @@ def edit_area(area_id: int) -> str:
     )
     return render(
         "edit_area.html",
+        title="Edit area",
         area_form=area_form,
         area_names=[area.name for area in Area.query.order_by(Area.name).all()],
     )
