@@ -1,14 +1,13 @@
 from flask import (
     Blueprint,
-    render_template,
     redirect,
-    url_for,
     request,
     session as flask_session,
 )
 from climbz.models import Area
 from climbz.forms import AreaForm
 from climbz import db
+from climbz.blueprints.render import render
 
 
 areas = Blueprint("areas", __name__)
@@ -17,7 +16,7 @@ areas = Blueprint("areas", __name__)
 @areas.route("/areas")
 def table_areas() -> str:
     flask_session["call_from_url"] = "/areas"
-    return render_template("areas.html", title="Areas", areas=Area.query.all())
+    return render("areas.html", title="Areas", areas=Area.query.all())
 
 
 @areas.route
@@ -25,7 +24,7 @@ def table_areas() -> str:
 def page_area(area_id: int) -> str:
     area = Area.query.get(area_id)
     flask_session["call_from_url"] = f"/area/{area_id}"
-    return render_template("area.html", area=area)
+    return render("area.html", area=area)
 
 
 @areas.route("/edit_area/<int:area_id>", methods=["GET", "POST"])
@@ -37,20 +36,14 @@ def edit_area(area_id: int) -> str:
     # POST: an area form was submitted => edit area or return error
     if request.method == "POST":
         if not area_form.validate():
-            return render_template(
-                "edit_area.html",
-                area_form=area_form,
-                error=area_form.errors,
-            )
+            flask_session["error"] = area_form.errors
+            return render("edit_area.html", area_form=area_form)
 
         # if the name has changed, check if it already exists
         if area_form.name.data != area.name:
             if Area.query.filter_by(name=area_form.name.data).first() is not None:
-                return render_template(
-                    "edit_area.html",
-                    area_form=area_form,
-                    error="An area with that name already exists.",
-                )
+                flask_session["error"] = "An area with that name already exists."
+                return render("edit_area.html", area_form=area_form)
 
         area.name = area_form.name.data
         area.rock_type_id = int(area_form.rock_type.data)
@@ -62,7 +55,7 @@ def edit_area(area_id: int) -> str:
     area_form.rock_type.data = (
         str(area.rock_type.id) if area.rock_type is not None else 0
     )
-    return render_template(
+    return render(
         "edit_area.html",
         area_form=area_form,
         area_names=[area.name for area in Area.query.order_by(Area.name).all()],

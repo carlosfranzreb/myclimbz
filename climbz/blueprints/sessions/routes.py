@@ -1,6 +1,5 @@
 from flask import (
     Blueprint,
-    render_template,
     redirect,
     request,
     session as flask_session,
@@ -10,6 +9,7 @@ from climbz.models import Area, Session
 from climbz.forms import SessionForm
 from climbz import db
 from climbz.ner.tracking import dump_predictions
+from climbz.blueprints.render import render
 
 
 sessions = Blueprint("sessions", __name__)
@@ -18,16 +18,14 @@ sessions = Blueprint("sessions", __name__)
 @sessions.route("/sessions")
 def table_sessions() -> str:
     flask_session["call_from_url"] = "/sessions"
-    return render_template(
-        "sessions.html", title="Sessions", sessions=Session.query.all()
-    )
+    return render("sessions.html", title="Sessions", sessions=Session.query.all())
 
 
 @sessions.route("/session/<int:session_id>")
 def page_session(session_id: int) -> str:
     session = Session.query.get(session_id)
     flask_session["call_from_url"] = f"/session/{session_id}"
-    return render_template("session.html", session=session)
+    return render("session.html", session=session)
 
 
 @sessions.route("/stop_session", methods=["GET", "POST"])
@@ -49,11 +47,8 @@ def add_session() -> str:
     if request.method == "POST":
         session_form = SessionForm.create_empty()
         if not session_form.validate():
-            return render_template(
-                "add_session.html",
-                session_form=session_form,
-                error=session_form.errors,
-            )
+            flask_session["error"] = session_form.errors
+            return render("add_session.html", session_form=session_form)
 
         # if new_area, create new area; otherwise, get existing area
         area = session_form.get_area()
@@ -80,7 +75,7 @@ def add_session() -> str:
         flask_session["entities"] = dict()
     session_form = SessionForm.create_from_entities(flask_session["entities"])
 
-    return render_template(
+    return render(
         "add_session.html",
         session_form=session_form,
         area_names=[area.name for area in Area.query.order_by(Area.name).all()],
@@ -95,11 +90,8 @@ def edit_session(session_id: int) -> str:
     if request.method == "POST":
         session_form = SessionForm.create_empty()
         if not session_form.validate():
-            return render_template(
-                "add_session.html",
-                session_form=session_form,
-                error=session_form.errors,
-            )
+            flask_session["error"] = session_form.errors
+            return render("add_session.html", session_form=session_form)
 
         # if new_area, create new area; otherwise, get existing area
         area = session_form.get_area()
@@ -115,7 +107,7 @@ def edit_session(session_id: int) -> str:
 
     # GET: the user wants to edit the session
     session_form = SessionForm.create_from_object(session)
-    return render_template(
+    return render(
         "add_session.html",
         session_form=session_form,
         area_names=[area.name for area in Area.query.order_by(Area.name).all()],

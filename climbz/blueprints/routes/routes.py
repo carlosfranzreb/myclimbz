@@ -1,6 +1,5 @@
 from flask import (
     Blueprint,
-    render_template,
     request,
     url_for,
     redirect,
@@ -9,6 +8,7 @@ from flask import (
 from climbz.models import Route
 from climbz.forms import RouteForm
 from climbz import db
+from climbz.blueprints.render import render
 
 routes = Blueprint("routes", __name__)
 FILE = "src/static/data/boulders.csv"
@@ -18,14 +18,14 @@ FILE = "src/static/data/boulders.csv"
 def table_routes() -> str:
     page_routes = Route.query.all()
     flask_session["call_from_url"] = "/routes"
-    return render_template("routes.html", title="Routes", routes=page_routes)
+    return render("routes.html", title="Routes", routes=page_routes)
 
 
 @routes.route("/route/<int:route_id>")
 def page_route(route_id: int) -> str:
     flask_session["call_from_url"] = f"/route/{route_id}"
     route = Route.query.get(route_id)
-    return render_template("route.html", route=route)
+    return render("route.html", route=route)
 
 
 @routes.route("/edit_route/<int:route_id>", methods=["GET", "POST"])
@@ -36,16 +36,13 @@ def edit_route(route_id: int) -> str:
     route_form = RouteForm.create_empty()
     if request.method == "POST":
         if not route_form.validate():
-            return render_template("route.html", title="Route", route_id=route_id)
+            return render("route.html", title="Route", route_id=route_id)
 
         # if the name has changed, check if it already exists
         if route_form.name.data != route.name:
             if Route.query.filter_by(name=route_form.name.data).first() is not None:
-                return render_template(
-                    "edit_route.html",
-                    route_form=route_form,
-                    error="A route with that name already exists.",
-                )
+                flask_session["error"] = "A route with that name already exists."
+                return render("edit_route.html", route_form=route_form)
 
         route = route_form.get_edited_route(route_id)
         db.session.add(route)
@@ -54,7 +51,7 @@ def edit_route(route_id: int) -> str:
 
     # GET: return the edit route page
     route_form = RouteForm.create_from_obj(route)
-    return render_template("edit_route.html", title="Edit Route", route_form=route_form)
+    return render("edit_route.html", title="Edit Route", route_form=route_form)
 
 
 @routes.route("/delete_route/<int:route_id>", methods=["GET", "POST"])

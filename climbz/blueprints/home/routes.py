@@ -3,7 +3,6 @@ from time import time
 
 from flask import (
     Blueprint,
-    render_template,
     redirect,
     request,
     session as flask_session,
@@ -12,6 +11,7 @@ import whisper
 
 from climbz.ner import transcribe, parse_climb, ClimbsModel
 from climbz.models import Session, Route, Grade
+from climbz.blueprints.render import render
 
 
 ASR_MODEL = whisper.load_model("small.en")
@@ -54,15 +54,9 @@ def page_home() -> str:
             return redirect("/add_session")
 
     # GET: no audio file was uploaded => show home page
-    if current_session_id > 0:
-        session = Session.query.get(current_session_id)
-    else:
-        session = None
-    return render_template(
+    return render(
         "data.html",
         title="Routes",
-        open_session=session,
-        error=flask_session.pop("error", None),
         routes=routes_dict,
         grades=grades_dict,
     )

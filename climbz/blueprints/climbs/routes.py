@@ -1,6 +1,5 @@
 from flask import (
     Blueprint,
-    render_template,
     redirect,
     request,
     session as flask_session,
@@ -11,6 +10,7 @@ from climbz.models import Climb, Session, Sector
 from climbz.forms import ClimbForm, RouteForm
 from climbz import db
 from climbz.ner.tracking import dump_predictions
+from climbz.blueprints.render import render
 
 
 climbs = Blueprint("climbs", __name__)
@@ -35,11 +35,9 @@ def add_climb() -> str:
     if request.method == "POST":
         invalid_climb = not climb_form.validate() if climb_form is not None else False
         if not route_form.validate() or invalid_climb:
-            return render_template(
-                "add_climb.html",
-                climb_form=climb_form,
-                route_form=route_form,
-                error=route_form.errors or climb_form.errors,
+            flask_session["error"] = route_form.errors or climb_form.errors
+            return render(
+                "add_climb.html", climb_form=climb_form, route_form=route_form
             )
 
         # create new sector and new route if necessary
@@ -113,7 +111,7 @@ def add_climb() -> str:
         routes += sector.routes
     route_names = sorted([route.name for route in routes])
 
-    return render_template(
+    return render(
         "add_climb.html",
         route_form=route_form,
         climb_form=climb_form,
@@ -130,11 +128,8 @@ def edit_climb(climb_id: int) -> str:
         climb_form = ClimbForm()
         # remove the is_project field from the form
         if not climb_form.validate():
-            return render_template(
-                "edit_climb.html",
-                climb_form=climb_form,
-                error=climb_form.errors,
-            )
+            flask_session["error"] = climb_form.errors
+            return render("edit_climb.html", climb_form=climb_form)
         climb.sent = climb_form.sent.data
         climb.n_attempts = climb_form.n_attempts.data
         db.session.commit()
@@ -145,11 +140,7 @@ def edit_climb(climb_id: int) -> str:
         n_attempts=climb.n_attempts,
         sent=climb.sent,
     )
-    return render_template(
-        "add_climb.html",
-        climb_form=climb_form,
-        route_name=climb.route.name,
-    )
+    return render("add_climb.html", climb_form=climb_form, route_name=climb.route.name)
 
 
 @climbs.route("/delete_climb/<int:climb_id>")
