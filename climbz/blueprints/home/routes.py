@@ -73,4 +73,4 @@ def cancel_form() -> None:
     """Cancel the addition of a session."""
     flask_session.pop("entities", None)
     flask_session.pop("predictions", None)
-    return redirect("/")
+    return redirect(flask_session.pop("call_from_url"))
