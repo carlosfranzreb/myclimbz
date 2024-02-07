@@ -21,13 +21,13 @@ class Route(db.Model):
     height = db.Column(db.Integer)
     landing = db.Column(db.Integer)
     inclination = db.Column(db.Integer)
-    sector_id = db.Column(db.Integer, db.ForeignKey("sector.id"))
-    sector = db.relationship("Sector", backref="routes")
     cruxes = db.relationship(
         "Crux",
         secondary=route_crux_association,
         backref=db.backref("routes", lazy="dynamic"),
     )
+    sector_id = db.Column(db.Integer, db.ForeignKey("sector.id"))
+    climbs = db.relationship("Climb", backref="route", cascade="all, delete")
 
     @property
     def sent(self) -> bool:
@@ -50,6 +50,7 @@ class Route(db.Model):
             dates.append(climb.session.date)
 
         return {
+            "id": self.id,
             "name": self.name,
             "sector": self.sector.name,
             "area": self.sector.area.name,

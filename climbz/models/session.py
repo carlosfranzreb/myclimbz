@@ -6,5 +6,5 @@ class Session(db.Model):
     date = db.Column(db.Date)
     conditions = db.Column(db.Integer)
     is_project_search = db.Column(db.Boolean, nullable=False, default=False)
-    area_id = db.Column(db.Integer, db.ForeignKey("area.id"), nullable=False)
-    area = db.relationship("Area", backref="sessions")
+    climbs = db.relationship("Climb", backref="session", cascade="all, delete")
+    area_id = db.Column(db.Integer, db.ForeignKey("area.id"))
