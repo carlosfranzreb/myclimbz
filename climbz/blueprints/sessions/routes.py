@@ -40,7 +40,7 @@ def stop_session() -> str:
 @sessions.route("/reopen_session/<int:session_id>", methods=["GET", "POST"])
 def reopen_session(session_id: int) -> str:
     flask_session["session_id"] = session_id
-    return redirect("/")
+    return redirect(flask_session.pop("call_from_url"))
 
 
 @sessions.route("/add_session", methods=["GET", "POST"])
