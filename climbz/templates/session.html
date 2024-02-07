@@ -34,7 +34,9 @@
     <div class="col-xs-12 center-block text-center">
         <a href="{{ url_for('sessions.edit_session', session_id=session.id) }}" class="btn btn-primary">Edit</a>
         <a href="{{ url_for('sessions.delete_session', session_id=session.id) }}" class="btn btn-danger">Delete</a>
+        {% if not open_session %}
         <a href="{{ url_for('sessions.reopen_session', session_id=session.id) }}" class="btn btn-success">Re-open</a>
+        {% endif %}
     </div>
 </div>
 
