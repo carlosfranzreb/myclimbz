@@ -10,7 +10,7 @@
 <table id="content_table" class="table table-striped table-hover">
     <thead>
         <tr>
-            {% for row_name in ["Name", "Rock Type", "# Sectors", "# Sessions", "# Routes"] %}
+            {% for row_name in ["Name", "Rock Type", "# Sectors", "# Sessions", "# Routes", "Actions"] %}
             <th>{{ row_name }}</th>
             {% endfor %}
         </tr>
@@ -23,6 +23,14 @@
             <td>{{ area.sectors|length }}</td>
             <td>{{ area.sessions|length }}</td>
             <td>{{ area.sectors|map(attribute='routes')|map('length')|sum }}</td>
+            <td>
+                <a href="{{ url_for('areas.edit_area', area_id=area.id) }}">
+                    {% include 'icons/edit.html' %}
+                </a>
+                <a href="{{ url_for('areas.delete_area', area_id=area.id) }}">
+                    {% include 'icons/delete.html' %}
+                </a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>

@@ -17,6 +17,7 @@ sessions = Blueprint("sessions", __name__)
 
 @sessions.route("/sessions")
 def table_sessions() -> str:
+    flask_session["call_from_url"] = "/sessions"
     return render_template(
         "sessions.html", title="Sessions", sessions=Session.query.all()
     )
@@ -25,6 +26,7 @@ def table_sessions() -> str:
 @sessions.route("/session/<int:session_id>")
 def page_session(session_id: int) -> str:
     session = Session.query.get(session_id)
+    flask_session["call_from_url"] = f"/session/{session_id}"
     return render_template("session.html", session=session)
 
 
@@ -109,7 +111,7 @@ def edit_session(session_id: int) -> str:
         # edit session with the new data
         session = session_form.get_object(area_id, session)
         db.session.commit()
-        return redirect(f"/session/{session.id}")
+        return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit the session
     session_form = SessionForm.create_from_object(session)
@@ -118,3 +120,11 @@ def edit_session(session_id: int) -> str:
         session_form=session_form,
         area_names=[area.name for area in Area.query.order_by(Area.name).all()],
     )
+
+
+@sessions.route("/delete_session/<int:session_id>", methods=["GET", "POST"])
+def delete_session(session_id: int) -> str:
+    session = Session.query.get(session_id)
+    db.session.delete(session)
+    db.session.commit()
+    return redirect(flask_session.pop("call_from_url"))

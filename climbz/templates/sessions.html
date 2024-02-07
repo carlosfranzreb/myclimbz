@@ -16,6 +16,7 @@
             <th>Conditions</th>
             <th># Routes</th>
             <th># Sends</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -26,6 +27,14 @@
             <td>{{ session.conditions }}</td>
             <td>{{ session.climbs|length }}</td>
             <td>{{ session.climbs|map(attribute='sent')|sum }}</td>
+            <td>
+                <a href="{{ url_for('sessions.edit_session', session_id=session.id) }}">
+                    {% include 'icons/edit.html' %}
+                </a>
+                <a href="{{ url_for('sessions.delete_session', session_id=session.id) }}">
+                    {% include 'icons/delete.html' %}
+                </a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>

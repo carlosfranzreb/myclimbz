@@ -1,4 +1,11 @@
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import (
+    Blueprint,
+    render_template,
+    redirect,
+    url_for,
+    request,
+    session as flask_session,
+)
 from climbz.models import Area
 from climbz.forms import AreaForm
 from climbz import db
@@ -9,6 +16,7 @@ areas = Blueprint("areas", __name__)
 
 @areas.route("/areas")
 def table_areas() -> str:
+    flask_session["call_from_url"] = "/areas"
     return render_template("areas.html", title="Areas", areas=Area.query.all())
 
 
@@ -16,6 +24,7 @@ def table_areas() -> str:
 @areas.route("/area/<int:area_id>")
 def page_area(area_id: int) -> str:
     area = Area.query.get(area_id)
+    flask_session["call_from_url"] = f"/area/{area_id}"
     return render_template("area.html", area=area)
 
 
@@ -46,7 +55,7 @@ def edit_area(area_id: int) -> str:
         area.name = area_form.name.data
         area.rock_type_id = int(area_form.rock_type.data)
         db.session.commit()
-        return redirect(url_for("areas.page_area", area_id=area_id))
+        return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit an area
     area_form.name.data = area.name
@@ -62,4 +71,5 @@ def edit_area(area_id: int) -> str:
 
 @areas.route("/edit_area/<int:area_id>", methods=["GET", "POST"])
 def delete_area(area_id: int) -> str:
-    return redirect(url_for("areas.page_area", area_id=area_id))
+    # TODO: mark as deleted instead of deleting
+    return redirect(flask_session.pop("call_from_url"))
