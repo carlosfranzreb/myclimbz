@@ -1,4 +1,7 @@
+from sqlalchemy import event
+
 from climbz import db
+from climbz.models import Sector
 
 
 class Area(db.Model):
@@ -18,3 +21,13 @@ class Area(db.Model):
     def n_sent_routes(self) -> int:
         """Return the number of sent routes in all sectors of this area."""
         return sum(sector.n_sent_routes for sector in self.sectors)
+
+
+@event.listens_for(Sector, "after_delete")
+def after_sector_deletion(mapper, connection, target) -> None:
+    """
+    When a sector is deleted, delete the area as well if it has no sectors left.
+    """
+    area = target.area
+    if not area.sectors:
+        db.session.delete(area)
