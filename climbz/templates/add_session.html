@@ -1,0 +1,86 @@
+{% extends "main.html" %}
+{% block content %}
+
+<!-- 
+        Display the form for adding a new session.
+    -->
+
+<h2>Start Session</h2>
+
+<form method="POST" style="margin: 40px;" onkeydown="return event.key != 'Enter';">
+    {{ session_form.hidden_tag() }}
+
+    <div class="form-group">
+        <label for="{{ session_form.area.id }}">{{ session_form.area.label }}</label>
+        {{ session_form.area(id=session_form.area.id, class='form-control', list='existingAreas', autocomplete='off') }}
+        <datalist id="existingAreas">
+            {% for area_name in area_names %}
+            <option value="{{ area_name }}"></option>
+            {% endfor %}
+        </datalist>
+    </div>
+
+    <div id="rock-type-container" class="form-group">
+        <label for="{{ session_form.rock_type.id }}">{{ session_form.rock_type.label }}</label>
+        {{ session_form.rock_type(id=session_form.rock_type.id, class='form-control') }}
+    </div>
+
+    <div id="date-container" class="form-group">
+        <label for="{{ session_form.date.id }}">{{ session_form.date.label }}</label>
+        {{ session_form.date(id=session_form.date.id, class='form-control') }}
+    </div>
+
+    <div id="conditions-container" class="form-group">
+        <label for="{{ session_form.conditions.id }}">{{ session_form.conditions.label }}</label>
+        {{ session_form.conditions(id=session_form.conditions.id, class='form-control') }}
+    </div>
+
+    <div class="form-group">
+        <label for="{{ session_form.is_project_search.id }}">{{ session_form.is_project_search.label }}</label>
+        {{ session_form.is_project_search(id=session_form.is_project_search.id, class='form-check') }}
+    </div>
+
+    <div class="form-group">
+        <input type="submit" class="btn btn-success" value="Save">
+        <a type="button" class="btn btn-danger" value="Cancel" href="{{ url_for('home.cancel_form') }}">
+            Cancel
+        </a>
+    </div>
+</form>
+
+<script>
+    // If the user selects an existing area, the rock type field is hidden
+    let rockTypeContainer = document.getElementById("rock-type-container");
+    let area = document.getElementById("{{ session_form.area.id }}");
+
+    // If the user clicks on the project search checkbox, date and conditions fields are hidden
+    let is_project_search = document.getElementById("{{ session_form.is_project_search.id }}");
+    let dateContainer = document.getElementById("date-container");
+    let conditionsContainer = document.getElementById("conditions-container");
+
+    function toggleRockTypeContainer() {
+        let areaValue = area.value;
+        let areaExists = false;
+        for (let existingArea of document.getElementById("existingAreas").options) {
+            if (existingArea.value == areaValue) {
+                areaExists = true;
+                break;
+            }
+        }
+        rockTypeContainer.style.display = areaExists ? "none" : "block";
+    }
+
+    function toggleIsProjectSearch() {
+        let isProjectSearch = is_project_search.checked;
+        dateContainer.style.display = isProjectSearch ? "none" : "block";
+        conditionsContainer.style.display = isProjectSearch ? "none" : "block";
+    }
+
+    area.addEventListener("change", toggleRockTypeContainer);
+    toggleRockTypeContainer();
+
+    is_project_search.addEventListener("change", toggleIsProjectSearch);
+    toggleIsProjectSearch();
+</script>
+
+{% endblock content %}

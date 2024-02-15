@@ -1,0 +1,36 @@
+{% extends "main.html" %}
+{% block content %}
+
+<!-- 
+        Display the form for an area.
+    -->
+
+<h2>Edit Area</h2>
+
+<form method="POST" style="margin: 40px;" onkeydown="return event.key != 'Enter';">
+    {{ area_form.hidden_tag() }}
+
+    <div class="form-group">
+        <label for="{{ area_form.name.id }}">{{ area_form.name.label }}</label>
+        {{ area_form.name(id=area_form.name.id, class='form-control', list='existingAreas', autocomplete='off') }}
+        <datalist id="existingAreas">
+            {% for area_name in area_names %}
+            <option value="{{ area_name }}"></option>
+            {% endfor %}
+        </datalist>
+    </div>
+
+    <div id="rock-type-container" class="form-group">
+        <label for="{{ area_form.rock_type.id }}">{{ area_form.rock_type.label }}</label>
+        {{ area_form.rock_type(id=area_form.rock_type.id, class='form-control') }}
+    </div>
+
+    <div class="form-group">
+        <input type="submit" class="btn btn-success" value="Save">
+        <a type="button" class="btn btn-danger" value="Cancel" href="{{ url_for('home.cancel_form') }}">
+            Cancel
+        </a>
+    </div>
+</form>
+
+{% endblock content %}

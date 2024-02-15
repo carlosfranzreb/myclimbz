@@ -1,0 +1,135 @@
+<html>
+
+<head>
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="{{ url_for('static', filename='css/vanilla-dataTables.css') }}" rel="stylesheet" type="text/css">
+    {% if title == "Routes" %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/slider_switch.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/filter_checkboxes.css') }}" />
+    {% endif %}
+</head>
+
+<body>
+
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    </form>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{{ url_for('home.page_home') }}" style="padding-left: 10px;">climbz</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        {% if not "Add" in title and not "Edit" in title %}
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a id="record_button" class="nav-link">Record
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-mic-fill" viewBox="0 0 16 16">
+                            <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z" />
+                            <path
+                                d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5" />
+                        </svg>
+                    </a>
+
+                </li>
+
+                {% if open_session %}
+                <li><a class="nav-link" href="{{ url_for('climbs.add_climb') }}">Add climb</a></li>
+                <li>
+                    <a class="nav-link" href="{{ url_for('sessions.stop_session') }}">
+                        Stop
+                        {% if open_session.is_project_search %}
+                        project search
+                        {% else %}
+                        session
+                        {% endif %}
+                    </a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('sessions.add_session') }}">Start session</a>
+                </li>
+                {% endif %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        Lists
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('sessions.table_sessions') }}">Sessions</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('areas.table_areas') }}">Areas</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+    </nav>
+
+
+
+    {% if error %}
+    <script>
+        console.error("An error has occurred.");
+        console.error("{{ error }}");
+    </script>
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Show the current session / project search, if any-->
+    {% if open_session %}
+
+    <div class="alert alert-success" role="alert">
+        {% if open_session.is_project_search %}
+        Project search
+        {% else %}
+        Session
+        {% endif %}
+        in {{ open_session.area.name }}
+    </div>
+    {% endif %}
+
+    <div class="container p-4">
+        {%block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Bootstrap & DataTable -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+    <script src="{{url_for('static', filename='js/table/vanilla-dataTables.js')}}" type="text/javascript"></script>
+
+    <!-- Scripts for recording & confirming deletes -->
+    <script src="{{url_for('static', filename='js/logging/record.js')}}"></script>
+    <script src="{{url_for('static', filename='js/confirm_deletion.js')}}"></script>
+
+    <!-- Scripts for routes -->
+    {% if title == "Routes" %}
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://momentjs.com/downloads/moment.js"></script>
+    <script src="{{url_for('static', filename='js/data.js')}}"></script>
+
+    <!-- Scripts for table -->
+    <script src="{{url_for('static', filename='js/table/routes.js')}}"></script>
+
+    <!-- Scripts for plotting -->
+    <script src="{{url_for('static', filename='js/analysis/main.js')}}"></script>
+    <script src="{{url_for('static', filename='js/analysis/grades.js')}}"></script>
+    <script src="{{url_for('static', filename='js/analysis/y_axis.js')}}"></script>
+
+    <!-- Scripts for filters -->
+    <script src="{{url_for('static', filename='js/filters/checkboxes.js')}}"></script>
+    <script src="{{url_for('static', filename='js/filters/range.js')}}"></script>
+    <script src="{{url_for('static', filename='js/filters/main.js')}}"></script>
+    {% endif %}
+</body>
+
+</html>

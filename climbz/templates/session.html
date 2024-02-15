@@ -1,0 +1,76 @@
+{% extends "main.html" %}
+{% block content %}
+
+<!-- Possible additional columns: 
+        - avg. height/inclination/landing/grade of the session
+    -->
+
+<div class="container">
+    <div class="row">
+        <div class="col-4 offset-md-2">
+            <div class="row">
+                <div class="col-xs-12 center-block text-center">{{ session.area.name }} on {{ session.date }}</div>
+            </div>
+            {% if session.conditions %}
+            <div class="row">
+                <div class="col-xs-12 center-block text-center">Conditions: {{ session.conditions }} / 10</div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-4">
+            <div class="row">
+                <div class="col-xs-12 center-block text-center"># climbs: {{ session.climbs | length }}</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 center-block text-center">
+                    # sends: {{ session.climbs | map(attribute='sent') | sum }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="col-xs-12 center-block text-center">
+        <a href="{{ url_for('sessions.edit_session', session_id=session.id) }}" class="btn btn-primary">Edit</a>
+        <a href="{{ url_for('sessions.delete_session', session_id=session.id) }}" class="btn btn-danger">Delete</a>
+        {% if not open_session %}
+        <a href="{{ url_for('sessions.reopen_session', session_id=session.id) }}" class="btn btn-success">Re-open</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container">
+    <h3>Climbs</h3>
+
+    <table class="table table-striped table-hover">
+        <tr>
+            <th>Route</th>
+            <th>Sector</th>
+            <th>Area</th>
+            <th># tries</th>
+            <th>Sent</th>
+            <th>Actions</th>
+        </tr>
+        {% for climb in session.climbs %}
+        {% set onclick = "window.location=\"" + url_for('routes.page_route', route_id=climb.route.id) + "\"" %}
+        <tr onclick="window.location=&quot;{{ url_for('routes.page_route', route_id=climb.route.id) }}&quot;">
+            <td onclick={{ onclick }}>{{ climb.route.name }}</td>
+            <td onclick={{ onclick }}>{{ climb.route.sector.name }}</td>
+            <td onclick={{ onclick }}>{{ climb.route.sector.area.name }}</td>
+            <td onclick={{ onclick }}>{{ climb.n_attempts }}</td>
+            <td onclick={{ onclick }}>{{ climb.sent }}</td>
+            <td>
+                <a href="{{ url_for('climbs.edit_climb', climb_id=climb.id) }}">
+                    {% include 'icons/edit.html' %}
+                </a>
+                <a href="{{ url_for('climbs.delete_climb', climb_id=climb.id) }}">
+                    {% include 'icons/delete.html' %}
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock content %}

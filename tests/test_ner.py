@@ -1,9 +1,9 @@
 import pytest
-from climbs import create_app
+from climbz import create_app
 from flask import session
 from flask.testing import FlaskClient
 from flask import Flask
-from climbs.forms import RouteForm
+from climbz.forms import RouteForm
 
 
 @pytest.fixture()
