@@ -27,10 +27,6 @@ class Route(db.Model):
     # grades
     grade_id = db.Column(db.Integer, db.ForeignKey("grade.id"))
     grade = db.relationship("Grade", foreign_keys=[grade_id], backref="routes")
-    grade_felt_id = db.Column(db.Integer, db.ForeignKey("grade.id"), nullable=True)
-    grade_felt = db.relationship(
-        "Grade", foreign_keys=[grade_felt_id], backref="routes_felt"
-    )
 
     # other relationships
     cruxes = db.relationship(
