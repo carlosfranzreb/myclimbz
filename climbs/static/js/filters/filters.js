@@ -325,7 +325,7 @@ var DropdownMenu = function(id, placeholder, width, left, options) {
     var self = this;
     self.left = left;
     self.id = id;
-    options.push(" ");
+    options.unshift("Select all");
     self.options = options;
     self.placeholder = placeholder;
     var wrapper = document.getElementById(id);
@@ -334,7 +334,7 @@ var DropdownMenu = function(id, placeholder, width, left, options) {
     + `<div class='dropdown-menu' aria-labelledby='${id}_button' id='${id}_menu'>`;
     
     for (let i = 0; i < options.length; i++) {
-        inner_html += `<div class='dropdown-item' id=${id}_${options[i]}>${options[i]}</div>`;
+        inner_html += `<div class='dropdown-item' id=${id}_${i}>${options[i]}</div>`;
     }
     inner_html += "</div>";
     wrapper.innerHTML = inner_html;
@@ -350,13 +350,38 @@ var DropdownMenu = function(id, placeholder, width, left, options) {
         self.menu.style.display === "block" ? "none" : "block";
     }
 
-    //When an item is selected, change the button text to the selected item
-
+    //?Necessary to check if all buttons manually selected to change "Select all" to "Deselect all"
     for (let i = 0; i < self.options.length; i++) {
-        let option = document.getElementById(`${id}_${self.options[i]}`);
+        let option = document.getElementById(`${id}_${i}`);
         option.addEventListener("click", function() {
-            self.button.innerHTML = `${placeholder}: ${self.options[i]}`;
-            openFilters();
+            if (self.options[i] === "Select all") {
+                self.button.innerHTML = `${placeholder}`;
+                //change "Select all" to "Deselect all" and vice versa
+                option.textContent = option.textContent === "Select all" ? "Deselect all" : "Select all";
+                let all_selected = false;
+                if (option.textContent === "Deselect all") {
+                    all_selected = true;
+                }
+                for (let j = 1; j < self.options.length; j++) {
+                    let option = document.getElementById(`${id}_${j}`);
+                    // If "Deselect all" is clicked, add a checkmark to all options
+                    if (all_selected) {
+                        option.classList.add('active');
+                    }
+                    else {
+                        option.classList.remove('active');
+                    }
+                }
+            }
+            else {
+                option.classList.toggle('active');
+                if (option.classList.contains('active')) {
+                    self.button.innerHTML += ` ${self.options[i]}, `;
+                }
+                else {
+                    self.button.innerHTML = self.button.innerHTML.replace(` ${self.options[i]}, `, "");
+                }
+            }
         });
     
     }
@@ -365,7 +390,7 @@ var DropdownMenu = function(id, placeholder, width, left, options) {
     //reset menu to have no items selected
     self.reset = function() {
         for (let i = 0; i < options.length; i++) {
-            let option = document.getElementById(`${id}_${options[i]}`);
+            let option = document.getElementById(`${id}_${i}`);
             option.classList.remove('active');
         }
         self.button.innerHTML = `${placeholder}`;
@@ -429,23 +454,23 @@ var FilterWidget = function(id, left) {
     //}
     //menu.appendChild(row);
     //
-    //let divider = document.createElement("div");
-    //divider.className = "dropdown-divider";
-    //menu.appendChild(divider);
-//
-    //let filter_apply = document.createElement("div");
-    //filter_apply.className = "dropdown-item";
-    //filter_apply.id = "filter_apply";
-    //filter_apply.type = "button";
-    //filter_apply.innerHTML = "Apply";
-    //menu.appendChild(filter_apply);
-//
-    //let filter_reset = document.createElement("div");
-    //filter_reset.className = "dropdown-item";
-    //filter_reset.id = "filter_reset";
-    //filter_reset.type = "button";
-    //filter_reset.innerHTML = "Reset";
-    //menu.appendChild(filter_reset);
+    let divider = document.createElement("div");
+    divider.className = "dropdown-divider";
+    menu.appendChild(divider);
+
+    let filter_apply = document.createElement("div");
+    filter_apply.className = "dropdown-item";
+    filter_apply.id = "filter_apply";
+    filter_apply.type = "button";
+    filter_apply.innerHTML = "Apply";
+    menu.appendChild(filter_apply);
+
+    let filter_reset = document.createElement("div");
+    filter_reset.className = "dropdown-item";
+    filter_reset.id = "filter_reset";
+    filter_reset.type = "button";
+    filter_reset.innerHTML = "Reset";
+    menu.appendChild(filter_reset);
 
     self.menu = menu;
     self.menu.style.display = "block";
