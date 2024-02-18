@@ -22,9 +22,9 @@
       "type": "python",
       "request": "launch",
       "program": "run.py",
-      "args": ["-t=true"],
+      "args": ["-d=test_100"],
       "jinja": true,
-      "justMyCode": true
+      "justMyCode": true,
     },
     {
       "name": "Python: pytest",

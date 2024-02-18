@@ -735,6 +735,33 @@
         }
     };
 
+    Columns.prototype.get_min_max = function (column) {
+        var dt = this.dt;
+        var rows = dt.data;
+        var min = Infinity;
+        var max = -Infinity;
+        //if column is a string then convert it to a number
+        if (typeof column === "string") {
+            column = dt.header_names.indexOf(column);
+        }
+
+        each(rows, function (tr) {
+            var cell = tr.cells[column];
+            var content = cell.hasAttribute('data-content') ? cell.getAttribute('data-content') : cell.data;
+            var num = content.replace(/(\$|\,|\s|%)/g, "");
+            if (parseFloat(num) == num && num !== "Infinity") {
+                num = Number(num);
+                if (num < min) {
+                    min = num;
+                }
+                if (num > max) {
+                    max = num;
+                }
+            }
+        });
+        return [min, max];
+    }
+
     /**
      * Rebuild the columns
      * @return {Void}
@@ -1133,10 +1160,14 @@
         }
 
         that.headings = [];
+        that.header_names = [];
         that.hasHeadings = that.head.rows.length > 0;
 
         if (that.hasHeadings) {
             that.header = that.head.rows[0];
+            that.header_names = [].slice.call(that.header.cells).map(function (cell) {
+                return cell.innerHTML;
+            });
             that.headings = [].slice.call(that.header.cells);
         }
 

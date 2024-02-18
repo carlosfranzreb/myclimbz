@@ -1,6 +1,7 @@
 <div class="container-fluid">
   <div class="row">
-    <div id="slider_1"></div>
+    <div id="test-slider"></div>
+    <div id="filter"></div>
     <table class="table table-striped" id="routes_table">
       <thead>
         <tr>
@@ -38,24 +39,12 @@
 
 <script>
   window.onload = () => {
-    (window.slider_1 = new DoubleRangeSlider("slider_1", 300, 50, 1, 10, 1)),
-      (window.data_table = new DataTable("#routes_table", {
-        perPage: 100,
-        perPageSelect: false,
-        searchable: true,
-        nextPrev: false,
-      }));
+    (window.data_table = new DataTable("#routes_table", {
+      perPage: 100,
+      perPageSelect: false,
+      searchable: true,
+      nextPrev: false,
+    })),
+    (window.filter = new FilterWidget("filter", 50));
   };
-  function filterTable() {
-    var filterOptions = document.getElementById("filterOptions");
-    filterOptions.style.display =
-      filterOptions.style.display === "block" ? "none" : "block";
-  }
-
-  function handleCheckbox() {
-    var checkbox = document.getElementById("filterCheckbox");
-    if (checkbox.checked) {
-      console.log("Hello");
-    }
-  }
 </script>
