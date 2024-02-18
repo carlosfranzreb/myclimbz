@@ -13,6 +13,7 @@ class Session(db.Model):
     comment = db.Column(db.Text)
     climbs = db.relationship("Climb", backref="session", cascade="all, delete")
     area_id = db.Column(db.Integer, db.ForeignKey("area.id"))
+    climber_id = db.Column(db.Integer, db.ForeignKey("climber.id"))
 
 
 @event.listens_for(Sector, "after_delete")

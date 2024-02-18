@@ -1,9 +1,13 @@
 from flask import Flask
+from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 
 
 db = SQLAlchemy()
+login_manager = LoginManager()
+login_manager.login_view = "climbers.login"
+login_manager.login_message_category = "info"
 
 
 def create_app(db_name: str):
@@ -15,6 +19,7 @@ def create_app(db_name: str):
 
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_name}.db"
     db.init_app(app)
+    login_manager.init_app(app)
 
     from climbz.blueprints.areas.routes import areas
     from climbz.blueprints.home.routes import home
