@@ -21,22 +21,31 @@ ROCKS = [
 ]
 
 CRUXES = [
+    # Hands
     "Crimp",
-    "Sloper",
-    "Pocket",
-    "Tension",
-    "Compression",
-    "Heel hook",
-    "Toe hook",
-    "Undercling",
-    "Shoulder",
-    "Wrist",
     "Drag",
-    "Power",
-    "Lock-off",
-    "Top out",
+    "Pinch",
+    "Pocket",
+    "Sloper",
+    # Legs
+    "Drop knee",
     "Feet",
+    "Heel hook",
+    "Knee bar",
+    "Toe hook",
+    # Hold orientation
+    "Gaston",
+    "Sidepull",
+    "Undercling",
+    # Other
+    "Compression",
+    "Dyno",
+    "Endurance",
+    "Lock-off",
     "Mantel",
+    "Power",
+    "Scary",
+    "Tension",
 ]
 
 GRADES = [
