@@ -90,8 +90,11 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
     route is added to a second session.
     """
     print("Adding testing data")
-    db.session.add(models.Area(name="A1", rock_type_id=1, rock_quality=4))
-    db.session.add(models.Area(name="A2", rock_type_id=2, rock_quality=2))
+    db.session.add(models.Climber(name="Climber1", email="c@d", password="123"))
+    db.session.add(models.Climber(name="Climber2", email="b@d", password="123"))
+
+    db.session.add(models.Area(name="A1", rock_type_id=1))
+    db.session.add(models.Area(name="A2", rock_type_id=2))
 
     db.session.add(models.Sector(name="A1_S1", area_id=1))
     db.session.add(models.Sector(name="A1_S2", area_id=1))
@@ -99,10 +102,22 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
     sector_ids = list(range(1, 4))
 
     # create 4 sessions: 3 in A1, 1 in A2
-    db.session.add(models.Session(date=datetime(2023, 1, 1), conditions=7, area_id=1))
-    db.session.add(models.Session(date=datetime(2023, 1, 13), conditions=6, area_id=1))
-    db.session.add(models.Session(date=datetime(2023, 3, 7), conditions=9, area_id=1))
-    db.session.add(models.Session(date=datetime(2023, 8, 18), conditions=4, area_id=2))
+    db.session.add(
+        models.Session(date=datetime(2023, 1, 1), conditions=4, area_id=1, climber_id=1)
+    )
+    db.session.add(
+        models.Session(
+            date=datetime(2023, 1, 13), conditions=2, area_id=1, climber_id=1
+        )
+    )
+    db.session.add(
+        models.Session(date=datetime(2023, 3, 7), conditions=1, area_id=1, climber_id=1)
+    )
+    db.session.add(
+        models.Session(
+            date=datetime(2023, 8, 18), conditions=4, area_id=2, climber_id=2
+        )
+    )
 
     with open("instance/utils/climb_names.txt", "r", encoding="utf-8") as f:
         for route_idx, name in enumerate(f.readlines()):
@@ -115,18 +130,8 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                     name=name.strip(),
                     sit_start=bool(route_idx % 3),
                     sector_id=sector_id,
-                    grade_id=route_idx % 15 + 1,
                     height=route_idx % 5 + 1,
-                    landing=route_idx % 5 + 1,
-                    rating=route_idx % 5 + 1,
                     inclination=random.randrange(-10, 90, 5),
-                    grade_felt_id=route_idx % 24 + 1,
-                    cruxes=[
-                        models.Crux.query.filter_by(
-                            name=CRUXES[random.randint(0, len(CRUXES) - 1)]
-                        ).first()
-                        for _ in range(random.randint(1, 5))
-                    ],
                 )
             )
             # with p=0.6, add climb to the session
@@ -153,8 +158,27 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                             route_id=route_idx + 1,
                             n_attempts=random.randint(1, 10),
                             sent=bool(random.randint(0, 1)),
+                            flashed=False,
                         )
                     )
+
+                # add climber opinion for the route
+                climber_id = 1 if session_id < 4 else 2
+                db.session.add(
+                    models.Opinion(
+                        route_id=route_idx + 1,
+                        climber_id=climber_id,
+                        grade_id=random.randint(1, len(GRADES)),
+                        landing=random.randint(1, 5),
+                        rating=random.randint(1, 5),
+                        cruxes=[
+                            models.Crux.query.filter_by(
+                                name=CRUXES[random.randint(0, len(CRUXES) - 1)]
+                            ).first()
+                            for _ in range(random.randint(1, 5))
+                        ],
+                    )
+                )
 
 
 if __name__ == "__main__":
