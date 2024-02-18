@@ -81,8 +81,8 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
     route is added to a second session.
     """
     print("Adding testing data")
-    db.session.add(models.Area(name="A1", rock_type_id=1))
-    db.session.add(models.Area(name="A2", rock_type_id=2))
+    db.session.add(models.Area(name="A1", rock_type_id=1, rock_quality=4))
+    db.session.add(models.Area(name="A2", rock_type_id=2, rock_quality=2))
 
     db.session.add(models.Sector(name="A1_S1", area_id=1))
     db.session.add(models.Sector(name="A1_S2", area_id=1))
@@ -108,7 +108,8 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                     sector_id=sector_id,
                     grade_id=route_idx % 15 + 1,
                     height=route_idx % 5 + 1,
-                    landing=route_idx % 10 + 1,
+                    landing=route_idx % 5 + 1,
+                    rating=route_idx % 5 + 1,
                     inclination=random.randrange(-10, 90, 5),
                     grade_felt_id=route_idx % 24 + 1,
                     cruxes=[

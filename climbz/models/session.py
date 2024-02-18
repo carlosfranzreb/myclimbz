@@ -2,12 +2,13 @@ from sqlalchemy import event
 
 from climbz import db
 from climbz.models import Sector, Route, Climb
+from climbz.models.columns import Rating
 
 
 class Session(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date)
-    conditions = db.Column(db.Integer)
+    conditions = Rating("conditions")
     is_project_search = db.Column(db.Boolean, nullable=False, default=False)
     climbs = db.relationship("Climb", backref="session", cascade="all, delete")
     area_id = db.Column(db.Integer, db.ForeignKey("area.id"))

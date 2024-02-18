@@ -1,4 +1,5 @@
 from climbz import db
+from climbz.models.columns import ConstrainedInteger, Rating
 
 
 route_crux_association = db.Table(
@@ -11,16 +12,23 @@ route_crux_association = db.Table(
 class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200))
+
+    # route characteristics and ratings
     sit_start = db.Column(db.Boolean)
+    height = db.Column(db.Float, db.CheckConstraint("height >= 0"))
+    inclination = ConstrainedInteger("inclination", -20, 90)
+    landing = Rating("landing")
+    rating = Rating("rating")
+
+    # grades
     grade_id = db.Column(db.Integer, db.ForeignKey("grade.id"))
     grade = db.relationship("Grade", foreign_keys=[grade_id], backref="routes")
     grade_felt_id = db.Column(db.Integer, db.ForeignKey("grade.id"), nullable=True)
     grade_felt = db.relationship(
         "Grade", foreign_keys=[grade_felt_id], backref="routes_felt"
     )
-    height = db.Column(db.Integer)
-    landing = db.Column(db.Integer)
-    inclination = db.Column(db.Integer)
+
+    # other relationships
     cruxes = db.relationship(
         "Crux",
         secondary=route_crux_association,
