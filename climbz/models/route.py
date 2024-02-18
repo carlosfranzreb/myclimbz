@@ -12,6 +12,8 @@ route_crux_association = db.Table(
 class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
 
     # route characteristics and ratings
     sit_start = db.Column(db.Boolean)
