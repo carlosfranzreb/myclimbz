@@ -9,6 +9,7 @@ class Sector(db.Model):
     name = db.Column(db.String(200), nullable=False)
     area_id = db.Column(db.Integer, db.ForeignKey("area.id"))
     routes = db.relationship("Route", backref="sector", cascade="all, delete")
+    comment = db.Column(db.Text)
 
     @property
     def n_sent_routes(self) -> int:

@@ -14,6 +14,7 @@ class Route(db.Model):
     name = db.Column(db.String(200))
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
+    comment = db.Column(db.Text)
 
     # route characteristics and ratings
     sit_start = db.Column(db.Boolean)
