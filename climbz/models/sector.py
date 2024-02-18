@@ -11,10 +11,9 @@ class Sector(db.Model):
     routes = db.relationship("Route", backref="sector", cascade="all, delete")
     comment = db.Column(db.Text)
 
-    @property
-    def n_sent_routes(self) -> int:
-        """Return the number of sent routes in this sector."""
-        return sum(route.sent for route in self.routes)
+    def n_sent_routes(self, climber_id: int) -> int:
+        """Return the number of sent routes in this sector by a climber."""
+        return sum(route.sent(climber_id) for route in self.routes)
 
 
 @event.listens_for(Route, "after_delete")

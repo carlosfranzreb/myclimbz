@@ -7,7 +7,6 @@ from climbz.models import Sector
 class Area(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    comment = db.Column(db.Text)
     rock_type_id = db.Column(db.Integer, db.ForeignKey("rock_type.id"))
     rock_type = db.relationship("RockType", backref="climbing_areas")
     sessions = db.relationship("Session", backref="area", cascade="all, delete")
@@ -18,10 +17,9 @@ class Area(db.Model):
         """Return the number of routes in all sectors of this area."""
         return sum(len(sector.routes) for sector in self.sectors)
 
-    @property
-    def n_sent_routes(self) -> int:
-        """Return the number of sent routes in all sectors of this area."""
-        return sum(sector.n_sent_routes for sector in self.sectors)
+    def n_sent_routes(self, climber_id: int) -> int:
+        """Return the number of sent routes in all sectors of this area by a climber."""
+        return sum(sector.n_sent_routes(climber_id) for sector in self.sectors)
 
 
 @event.listens_for(Sector, "after_delete")
