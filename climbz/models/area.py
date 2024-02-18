@@ -2,14 +2,12 @@ from sqlalchemy import event
 
 from climbz import db
 from climbz.models import Sector
-from climbz.models.columns import Rating
 
 
 class Area(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     comment = db.Column(db.Text)
-    rock_quality = Rating("rock_quality")
     rock_type_id = db.Column(db.Integer, db.ForeignKey("rock_type.id"))
     rock_type = db.relationship("RockType", backref="climbing_areas")
     sessions = db.relationship("Session", backref="area", cascade="all, delete")

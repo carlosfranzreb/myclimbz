@@ -3,12 +3,7 @@ from flask_login import UserMixin
 from climbz import db, login_manager
 
 
-def load_user(user_id):
-    """Required by the login manager, which uses it internally."""
-    return Climber.query.get(int(user_id))
-
-
-class Climber(db.Model):
+class Climber(db.Model, UserMixin):
     # login information
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(200), nullable=False)
@@ -22,4 +17,12 @@ class Climber(db.Model):
     height = db.Column(db.Float, nullable=True)
     ape_index = db.Column(db.Float, nullable=True)
 
+    # relationships
     sessions = db.relationship("Session", backref="climber", cascade="all, delete")
+    opinions = db.relationship("Opinion", backref="climber", cascade="all, delete")
+
+
+@login_manager.user_loader
+def load_climber(climber_id: int) -> Climber:
+    """Required by the login manager, which uses it internally."""
+    return Climber.query.get(int(climber_id))

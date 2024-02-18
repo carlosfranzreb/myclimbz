@@ -12,3 +12,5 @@ from climbz.models.route import Route  # noqa: F401
 from climbz.models.sector import Sector  # noqa: F401
 from climbz.models.area import Area  # noqa: F401
 from climbz.models.session import Session  # noqa: F401
+from climbz.models.climber import Climber  # noqa: F401
+from climbz.models.climber_opinion import Opinion  # noqa: F401
