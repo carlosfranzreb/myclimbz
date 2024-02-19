@@ -1,0 +1,51 @@
+{% extends "main.html" %}
+{% block content %}
+
+<!-- Possible additional columns: 
+        - avg. height/inclination/landing/conditions 
+    -->
+
+<h1>Areas</h1>
+
+<table id="content_table" class="table table-striped table-hover">
+    <thead>
+        <tr>
+            {% for row_name in ["Name", "Rock Type", "# Sectors", "# Sessions", "# Routes", "Actions"] %}
+            <th>{{ row_name }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for area in areas %}
+        {% set onclick = "window.location=\"" + url_for('areas.page_area', area_id=area.id) + "\"" %}
+        <tr>
+            <td onclick={{ onclick }}>{{ area.name }}</td>
+            <td onclick={{ onclick }}>{{ area.rock_type.name }}</td>
+            <td onclick={{ onclick }}>{{ area.sectors|length }}</td>
+            <td onclick={{ onclick }}>{{ area.sessions|length }}</td>
+            <td onclick={{ onclick }}>{{ area.sectors|map(attribute='routes')|map('length')|sum }}</td>
+            <td>
+                <a href="{{ url_for('areas.edit_area', area_id=area.id) }}">
+                    {% include 'icons/edit.html' %}
+                </a>
+                <a href="{{ url_for('areas.delete_area', area_id=area.id) }}">
+                    {% include 'icons/delete.html' %}
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    window.addEventListener('load', function () {
+        window.data_table = new DataTable("#content_table", {
+            perPage: 100,
+            perPageSelect: false,
+            searchable: false,
+            nextPrev: false,
+        });
+    });
+</script>
+
+{% endblock content %}

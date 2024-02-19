@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pytest
 
-from climbs import create_app
+from climbz import create_app
 
 
 @pytest.fixture()

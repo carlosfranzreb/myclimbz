@@ -1,0 +1,68 @@
+{% extends "main.html" %}
+{% block content %}
+
+<!-- If a session is open, show only the climbs of that session -->
+{% if open_session and not open_session.is_project_search %}
+{% set session_date = open_session.date.strftime("%Y-%m-%d") %}
+{% else %}
+{% set session_date = null %}
+{% endif %}
+
+<script>
+    window.addEventListener('load', function () {
+        start_display({{ routes | tojson }} , {{ grades | tojson }}, "{{ session_date }}");
+        });
+</script>
+
+<!-- This div is used to display the data in the chart; it is centered -->
+<div class="row-sm gy-1">
+
+    <!-- Switch to define the display form -->
+    <div class="row-sm">
+        <span>Table</span>
+        <span>
+            <label class="switch">
+                <input type="checkbox" id="display-form-toggle">
+                <span class="slider round"></span>
+            </label>
+        </span>
+        <span>Plot</span>
+    </div>
+
+    <!-- Switch to define the grade type -->
+    <div class="row-sm">
+        <span>Font</span>
+        <span>
+            <label class="switch">
+                <input type="checkbox" id="grade-scale-toggle">
+                <span class="slider round"></span>
+            </label>
+        </span>
+        <span>Hueco</span>
+    </div>
+
+    <!-- Checkbox to include unsent climbs -->
+    <div class="row-sm">
+        <input type="checkbox" id="include-unsent-climbs">
+        <span>Include unsent boulders</span>
+    </div>
+
+    <!-- Filters -->
+    <div class="row-sm">
+        <button class="btn btn-outline-primary" onclick="add_filter()">Add filter</button>
+        <div id="filterList"></div>
+    </div>
+
+    <!-- Table to display the data; filled by the scripts -->
+    <div id="content_div" class="row"></div>
+
+    <div id="plot-axes" class="row-sm">
+        <label for="x-axis-select">X Axis:</label>
+        <select id="x-axis-select" onchange="plot_data()"></select>
+        <label for="y-axis-select">Y Axis:</label>
+        <select id="y-axis-select" onchange="plot_data()"></select>
+    </div>
+
+</div>
+
+{% endblock content %}

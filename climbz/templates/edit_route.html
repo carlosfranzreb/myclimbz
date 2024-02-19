@@ -1,0 +1,36 @@
+{% extends "main.html" %}
+{% block content %}
+
+<!-- 
+        Display the form for editing an existing one.
+    -->
+
+<h2>Log climb</h2>
+
+<div class="container">
+    <h3>Route</h3>
+    <form method="POST" style="margin: 40px;">
+        {{ route_form.hidden_tag() }}
+        {% for field in route_form %}
+        {% if field.name != 'csrf_token' and field != route_form.existing_route %}
+        <div class="form-group">
+            <label for="{{ field.id }}">{{ field.label }}</label>
+            {% if field.type == 'BooleanField' %}
+            {{ field(id=field.id, class='form-check') }}
+            {% else %}
+            {{ field(id=field.id, class='form-control') }}
+            {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        <div class="form-group">
+            <input type="submit" name="btn" value="Save">
+            <a type="button" class="btn btn-danger" value="Cancel" href="{{ url_for('home.cancel_form') }}">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+{% endblock content %}

@@ -5,7 +5,7 @@ import pytest
 from flask.testing import FlaskClient
 from selenium import webdriver
 
-from climbs import create_app
+from climbz import create_app, db
 
 
 @pytest.fixture()
@@ -13,6 +13,17 @@ def app():
     app = create_app(db_name="test_100")
     app.config.update({"TESTING": True})
     yield app
+
+
+@pytest.fixture
+def test_client_db():
+    """Returns a test client for the app"""
+    app = create_app(db_name="test_100")
+    app.testing = True
+    with app.test_client() as test_client:
+        with app.app_context():
+            db.create_all()
+            yield test_client
 
 
 @pytest.fixture()
