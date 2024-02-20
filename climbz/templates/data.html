@@ -11,6 +11,7 @@
 <script>
     window.addEventListener('load', function () {
         start_display({{ routes | tojson }} , {{ grades | tojson }}, "{{ session_date }}");
+        create_filter("filter");
         });
 </script>
 
@@ -44,13 +45,12 @@
     <!-- Checkbox to include unsent climbs -->
     <div class="row-sm">
         <input type="checkbox" id="include-unsent-climbs">
-        <span>Include unsent boulders</span>
+        <label class="form-check-label" for="include-unsent-climbs">Include unsent boulders</label>
     </div>
 
-    <!-- Filters -->
+    <!-- Filters; filled by the scripts -->
     <div class="row-sm">
-        <button class="btn btn-outline-primary" onclick="add_filter()">Add filter</button>
-        <div id="filterList"></div>
+        <div id="filter"></div>
     </div>
 
     <!-- Table to display the data; filled by the scripts -->

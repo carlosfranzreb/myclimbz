@@ -1,14 +1,14 @@
 FILTERS = {
-    "Grade":{"row": 0, "col": 0, "type": "slider", "params": [ "Grade", null, 0, 1, 10, 1]},
-    "Area":{"row": 0, "col": 1, "type": "dropdown", "params": [ "Area", 100, 0, ["good", "bad", "ugly"]]},
-    "Inclination":{"row": 0, "col": 2, "type": "slider", "params": [ "Inclination", null, 0, "min", "max", 5]},
-    "Landing":{"row": 1, "col": 0, "type": "slider", "params": [ "Landing", null, 0, 1, 10, 1]},
-    "Sit_start":{"row": 1, "col": 1, "type": "checkbox", "params": [ "Sit start", 100, 0]},
-    "Height":{"row": 1, "col": 2, "type": "slider", "params": [ "Height", null, 0, 1, 10, 1]},
-    "Style":{"row": 2, "col": 0, "type": "dropdown", "params": [ "Style", 100, 0, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]]},
-    "Projects":{"row": 2, "col": 1, "type": "checkbox", "params": [ "Projects", 100, 0]},
-    "Sends":{"row": 3, "col": 0, "type": "checkbox", "params": [ "Sends", 100, 0]},
-    "Attempted":{"row": 3, "col": 1, "type": "checkbox", "params": [ "Attempted", 100, 0]},
+    "Grade":{"row": 0, "col": 0, "type": "slider", "params": [ "Grade", 0, 1, 10, 1]},
+    "Area":{"row": 0, "col": 1, "type": "dropdown", "params": [ "Area", 0, ["good", "bad", "ugly"]]},
+    "Inclination":{"row": 0, "col": 2, "type": "slider", "params": [ "Inclination", 0, "min", "max", 5]},
+    "Landing":{"row": 1, "col": 0, "type": "slider", "params": [ "Landing", 0, 1, 10, 1]},
+    "Sit_start":{"row": 1, "col": 1, "type": "checkbox", "params": [ "Sit start", 0]},
+    "Height":{"row": 1, "col": 2, "type": "slider", "params": [ "Height", 0, 1, 10, 1]},
+    "Style":{"row": 2, "col": 0, "type": "dropdown", "params": [ "Style", 0, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]]},
+    "Projects":{"row": 2, "col": 1, "type": "checkbox", "params": [ "Projects", 0]},
+    "Sends":{"row": 3, "col": 0, "type": "checkbox", "params": [ "Sends", 0]},
+    "Attempted":{"row": 3, "col": 1, "type": "checkbox", "params": [ "Attempted", 0]},
     //"Date": add_filter_range,
     //"Tries": add_filter_range,
 }
@@ -17,13 +17,12 @@ FILTERS = {
 
 /*Range slider object:
 id: id of the div element to place the slider in
-width: width of the slider, if width is null, a width will be selected so that one step is 15px
 left: left offset of the slider
 min: minimum value of the slider
 max: maximum value of the slider
 step: step size of the slider
 */
-var DoubleRangeSlider = function(id, title, width, left, min, max, step) { 
+var DoubleRangeSlider = function(id, title, left, min, max, step) { 
     var self = this;
     var startX = 0, x = 0;
     //Assumes that "max" also wanted
@@ -31,14 +30,11 @@ var DoubleRangeSlider = function(id, title, width, left, min, max, step) {
         //Find minimum value in the data
         [min, max] = window.data_table.columns().get_min_max(title);
     }
-    if (width === null) {
-        width = 15*(max - min)/step;
-    }
-    self.width = width;
+    self.width = 15*(max - min)/step;
     self.left = left;
     self.title = title;
     var wrapper = document.getElementById(id);
-    wrapper.style.width = width + 'px';
+    wrapper.style.width = self.width + 'px';
     wrapper.style.left = left + 'px';
     wrapper.style.position = 'relative';
 
@@ -48,10 +44,10 @@ var DoubleRangeSlider = function(id, title, width, left, min, max, step) {
     var inner_html = `<div class=slider-title id=title_${id}>${self.title}: ${min} - ${max}</div>`
     + `<div id=widget_${id} se-min="${min}"`
     + `se-step="${step}"`
-    + `se-max="${max}" class="slider"></div>`;
+    + `se-max="${max}" class="double-slider"></div>`;
     wrapper.innerHTML = inner_html;
     var slider = document.getElementById(`widget_${id}`);
-    slider.style.width = width + 'px';
+    slider.style.width = self.width + 'px';
     
     inner_html = "<div class='slider-touch-left'><span></span></div>"
     + "<div class='slider-touch-right'><span></span></div>"
@@ -321,7 +317,7 @@ var DoubleRangeSlider = function(id, title, width, left, min, max, step) {
   
   };
 
-var DropdownMenu = function(id, placeholder, width, left, options) {
+var DropdownMenu = function(id, placeholder, left, options) {
     var self = this;
     self.left = left;
     self.id = id;
@@ -411,7 +407,7 @@ var DropdownMenu = function(id, placeholder, width, left, options) {
 
 }
 
-var Checkbox = function(id, title, width, left) {
+var Checkbox = function(id, title, left) {
     var self = this;
     self.left = left;
     self.id = id;
@@ -453,7 +449,6 @@ var FilterWidget = function(id, left) {
     let col_width = Math.floor(12/Object.keys(cols).length);
     wrapper.innerHTML = inner_html;
     let menu = document.getElementById(`${id}_menu`);
-    menu.style.width = "800px";
     let row = document.createElement("div");
     row.className = "row";
     row.id = `${id}_row`;
@@ -472,19 +467,25 @@ var FilterWidget = function(id, left) {
     divider.className = "dropdown-divider";
     menu.appendChild(divider);
 
+    let bottom_row = document.createElement("div");
+    bottom_row.className = "row";
+    bottom_row.id = `${id}_bottom_row`;
+
     let filter_apply = document.createElement("button");
-    filter_apply.className = "dropdown-item";
+    filter_apply.className = "btn btn-primary";
     filter_apply.id = "filter_apply";
     filter_apply.type = "button";
     filter_apply.innerHTML = "Apply";
-    menu.appendChild(filter_apply);
+    bottom_row.appendChild(filter_apply);
 
     let filter_reset = document.createElement("button");
-    filter_reset.className = "dropdown-item";
+    filter_reset.className = "btn btn-primary";
     filter_reset.id = "filter_reset";
     filter_reset.type = "button";
     filter_reset.innerHTML = "Reset";
-    menu.appendChild(filter_reset);
+    bottom_row.appendChild(filter_reset);
+
+    menu.appendChild(bottom_row);
 
     self.menu = menu;
     self.menu.style.display = "block";

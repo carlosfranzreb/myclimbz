@@ -5,10 +5,16 @@
 #filter_apply{
     background-color: blue;
     color: white;
+	width: 60px;
+	margin: 2px;
+	padding: 5px;
 }
 
 #filter_reset{
     background-color: red;
+	width: 60px;
+	margin: 2px;
+	padding: 5px;
 }
 
 .slider-title {
@@ -20,7 +26,7 @@
 	width: 100%;
 }
 
-.slider {
+.double-slider {
 	display: block;
 	position: relative;
 	height: 40px;

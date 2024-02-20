@@ -58,19 +58,23 @@ function start_display(data, grades, session_date) {
 
 function display_data() {
 
-    // Filter the data according to the active filters
+        // Filter the data according to the active filters
     DISPLAYED_DATA = filter_data();
-
+    
     // Remove the previous table or plot
     d3.select("#content_div").selectAll("*").remove();
-
+    
     // hide/show plot-axes
     let plot_axes = document.getElementById("plot-axes");
     plot_axes.style.display = DISPLAY_FORM == "plot" ? "block" : "none";
-
+    
     // Display the data
     if (DISPLAY_FORM == "table")
         show_table();
     else
         show_plot();
+}
+
+function create_filter(id){
+    window.filter_button = new FilterWidget(id, 50);
 }
