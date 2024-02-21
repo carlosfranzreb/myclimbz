@@ -1,19 +1,26 @@
 FILTERS = {
     "Grade":{"row": 0, "col": 0, "type": "slider", "params": [ "Grade", 0, 1, 10, 1]},
-    "Area":{"row": 0, "col": 1, "type": "dropdown", "params": [ "Area", 0, ["good", "bad", "ugly"]]},
-    "Inclination":{"row": 0, "col": 2, "type": "slider", "params": [ "Inclination", 0, "min", "max", 5]},
-    "Landing":{"row": 1, "col": 0, "type": "slider", "params": [ "Landing", 0, 1, 10, 1]},
-    "Sit_start":{"row": 1, "col": 1, "type": "checkbox", "params": [ "Sit start", 0]},
-    "Height":{"row": 1, "col": 2, "type": "slider", "params": [ "Height", 0, 1, 10, 1]},
-    "Style":{"row": 2, "col": 0, "type": "dropdown", "params": [ "Style", 0, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]]},
-    "Projects":{"row": 2, "col": 1, "type": "checkbox", "params": [ "Projects", 0]},
-    "Sends":{"row": 3, "col": 0, "type": "checkbox", "params": [ "Sends", 0]},
-    "Attempted":{"row": 3, "col": 1, "type": "checkbox", "params": [ "Attempted", 0]},
+    "Inclination":{"row": 1, "col": 0, "type": "slider", "params": [ "Inclination", 0, "min", "max", 5]},
+    "Landing":{"row": 0, "col": 1, "type": "slider", "params": [ "Landing", 0, 1, 10, 1]},
+    "Height":{"row": 1, "col": 1, "type": "slider", "params": [ "Height", 0, 1, 10, 1]},
+    "Area":{"row": 2, "col": 0, "type": "dropdown", "params": [ "Area", 0, ["good", "bad", "ugly"]]},
+    "Style":{"row": 2, "col": 1, "type": "dropdown", "params": [ "Style", 0, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]]},
+    "Sit_start":{"row": 3, "col": 0, "type": "checkbox", "params": [ "Sit start", 0]},
+    "Projects":{"row": 4, "col": 0, "type": "checkbox", "params": [ "Projects", 0]},
+    "Sends":{"row": 3, "col": 1, "type": "checkbox", "params": [ "Sends", 0]},
+    "Attempted":{"row": 4, "col": 1, "type": "checkbox", "params": [ "Attempted", 0]},
     //"Date": add_filter_range,
     //"Tries": add_filter_range,
 }
 
 
+function getTextWidth(text, obj) {
+    let canvas = document.createElement('canvas');
+    let context = canvas.getContext('2d');
+    context.font = getComputedStyle(obj).font; // Use the button's font style
+    let width = context.measureText(text).width;
+    return width;
+}
 
 /*Range slider object:
 id: id of the div element to place the slider in
@@ -346,6 +353,10 @@ var DropdownMenu = function(id, placeholder, left, options) {
         self.menu.style.display === "block" ? "none" : "block";
     }
 
+    self.width = (getTextWidth(self.placeholder, self.button) + 30);
+    self.button.style.width = self.width + "px";
+    wrapper.style.width = self.width + "px";
+
     let num_selected = 0;
     let num_options = self.options.length;
     for (let i = 0; i < num_options; i++) {
@@ -401,10 +412,7 @@ var DropdownMenu = function(id, placeholder, left, options) {
             let option = document.getElementById(`${id}_${i}`);
             option.classList.remove('active');
         }
-        self.button.innerHTML = `${placeholder}`;
     }
-
-
 }
 
 var Checkbox = function(id, title, left) {
@@ -419,6 +427,9 @@ var Checkbox = function(id, title, left) {
     wrapper.innerHTML = inner_html;
     let button = document.getElementById(`${id}_button`);
     self.button = button;
+    let label = document.querySelector(`label[for='${id}_button']`);
+    self.width = getTextWidth(title, label) + 30;
+    wrapper.style.width = self.width + "px";
     self.reset = function() {
         self.button.checked = false;
     }
@@ -452,16 +463,54 @@ var FilterWidget = function(id, left) {
     let row = document.createElement("div");
     row.className = "row";
     row.id = `${id}_row`;
-    for (let i = 0; i < Object.keys(cols).length; i++) {
-        let col = document.createElement("div");
-        col.className = `col-${col_width}`;
-        //col.role = "menu";
-        for (let j = 0; j < Object.keys(cols[i]).length; j++) {
-            col.innerHTML += `<div id=${id}_${cols[i][j]}>${cols[i][j]}</div>`;
+
+    var widgets = [];
+    // Calculate the width for each column
+    for (let col in cols) {
+        let colElement = document.createElement("div");
+        colElement.className = "col";
+        colElement.id = `${id}_col_${col}`;
+
+        for (let row in cols[col]) {
+            let filter_name = cols[col][row];
+            colElement.innerHTML += `<div id=${id}_${filter_name}>${filter_name}</div>`;
+
         }
-        row.appendChild(col);
+        
+        row.appendChild(colElement);
     }
+
     menu.appendChild(row);
+
+    var widgets = [];
+    var col_widths = [];
+    menu.style.display = "block";
+    for (let filter_name in window.FILTERS) {
+        let filter_settings = window.FILTERS[filter_name]["params"];
+        let widget = window.FILTERS[filter_name]["type"];
+        let filter_id = `${id}_${filter_name}`;
+        if (widget === "slider") {
+            widgets.push(new DoubleRangeSlider(filter_id, ...filter_settings));
+        }
+        else if (widget === "dropdown") {
+            widgets.push(new DropdownMenu(filter_id, ...filter_settings));
+        }
+        else if (widget === "checkbox") {
+            widgets.push(new Checkbox(filter_id, ...filter_settings));
+        }
+        let widgetWidth = Math.floor(widgets[widgets.length - 1].width);
+        let current_col = window.FILTERS[filter_name]["col"];
+        if (col_widths[current_col] === undefined) {
+            col_widths[current_col] = widgetWidth + 20;
+        }
+        else {
+            col_widths[current_col] = Math.max(col_widths[current_col], widgetWidth + 20);
+        }
+    }
+    for (let w in col_widths) {
+        let col = document.getElementById(`${id}_col_${w}`);
+        col.style.width = `${col_widths[w]}px`;
+    }
     
     let divider = document.createElement("div");
     divider.className = "dropdown-divider";
@@ -488,23 +537,7 @@ var FilterWidget = function(id, left) {
     menu.appendChild(bottom_row);
 
     self.menu = menu;
-    self.menu.style.display = "block";
 
-    var widgets = [];
-    for (let filter_name in window.FILTERS) {
-        let filter_settings = window.FILTERS[filter_name]["params"];
-        let widget = window.FILTERS[filter_name]["type"];
-        let filter_id = `${id}_${filter_name}`;
-        if (widget === "slider") {
-            widgets.push(new DoubleRangeSlider(filter_id, ...filter_settings));
-        }
-        else if (widget === "dropdown") {
-            widgets.push(new DropdownMenu(filter_id, ...filter_settings));
-        }
-        else if (widget === "checkbox") {
-            widgets.push(new Checkbox(filter_id, ...filter_settings));
-        }
-    }
     self.menu.style.display = "none";
     let filter_button = document.getElementById(`${id}_button`);
     self.filter_button = filter_button;

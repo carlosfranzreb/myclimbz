@@ -5,16 +5,10 @@
 #filter_apply{
     background-color: blue;
     color: white;
-	width: 60px;
-	margin: 2px;
-	padding: 5px;
 }
 
 #filter_reset{
     background-color: red;
-	width: 60px;
-	margin: 2px;
-	padding: 5px;
 }
 
 .slider-title {
@@ -88,3 +82,16 @@ input[type="checkbox"]+label{
   .checkbox-wrapper{
 	padding: 5px;
   }
+
+.btn{
+	width: fit-content;
+	margin: 2px;
+}
+
+.col{
+	margin:0px 10px;
+}
+
+#filter_bottom_row{
+	margin-left: 10px;
+}
