@@ -58,7 +58,7 @@ function start_display(data, grades, session_date) {
 
 function display_data() {
 
-        // Filter the data according to the active filters
+    // Filter the data according to the active filters
     DISPLAYED_DATA = filter_data();
     
     // Remove the previous table or plot

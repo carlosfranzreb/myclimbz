@@ -1,19 +1,3 @@
-FILTERS = {
-    "Grade":{"row": 0, "col": 0, "type": "slider", "params": [ "Grade", 0, 1, 10, 1]},
-    "Inclination":{"row": 1, "col": 0, "type": "slider", "params": [ "Inclination", 0, "min", "max", 5]},
-    "Landing":{"row": 0, "col": 1, "type": "slider", "params": [ "Landing", 0, 1, 10, 1]},
-    "Height":{"row": 1, "col": 1, "type": "slider", "params": [ "Height", 0, 1, 10, 1]},
-    "Area":{"row": 2, "col": 0, "type": "dropdown", "params": [ "Area", 0, ["good", "bad", "ugly"]]},
-    "Style":{"row": 2, "col": 1, "type": "dropdown", "params": [ "Style", 0, ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]]},
-    "Sit_start":{"row": 3, "col": 0, "type": "checkbox", "params": [ "Sit start", 0]},
-    "Projects":{"row": 4, "col": 0, "type": "checkbox", "params": [ "Projects", 0]},
-    "Sends":{"row": 3, "col": 1, "type": "checkbox", "params": [ "Sends", 0]},
-    "Attempted":{"row": 4, "col": 1, "type": "checkbox", "params": [ "Attempted", 0]},
-    //"Date": add_filter_range,
-    //"Tries": add_filter_range,
-}
-
-
 function getTextWidth(text, obj) {
     let canvas = document.createElement('canvas');
     let context = canvas.getContext('2d');
@@ -24,25 +8,39 @@ function getTextWidth(text, obj) {
 
 /*Range slider object:
 id: id of the div element to place the slider in
-left: left offset of the slider
-min: minimum value of the slider
-max: maximum value of the slider
 step: step size of the slider
 */
-var DoubleRangeSlider = function(id, title, left, min, max, step) { 
+var DoubleRangeSlider = function(id, title, step, data_class, data_column) { 
     var self = this;
     var startX = 0, x = 0;
-    //Assumes that "max" also wanted
-    if (min === "min") {
-        //Find minimum value in the data
-        [min, max] = window.data_table.columns().get_min_max(title);
+
+    //[min, max] = window.data_table.columns().get_min_max(title);
+    let min = Infinity;
+    let max = -Infinity;
+
+    self.get_ranges = function() {
+        for (let climb of DATA){
+            let value = climb[data_column];
+            if (value < min) {
+                min = value;
+            }
+            if (value > max) {
+                max = value;
+            }
+        }
     }
-    self.width = 15*(max - min)/step;
-    self.left = left;
+    self.get_ranges();
+    self.data_column = data_column;
+
+    if (step === null) {
+        step = 1;
+    }
+    self.width = 16*(max - min)/step;
+    self.left = 0;
     self.title = title;
     var wrapper = document.getElementById(id);
     wrapper.style.width = self.width + 'px';
-    wrapper.style.left = left + 'px';
+    wrapper.style.left = self.left + 'px';
     wrapper.style.position = 'relative';
 
 
@@ -267,16 +265,16 @@ var DoubleRangeSlider = function(id, title, left, min, max, step) {
     }
   
     function calculateValue() {
-        var newValue = (lineSpan.offsetWidth ) / line_max_width;
-        var minValue = lineSpan.offsetLeft / line_max_width;
-        var maxValue = minValue + newValue;
+        let newValue = (lineSpan.offsetWidth ) / line_max_width;
+        let minValue = lineSpan.offsetLeft / line_max_width;
+        let maxValue = minValue + newValue;
         
-        var minValue = minValue * (max - min) + min;
-        var maxValue = maxValue * (max - min) + min;
+        minValue = minValue * (max - min) + min;
+        maxValue = maxValue * (max - min) + min;
         
         if (step !== 0.0)
         {
-            var multi = Math.round((minValue / step));
+            let multi = Math.round((minValue / step));
             minValue = step * multi;
             
             multi = Math.round((maxValue / step));
@@ -314,25 +312,63 @@ var DoubleRangeSlider = function(id, title, left, min, max, step) {
   
     self.onChange = function(min, max)
     {
-        document.getElementById(`title_${id}`).innerHTML = `${self.title}: ${min} - ${max}`;
+        if (data_class === Grade){
+            document.getElementById(`title_${id}`).innerHTML = `${self.title}: ${GRADES[min][GRADE_SCALE]} - ${GRADES[max][GRADE_SCALE]}`;
+        }
+        else{
+            document.getElementById(`title_${id}`).innerHTML = `${self.title}: ${min} - ${max}`;
+        }
     }
   
     self.didChanged = function(min, max)
     {
-        document.getElementById(`title_${id}`).innerHTML = `${self.title}: ${min} - ${max}`;
+        if (data_class === Grade){
+            document.getElementById(`title_${id}`).innerHTML = `${self.title}: ${GRADES[min][GRADE_SCALE]} - ${GRADES[max][GRADE_SCALE]}`;
+        }
+        else{
+            document.getElementById(`title_${id}`).innerHTML = `${self.title}: ${min} - ${max}`;
+        }
     }
   
-  };
+    self.didChanged(min, max);
 
-var DropdownMenu = function(id, placeholder, left, options) {
+    self.filter_value = function(value) {
+        let min = parseInt(slider.getAttribute('se-min-current'));
+        let max = parseInt(slider.getAttribute('se-max-current'));
+        return value >= min && value <= max;
+    }
+};
+
+var DropdownMenu = function(id, placeholder, data_column) {
     var self = this;
-    self.left = left;
+    self.left = 0;
     self.id = id;
+    self.data_column = data_column;
+
+    self.get_options = function() {
+        let options = [];
+        for (let climb of DATA) {
+            let value = climb[data_column];
+            //if value is an array, add each element to options
+            if (Array.isArray(value)) {
+                for (v of value) {
+                    if (!options.includes(v)) {
+                        options.push(v);
+                    }
+                }
+            }
+            else if (!options.includes(value)) {
+                options.push(value);
+            }
+        }
+        return options;
+    }
+    let options = self.get_options();
     options.unshift("Select all");
     self.options = options;
     self.placeholder = placeholder;
     var wrapper = document.getElementById(id);
-    wrapper.style.left = left + 'px';
+    wrapper.style.left = self.left + 'px';
     let inner_html = `<button class='btn btn-secondary dropdown-toggle' type='button' id='${id}_button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>${self.placeholder}</button>`
     + `<div class='dropdown-menu' aria-labelledby='${id}_button' id='${id}_menu'>`;
     
@@ -413,14 +449,27 @@ var DropdownMenu = function(id, placeholder, left, options) {
             option.classList.remove('active');
         }
     }
+
+    self.filter_value = function(value) {
+        if (Array.isArray(value)) {
+            for (v of value) {
+                if (self.options.includes(v)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return self.options.includes(value);
+    }
 }
 
-var Checkbox = function(id, title, left) {
+var Checkbox = function(id, title, data_column) {
     var self = this;
-    self.left = left;
+    self.left = 0;
     self.id = id;
+    self.data_column = this.data_column;
     wrapper = document.getElementById(id);
-    wrapper.style.left = left + 'px';
+    wrapper.style.left = self.left + 'px';
     let inner_html = `
     <input class='form-check-input' type='checkbox' id='${id}_button'>
     <label class='form-check-label' for='${id}_button'>${title}</label>`;
@@ -433,6 +482,16 @@ var Checkbox = function(id, title, left) {
     self.reset = function() {
         self.button.checked = false;
     }
+
+    self.filter_value = function(value, false_value) {
+        if (value === false_value) {
+            return !self.button.checked;
+        }
+        else{
+            return true;
+        }
+    }
+
 }
 
 var FilterWidget = function(id, left) {
@@ -455,7 +514,6 @@ var FilterWidget = function(id, left) {
             cols[col] = {};
             cols[col][row] = filter_name;
         }
-        //inner_html += `<div id=${id}_${filter_name}>${filter_name}</div>`;  
     }
     let col_width = Math.floor(12/Object.keys(cols).length);
     wrapper.innerHTML = inner_html;
@@ -464,7 +522,6 @@ var FilterWidget = function(id, left) {
     row.className = "row";
     row.id = `${id}_row`;
 
-    var widgets = [];
     // Calculate the width for each column
     for (let col in cols) {
         let colElement = document.createElement("div");
@@ -482,23 +539,23 @@ var FilterWidget = function(id, left) {
 
     menu.appendChild(row);
 
-    var widgets = [];
     var col_widths = [];
     menu.style.display = "block";
     for (let filter_name in window.FILTERS) {
-        let filter_settings = window.FILTERS[filter_name]["params"];
-        let widget = window.FILTERS[filter_name]["type"];
+        let widget = window.FILTERS[filter_name]["filter_type"];
         let filter_id = `${id}_${filter_name}`;
         if (widget === "slider") {
-            widgets.push(new DoubleRangeSlider(filter_id, ...filter_settings));
+            let step = "step" in window.FILTERS[filter_name] ? window.FILTERS[filter_name]["step"] : null;
+            FILTER_WIDGETS.push(new DoubleRangeSlider(filter_id, filter_name.replace(/_/g, " "), step, 
+            window.FILTERS[filter_name]["data_class"], window.FILTERS[filter_name]["data_column"]));
         }
         else if (widget === "dropdown") {
-            widgets.push(new DropdownMenu(filter_id, ...filter_settings));
+            FILTER_WIDGETS.push(new DropdownMenu(filter_id, filter_name.replace(/_/g, " "), window.FILTERS[filter_name]["data_column"]));
         }
         else if (widget === "checkbox") {
-            widgets.push(new Checkbox(filter_id, ...filter_settings));
+            FILTER_WIDGETS.push(new Checkbox(filter_id, filter_name.replace(/_/g, " "), window.FILTERS[filter_name]["data_column"]));
         }
-        let widgetWidth = Math.floor(widgets[widgets.length - 1].width);
+        let widgetWidth = Math.floor(FILTER_WIDGETS[FILTER_WIDGETS.length - 1].width);
         let current_col = window.FILTERS[filter_name]["col"];
         if (col_widths[current_col] === undefined) {
             col_widths[current_col] = widgetWidth + 20;
@@ -549,14 +606,13 @@ var FilterWidget = function(id, left) {
 
     // Reset all filters when the reset button is clicked
     filter_reset.addEventListener("click", function() {
-        for (let i = 0; i < widgets.length; i++) {
-            widgets[i].reset();
+        for (let i = 0; i < FILTER_WIDGETS.length; i++) {
+            FILTER_WIDGETS[i].reset();
         }
     });
 
     // Apply filters when the apply button is clicked
     filter_apply.addEventListener("click", function() {
-        // Apply filters
-        // plot_data();
+        display_data();
     });
 }

@@ -15,47 +15,92 @@ grade_scale_toggle.addEventListener("change", function () {
     display_data();
 });
 
+let FILTER_WIDGETS = [];
 
 // --- List of available filters and their corresponding functions
 FILTERS = {
     "Grade": {
-        "filter_type": "range",
+        "filter_type": "slider",
         "data_class": Grade,
         "data_column": "level",
+        "row": 0,
+        "col": 0,
     },
-    "Date": {
-        "filter_type": "range",
-        "data_class": Date,
-        "data_column": "dates",
-    },
+    //"Date": {
+    //    "filter_type": "range",
+    //    "data_class": Date,
+    //    "data_column": "dates",
+    //    "row": 0,
+    //    "col": 0,
+    //},
     "Inclination": {
-        "filter_type": "range",
+        "filter_type": "slider",
         "data_class": Number,
+        "step": 5, 
         "data_column": "inclination",
+        "row": 1,
+        "col": 0,
     },
     "Landing": {
-        "filter_type": "range",
+        "filter_type": "slider",
         "data_class": Number,
+        "step": 1, 
         "data_column": "landing",
+        "row": 0,
+        "col": 1,
     },
     "Attempts": {
-        "filter_type": "range",
+        "filter_type": "slider",
         "data_class": Number,
+        "step": 1, 
         "data_column": "n_attempts_send",
+        "row": 1,
+        "col": 1,
     },
     "Height": {
-        "filter_type": "range",
+        "filter_type": "slider",
         "data_class": Number,
+        "step": 0.5, 
         "data_column": "height",
+        "row": 2,
+        "col": 1,
         "is_float": true,
     },
     "Area": {
-        "filter_type": "checkboxes",
+        "filter_type": "dropdown",
         "data_column": "area",
+        "row": 2,
+        "col": 0,
     },
     "Crux": {
-        "filter_type": "checkboxes",
+        "filter_type": "dropdown",
         "data_column": "cruxes",
+        "row": 3,
+        "col": 1,
+    },
+    //"Sit_start": {
+    //    "filter_type": "checkbox",
+    //    "row": 3,
+    //    "col": 0,
+    //},
+    //"Projects": {
+    //    "filter_type": "checkbox",
+    //    "row": 3,
+    //    "col": 0,
+    //},
+    "Sends": {
+        "filter_type": "checkbox",
+        "data_column": "sent",
+        "false_value": false, 
+        "row": 3,
+        "col": 0,
+    },
+    "Attempted": {
+        "filter_type": "checkbox",
+        "data_column": "n_sessions",
+        "false_value": 0, 
+        "row": 4,
+        "col": 0,
     },
 };
 
@@ -69,22 +114,17 @@ function filter_data() {
         this_data = DATA;
     else
         this_data = DATA.filter(d => d.sent === true);
+    if (FILTER_WIDGETS.length === 0)
+        return this_data;
 
     // Apply the active filters
     let filtered_data = [];
     for (let climb of this_data) {
-        let include = ACTIVE_FILTERS.size == 0;
-        for (let [filter_key, filter_value] of ACTIVE_FILTERS) {
-            let climb_values = climb[filter_key];
-            if (!Array.isArray(climb_values))
-                climb_values = [climb_values];
-            for (let climb_value of climb_values) {
-                if (filter_value.includes(climb_value)) {
-                    include = true;
-                    break;
-                }
-            }
-            if (include)
+        let include = false;
+        for (let w of FILTER_WIDGETS) {
+            include = w.filter_value(climb[w.data_column]);
+            //TODO: Clear this
+            if (!include)
                 break;
         }
         if (include)
