@@ -59,17 +59,22 @@ class Route(db.Model):
         consensus_level = level_counts.most_common(1)[0][0] if level_counts else None
 
         return {
+            # route characteristics
             "id": self.id,
             "name": self.name,
             "sector": self.sector.name,
             "area": self.sector.area.name,
             "level": consensus_level,
-            "level_felt": opinion.grade.level,
             "height": self.height,
-            "landing": self.landing,
             "inclination": self.inclination,
-            "cruxes": [crux.name for crux in opinion.cruxes],
+            "sit_start": self.sit_start,
+            # climber's opinion
+            "landing": opinion.landing if opinion else None,
+            "rating": opinion.rating if opinion else None,
+            "level_felt": opinion.grade.level if opinion else None,
+            "cruxes": [crux.name for crux in opinion.cruxes] if opinion else None,
             "sent": self.sent(climber_id),
+            # climbing history
             "n_sessions": n_sessions,
             "n_attempts_all": n_attempts_all,
             "n_attempts_send": n_attempts_send,

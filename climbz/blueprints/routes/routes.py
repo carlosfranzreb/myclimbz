@@ -8,7 +8,7 @@ from flask import (
 from climbz.models import Route
 from climbz.forms import RouteForm
 from climbz import db
-from climbz.blueprints.render import render
+from climbz.blueprints.utils import render
 
 routes = Blueprint("routes", __name__)
 FILE = "src/static/data/boulders.csv"

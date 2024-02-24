@@ -9,7 +9,7 @@ from climbz.models import Area, Session
 from climbz.forms import SessionForm
 from climbz import db
 from climbz.ner.tracking import dump_predictions
-from climbz.blueprints.render import render
+from climbz.blueprints.utils import render
 
 
 sessions = Blueprint("sessions", __name__)

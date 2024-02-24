@@ -7,11 +7,12 @@ from flask import (
     request,
     session as flask_session,
 )
+from flask_login import current_user
 import whisper
 
 from climbz.ner import transcribe, parse_climb, ClimbsModel
 from climbz.models import Route, Grade
-from climbz.blueprints.render import render
+from climbz.blueprints.utils import render
 
 
 ASR_MODEL = whisper.load_model("medium")
@@ -25,7 +26,7 @@ home = Blueprint("home", __name__)
 @home.route("/", methods=["GET", "POST"])
 def page_home() -> str:
     current_session_id = flask_session.get("session_id", -1)
-    routes_dict = [route.as_dict() for route in Route.query.all()]
+    routes_dict = [route.as_dict(current_user.id) for route in Route.query.all()]
     grades_dict = [grade.as_dict() for grade in Grade.query.all()]
 
     # POST: an audio file was uploaded

@@ -2,7 +2,9 @@
 Gathers all the forms in the climbs app.
 """
 
-from climbz.forms.climb import ClimbForm
-from climbz.forms.session import SessionForm
-from climbz.forms.route import RouteForm
-from climbz.forms.area import AreaForm
+from .climb import ClimbForm  # noqa
+from .session import SessionForm  # noqa
+from .route import RouteForm  # noqa
+from .area import AreaForm  # noqa
+from .login import LoginForm  # noqa
+from .profile import ProfileForm  # noqa

@@ -10,7 +10,7 @@ from climbz.models import Climb, Session, Sector
 from climbz.forms import ClimbForm, RouteForm
 from climbz import db
 from climbz.ner.tracking import dump_predictions
-from climbz.blueprints.render import render
+from climbz.blueprints.utils import render
 
 
 climbs = Blueprint("climbs", __name__)

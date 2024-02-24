@@ -7,7 +7,7 @@ from flask import (
 from climbz.models import Area
 from climbz.forms import AreaForm
 from climbz import db
-from climbz.blueprints.render import render
+from climbz.blueprints.utils import render
 
 
 areas = Blueprint("areas", __name__)

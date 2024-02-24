@@ -38,10 +38,6 @@ class RouteForm(FlaskForm):
         Check that only one of the new and existing fields is filled. Sector is only
         checked if a new route is given. If the form is valid, change the grades to
         their objects.
-
-        Args:
-            is_edit: Whether the form is used for editing a route. If so, the route
-                name is allowed to be the same as the name of an existing route.
         """
         # self.cruxes.data = [int(c) for c in self.cruxes.data]
         is_valid = True

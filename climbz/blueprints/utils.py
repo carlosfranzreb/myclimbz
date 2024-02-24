@@ -4,6 +4,7 @@ always required.
 """
 
 from flask import render_template, session as flask_session
+
 from climbz.models import Session
 
 

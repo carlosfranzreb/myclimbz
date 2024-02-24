@@ -7,6 +7,7 @@ from datetime import datetime
 import random
 
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import generate_password_hash
 
 from climbz import db, create_app, models
 
@@ -90,8 +91,14 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
     route is added to a second session.
     """
     print("Adding testing data")
-    db.session.add(models.Climber(name="Climber1", email="c@d", password="123"))
-    db.session.add(models.Climber(name="Climber2", email="b@d", password="123"))
+    pw = "123"
+    pw_hash = generate_password_hash(pw)
+    db.session.add(
+        models.Climber(name="Climber1", email="c1@climbz.com", password=pw_hash)
+    )
+    db.session.add(
+        models.Climber(name="Climber2", email="c2@climbz.com", password=pw_hash)
+    )
 
     db.session.add(models.Area(name="A1", rock_type_id=1, created_by=1))
     db.session.add(models.Area(name="A2", rock_type_id=2, created_by=2))
