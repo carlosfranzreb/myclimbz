@@ -93,12 +93,12 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
     db.session.add(models.Climber(name="Climber1", email="c@d", password="123"))
     db.session.add(models.Climber(name="Climber2", email="b@d", password="123"))
 
-    db.session.add(models.Area(name="A1", rock_type_id=1))
-    db.session.add(models.Area(name="A2", rock_type_id=2))
+    db.session.add(models.Area(name="A1", rock_type_id=1, created_by=1))
+    db.session.add(models.Area(name="A2", rock_type_id=2, created_by=2))
 
-    db.session.add(models.Sector(name="A1_S1", area_id=1))
-    db.session.add(models.Sector(name="A1_S2", area_id=1))
-    db.session.add(models.Sector(name="A2_S1", area_id=2))
+    db.session.add(models.Sector(name="A1_S1", area_id=1, created_by=1))
+    db.session.add(models.Sector(name="A1_S2", area_id=1, created_by=2))
+    db.session.add(models.Sector(name="A2_S1", area_id=2, created_by=2))
     sector_ids = list(range(1, 4))
 
     # create 4 sessions: 3 in A1, 1 in A2
@@ -132,12 +132,14 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                     sector_id=sector_id,
                     height=route_idx % 5 + 1,
                     inclination=random.randrange(-10, 90, 5),
+                    created_by=random.choice([1, 2]),
                 )
             )
             # with p=0.6, add climb to the session
             if random.random() < 0.6:
                 session_id = random.randint(1, 3) if area_id == 1 else 4
                 sent = bool(random.randint(0, 1))
+                climber_id = 1 if session_id < 4 else 2
                 db.session.add(
                     models.Climb(
                         session_id=session_id,
@@ -145,6 +147,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                         n_attempts=random.randint(1, 10),
                         sent=sent,
                         flashed=bool(random.randint(0, 1)) if sent else False,
+                        climber_id=climber_id,
                     )
                 )
                 # for area 1, with p=0.2, add climb to a second session
@@ -159,11 +162,11 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                             n_attempts=random.randint(1, 10),
                             sent=bool(random.randint(0, 1)),
                             flashed=False,
+                            climber_id=climber_id,
                         )
                     )
 
                 # add climber opinion for the route
-                climber_id = 1 if session_id < 4 else 2
                 db.session.add(
                     models.Opinion(
                         route_id=route_idx + 1,
