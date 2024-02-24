@@ -7,6 +7,7 @@ from climbz.models.columns import ConstrainedInteger
 class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200))
+    created_by = db.Column(db.Integer, db.ForeignKey("climber.id"), nullable=False)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
 
@@ -15,11 +16,9 @@ class Route(db.Model):
     height = db.Column(db.Float, db.CheckConstraint("height >= 0"))
     inclination = ConstrainedInteger("inclination", -20, 90)
 
-    # grades
+    # relationships
     grade_id = db.Column(db.Integer, db.ForeignKey("grade.id"))
     grade = db.relationship("Grade", foreign_keys=[grade_id], backref="routes")
-
-    # other relationships
     sector_id = db.Column(db.Integer, db.ForeignKey("sector.id"))
     climbs = db.relationship("Climb", backref="route", cascade="all, delete")
     opinions = db.relationship("Opinion", backref="route", cascade="all, delete")

@@ -7,6 +7,7 @@ from climbz.models import Route
 class Sector(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey("climber.id"), nullable=False)
     area_id = db.Column(db.Integer, db.ForeignKey("area.id"))
     routes = db.relationship("Route", backref="sector", cascade="all, delete")
     comment = db.Column(db.Text)
