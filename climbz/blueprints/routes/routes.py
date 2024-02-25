@@ -5,19 +5,13 @@ from flask import (
     redirect,
     session as flask_session,
 )
+
 from climbz.models import Route
 from climbz.forms import RouteForm
 from climbz import db
 from climbz.blueprints.utils import render
 
 routes = Blueprint("routes", __name__)
-FILE = "src/static/data/boulders.csv"
-
-
-@routes.route("/routes")  # ? Missing "methods" argument
-def table_routes() -> str:
-    page_routes = Route.query.all()
-    return render("routes.html", title="Routes", routes=page_routes)
 
 
 @routes.route("/route/<int:route_id>")
@@ -28,7 +22,6 @@ def page_route(route_id: int) -> str:
 
 @routes.route("/edit_route/<int:route_id>", methods=["GET", "POST"])
 def edit_route(route_id: int) -> str:
-
     route = Route.query.get(route_id)
     # POST: a route form was submitted => edit route or return error
     route_form = RouteForm.create_empty()
