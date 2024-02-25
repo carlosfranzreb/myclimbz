@@ -13,12 +13,16 @@ step: step size of the slider
 var DoubleRangeSlider = function(id, title, step, data_class, data_column) { 
     var self = this;
     var startX = 0, x = 0;
+    self.id = id;
 
-    //[min, max] = window.data_table.columns().get_min_max(title);
+    self.data_column = data_column;
+
     let min = Infinity;
     let max = -Infinity;
 
-    self.get_ranges = function() {
+    const left = 0;
+    
+    let get_ranges = function() {
         for (let climb of DATA){
             let value = climb[data_column];
             if (value < min) {
@@ -29,124 +33,106 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
             }
         }
     }
-    self.get_ranges();
-    self.data_column = data_column;
+    get_ranges();
 
-    if (step === null) {
-        step = 1;
-    }
-    self.width = 16*(max - min)/step;
-    self.left = 0;
-    self.title = title;
-    var wrapper = document.getElementById(id);
-    wrapper.style.width = self.width + 'px';
-    wrapper.style.left = self.left + 'px';
-    wrapper.style.position = 'relative';
-
-
-    
-    // retrieve touch button
-    var inner_html = `<div class=slider-title id=title_${id}>${self.title}: ${min} - ${max}</div>`
+    let wrapper = document.getElementById(id);
+    let inner_html = `<div class=slider-title id=title_${id}>${title}: ${min} - ${max}</div>`
     + `<div id=widget_${id} se-min="${min}"`
     + `se-step="${step}"`
     + `se-max="${max}" class="double-slider"></div>`;
     wrapper.innerHTML = inner_html;
-    var slider = document.getElementById(`widget_${id}`);
-    slider.style.width = self.width + 'px';
-    
+
+    let slider = document.getElementById(`widget_${id}`);
     inner_html = "<div class='slider-touch-left'><span></span></div>"
     + "<div class='slider-touch-right'><span></span></div>"
     + "<div class='slider-line'><span></span></div></div>";
     slider.innerHTML = inner_html;
     
-    self.wrapper = wrapper;
-    self.slider = slider;
-    var touchLeft  = slider.querySelector('.slider-touch-left');
-    var touchRight = slider.querySelector('.slider-touch-right');
-    var lineSpan   = slider.querySelector('.slider-line span');
-    
+    let touchLeft  = slider.querySelector('.slider-touch-left');
+    let touchRight = slider.querySelector('.slider-touch-right');
+    let lineSpan   = slider.querySelector('.slider-line span');
+
+    if (step === null) {
+        step = 1;
+    }
+
+    let buttonOffsetWidth = touchLeft.offsetWidth;
+    let buttonWidth = buttonOffsetWidth - Number(window.getComputedStyle(touchLeft).padding.replace('px', '')*2);
+
+    let step_width = 2*buttonWidth + 3;
+    let intervals = [];
+    for (let i = 0; i <= (max - min)/step + 1; i += 1) {
+        intervals.push(i*step_width);
+    }
+
+    let span_width = intervals[intervals.length - 1];
+    self.width = span_width + buttonOffsetWidth;
+
+
+    slider.style.width = self.width + 'px';
+    wrapper.style.width = self.width + 'px';
+    wrapper.style.left = left + 'px';
+    wrapper.style.position = 'relative';
+
     // retrieve default values
-    var defaultMinValue = min;
-    var defaultMaxValue = max;
+    let defaultMinValue = min;
+    let defaultMaxValue = max;
   
     if(defaultMinValue > defaultMaxValue)
     {
         defaultMinValue = defaultMaxValue;
     }
     
-    var step  = 0.0;
+    slider.setAttribute('se-min-current', defaultMinValue);
+    slider.setAttribute('se-max-current', defaultMaxValue);
     
-    if (slider.getAttribute('se-step'))
-    {
-        step  = Math.abs(parseFloat(slider.getAttribute('se-step')));
+
+    let maxX = slider.offsetWidth - buttonOffsetWidth - buttonWidth/2;
+    let selectedTouch = null;
+
+    self.adjust_width = function(width) {
+        self.width = width;
+        span_width = width - buttonOffsetWidth;
+        step_width = Math.floor(span_width/(intervals.length - 1));
+        for (let i in intervals) {
+            intervals[i] = i*step_width;
+        }
+        self.width = intervals[intervals.length - 1] + buttonOffsetWidth;
+        maxX = width - buttonOffsetWidth - buttonWidth/2;
+
+        slider.style.width = self.width + 'px';
+        wrapper.style.width = self.width + 'px';
+        self.reset();
     }
-    
-    // normalize flag
-    
-    self.slider.setAttribute('se-min-current', defaultMinValue);
-    self.slider.setAttribute('se-max-current', defaultMaxValue);
-    
-    var left_button_x, right_button_x, current_min, current_max;
-    var newWidth = self.width;
-    self.newWidth = newWidth;
-    self.buttonWidth = parseInt(window.getComputedStyle(touchLeft)["width"]);
+        
 
     // reset the slider to its default values
     self.reset = function() {
         self.setMinValue(defaultMinValue);
+        slider.setAttribute('se-min-current', defaultMinValue);
         self.setMaxValue(defaultMaxValue);
-        self.slider.setAttribute('se-min-current', defaultMinValue);
-        self.slider.setAttribute('se-max-current', defaultMaxValue);
+        slider.setAttribute('se-max-current', defaultMaxValue);
         self.onChange(defaultMinValue, defaultMaxValue);
     }
-
-    
-    self.readjust = function() {
-        current_min = parseInt(slider.getAttribute('se-min-current'));
-        current_max = parseInt(slider.getAttribute('se-max-current'));
-        left_button_x = Math.floor((self.newWidth-self.buttonWidth)*(current_min - min)/(max - min));
-        right_button_x = Math.floor((self.newWidth-self.buttonWidth)*(current_max - min)/(max - min));
-        if (left_button_x === right_button_x) {
-            if (left_button_x <= 50) {
-                right_button_x += self.buttonWidth;
-            }
-            else{
-                left_button_x -= self.buttonWidth;
-            }
-        }
-        touchLeft.style.left = left_button_x + 'px';
-        touchRight.style.left = right_button_x + 'px';
-        lineSpan.style.marginLeft = left_button_x + 'px';
-        lineSpan.style.width = right_button_x - left_button_x + 'px';
-        startX = 0;
-        x = 0;
-        maxX = slider.offsetWidth - touchRight.offsetWidth;
-        line_max_width = (self.newWidth - self.buttonWidth );
-    };
     
     self.setMinValue = function(minValue)
     {
-        var ratio = ((minValue - min) / (max - min));
-        touchLeft.style.left = Math.ceil(ratio * (slider.offsetWidth - (touchLeft.offsetWidth ))) + 'px';
-        lineSpan.style.marginLeft = touchLeft.offsetLeft + 'px';
-        lineSpan.style.width = (touchRight.offsetLeft - touchLeft.offsetLeft) + 'px';
+        let i = Math.floor((minValue - min)/step);
+        touchLeft.style.left = Math.floor(intervals[i] + buttonWidth/2) + 'px';
+        lineSpan.style.marginLeft = intervals[i] + 'px';
+        let current_max = parseFloat(slider.getAttribute('se-max-current'));
+        let j = Math.floor((current_max - min)/step);
+        lineSpan.style.width = (intervals[j + 1] - intervals[i]) + 'px';
     }
     
     self.setMaxValue = function(maxValue)
     {
-        var ratio = ((maxValue - min) / (max - min));
-        touchRight.style.left = Math.ceil(ratio * (slider.offsetWidth - (touchLeft.offsetWidth )) ) + 'px';
-        lineSpan.style.marginLeft = touchLeft.offsetLeft + 'px';
-        lineSpan.style.width = (touchRight.offsetLeft - touchLeft.offsetLeft) + 'px';
+        let i = Math.floor((maxValue - min)/step) + 1;
+        touchRight.style.left = Math.floor((intervals[i] - buttonWidth/2)) + 'px';
+        let current_min = parseFloat(slider.getAttribute('se-min-current'));
+        let j = Math.floor((current_min - min)/step);
+        lineSpan.style.width = (intervals[i] - intervals[j]) + 'px';
     }
-    
-    // initial readjust
-    self.readjust();
-    
-    // usefull values, min, max, normalize fact is the width of both touch buttons
-    var maxX = slider.offsetWidth - touchRight.offsetWidth;
-    var selectedTouch = null;
-    var line_max_width = (lineSpan.offsetWidth );
     
     // set defualt values
     self.setMinValue(defaultMinValue);
@@ -195,48 +181,47 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
         
         if (selectedTouch === touchLeft)
         {
-            if(x > (touchRight.offsetLeft - selectedTouch.offsetWidth + 10))
+            if(x > (touchRight.offsetLeft - buttonWidth))
             {
-                x = (touchRight.offsetLeft - selectedTouch.offsetWidth + 10)
+                x = (touchRight.offsetLeft - buttonWidth)
             }
-            else if(x < 0)
+            else if(x < buttonWidth/2)
             {
-                x = 0;
+                x = buttonWidth/2;
             }
-            
+            calculateMinValue(x - buttonWidth/2);
             selectedTouch.style.left = x + 'px';
         }
         else if (selectedTouch === touchRight)
         {
-            if(x < (touchLeft.offsetLeft + touchLeft.offsetWidth - 10))
+            if(x < (touchLeft.offsetLeft + buttonWidth))
             {
-                x = (touchLeft.offsetLeft + touchLeft.offsetWidth - 10)
+                x = (touchLeft.offsetLeft + buttonWidth)
             }
             else if(x > maxX)
             {
                 x = maxX;
             }
-        selectedTouch.style.left = x + 'px';
-    }
+            calculateMaxValue(x + buttonWidth/2);
+            selectedTouch.style.left = x + 'px';
+        }
     
-    // update line span
-    lineSpan.style.marginLeft = touchLeft.offsetLeft + 'px';
-    lineSpan.style.width = (touchRight.offsetLeft - touchLeft.offsetLeft) + 'px';
-    
-    // write new value
-    calculateValue();
-    
-    // call on change
-    if(slider.getAttribute('on-change'))
-    {
-        var fn = new Function('min, max', slider.getAttribute('on-change'));
-        fn(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
-    }
-    
-    if(self.onChange)
-    {
-        self.onChange(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
-    }
+        // update line span
+        lineSpan.style.marginLeft = (touchLeft.offsetLeft - buttonWidth/2) + 'px';
+        lineSpan.style.width = (touchRight.offsetLeft - touchLeft.offsetLeft + buttonWidth) + 'px';
+        
+        
+        // call on change
+        if(slider.getAttribute('on-change'))
+        {
+            var fn = new Function('min, max', slider.getAttribute('on-change'));
+            fn(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
+        }
+        
+        if(self.onChange)
+        {
+            self.onChange(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
+        }
     
     }
   
@@ -245,11 +230,31 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
         document.removeEventListener('mouseup', onStop);
         document.removeEventListener('touchmove', onMove);
         document.removeEventListener('touchend', onStop);
+
+        var eventTouch = event;
+        
+        if (event.touches)
+        {
+            eventTouch = event.touches[0];
+        }
+        
+        x = eventTouch.pageX - startX;
+        
+        if (selectedTouch === touchLeft)
+        {
+            self.setMinValue(slider.getAttribute('se-min-current'));
+            //calculateMinValue(x - buttonWidth/2);
+            
+        }
+        else if (selectedTouch === touchRight)
+        {
+            self.setMaxValue(slider.getAttribute('se-max-current'));
+            //calculateMaxValue(x + buttonWidth/2);
+
+        }
         
         selectedTouch = null;
         
-        // write new value
-        calculateValue();
         
         // call did changed
         if(slider.getAttribute('did-changed'))
@@ -264,24 +269,18 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
         }
     }
   
-    function calculateValue() {
-        let newValue = (lineSpan.offsetWidth ) / line_max_width;
-        let minValue = lineSpan.offsetLeft / line_max_width;
-        let maxValue = minValue + newValue;
-        
-        minValue = minValue * (max - min) + min;
-        maxValue = maxValue * (max - min) + min;
-        
-        if (step !== 0.0)
-        {
-            let multi = Math.round((minValue / step));
-            minValue = step * multi;
-            
-            multi = Math.round((maxValue / step));
-            maxValue = step * multi;
-        }
+    function calculateMinValue(x) {
+        let minValue = Math.floor((x/step_width))*step + min;
         
         slider.setAttribute('se-min-current', minValue);
+    }
+
+    function calculateMaxValue(x) {
+        let maxValue = Math.floor((x/step_width))*step + min;
+        if (maxValue > max) {
+            maxValue = max;
+        }
+        
         slider.setAttribute('se-max-current', maxValue);
     }
   
@@ -291,42 +290,23 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
     touchLeft.addEventListener('touchstart', onStart);
     touchRight.addEventListener('touchstart', onStart);
   
-    self.adjustWidth = function() {
-        // Check if the right edge of the element is past the right edge of the window
-        if (self.left+self.width + 50 > window.innerWidth) {
-            // readjust the width of the element
-            self.newWidth = window.innerWidth - self.left - 50
-            self.wrapper.style.width = self.newWidth + "px";
-            self.slider.style.width = self.newWidth + "px";
-            self.readjust();
-        } else if (self.slider.style.width !== self.width + "px" && window.innerWidth > self.width + self.left) {
-            self.newWidth = self.width;
-            self.wrapper.style.width = self.newWidth + "px";
-            self.slider.style.width = self.newWidth + "px";
-            self.readjust();
-        }
-    }
-    window.addEventListener("resize", function () {
-        self.adjustWidth();
-    });
-  
     self.onChange = function(min, max)
     {
         if (data_class === Grade){
-            document.getElementById(`title_${id}`).innerHTML = `${self.title}: ${GRADES[min][GRADE_SCALE]} - ${GRADES[max][GRADE_SCALE]}`;
+            document.getElementById(`title_${id}`).innerHTML = `${title}: ${GRADES[min][GRADE_SCALE]} - ${GRADES[max][GRADE_SCALE]}`;
         }
         else{
-            document.getElementById(`title_${id}`).innerHTML = `${self.title}: ${min} - ${max}`;
+            document.getElementById(`title_${id}`).innerHTML = `${title}: ${min} - ${max}`;
         }
     }
   
     self.didChanged = function(min, max)
     {
         if (data_class === Grade){
-            document.getElementById(`title_${id}`).innerHTML = `${self.title}: ${GRADES[min][GRADE_SCALE]} - ${GRADES[max][GRADE_SCALE]}`;
+            document.getElementById(`title_${id}`).innerHTML = `${title}: ${GRADES[min][GRADE_SCALE]} - ${GRADES[max][GRADE_SCALE]}`;
         }
         else{
-            document.getElementById(`title_${id}`).innerHTML = `${self.title}: ${min} - ${max}`;
+            document.getElementById(`title_${id}`).innerHTML = `${title}: ${min} - ${max}`;
         }
     }
   
@@ -515,7 +495,6 @@ var FilterWidget = function(id, left) {
             cols[col][row] = filter_name;
         }
     }
-    let col_width = Math.floor(12/Object.keys(cols).length);
     wrapper.innerHTML = inner_html;
     let menu = document.getElementById(`${id}_menu`);
     let row = document.createElement("div");
@@ -541,6 +520,7 @@ var FilterWidget = function(id, left) {
 
     var col_widths = [];
     menu.style.display = "block";
+    let delta = 20;
     for (let filter_name in window.FILTERS) {
         let widget = window.FILTERS[filter_name]["filter_type"];
         let filter_id = `${id}_${filter_name}`;
@@ -558,15 +538,24 @@ var FilterWidget = function(id, left) {
         let widgetWidth = Math.floor(FILTER_WIDGETS[FILTER_WIDGETS.length - 1].width);
         let current_col = window.FILTERS[filter_name]["col"];
         if (col_widths[current_col] === undefined) {
-            col_widths[current_col] = widgetWidth + 20;
+            col_widths[current_col] = widgetWidth + delta;
         }
         else {
-            col_widths[current_col] = Math.max(col_widths[current_col], widgetWidth + 20);
+            col_widths[current_col] = Math.max(col_widths[current_col], widgetWidth + delta);
         }
     }
     for (let w in col_widths) {
         let col = document.getElementById(`${id}_col_${w}`);
         col.style.width = `${col_widths[w]}px`;
+    }
+
+    for (let filter of FILTER_WIDGETS) {
+        let filter_name = filter.id.split("_")[1];
+        if (window.FILTERS[filter_name]["filter_type"] === "slider") {
+            if (filter.width < col_widths[window.FILTERS[filter_name]["col"]] - delta){
+                filter.adjust_width(col_widths[window.FILTERS[filter_name]["col"]] - delta);
+            }
+        }
     }
     
     let divider = document.createElement("div");

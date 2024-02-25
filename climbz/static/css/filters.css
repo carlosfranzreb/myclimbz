@@ -21,9 +21,11 @@
 }
 
 .double-slider {
+	--w: 20px;
+	--h: 40px;
 	display: block;
 	position: relative;
-	height: 40px;
+	height: var(--h);
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select:none;
@@ -33,9 +35,10 @@
 	.slider-touch-left, .slider-touch-right {
 		display: block;
 		position: absolute;
-		height: 40px;
-		width: 20px;
-		padding: 6px;
+		height: var(--h);
+		width: var(--w);
+		/* make horizontal padding equal the width of the slider-touch divided by 4*/
+		padding: 5px calc((var(--w) / 4));
 		z-index: 1;
 		
 		span {
@@ -50,7 +53,7 @@
 
 	.slider-line {
 		position: absolute;
-		width: calc(100% - 20px);
+		width: calc(100% - var(--w));
 		left: 10px;
 		top: 16px;
 		height: 6px;
