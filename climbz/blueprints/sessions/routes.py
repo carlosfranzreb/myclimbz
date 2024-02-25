@@ -4,6 +4,7 @@ from flask import (
     request,
     session as flask_session,
 )
+from flask_login import current_user
 
 from climbz.models import Area, Session
 from climbz.forms import SessionForm
@@ -17,13 +18,13 @@ sessions = Blueprint("sessions", __name__)
 
 @sessions.route("/sessions")
 def table_sessions() -> str:
-    return render("sessions.html", title="Sessions", sessions=Session.query.all())
+    sessions = Session.query.filter_by(user_id=current_user.id).all()
+    return render("sessions.html", title="Sessions", sessions=sessions)
 
 
 @sessions.route("/session/<int:session_id>")
 def page_session(session_id: int) -> str:
-    session = Session.query.get(session_id)
-    return render("session.html", session=session)
+    return render("session.html", session=Session.query.get(session_id))
 
 
 @sessions.route("/stop_session", methods=["GET", "POST"])
