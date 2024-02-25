@@ -6,8 +6,8 @@ from climbz import db
 from climbz.models.columns import Rating
 
 
-route_crux_association = db.Table(
-    "route_crux_association",
+crux_opinions = db.Table(
+    "crux_opinions",
     db.Column("opinion_id", db.Integer, db.ForeignKey("opinion.id")),
     db.Column("crux_id", db.Integer, db.ForeignKey("crux.id")),
 )
@@ -25,6 +25,6 @@ class Opinion(db.Model):
     link = db.Column(db.String(300))  # link to a photo or video
     cruxes = db.relationship(
         "Crux",
-        secondary=route_crux_association,
+        secondary=crux_opinions,
         backref=db.backref("routes", lazy="dynamic"),
     )
