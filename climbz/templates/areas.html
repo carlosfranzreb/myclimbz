@@ -24,6 +24,7 @@
             <td onclick={{ onclick }}>{{ area.sectors|length }}</td>
             <td onclick={{ onclick }}>{{ area.sessions|length }}</td>
             <td onclick={{ onclick }}>{{ area.sectors|map(attribute='routes')|map('length')|sum }}</td>
+            {% if area.created_by == user_id or user_role == 1 %}
             <td>
                 <a href="{{ url_for('areas.edit_area', area_id=area.id) }}">
                     {% include 'icons/edit.html' %}
@@ -32,6 +33,7 @@
                     {% include 'icons/delete.html' %}
                 </a>
             </td>
+            {% endif %}
         </tr>
         {% endfor %}
     </tbody>

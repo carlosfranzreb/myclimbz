@@ -39,12 +39,14 @@
     </div>
 </div>
 
+{% if route.created_by == user_id or user_role == 1 %}
 <div class="container">
     <div class="col-xs-12 center-block text-center">
         <a href="{{ url_for('routes.edit_route', route_id=route.id) }}" class="btn btn-primary">Edit route</a>
         <a href="{{ url_for('routes.delete_route', route_id=route.id) }}" class="btn btn-danger">Delete route</a>
     </div>
 </div>
+{% endif %}
 
 <div class="container">
     <h3>Sessions</h3>
@@ -58,6 +60,11 @@
             <th>Actions</th>
         </tr>
         {% for climb in route.climbs %}
+
+        {% if climb.session.climber_id != user_id %}
+        {% continue %}
+        {% endif %}
+
         {% set onclick = "window.location=\"" + url_for('sessions.page_session', session_id=climb.session.id) + "\"" %}
         <tr>
             <td onclick={{ onclick }}>{{ climb.session.date }}</td>

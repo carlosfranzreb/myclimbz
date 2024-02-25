@@ -21,6 +21,7 @@
     </div>
 </div>
 
+{% if area.created_by == user_id or user_role == 1 %}
 <div class="container">
     <div class="row">
         <div class="col-xs-12 center-block text-center">
@@ -29,6 +30,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <div class="container">
     <h3>Routes</h3>
@@ -52,6 +54,7 @@
             <td onclick={{ onclick }}>{{ route.sector.name }}</td>
             <td onclick={{ onclick }}>{{ route.grade.font }} / {{ route.grade.hueco }}</td>
             <td onclick={{ onclick }}>{{ route.sent }}</td>
+            {% if route.created_by == user_id or user_role == 1 %}
             <td>
                 <a href="{{ url_for('routes.edit_route', route_id=route.id) }}">
                     {% include 'icons/edit.html' %}
@@ -60,6 +63,7 @@
                     {% include 'icons/delete.html' %}
                 </a>
             </td>
+            {% endif %}
         </tr>
         {% endfor %}
         {% endfor %}

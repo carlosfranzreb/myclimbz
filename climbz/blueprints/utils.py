@@ -22,6 +22,7 @@ def render(*args, **kwargs) -> str:
     kwargs["open_session"] = Session.query.get(flask_session.get("session_id", -1))
     kwargs["username"] = current_user.name
     kwargs["user_id"] = current_user.id
+    kwargs["user_role"] = current_user.role
     if not request.path.startswith("/edit_") and request.path != "/login":
         flask_session["call_from_url"] = request.path
     return render_template(

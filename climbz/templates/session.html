@@ -30,6 +30,7 @@
     </div>
 </div>
 
+{% if session.created_by == user_id or user_role == 1 %}
 <div class="container">
     <div class="col-xs-12 center-block text-center">
         <a href="{{ url_for('sessions.edit_session', session_id=session.id) }}" class="btn btn-primary">Edit</a>
@@ -39,6 +40,7 @@
         {% endif %}
     </div>
 </div>
+{% endif %}
 
 <div class="container">
     <h3>Climbs</h3>
@@ -50,7 +52,9 @@
             <th>Area</th>
             <th># tries</th>
             <th>Sent</th>
+            {% if session.climber_id == user_id or user_role == 1 %}
             <th>Actions</th>
+            {% endif %}
         </tr>
         {% for climb in session.climbs %}
         {% set onclick = "window.location=\"" + url_for('routes.page_route', route_id=climb.route.id) + "\"" %}
@@ -60,6 +64,8 @@
             <td onclick={{ onclick }}>{{ climb.route.sector.area.name }}</td>
             <td onclick={{ onclick }}>{{ climb.n_attempts }}</td>
             <td onclick={{ onclick }}>{{ climb.sent }}</td>
+
+            {% if session.climber_id == user_id or user_role == 1 %}
             <td>
                 <a href="{{ url_for('climbs.edit_climb', climb_id=climb.id) }}">
                     {% include 'icons/edit.html' %}
@@ -68,6 +74,7 @@
                     {% include 'icons/delete.html' %}
                 </a>
             </td>
+            {% endif %}
         </tr>
         {% endfor %}
     </table>
