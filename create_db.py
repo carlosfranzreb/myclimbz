@@ -174,21 +174,22 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                     )
 
                 # add climber opinion for the route
-                db.session.add(
-                    models.Opinion(
-                        route_id=route_idx + 1,
-                        climber_id=climber_id,
-                        grade_id=random.randint(1, len(GRADES)),
-                        landing=random.randint(1, 5),
-                        rating=random.randint(1, 5),
-                        cruxes=[
-                            models.Crux.query.filter_by(
-                                name=CRUXES[random.randint(0, len(CRUXES) - 1)]
-                            ).first()
-                            for _ in range(random.randint(1, 5))
-                        ],
+                if sent is True:
+                    db.session.add(
+                        models.Opinion(
+                            route_id=route_idx + 1,
+                            climber_id=climber_id,
+                            grade_id=random.randint(1, len(GRADES)),
+                            landing=random.randint(1, 5),
+                            rating=random.randint(1, 5),
+                            cruxes=[
+                                models.Crux.query.filter_by(
+                                    name=CRUXES[random.randint(0, len(CRUXES) - 1)]
+                                ).first()
+                                for _ in range(random.randint(1, 5))
+                            ],
+                        )
                     )
-                )
 
 
 if __name__ == "__main__":
