@@ -6,16 +6,12 @@
 <div class="container">
     <div class="row">
         <div class="col-4 offset-md-2">
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">{{ route.name }}</div>
+            <div class="col-xs-12 center-block text-center">
+                <h4>{{ route.name }}</h4>
             </div>
             <div class="row">
-                <div class="col-xs-12 center-block text-center">{{ route.grade.font }} / {{ route.grade.hueco }}</div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">{{ route.sector.area.name }}, {{ route.sector.name }}
+                <div class="col-xs-12 center-block text-center">In {{ route.sector.name }}, {{
+                    route.sector.area.name }}
                 </div>
             </div>
             <div class="row">
@@ -24,12 +20,24 @@
             <div class="row">
                 <div class="col-xs-12 center-block text-center">Inclination: {{ route.inclination }} °</div>
             </div>
+        </div>
+        <div class="col-4">
             <div class="row">
-                <div class="col-xs-12 center-block text-center">Landing: {{ route.landing }} / 10</div>
+                <div class="col-xs-12 center-block text-center">
+                    Success rate: {{ route.n_sends }} / {{ route.n_tries }}
+                </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 center-block text-center">Cruxes: {{ route.cruxes|map(attribute="name")|join(", ")
-                    }}</div>
+                <div class="col-xs-12 center-block text-center">Grade: {{ route.consensus_grade }}</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 center-block text-center">Landing: {{ route.landing }} / 5</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 center-block text-center">Landing: {{ route.rating }} / 5</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 center-block text-center">Cruxes: {{ route.cruxes|join(", ") }}</div>
             </div>
         </div>
     </div>
@@ -45,8 +53,9 @@
 {% endif %}
 
 <div class="container">
-    <h3>Sessions</h3>
+    <h3>My Sessions</h3>
 
+    {% if route.climbs|selectattr("session.climber_id", "equalto", user_id)|list|length > 0 %}
     <table class="table table-striped">
         <tr>
             <th>Date</th>
@@ -74,6 +83,13 @@
         </tr>
         {% endfor %}
     </table>
+    {% else %}
+    <div class="col-xs-12">
+        <p>No sessions yet</p>
+    </div>
+    {% endif %}
 </div>
+
+
 
 {% endblock content %}

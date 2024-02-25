@@ -1,6 +1,7 @@
 from collections import Counter
 
 from climbz import db
+from climbz.models import Grade
 from climbz.models.columns import ConstrainedInteger
 
 
@@ -31,6 +32,55 @@ class Route(db.Model):
             if climb.session.climber_id == climber_id
         )
 
+    @property
+    def n_sends(self) -> int:
+        """The number of climbers that have sent this route."""
+        climbers = list()
+        for climb in self.climbs:
+            if climb.sent and climb.session.climber_id not in climbers:
+                climbers.append(climb.session.climber_id)
+        return len(climbers)
+
+    @property
+    def n_tries(self) -> int:
+        """The number of climbers that have tried this route."""
+        climbers = list()
+        for climb in self.climbs:
+            if climb.session.climber_id not in climbers:
+                climbers.append(climb.session.climber_id)
+        return len(climbers)
+
+    @property
+    def consensus_level(self) -> int:
+        """Most common given level to this route, or -1 if there are none."""
+        level_counts = Counter(op.grade.level for op in self.opinions)
+        return level_counts.most_common(1)[0][0] if level_counts else -1
+
+    @property
+    def consensus_grade(self) -> str:
+        """The `consensus_level` expressed in both grade scales"""
+        grade_obj = Grade.query.filter_by(level=self.consensus_level).first()
+        if grade_obj:
+            return f"{grade_obj.font} / {grade_obj.hueco}"
+
+    @property
+    def rating(self) -> float:
+        """The average rating given to this route."""
+        ratings = [op.rating for op in self.opinions if op.rating is not None]
+        return sum(ratings) / len(ratings) if ratings else None
+
+    @property
+    def landing(self) -> float:
+        """The average landing rating given to this route."""
+        landings = [op.landing for op in self.opinions if op.landing is not None]
+        return sum(landings) / len(landings) if landings else None
+
+    @property
+    def cruxes(self) -> list:
+        """The 3 most common cruxes given to this route."""
+        crux_counts = Counter(crux.name for op in self.opinions for crux in op.cruxes)
+        return [crux[0] for crux in crux_counts.most_common(3)]
+
     def as_dict(self, climber_id: int) -> dict:
         """
         Return the relevant attributes of this route for a climber as a dictionary,
@@ -51,12 +101,10 @@ class Route(db.Model):
             dates.append(climb.session.date)
 
         opinion = None
-        level_counts = Counter()
         for op in self.opinions:
             if op.climber_id == climber_id:
                 opinion = op
-            level_counts[op.grade.level] += 1
-        consensus_level = level_counts.most_common(1)[0][0] if level_counts else None
+                break
 
         return {
             # route characteristics
@@ -64,7 +112,7 @@ class Route(db.Model):
             "name": self.name,
             "sector": self.sector.name,
             "area": self.sector.area.name,
-            "level": consensus_level,
+            "level": self.consensus_level,
             "height": self.height,
             "inclination": self.inclination,
             "sit_start": self.sit_start,
