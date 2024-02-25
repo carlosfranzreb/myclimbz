@@ -17,13 +17,11 @@ FILE = "src/static/data/boulders.csv"
 @routes.route("/routes")  # ? Missing "methods" argument
 def table_routes() -> str:
     page_routes = Route.query.all()
-    flask_session["call_from_url"] = "/routes"
     return render("routes.html", title="Routes", routes=page_routes)
 
 
 @routes.route("/route/<int:route_id>")
 def page_route(route_id: int) -> str:
-    flask_session["call_from_url"] = f"/route/{route_id}"
     route = Route.query.get(route_id)
     return render("route.html", route=route)
 

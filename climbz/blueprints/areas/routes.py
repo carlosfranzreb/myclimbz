@@ -15,7 +15,6 @@ areas = Blueprint("areas", __name__)
 
 @areas.route("/areas")
 def table_areas() -> str:
-    flask_session["call_from_url"] = "/areas"
     return render("areas.html", title="Areas", areas=Area.query.all())
 
 
@@ -23,7 +22,6 @@ def table_areas() -> str:
 @areas.route("/area/<int:area_id>")
 def page_area(area_id: int) -> str:
     area = Area.query.get(area_id)
-    flask_session["call_from_url"] = f"/area/{area_id}"
     return render("area.html", area=area)
 
 

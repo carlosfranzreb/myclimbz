@@ -21,8 +21,7 @@ climbers = Blueprint("climbers", __name__)
 @climbers.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for("main.get_home"))
-
+        return redirect(url_for("home.page_home"))
     form = LoginForm()
 
     # POST: a login form was submitted => log in or return error
@@ -37,7 +36,10 @@ def login():
         else:
             climber = Climber.query.filter_by(email=form.email.data).first()
             login_user(climber, remember=form.remember.data)
-            return redirect(url_for("home.page_home"))
+            if "call_from_url" in flask_session:
+                return redirect(flask_session.pop("call_from_url"))
+            else:
+                return redirect(url_for("home.page_home"))
 
     # GET: render the login page
     return render_template(
