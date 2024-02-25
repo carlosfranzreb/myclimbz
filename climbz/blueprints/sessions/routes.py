@@ -18,7 +18,7 @@ sessions = Blueprint("sessions", __name__)
 
 @sessions.route("/sessions")
 def table_sessions() -> str:
-    sessions = Session.query.filter_by(user_id=current_user.id).all()
+    sessions = Session.query.filter_by(climber_id=current_user.id).all()
     return render("sessions.html", title="Sessions", sessions=sessions)
 
 

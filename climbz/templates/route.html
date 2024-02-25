@@ -28,10 +28,6 @@
                 <div class="col-xs-12 center-block text-center">Landing: {{ route.landing }} / 10</div>
             </div>
             <div class="row">
-                <div class="col-xs-12 center-block text-center">Grade felt: {{ route.grade_felt.font }} / {{
-                    route.grade_felt.hueco }}</div>
-            </div>
-            <div class="row">
                 <div class="col-xs-12 center-block text-center">Cruxes: {{ route.cruxes|map(attribute="name")|join(", ")
                     }}</div>
             </div>
@@ -59,11 +55,7 @@
             <th>Sent</th>
             <th>Actions</th>
         </tr>
-        {% for climb in route.climbs %}
-
-        {% if climb.session.climber_id != user_id %}
-        {% continue %}
-        {% endif %}
+        {% for climb in route.climbs if climb.session.climber_id == user_id %}
 
         {% set onclick = "window.location=\"" + url_for('sessions.page_session', session_id=climb.session.id) + "\"" %}
         <tr>
