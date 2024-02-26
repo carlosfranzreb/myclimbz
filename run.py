@@ -26,7 +26,8 @@ def check_request_validity():
         path, obj_id = request.path[1:].split("/")
         obj_str = path.split("_")[1]
         obj = eval(obj_str.capitalize()).query.get(int(obj_id))
-        if obj.created_by != current_user.id and current_user.role != 1:
+        obj_owner = getattr(obj, "created_by", getattr(obj, "climber_id"))
+        if obj_owner != current_user.id and current_user.role != 1:
             flask_session["error"] = "You are not allowed to access this page."
             return redirect(flask_session.pop("call_from_url"))
 
