@@ -352,6 +352,8 @@ var DropdownMenu = function(id, placeholder, data_column) {
     let options = self.get_options();
     options.unshift("Select all");
     self.options = options;
+    let selected_options = [];
+
     self.placeholder = placeholder;
     var wrapper = document.getElementById(id);
     wrapper.style.left = self.left + 'px';
@@ -390,6 +392,10 @@ var DropdownMenu = function(id, placeholder, data_column) {
                 let all_selected = false;
                 if (option.textContent === "Deselect all") {
                     all_selected = true;
+                    selected_options = self.options.slice(1);
+                }
+                else {
+                    selected_options = [];
                 }
                 for (let j = 1; j < num_options; j++) {
                     let option = document.getElementById(`${id}_${j}`);
@@ -412,9 +418,12 @@ var DropdownMenu = function(id, placeholder, data_column) {
                 option.classList.toggle('active');
                 if (option.classList.contains('active')) {
                     num_selected++;
+                    selected_options.push(self.options[i]);
                 }
                 else {
                     num_selected--;
+                    let index = selected_options.indexOf(self.options[i]);
+                    selected_options.splice(index, 1);
                 }
                 if (num_selected === num_options - 1) {
                     document.getElementById(`${id}_0`).textContent = "Deselect all";
@@ -434,12 +443,16 @@ var DropdownMenu = function(id, placeholder, data_column) {
             let option = document.getElementById(`${id}_${i}`);
             option.classList.remove('active');
         }
+        document.getElementById(`${id}_0`).textContent = "Select all";
+        num_selected = 0;
+        selected_options = [];
     }
 
     self.filter_value = function(value) {
         if (Array.isArray(value)) {
             for (v of value) {
-                if (self.options.includes(v)) {
+                //if the option with value v is active, return true
+                if (selected_options.includes(v)) {
                     return true;
                 }
             }
