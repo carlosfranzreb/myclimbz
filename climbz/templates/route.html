@@ -90,6 +90,34 @@
     {% endif %}
 </div>
 
+<div class="container">
+    <h3>Climber's opinions</h3>
+
+    {% if route.opinions|length > 0 %}
+    {% for opinion in route.opinions %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="card-title">{{ opinion.climber.name }}</h5>
+        </div>
+        <div class="card-body">
+            <p class="card-body">
+                Grade: {{ opinion.grade.font }} / {{ opinion.grade.hueco }} <br>
+                Landing: {{ opinion.landing }} / 5 <br>
+                Rating: {{ opinion.rating }} / 5 <br>
+                Cruxes: {{ opinion.cruxes|map(attribute="name")|join(", ") }} <br>
+                Comment: {{ opinion.comment }}
+            </p>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="col-xs-12">
+        <p>No sessions yet</p>
+    </div>
+    {% endif %}
+
+
+</div>
 
 
 {% endblock content %}
