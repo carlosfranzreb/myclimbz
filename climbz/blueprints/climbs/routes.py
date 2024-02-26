@@ -137,7 +137,7 @@ def edit_climb(climb_id: int) -> str:
         climb.sent = climb_form.sent.data
         climb.n_attempts = climb_form.n_attempts.data
         db.session.commit()
-        return redirect(f"/session/{climb.session_id}")
+        return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit a climb
     climb_form = ClimbForm(
