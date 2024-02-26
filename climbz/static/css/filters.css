@@ -98,3 +98,15 @@ input[type="checkbox"]+label{
 #filter_bottom_row{
 	margin-left: 10px;
 }
+
+.form-control{
+	width: 150px;
+}
+
+.form-control[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
+
+.form-control[type="date"]:hover {
+    cursor: text;
+}

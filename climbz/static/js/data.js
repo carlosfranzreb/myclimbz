@@ -8,7 +8,6 @@ let DISPLAY_FORM = "table";  // Table or plot
 
 let GRADE_SCALE = "font";  // Scale chosen with the toggle button
 let ACTIVE_FILTERS = new Map();
-let INCLUDE_UNSENT_CLIMBS = false;
 
 
 // Add an event listener to the checkbox "display-form-toggle"

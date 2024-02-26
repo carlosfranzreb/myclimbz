@@ -64,10 +64,6 @@ function show_plot() {
     // Get the selected options
     let x_axis = document.getElementById("x-axis-select").value;
     let y_axis = document.getElementById("y-axis-select").value;
-    if (y_axis == "Climbs: success rate" && !unsent_climbs_btn.checked) {
-        document.getElementById("include-unsent-climbs").checked = true;
-        INCLUDE_UNSENT_CLIMBS = true;
-    }
 
     // If the data is empty, return without plotting
     let this_data = DISPLAYED_DATA;

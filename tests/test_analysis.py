@@ -35,7 +35,6 @@ def test_page_request(test_client: FlaskClient):
 def get_plotted_data(
     x_axis: str,
     y_axis: str,
-    check_unsent: bool = False,
     toggle_grade_scale: bool = False,
 ) -> list:
     """
@@ -44,7 +43,6 @@ def get_plotted_data(
     Args:
         x_axis: the x-axis value
         y_axis: the y-axis value
-        check_unsent: whether to check the "Include unsent boulders" checkbox
         toggle_grade_scale: whether to toggle the scale switch, i.e. change to V-scale
 
     Returns:
@@ -63,8 +61,6 @@ def get_plotted_data(
     driver.get("http://127.0.0.1:5000/analysis")
     WebDriverWait(driver, 10).until(EC.title_is("Analysis"))
 
-    if check_unsent:
-        driver.find_element(By.XPATH, "//input[@id='include-unsent-climbs']").click()
     if toggle_grade_scale:
         btn = driver.find_element(By.XPATH, "//input[@id='grade-scale-toggle']")
         btn.find_element(By.XPATH, "..").click()
