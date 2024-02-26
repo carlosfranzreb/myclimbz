@@ -8,3 +8,4 @@ from .route import RouteForm  # noqa
 from .area import AreaForm  # noqa
 from .login import LoginForm  # noqa
 from .profile import ProfileForm  # noqa
+from .opinion import OpinionForm  # noqa

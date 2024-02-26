@@ -13,4 +13,4 @@ from .sector import Sector  # noqa
 from .area import Area  # noqa
 from .session import Session  # noqa
 from .climber import Climber  # noqa
-from .climber_opinion import Opinion  # noqa
+from .opinion import Opinion  # noqa

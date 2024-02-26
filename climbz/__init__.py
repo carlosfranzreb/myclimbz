@@ -30,6 +30,7 @@ def create_app(db_name: str):
     from climbz.blueprints.routes.routes import routes
     from climbz.blueprints.climbs.routes import climbs
     from climbz.blueprints.climbers.routes import climbers
+    from climbz.blueprints.opinions.routes import opinions
 
     app.register_blueprint(areas)
     app.register_blueprint(home)
@@ -37,5 +38,6 @@ def create_app(db_name: str):
     app.register_blueprint(routes)
     app.register_blueprint(climbs)
     app.register_blueprint(climbers)
+    app.register_blueprint(opinions)
 
     return app
