@@ -91,6 +91,14 @@ input[type="checkbox"]+label{
 	margin: 2px;
 }
 
+.btn-wrapper{
+	margin: 2px;
+}
+
+.row{
+	margin: 0px;
+}
+
 .col{
 	margin:0px 10px;
 }

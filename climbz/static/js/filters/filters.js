@@ -357,6 +357,7 @@ var DropdownMenu = function(id, placeholder, data_column) {
     self.placeholder = placeholder;
     var wrapper = document.getElementById(id);
     wrapper.style.left = self.left + 'px';
+    wrapper.classList.add('btn-wrapper');
     let inner_html = `<button class='btn btn-secondary dropdown-toggle' type='button' id='${id}_button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>${self.placeholder}</button>`
     + `<div class='dropdown-menu' aria-labelledby='${id}_button' id='${id}_menu'>`;
     
@@ -436,6 +437,13 @@ var DropdownMenu = function(id, placeholder, data_column) {
     
     }
 
+    //add event listener so that dropdown menu closes when element loses focus
+    document.addEventListener('click', function(event) {
+        if (!wrapper.contains(event.target)) {
+            self.menu.style.display = "none";
+        }
+    });
+
 
     //reset menu to have no items selected
     self.reset = function() {
@@ -458,7 +466,7 @@ var DropdownMenu = function(id, placeholder, data_column) {
             }
             return false;
         }
-        return self.options.includes(value);
+        return selected_options.includes(value);
     }
 }
 
@@ -623,6 +631,7 @@ var FilterWidget = function(id, left) {
     self.id = id;
     wrapper = document.getElementById(id);
     wrapper.style.left = left + 'px';
+    wrapper.style.width = "fit-content";
     let inner_html = `<button class='btn btn-secondary dropdown-toggle' type='button' id='${id}_button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Filter</button>`
     + `<div class='dropdown-menu' aria-labelledby='${id}_button' id='${id}_menu'>`;
     //add widgets here
@@ -631,7 +640,14 @@ var FilterWidget = function(id, left) {
         let row = window.FILTERS[filter_name].row;
         let col = window.FILTERS[filter_name].col;
         if (col in cols) {
+            if (row in cols[col]) {
+                let filter_array = [cols[col][row]];
+                filter_array.push(filter_name);
+                cols[col][row] = filter_array;
+            }
+            else{
             cols[col][row] = filter_name;
+            }
         }
         else {
             cols[col] = {};
@@ -644,7 +660,6 @@ var FilterWidget = function(id, left) {
     row.className = "row";
     row.id = `${id}_row`;
 
-    // Calculate the width for each column
     for (let col in cols) {
         let colElement = document.createElement("div");
         colElement.className = "col";
@@ -652,7 +667,24 @@ var FilterWidget = function(id, left) {
 
         for (let row in cols[col]) {
             let filter_name = cols[col][row];
-            colElement.innerHTML += `<div id=${id}_${filter_name}>${filter_name}</div>`;
+            if (filter_name instanceof Array) {
+                let subrow = document.createElement("div");
+                subrow.className = "row";
+                subrow.id = `${id}_col_${col}_subrow_${row}`;
+                for (let f of filter_name) {
+                    let elem = document.createElement("div");
+                    elem.id = `${id}_${f}`;
+                    elem.innerHTML = f;
+                    subrow.appendChild(elem);
+                }
+                colElement.appendChild(subrow);
+            }
+            else {
+                let elem = document.createElement("div");
+                elem.id = `${id}_${filter_name}`;
+                elem.innerHTML = filter_name;
+                colElement.appendChild(elem);
+            }
 
         }
         
@@ -749,5 +781,11 @@ var FilterWidget = function(id, left) {
     // Apply filters when the apply button is clicked
     filter_apply.addEventListener("click", function() {
         display_data();
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!wrapper.contains(event.target)) {
+            self.menu.style.display = "none";
+        }
     });
 }

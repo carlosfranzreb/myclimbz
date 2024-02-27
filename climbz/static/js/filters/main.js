@@ -22,7 +22,7 @@ FILTERS = {
         "filter_type": "date_range",
         "data_class": Date,
         "data_column": "dates",
-        "row": 2,
+        "row": 3,
         "col": 0,
     },
     "Inclination": {
@@ -46,7 +46,7 @@ FILTERS = {
         "data_class": Number,
         "step": 1, 
         "data_column": "n_attempts_send",
-        "row": 3,
+        "row": 2,
         "col": 0,
     },
     "Height": {
@@ -61,8 +61,8 @@ FILTERS = {
     "Area": {
         "filter_type": "dropdown",
         "data_column": "area",
-        "row": 4,
-        "col": 0,
+        "row": 2,
+        "col": 1,
     },
     "Crux": {
         "filter_type": "dropdown",
