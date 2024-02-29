@@ -1133,14 +1133,10 @@
         }
 
         that.headings = [];
-        that.header_names = [];
         that.hasHeadings = that.head.rows.length > 0;
 
         if (that.hasHeadings) {
             that.header = that.head.rows[0];
-            that.header_names = [].slice.call(that.header.cells).map(function (cell) {
-                return cell.innerHTML;
-            });
             that.headings = [].slice.call(that.header.cells);
         }
 
