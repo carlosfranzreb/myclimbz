@@ -12,7 +12,7 @@ step: step size of the slider
 */
 var DoubleRangeSlider = function(id, title, step, data_class, data_column) { 
     var self = this;
-    var startX = 0, x = 0;
+    let startX = 0, x = 0;
     self.id = id;
 
     self.data_column = data_column;
@@ -143,7 +143,7 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
         
         // Prevent default dragging of selected content
         event.preventDefault();
-        var eventTouch = event;
+        let eventTouch = event;
         
         if (event.touches)
         {
@@ -170,7 +170,7 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
     }
   
     function onMove(event) {
-        var eventTouch = event;
+        let eventTouch = event;
         
         if (event.touches)
         {
@@ -214,7 +214,7 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
         // call on change
         if(slider.getAttribute('on-change'))
         {
-            var fn = new Function('min, max', slider.getAttribute('on-change'));
+            let fn = new Function('min, max', slider.getAttribute('on-change'));
             fn(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
         }
         
@@ -231,7 +231,7 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
         document.removeEventListener('touchmove', onMove);
         document.removeEventListener('touchend', onStop);
 
-        var eventTouch = event;
+        let eventTouch = event;
         
         if (event.touches)
         {
@@ -259,7 +259,7 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
         // call did changed
         if(slider.getAttribute('did-changed'))
         {
-            var fn = new Function('min, max', slider.getAttribute('did-changed'));
+            let fn = new Function('min, max', slider.getAttribute('did-changed'));
             fn(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
         }
         
@@ -355,7 +355,7 @@ var DropdownMenu = function(id, placeholder, data_column) {
     let selected_options = [];
 
     self.placeholder = placeholder;
-    var wrapper = document.getElementById(id);
+    let wrapper = document.getElementById(id);
     wrapper.style.left = self.left + 'px';
     wrapper.classList.add('btn-wrapper');
     let inner_html = `<button class='btn btn-secondary dropdown-toggle' type='button' id='${id}_button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>${self.placeholder}</button>`
@@ -763,7 +763,7 @@ var FilterWidget = function(id, left) {
 
     menu.appendChild(row);
 
-    var col_widths = [];
+    let col_widths = [];
     menu.style.display = "block";
     let delta = 20;
     for (let filter_name in window.FILTERS) {
