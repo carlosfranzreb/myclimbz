@@ -7,7 +7,6 @@ let DISPLAYED_DATA = null;
 let DISPLAY_FORM = "table";  // Table or plot
 
 let GRADE_SCALE = "font";  // Scale chosen with the toggle button
-let ACTIVE_FILTERS = new Map();
 
 
 // Add an event listener to the checkbox "display-form-toggle"
@@ -21,36 +20,21 @@ function start_display(data, grades, session_date) {
     DATA = data;
     GRADES = grades;
 
-    // Parse the dates and format them to YYYY-MM-DD
+    // Parse the dates and format them to "dd/mm/yyyy"
     let parseTime = d3.timeParse("%a, %d %b %Y %H:%M:%S");
-    let formatDate = d3.timeFormat("%Y-%m-%d");
+    let formatDate = d3.timeFormat("%d/%m/%Y");
     DATA = DATA.map(d => {
+        if (d.dates.length == 0) {
+            d.dates = [""];
+            d.last_climbed = "";
+            return d;
+        }
         let parsed_dates = d.dates.map(date => parseTime(date.substring(0, date.length - 4)))
         d.dates = parsed_dates.map(date => formatDate(date));
         let max_date = Math.max(...parsed_dates);
         d.last_climbed = formatDate(max_date);
         return d;
     });
-
-    // If session date is given, filter the data on the session date
-    if (session_date != "") {
-        add_filter();
-
-        // Create the filter and change it to "Date"
-        let filter_list = document.getElementById("filterList");
-        let filter = filter_list.children[0];
-        let select = filter.getElementsByTagName("select")[0];
-        select.value = "Date";
-        let event = new Event("change");
-        select.dispatchEvent(event);
-
-        // Set the start date
-        let start_date = filter.getElementsByClassName("start-range")[0];
-        start_date.value = session_date;
-        start_date.addEventListener("change", filter_data_by_range);
-        start_date.dispatchEvent(event);
-    }
-
     display_data();
 }
 

@@ -7,6 +7,21 @@ grade_scale_toggle.addEventListener("change", function () {
     display_data();
 });
 
+class Grade {
+    constructor(grade) {
+        this.grade_dict = GRADES.find(
+            obj => obj[GRADE_SCALE] === grade
+        );
+        this.scale = GRADE_SCALE;
+    }
+
+    valueOf() {
+        if (this.grade_dict === undefined)
+            return NaN;
+        return this.grade_dict.level;
+    }
+}
+
 let FILTER_WIDGETS = [];
 
 // --- List of available filters and their corresponding functions
@@ -68,6 +83,14 @@ FILTERS = {
         "filter_type": "dropdown",
         "data_column": "cruxes",
         "row": 2,
+        "col": 1,
+    },
+    "Sends": {
+        "filter_type": "radio",
+        "data_column": "sent",
+        "options": ["All", "Projects", "Sent"],
+        "truth_values": [[true, false], false, true],
+        "row": 3,
         "col": 1,
     },
 };

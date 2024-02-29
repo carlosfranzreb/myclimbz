@@ -393,11 +393,8 @@ var DropdownMenu = function(id, placeholder, data_column) {
                 let all_selected = false;
                 if (option.textContent === "Deselect all") {
                     all_selected = true;
-                    selected_options = self.options.slice(1);
                 }
-                else {
-                    selected_options = [];
-                }
+                selected_options = [];
                 for (let j = 1; j < num_options; j++) {
                     let option = document.getElementById(`${id}_${j}`);
                     // If "Deselect all" is clicked, add a checkmark to all options
@@ -452,7 +449,7 @@ var DropdownMenu = function(id, placeholder, data_column) {
             option.classList.remove('active');
         }
         document.getElementById(`${id}_0`).textContent = "Select all";
-        num_selected = 0;
+        num_selected = self.options.length - 1;
         selected_options = [];
     }
 
@@ -460,21 +457,21 @@ var DropdownMenu = function(id, placeholder, data_column) {
         if (Array.isArray(value)) {
             for (v of value) {
                 //if the option with value v is active, return true
-                if (selected_options.includes(v)) {
+                if (selected_options.length === 0 || selected_options.includes(v)) {
                     return true;
                 }
             }
             return false;
         }
-        return selected_options.includes(value);
+        return (selected_options.length === 0 || selected_options.includes(value));
     }
 }
 
-var Checkbox = function(id, title, data_column) {
+var Checkbox = function(id, title, data_column, false_value) {
     var self = this;
     self.left = 0;
     self.id = id;
-    self.data_column = this.data_column;
+    self.data_column = data_column;
     wrapper = document.getElementById(id);
     wrapper.style.left = self.left + 'px';
     let inner_html = `
@@ -490,7 +487,7 @@ var Checkbox = function(id, title, data_column) {
         self.button.checked = false;
     }
 
-    self.filter_value = function(value, false_value) {
+    self.filter_value = function(value) {
         if (value === false_value) {
             return !self.button.checked;
         }
@@ -599,31 +596,103 @@ var DateRange = function(id, title, data_column) {
         endDate.value = "";
     }
 
+    function parseDateString(dateString) {
+        const [day, month, year] = dateString.split('/');
+        // Month is 0-indexed in JavaScript, so we subtract 1 from the parsed month
+        return new Date(year, month - 1, day);
+    }
+
     self.filter_value = function(value) {
         if (startDate.value === "" || endDate.value === "") {
             if (startDate.value === "" && endDate.value === "") {
                 return true;
             }
+            let date;
+            if (value instanceof Array) {
+                date = parseDateString(value[value.length - 1]);
+            }
+            else{
+                date = parseDateString(value);
+            }
             if (startDate.value === "") {
-                let end = new Date(endDate.value);
-                let date = new Date(value);
+                let end = parseDateString(endDate.value);
                 return date <= end;
             }
             if (endDate.value === "") {
-                let start = new Date(startDate.value);
-                let date = new Date(value);
+                let start = parseDateString(startDate.value);
                 return date >= start;
             }
         }
 
-        let start = new Date(startDate.value);
-        let end = new Date(endDate.value);
-        let date = new Date(value);
+        let start = parseDateString(startDate.value);
+        let end = parseDateString(endDate.value);
+        let date;
+        if (value instanceof Array) {
+            date = parseDateString(value[value.length - 1]);
+        }
+        else{
+            date = parseDateString(value);
+        }
         return date >= start && date <= end;
     }
 }
 
+var RadioButton = function(id, data_column, options, truth_values) {
+    var self = this;
+    const left = 0;
+    self.id = id;
+    self.data_column = data_column;
+
+    let wrapper = document.getElementById(id);
+    wrapper.innerHTML = "";
+    wrapper.style.left = left + 'px';
     
+    for (i in options) {
+        let form_elem = document.createElement("div");
+        form_elem.className = "form-check";
+        form_elem.id = `${id}_form_${i}`;
+        wrapper.appendChild(form_elem);
+        let elem = document.createElement("input");
+        elem.className = "form-check-input";
+        elem.type = "radio";
+        elem.id = `${id}_${i}`;
+        elem.name = id;
+        if (i === "0") {
+            elem.checked = true;
+        }
+        form_elem.appendChild(elem);
+        let label = document.createElement("label");
+        label.className = "form-check-label";
+        label.htmlFor = `${id}_${i}`;
+        label.innerHTML = options[i];
+        form_elem.appendChild(label);
+    }
+
+    let width = 0;
+    for (i in options) {
+        let elem = document.getElementById(`${id}_${i}`);
+        let opt_width = getTextWidth(options[i], elem);
+        if (opt_width > width) {
+            width = opt_width;
+        }
+    }
+    self.width = width + 30;
+    wrapper.style.width = self.width + "px";
+
+    self.reset = function() {
+        document.getElementById(`${id}_0`).checked = true;
+    }
+
+    self.filter_value = function(value) {
+        let checked = document.querySelector(`input[name=${id}]:checked`);
+        let index = checked.id.split("_").pop();
+        let t = truth_values[index];
+        if (t instanceof Array) {
+            return t.includes(value);
+        }
+        return value === t;
+    }
+}
 
 var FilterWidget = function(id, left) {
     var self = this;
@@ -655,6 +724,7 @@ var FilterWidget = function(id, left) {
         }
     }
     wrapper.innerHTML = inner_html;
+
     let menu = document.getElementById(`${id}_menu`);
     let row = document.createElement("div");
     row.className = "row";
@@ -712,6 +782,9 @@ var FilterWidget = function(id, left) {
         }
         else if (widget === "date_range") {
             FILTER_WIDGETS.push(new DateRange(filter_id, filter_name.replace(/_/g, " "), window.FILTERS[filter_name]["data_column"]));
+        }
+        else if (widget === "radio") {
+            FILTER_WIDGETS.push(new RadioButton(filter_id, window.FILTERS[filter_name]["data_column"], window.FILTERS[filter_name]["options"], window.FILTERS[filter_name]["truth_values"]));
         }
         let widgetWidth = Math.floor(FILTER_WIDGETS[FILTER_WIDGETS.length - 1].width);
         let current_col = window.FILTERS[filter_name]["col"];
@@ -781,6 +854,7 @@ var FilterWidget = function(id, left) {
     // Apply filters when the apply button is clicked
     filter_apply.addEventListener("click", function() {
         display_data();
+        self.menu.style.display = "none";
     });
 
     document.addEventListener('click', function(event) {

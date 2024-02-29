@@ -28,7 +28,7 @@ let x_axis_options = {
  * 2. Get the selected x- and y-axis from the corresponding dropdown menus.
  * 3. If the y-axis is "Success rate", check the "include-unsent-climbs" checkbox.
  * 4. Filter the data based on whether unsent climbs should be included or not.
- * 5. Filter the data based on the active filters stored in the ACTIVE_FILTERS map.
+ * 5. Filter the data based on the active filters.
  * 6. If the filtered data is empty, return without plotting.
  * 7. Group the data by the selected x-axis key. If the key is "cruxes", "dates" or
  *   "conditions", count the number of values per unique key.
