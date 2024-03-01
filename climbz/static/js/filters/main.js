@@ -1,13 +1,5 @@
 // --- Buttons at the top of the page
 
-// Add an event listener to the checkbox "Include unsent climbs"
-let unsent_climbs_btn = document.getElementById("include-unsent-climbs");
-unsent_climbs_btn.addEventListener("change", function () {
-    INCLUDE_UNSENT_CLIMBS = unsent_climbs_btn.checked;
-    display_data();
-});
-
-
 // Add an event listener to the checkbox "Grade scale"
 let grade_scale_toggle = document.getElementById("grade-scale-toggle");
 grade_scale_toggle.addEventListener("change", function () {
@@ -15,131 +7,93 @@ grade_scale_toggle.addEventListener("change", function () {
     display_data();
 });
 
+class Grade {
+    constructor(grade) {
+        this.grade_dict = GRADES.find(
+            obj => obj[GRADE_SCALE] === grade
+        );
+        this.scale = GRADE_SCALE;
+    }
+
+    valueOf() {
+        if (this.grade_dict === undefined)
+            return NaN;
+        return this.grade_dict.level;
+    }
+}
+
+let FILTER_WIDGETS = [];
 
 // --- List of available filters and their corresponding functions
 FILTERS = {
     "Grade": {
-        "filter_type": "range",
+        "filter_type": "slider",
         "data_class": Grade,
         "data_column": "level",
+        "row": 0,
+        "col": 0,
     },
     "Date": {
-        "filter_type": "range",
+        "filter_type": "date_range",
         "data_class": Date,
         "data_column": "dates",
+        "row": 3,
+        "col": 0,
     },
     "Inclination": {
-        "filter_type": "range",
+        "filter_type": "slider",
         "data_class": Number,
+        "step": 5, 
         "data_column": "inclination",
+        "row": 1,
+        "col": 0,
     },
     "Landing": {
-        "filter_type": "range",
+        "filter_type": "slider",
         "data_class": Number,
+        "step": 1, 
         "data_column": "landing",
+        "row": 0,
+        "col": 1,
     },
     "Attempts": {
-        "filter_type": "range",
+        "filter_type": "slider",
         "data_class": Number,
+        "step": 1, 
         "data_column": "n_attempts_send",
+        "row": 2,
+        "col": 0,
     },
     "Height": {
-        "filter_type": "range",
+        "filter_type": "slider",
         "data_class": Number,
+        "step": 0.5, 
         "data_column": "height",
+        "row": 1,
+        "col": 1,
         "is_float": true,
     },
     "Area": {
-        "filter_type": "checkboxes",
+        "filter_type": "dropdown",
         "data_column": "area",
+        "row": 2,
+        "col": 1,
     },
     "Crux": {
-        "filter_type": "checkboxes",
+        "filter_type": "dropdown",
         "data_column": "cruxes",
+        "row": 2,
+        "col": 1,
     },
-}
-
-// Add a filter to the list of filters
-function add_filter() {
-    let filter_list = document.getElementById("filterList");
-    let filter_container = document.createElement("div");
-    filter_container.classList.add("filter-container");
-
-    // add dropdown menu to select filter
-    let filter_selection = document.createElement("select");
-    for (let option of Object.keys(FILTERS)) {
-        if (ACTIVE_FILTERS.has(FILTERS[option].data_column))
-            continue;
-        else
-            filter_selection.options.add(new Option(option, option));
-    }
-    filter_selection.addEventListener("change", change_filter);
-    filter_container.appendChild(filter_selection);
-
-    // add dropdown menu to select filter value
-    let selected = filter_selection.options[filter_selection.selectedIndex].value;
-    let filter_div = document.createElement("div");
-    create_filter(filter_div, selected);
-    filter_container.appendChild(filter_div);
-
-    // add remove button to container
-    let remove_button = document.createElement("button");
-    remove_button.innerText = "Remove";
-    remove_button.addEventListener("click", remove_filter);
-    filter_container.appendChild(remove_button);
-
-    // add container to list
-    filter_list.appendChild(filter_container);
-}
-
-function create_filter(div, filter_key) {
-    div.classList.add("filter_div");
-    div.dataset.column = filter_key;
-    let filter_type = FILTERS[filter_key]["filter_type"];
-    if (filter_type == "range")
-        add_filter_range(div, filter_key);
-    else if (filter_type == "checkboxes")
-        add_filter_checkboxes(div, filter_key);
-}
-
-
-// Change the filter options when a new filter is selected
-function change_filter(event) {
-
-    // get the filter container and the old and new selected filters
-    let filter_container = event.target.parentNode;
-    let filter_div = filter_container.querySelector(".filter_div");
-    let old_selected_option = filter_div.dataset.column;
-    let selected_option = event.target.options[event.target.selectedIndex].value;
-
-    // remove the filter from the list of active filters
-    ACTIVE_FILTERS.delete(FILTERS[old_selected_option].data_column);
-
-    // add new filter and remove the old one
-    let new_filter_div = document.createElement("div");
-    create_filter(new_filter_div, selected_option);
-
-    filter_container.insertBefore(new_filter_div, filter_div);
-    filter_container.removeChild(filter_div);
-    display_data();
-}
-
-
-// Remove a filter from the list of filters
-function remove_filter(event) {
-
-    // remove the filter from the list of active filters and plot the data
-    let filter_container = event.target.parentNode;
-    let select_menu = filter_container.querySelector("select")
-    let selected_option = select_menu.options[select_menu.selectedIndex].value;
-    ACTIVE_FILTERS.delete(FILTERS[selected_option].data_column);
-
-    // remove the filter from the list of filters
-    let filter_list = filter_container.parentNode;
-    filter_list.removeChild(filter_container);
-
-    display_data();
-}
+    "Sends": {
+        "filter_type": "radio",
+        "data_column": "sent",
+        "options": ["All", "Projects", "Sent"],
+        "truth_values": [[true, false], false, true],
+        "row": 3,
+        "col": 1,
+    },
+};
 
 
 // Filter the global data according to the active filters
@@ -147,26 +101,17 @@ function filter_data() {
 
     // Remove unsent climbs if the corresponding button is unchecked
     let this_data = null;
-    if (INCLUDE_UNSENT_CLIMBS)
-        this_data = DATA;
-    else
-        this_data = DATA.filter(d => d.sent === true);
+    this_data = DATA;
+    if (FILTER_WIDGETS.length === 0)
+        return this_data;
 
     // Apply the active filters
     let filtered_data = [];
     for (let climb of this_data) {
-        let include = ACTIVE_FILTERS.size == 0;
-        for (let [filter_key, filter_value] of ACTIVE_FILTERS) {
-            let climb_values = climb[filter_key];
-            if (!Array.isArray(climb_values))
-                climb_values = [climb_values];
-            for (let climb_value of climb_values) {
-                if (filter_value.includes(climb_value)) {
-                    include = true;
-                    break;
-                }
-            }
-            if (include)
+        let include = false;
+        for (let w of FILTER_WIDGETS) {
+            include = w.filter_value(climb[w.data_column]);
+            if (!include)
                 break;
         }
         if (include)

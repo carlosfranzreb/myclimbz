@@ -7,7 +7,8 @@
     <link href="{{ url_for('static', filename='css/vanilla-dataTables.css') }}" rel="stylesheet" type="text/css">
     {% if title == "Routes" %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/slider_switch.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/filter_checkboxes.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/filters.css') }}" />
+
     {% endif %}
 </head>
 
@@ -126,9 +127,8 @@
     <script src="{{url_for('static', filename='js/analysis/y_axis.js')}}"></script>
 
     <!-- Scripts for filters -->
-    <script src="{{url_for('static', filename='js/filters/checkboxes.js')}}"></script>
-    <script src="{{url_for('static', filename='js/filters/range.js')}}"></script>
     <script src="{{url_for('static', filename='js/filters/main.js')}}"></script>
+    <script src="{{url_for('static', filename='js/filters/filters.js')}}"></script>
     {% endif %}
 </body>
 
