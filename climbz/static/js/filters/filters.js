@@ -6,10 +6,6 @@ function getTextWidth(text, obj) {
     return width;
 }
 
-/*Range slider object:
-id: id of the div element to place the slider in
-step: step size of the slider
-*/
 var DoubleRangeSlider = function(id, title, step, data_class, data_column) { 
     var self = this;
     let startX = 0, x = 0;
@@ -97,8 +93,9 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
         for (let i in intervals) {
             intervals[i] = i*step_width;
         }
-        self.width = intervals[intervals.length - 1] + buttonOffsetWidth;
-        maxX = width - buttonOffsetWidth - buttonWidth/2;
+        //add remaining width to the last interval
+        intervals[intervals.length - 1] = span_width;
+        maxX = span_width - buttonWidth/2;
 
         slider.style.width = self.width + 'px';
         wrapper.style.width = self.width + 'px';
@@ -867,7 +864,9 @@ var FilterWidget = function(id, left) {
     });
 
     document.addEventListener('click', function(event) {
-        if (!wrapper.contains(event.target)) {
+        // if the user clicks outside of the filter widget, and no widget inside it is in focus, close the filter widget
+        if (!wrapper.contains(event.target) && document.activeElement.tagName === "BODY") {
+            console.log(document.activeElement);
             self.menu.style.display = "none";
         }
     });
