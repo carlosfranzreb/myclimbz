@@ -411,6 +411,7 @@ var DropdownMenu = function(id, placeholder, data_column) {
                 else {
                     num_selected = 0;
                 }
+                button.style.backgroundColor = "#6c757d";
             }
             else {
                 option.classList.toggle('active');
@@ -425,8 +426,15 @@ var DropdownMenu = function(id, placeholder, data_column) {
                 }
                 if (num_selected === num_options - 1) {
                     document.getElementById(`${id}_0`).textContent = "Deselect all";
+                    button.style.backgroundColor = "#6c757d";
                 }
                 else {
+                    if (num_selected === 0) {
+                        button.style.backgroundColor = "#6c757d";
+                    }
+                    else {
+                        button.style.backgroundColor = "#0000ff";
+                    }
                     document.getElementById(`${id}_0`).textContent = "Select all";
                 } 
             }  
@@ -451,6 +459,7 @@ var DropdownMenu = function(id, placeholder, data_column) {
         document.getElementById(`${id}_0`).textContent = "Select all";
         num_selected = self.options.length - 1;
         selected_options = [];
+        button.style.backgroundColor = "#6c757d";
     }
 
     self.filter_value = function(value) {
