@@ -18,8 +18,6 @@ class Route(db.Model):
     inclination = ConstrainedInteger("inclination", -20, 90)
 
     # relationships
-    grade_id = db.Column(db.Integer, db.ForeignKey("grade.id"))
-    grade = db.relationship("Grade", foreign_keys=[grade_id], backref="routes")
     sector_id = db.Column(db.Integer, db.ForeignKey("sector.id"))
     climbs = db.relationship("Climb", backref="route", cascade="all, delete")
     opinions = db.relationship("Opinion", backref="route", cascade="all, delete")

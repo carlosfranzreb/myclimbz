@@ -26,8 +26,8 @@ def edit_route(route_id: int) -> str:
     # POST: a route form was submitted => edit route or return error
     route_form = RouteForm.create_empty()
     if request.method == "POST":
-        if not route_form.validate():
-            return render("route.html", title="Route", route_id=route_id)
+        if not route_form.validate():  # TODO: tf is this
+            return render("edit_route.html", title="Edit route", route_id=route_id)
 
         # if the name has changed, check if it already exists
         if route_form.name.data != route.name:

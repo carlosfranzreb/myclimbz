@@ -15,11 +15,10 @@ from wtforms.validators import Optional
 from climbz.models import Grade, Route, Sector, Crux
 
 
-class RouteForm(FlaskForm):
+class RouteForm(FlaskForm):  # TODO: update this, as opinions are somewhere else now
     name = StringField("Route name", validators=[Optional()])
     sector = StringField("Sector", validators=[Optional()])
     grade = SelectField("Grade", validators=[Optional()])
-    grade_felt = SelectField("Grade felt", validators=[Optional()])
     height = FloatField("Height", validators=[Optional()])
     inclination = IntegerField(
         "Inclination", validators=[Optional()], render_kw={"step": "5"}
@@ -39,7 +38,7 @@ class RouteForm(FlaskForm):
         checked if a new route is given. If the form is valid, change the grades to
         their objects.
         """
-        # self.cruxes.data = [int(c) for c in self.cruxes.data]
+        # self.cruxes.data = [int(c) for c in self.cruxes.data]  # TODO: check if this is needed
         is_valid = True
         if not super().validate():
             is_valid = False
@@ -109,7 +108,7 @@ class RouteForm(FlaskForm):
         form = cls()
         form.add_choices(grade_scale)
 
-        for field in ["name", "name", "height", "inclination", "landing", "sit_start"]:
+        for field in ["name", "height", "inclination", "landing", "sit_start"]:
             if field in entities:
                 getattr(form, field).data = entities[field]
 
@@ -124,10 +123,6 @@ class RouteForm(FlaskForm):
                     getattr(form, field).data = str(grade.id)
             else:
                 getattr(form, field).data = 0
-
-        for field in ["height", "inclination", "landing", "sit_start"]:
-            if field in entities:
-                getattr(form, field).data = entities[field]
 
         if "cruxes" in entities:
             form.cruxes.data = list()
@@ -200,24 +195,24 @@ class RouteForm(FlaskForm):
             route_name = self.name.data.strip().title()
             route.name = route_name
 
-            sector_name = self.sector.data.strip().title()
-            sector = Sector.query.filter_by(name=sector_name).first()
-            if sector is None:
-                sector = Sector(name=sector_name, area_id=route.sector.area_id)
-            route.sector = sector
+        sector_name = self.sector.data.strip().title()
+        sector = Sector.query.filter_by(name=sector_name).first()
+        if sector is None:
+            sector = Sector(name=sector_name, area_id=route.sector.area_id)
+        route.sector = sector
 
-            for field in [
-                "height",
-                "inclination",
-                "landing",
-                "sit_start",
-                "grade",
-                "grade_felt",
-            ]:
-                setattr(route, field, getattr(self, field).data)
+        for field in [
+            "height",
+            "inclination",
+            "landing",
+            "sit_start",
+            "grade",
+            "grade_felt",
+        ]:
+            setattr(route, field, getattr(self, field).data)
 
-            for crux_id in self.cruxes.data:
-                crux = Crux.query.get(crux_id)
-                route.cruxes.append(crux)
+        for crux_id in self.cruxes.data:
+            crux = Crux.query.get(crux_id)
+            route.cruxes.append(crux)
 
         return route
