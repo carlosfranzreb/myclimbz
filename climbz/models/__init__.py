@@ -7,10 +7,10 @@ from .predictions import Predictions  # noqa
 from .rock_type import RockType  # noqa
 from .grade import Grade  # noqa
 from .crux import Crux  # noqa
+from .opinion import Opinion  # noqa
 from .climb import Climb  # noqa
 from .route import Route  # noqa
 from .sector import Sector  # noqa
 from .area import Area  # noqa
 from .session import Session  # noqa
 from .climber import Climber  # noqa
-from .opinion import Opinion  # noqa

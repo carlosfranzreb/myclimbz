@@ -44,37 +44,60 @@
                 <th>Sent</th>
                 <th>Actions</th>
             </tr>
+        </thead>
+        <tbody>
+
             {% for sector in area.sectors %}
             {% for route in sector.routes %}
-            {% set onclick = "window.location=\"" + url_for('routes.page_route', route_id=route.id) + "\"" %}
-        </thead>
-        </tbody>
-        <tr>
-            <td onclick={{ onclick }}>{{ route.name }}</td>
-            <td onclick={{ onclick }}>{{ route.sector.name }}</td>
-            <td onclick={{ onclick }}>{{ route.grade.font }} / {{ route.grade.hueco }}</td>
-            <td onclick={{ onclick }}>{{ route.sent }}</td>
-            {% if route.created_by == user_id or user_role == 1 %}
-            <td>
-                <a href="{{ url_for('routes.edit_route', route_id=route.id) }}">
-                    {% include 'icons/edit.html' %}
-                </a>
-                <a href="{{ url_for('routes.delete_route', route_id=route.id) }}">
-                    {% include 'icons/delete.html' %}
-                </a>
-            </td>
+
+            <!-- Replace boolean "route.sent" with "yes or "no" -->
+            <!-- Display user's grade if it exists and route sent, consensus otherwise -->
+            {% if route.sent(user_id) %}
+            {% set sent = "Yes" %}
+            {% set opinion = route.opinion(user_id) %}
+
+            {% if opinion %}
+            {% set grade = route.opinion(user_id).grade %}
             {% else %}
-            <td></td>
+            {% set grade = route.consensus_grade %}
             {% endif %}
-        </tr>
-        {% endfor %}
-        {% endfor %}
+
+            {% else %}
+            {% set sent = "No" %}
+            {% set grade = route.consensus_grade %}
+            {% endif %}
+
+
+            {% set onclick = "window.location=\"" + url_for('routes.page_route', route_id=route.id) + "\"" %}
+            {% if sent == "Yes" %}
+            <tr class="table-success">
+                {% else %}
+            <tr>
+                {% endif %}
+                <td onclick={{ onclick }}>{{ route.name }}</td>
+                <td onclick={{ onclick }}>{{ route.sector.name }}</td>
+                <td onclick={{ onclick }}>{{ grade.font }} / {{ grade.hueco }}</td>
+                <td onclick={{ onclick }}>{{ sent }}</td>
+                {% if route.created_by == user_id or user_role == 1 %}
+                <td>
+                    <a href="{{ url_for('routes.edit_route', route_id=route.id) }}">
+                        {% include 'icons/edit.html' %}
+                    </a>
+                    <a href="{{ url_for('routes.delete_route', route_id=route.id) }}">
+                        {% include 'icons/delete.html' %}
+                    </a>
+                </td>
+                {% else %}
+                <td></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+            {% endfor %}
         </tbody>
     </table>
 </div>
 
 <script>
-    // TODO: this is not working
     window.addEventListener('load', function () {
         window.data_table = new DataTable("#content_table", {
             perPage: 100,

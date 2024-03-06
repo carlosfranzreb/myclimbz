@@ -1,7 +1,7 @@
 from collections import Counter
 
 from climbz import db
-from climbz.models import Grade
+from climbz.models import Grade, Opinion
 from climbz.models.columns import ConstrainedInteger
 
 
@@ -29,6 +29,10 @@ class Route(db.Model):
             for climb in self.climbs
             if climb.session.climber_id == climber_id
         )
+
+    def opinion(self, climber_id: int):
+        """The opinion of a climber about this route."""
+        return Opinion.query.filter_by(route_id=self.id, climber_id=climber_id).first()
 
     @property
     def n_sends(self) -> int:
