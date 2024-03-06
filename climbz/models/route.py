@@ -1,5 +1,7 @@
 from collections import Counter
 
+from flask_login import current_user
+
 from climbz import db
 from climbz.models import Grade, Opinion
 from climbz.models.columns import ConstrainedInteger
@@ -22,17 +24,21 @@ class Route(db.Model):
     climbs = db.relationship("Climb", backref="route", cascade="all, delete")
     opinions = db.relationship("Opinion", backref="route", cascade="all, delete")
 
-    def sent(self, climber_id: int) -> bool:
+    @property
+    def sent(self) -> bool:
         """Whether a climber has sent this route."""
         return any(
             climb.sent
             for climb in self.climbs
-            if climb.session.climber_id == climber_id
+            if climb.session.climber_id == current_user.id
         )
 
-    def opinion(self, climber_id: int):
+    @property
+    def opinion(self):
         """The opinion of a climber about this route."""
-        return Opinion.query.filter_by(route_id=self.id, climber_id=climber_id).first()
+        return Opinion.query.filter_by(
+            route_id=self.id, climber_id=current_user.id
+        ).first()
 
     @property
     def n_sends(self) -> int:
@@ -64,6 +70,14 @@ class Route(db.Model):
         grade_obj = Grade.query.filter_by(level=self.consensus_level).first()
         if grade_obj:
             return f"{grade_obj.font} / {grade_obj.hueco}"
+
+    @property
+    def grade(self) -> Grade:
+        """
+        The grade of this route according to the climber. If the climber has not
+        given an opinion, return the consensus grade.
+        """
+        return self.opinion.grade if self.opinion else self.consensus_grade
 
     @property
     def rating(self) -> float:
@@ -102,32 +116,30 @@ class Route(db.Model):
             conditions.append(climb.session.conditions)
             dates.append(climb.session.date)
 
-        opinion = None
-        for op in self.opinions:
-            if op.climber_id == climber_id:
-                opinion = op
-                break
-
         return {
             # route characteristics
             "id": self.id,
             "name": self.name,
             "sector": self.sector.name,
             "area": self.sector.area.name,
-            "level": self.consensus_level,
+            "level_consensus": self.consensus_level,
             "height": self.height,
             "inclination": self.inclination,
             "sit_start": self.sit_start,
             # climber's opinion
-            "landing": opinion.landing if opinion else None,
-            "rating": opinion.rating if opinion else None,
-            "level_felt": opinion.grade.level if opinion else None,
-            "cruxes": [crux.name for crux in opinion.cruxes] if opinion else None,
-            "sent": self.sent(climber_id),
+            "landing": self.opinion.landing if self.opinion else None,
+            "rating": self.opinion.rating if self.opinion else None,
+            "level_mine": self.opinion.grade.level if self.opinion else None,
+            "cruxes": (
+                [crux.name for crux in self.opinion.cruxes] if self.opinion else None
+            ),
+            "sent": self.sent,
             # climbing history
             "n_sessions": n_sessions,
             "n_attempts_all": n_attempts_all,
             "n_attempts_send": n_attempts_send,
             "conditions": conditions,
             "dates": dates,
+            # level to be displayed
+            "level": self.grade.level if self.grade else None,
         }

@@ -51,20 +51,10 @@
             {% for route in sector.routes %}
 
             <!-- Replace boolean "route.sent" with "yes or "no" -->
-            <!-- Display user's grade if it exists and route sent, consensus otherwise -->
-            {% if route.sent(user_id) %}
+            {% if route.sent %}
             {% set sent = "Yes" %}
-            {% set opinion = route.opinion(user_id) %}
-
-            {% if opinion %}
-            {% set grade = route.opinion(user_id).grade %}
-            {% else %}
-            {% set grade = route.consensus_grade %}
-            {% endif %}
-
             {% else %}
             {% set sent = "No" %}
-            {% set grade = route.consensus_grade %}
             {% endif %}
 
 
@@ -76,7 +66,7 @@
                 {% endif %}
                 <td onclick={{ onclick }}>{{ route.name }}</td>
                 <td onclick={{ onclick }}>{{ route.sector.name }}</td>
-                <td onclick={{ onclick }}>{{ grade.font }} / {{ grade.hueco }}</td>
+                <td onclick={{ onclick }}>{{ route.grade.font }} / {{ route.grade.hueco }}</td>
                 <td onclick={{ onclick }}>{{ sent }}</td>
                 {% if route.created_by == user_id or user_role == 1 %}
                 <td>
