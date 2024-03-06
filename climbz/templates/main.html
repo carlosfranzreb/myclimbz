@@ -67,12 +67,54 @@
                         <li><a class="dropdown-item" href="{{ url_for('areas.table_areas') }}">Areas</a></li>
                     </ul>
                 </li>
+                <li><a type="button" class="nav-link" data-bs-toggle="modal" data-bs-target="#import_csv_dialog" id="import_csv_button">Import CSV file</a></li>
             </ul>
         </div>
         {% endif %}
     </nav>
 
+    <div class="modal" id="import_csv_dialog" tabindex="-1" aria-labelledby="import_csv_label" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="import_csv_label">Import CSV file
+                <a data-bs-target="#import_csv_info" data-bs-toggle="modal" style="cursor: pointer;" id="info_icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                </svg>
+                </a>
+              </h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="csv_dialog_body">
+                <div class="mb-3">
+                    <input class="form-control" type="file" id="csv_file_form">
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancel_csv_button">Cancel</button>
+              <button type="button" class="btn btn-primary" id="confirm_csv_import_button">Import</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
+    <div class="modal" id="import_csv_info" tabindex="-2" aria-labelledby="import_csv_info_header" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="import_csv_info_header">Import CSV file</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="csv_dialog_body">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="close_info_button">OK</button>
+            </div>
+          </div>
+        </div>
+    </div>
 
     {% if error %}
     <script>

@@ -25,33 +25,44 @@ home = Blueprint("home", __name__)
 @home.route("/", methods=["GET", "POST"])
 def page_home() -> str:
     current_session_id = flask_session.get("session_id", -1)
-    routes_dict = [route.as_dict() for route in Route.query.all()]
+    routes_dict = [
+        route.as_dict() for route in Route.query.all()
+    ]  # TODO WHy is rating and sit start not showing?
     grades_dict = [grade.as_dict() for grade in Grade.query.all()]
 
     # POST: an audio file was uploaded
     if request.method == "POST":
         try:
-            audio_file = request.files["audioFile"]
+            data_type = request.form["data_type"]
         except KeyError:
-            flask_session["error"] = "No audio file was uploaded."
+            flask_session["error"] = "No file was uploaded."
             return redirect("/")
+        if data_type == "audio":
+            try:
+                audio_file = request.files["audioFile"]
+            except KeyError:
+                flask_session["error"] = "No audio file was uploaded."
+                return redirect("/")
 
-        timestamp = str(int(time()))
-        filename = os.path.join("audios", f"{timestamp}.webm")
-        audio_file.save(filename)
-        transcript = transcribe(ASR_MODEL, filename)
-        entities = parse_climb(NER_MODEL, transcript)
+            timestamp = str(int(time()))
+            filename = os.path.join("audios", f"{timestamp}.webm")
+            audio_file.save(filename)
+            transcript = transcribe(ASR_MODEL, filename)
+            entities = parse_climb(NER_MODEL, transcript)
 
-        flask_session["entities"] = entities
-        flask_session["predictions"] = {
-            "audiofile": filename,
-            "transcript": transcript,
-        }
+            flask_session["entities"] = entities
+            flask_session["predictions"] = {
+                "audiofile": filename,
+                "transcript": transcript,
+            }
 
-        if current_session_id > 0:
-            return redirect("/add_climb")
-        else:
-            return redirect("/add_session")
+            if current_session_id > 0:
+                return redirect("/add_climb")
+            else:
+                return redirect("/add_session")
+
+        elif data_type == "csv":
+            csv_json = request.files["csv_data"]
 
     # GET: no audio file was uploaded => show home page
     return render(

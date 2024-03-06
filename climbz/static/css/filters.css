@@ -112,14 +112,13 @@ input[type="radio"]+label{
 	margin-left: 10px;
 }
 
-.form-control{
+.form-control[type="text"]{
 	width: 150px;
 }
 
-.form-control[type="date"]::-webkit-calendar-picker-indicator {
-    cursor: pointer;
+.modal:nth-of-type(even) {
+    z-index: 1062 !important;
 }
-
-.form-control[type="date"]:hover {
-    cursor: text;
+.modal-backdrop.show:nth-of-type(even) {
+    z-index: 1061 !important;
 }

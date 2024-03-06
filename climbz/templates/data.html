@@ -12,6 +12,7 @@
     window.addEventListener('load', function () {
         start_display({{ routes | tojson }} , {{ grades | tojson }}, "{{ session_date }}");
         create_filter("filter");
+        add_data_columns_csv("csv_dialog_body");
         });
 </script>
 

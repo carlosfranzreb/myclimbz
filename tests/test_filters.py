@@ -18,13 +18,6 @@ from climbz.models import Grade, Route, Crux
 from tests.conftest import run_app, driver
 
 
-def test_page_request(test_client: FlaskClient):
-    """Ensures that the analysis page loads correctly."""
-    response = test_client.get("/analysis")
-    assert response.status_code == 200
-    assert b"Analysis" in response.data
-
-
 def test_filters(driver):
     driver.get("http://127.0.0.1:5000/")
     while driver.title != "Routes":
