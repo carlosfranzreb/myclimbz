@@ -18,6 +18,15 @@
       "justMyCode": false
     },
     {
+      "name": "Python: Flask test db",
+      "type": "python",
+      "request": "launch",
+      "program": "run.py",
+      "args": ["-d=test_100"],
+      "jinja": true,
+      "justMyCode": true,
+    },
+    {
       "name": "Python: pytest",
       "type": "python",
       "request": "launch",
