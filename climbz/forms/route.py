@@ -37,7 +37,7 @@ class RouteForm(FlaskForm):
         return form
 
     @classmethod
-    def create_from_entities(cls, entities: dict, grade_scale: str) -> RouteForm:
+    def create_from_entities(cls, entities: dict) -> RouteForm:
         """
         Create the form with the given entities.
 

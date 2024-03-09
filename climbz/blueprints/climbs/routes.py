@@ -29,7 +29,7 @@ def add_climb() -> str:
     # create forms and add choices
     session = Session.query.get(flask_session["session_id"])
     climb_form = None if session.is_project_search else ClimbForm()
-    route_form = RouteForm.create_empty(grade_scale=grade_scale)
+    route_form = RouteForm.create_empty()
 
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
@@ -92,9 +92,9 @@ def add_climb() -> str:
 
     route = get_route_from_entities(entities, session.area_id)
     if route.id is None:
-        route_form = RouteForm.create_from_entities(entities, grade_scale)
+        route_form = RouteForm.create_from_entities(entities)
     else:
-        route_form = RouteForm.create_empty(grade_scale)
+        route_form = RouteForm.create_empty()
         route_form.name.data = route.name
 
     # if no sector was found, add the last sector of the current session if possible
