@@ -1,97 +1,38 @@
 from __future__ import annotations
 
 from flask_wtf import FlaskForm
-from wtforms import (
-    IntegerField,
-    StringField,
-    SelectField,
-    FloatField,
-    BooleanField,
-    SelectMultipleField,
-    widgets,
-)
+from wtforms import IntegerField, StringField, FloatField, BooleanField
 from wtforms.validators import Optional
 
-from climbz.models import Grade, Route, Sector, Crux
+from climbz.models import Route, Sector
 
 
-class RouteForm(FlaskForm):  # TODO: update this, as opinions are somewhere else now
+class RouteForm(FlaskForm):
     name = StringField("Route name", validators=[Optional()])
     sector = StringField("Sector", validators=[Optional()])
-    grade = SelectField("Grade", validators=[Optional()])
     height = FloatField("Height", validators=[Optional()])
     inclination = IntegerField(
         "Inclination", validators=[Optional()], render_kw={"step": "5"}
     )
-    landing = IntegerField("Landing", validators=[Optional()])
     sit_start = BooleanField("Sit Start", validators=[Optional()])
-    cruxes = SelectMultipleField(
-        "Cruxes",
-        validators=[Optional()],
-        widget=widgets.ListWidget(prefix_label=False),
-        option_widget=widgets.CheckboxInput(),
-    )
-
-    def validate(self) -> bool:
-        """
-        Check that only one of the new and existing fields is filled. Sector is only
-        checked if a new route is given. If the form is valid, change the grades to
-        their objects.
-        """
-        # self.cruxes.data = [int(c) for c in self.cruxes.data]  # TODO: check if this is needed
-        is_valid = True
-        if not super().validate():
-            is_valid = False
-
-        if is_valid:
-            for field in ["grade", "grade_felt"]:
-                getattr(self, field).data = Grade.query.get(getattr(self, field).data)
-
-        return is_valid
-
-    def add_choices(self, grade_scale: str):
-        """
-        Add choices to select fields: grades and cruxes.
-        """
-        cruxes = Crux.query.order_by(Crux.name).all()
-        self.cruxes.choices = [(str(c.id), c.name) for c in cruxes]
-
-        grades = Grade.query.order_by(Grade.level).all()
-        for field in ["grade", "grade_felt"]:
-            getattr(self, field).choices = [(0, "")] + [
-                (g.id, getattr(g, grade_scale)) for g in grades
-            ]
 
     @classmethod
-    def create_empty(cls, grade_scale: str = "font") -> RouteForm:
+    def create_empty(cls) -> RouteForm:
         """
         Create the form and add choices to the select fields.
         """
-        form = cls()
-        form.add_choices(grade_scale)
-        return form
+        return cls()
 
     @classmethod
-    def create_from_obj(cls, obj: Route, grade_scale: str = "font") -> RouteForm:
+    def create_from_obj(cls, obj: Route) -> RouteForm:
         """
         Create the form with data from the route object.
         """
         form = cls()
-        form.add_choices(grade_scale)
-        for field in ["name", "height", "inclination", "landing", "sit_start"]:
+        for field in ["name", "height", "inclination", "sit_start"]:
             getattr(form, field).data = getattr(obj, field)
-
         if obj.sector is not None:
             form.sector.data = obj.sector.name
-
-        if obj.grade is not None:
-            form.grade.data = str(obj.grade.id)
-        if obj.grade_felt is not None:
-            form.grade_felt.data = str(obj.grade_felt.id)
-
-        form.cruxes.data = list()
-        for crux in obj.cruxes:
-            form.cruxes.data.append(str(crux.id))
 
         return form
 
@@ -104,34 +45,10 @@ class RouteForm(FlaskForm):  # TODO: update this, as opinions are somewhere else
             entities: Dictionary of entities to select options from.
             grade_scale: The grade scale to use.
         """
-
         form = cls()
-        form.add_choices(grade_scale)
-
-        for field in ["name", "height", "inclination", "landing", "sit_start"]:
+        for field in ["name", "height", "inclination", "sit_start"]:
             if field in entities:
                 getattr(form, field).data = entities[field]
-
-        for field in ["grade", "grade_felt"]:
-            value = entities.get(field, None)
-            if value is not None:
-                if grade_scale == "hueco":
-                    grade = Grade.query.filter_by(hueco=value).first()
-                else:
-                    grade = Grade.query.filter_by(font=value).first()
-                if grade is not None:
-                    getattr(form, field).data = str(grade.id)
-            else:
-                getattr(form, field).data = 0
-
-        if "cruxes" in entities:
-            form.cruxes.data = list()
-            if isinstance(entities["cruxes"], str):
-                entities["cruxes"] = [entities["cruxes"]]
-            for crux in entities["cruxes"]:
-                crux_obj = Crux.query.filter_by(name=crux).first()
-                if crux_obj is not None:
-                    form.cruxes.data.append(str(crux_obj.id))
 
         return form
 
@@ -172,16 +89,9 @@ class RouteForm(FlaskForm):  # TODO: update this, as opinions are somewhere else
                 for field in [
                     "height",
                     "inclination",
-                    "landing",
                     "sit_start",
-                    "grade",
-                    "grade_felt",
                 ]:
                     setattr(route, field, getattr(self, field).data)
-
-                for crux_id in self.cruxes.data:
-                    crux = Crux.query.get(crux_id)
-                    route.cruxes.append(crux)
 
         return route
 
@@ -204,15 +114,8 @@ class RouteForm(FlaskForm):  # TODO: update this, as opinions are somewhere else
         for field in [
             "height",
             "inclination",
-            "landing",
             "sit_start",
-            "grade",
-            "grade_felt",
         ]:
             setattr(route, field, getattr(self, field).data)
-
-        for crux_id in self.cruxes.data:
-            crux = Crux.query.get(crux_id)
-            route.cruxes.append(crux)
 
         return route

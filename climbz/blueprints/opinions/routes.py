@@ -21,18 +21,16 @@ def edit_opinion(opinion_id: int) -> str:
     opinion_form = OpinionForm.create_empty()
     if request.method == "POST":
         if not opinion_form.validate():
-            return render(
-                "edit_opinion.html", title="Edit opinion", opinion_id=opinion_id
-            )
+            return render("edit_form.html", title="Edit opinion", form=opinion_form)
 
-        opinion = opinion_form.get_edited_route(opinion_id)
+        opinion = opinion_form.get_edited_opinion(opinion_id)
         db.session.add(opinion)
         db.session.commit()
         return redirect(flask_session.pop("call_from_url"))
 
     # GET: return the edit route page
     opinion_form = OpinionForm.create_from_obj(opinion)
-    return render("edit_opinion.html", title="Edit Route", opinion_form=opinion_form)
+    return render("edit_form.html", title="Edit opinion", form=opinion_form)
 
 
 @opinions.route("/delete_opinion/<int:opinion_id>", methods=["GET", "POST"])

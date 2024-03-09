@@ -10,9 +10,9 @@
 <div class="container">
     <h3>Route</h3>
     <form method="POST" style="margin: 40px;">
-        {{ route_form.hidden_tag() }}
-        {% for field in route_form %}
-        {% if field.name != 'csrf_token' and field != route_form.existing_route %}
+        {{ form.hidden_tag() }}
+        {% for field in form %}
+        {% if field.name != 'csrf_token' and field.name != "submit" and field != form.existing_route %}
         <div class="form-group">
             <label for="{{ field.id }}">{{ field.label }}</label>
             {% if field.type == 'BooleanField' %}

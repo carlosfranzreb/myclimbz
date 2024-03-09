@@ -17,8 +17,8 @@ from climbz.models import Grade, Crux, Opinion
 class OpinionForm(FlaskForm):
     # the route is determined in the route form
     grade = SelectField("Grade", validators=[Optional()])
+    rating = IntegerField("Rating", validators=[Optional()])
     landing = IntegerField("Landing", validators=[Optional()])
-    rating = IntegerField("Landing", validators=[Optional()])
     cruxes = SelectMultipleField(
         "Cruxes",
         validators=[Optional()],
@@ -36,10 +36,9 @@ class OpinionForm(FlaskForm):
         self.cruxes.choices = [(str(c.id), c.name) for c in cruxes]
 
         grades = Grade.query.order_by(Grade.level).all()
-        for field in ["grade", "grade_felt"]:
-            getattr(self, field).choices = [(0, "")] + [
-                (g.id, getattr(g, grade_scale)) for g in grades
-            ]
+        self.grade.choices = [(0, "")] + [
+            (g.id, getattr(g, grade_scale)) for g in grades
+        ]
 
     @classmethod
     def create_empty(cls, grade_scale: str = "font") -> OpinionForm:
@@ -58,13 +57,8 @@ class OpinionForm(FlaskForm):
         for field in ["landing", "rating", "comment"]:
             getattr(form, field).data = getattr(obj, field)
 
-        if obj.sector is not None:
-            form.sector.data = obj.sector.name
-
         if obj.grade is not None:
             form.grade.data = str(obj.grade.id)
-        if obj.grade_felt is not None:
-            form.grade_felt.data = str(obj.grade_felt.id)
 
         form.cruxes.data = list()
         for crux in obj.cruxes:
@@ -114,17 +108,14 @@ class OpinionForm(FlaskForm):
     def get_edited_opinion(self, opinion_id: int) -> Opinion:
         """Edit the opinion with the data from the form and return it."""
         opinion = Opinion.query.get(opinion_id)
+        opinion.grade = Grade.query.get(int(self.grade.data))
+        opinion.cruxes = [Crux.query.get(crux_id) for crux_id in self.cruxes.data]
 
         for field in [
             "landing",
             "rating",
-            "grade",
             "comment",
         ]:
             setattr(opinion, field, getattr(self, field).data)
-
-        for crux_id in self.cruxes.data:
-            crux = Crux.query.get(crux_id)
-            opinion.cruxes.append(crux)
 
         return opinion

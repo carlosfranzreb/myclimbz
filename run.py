@@ -2,7 +2,7 @@ from flask import request, redirect, url_for, session as flask_session
 from flask_login import current_user
 
 from climbz import create_app
-from climbz.models import Climber, Route, Area, Session, Climb  # noqa
+from climbz.models import Climber, Route, Area, Session, Climb, Opinion  # noqa
 
 
 app = create_app("test_100")

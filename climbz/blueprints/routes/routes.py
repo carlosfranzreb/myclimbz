@@ -26,14 +26,14 @@ def edit_route(route_id: int) -> str:
     # POST: a route form was submitted => edit route or return error
     route_form = RouteForm.create_empty()
     if request.method == "POST":
-        if not route_form.validate():  # TODO: tf is this
-            return render("edit_route.html", title="Edit route", route_id=route_id)
+        if not route_form.validate():
+            return render("edit_form.html", title="Edit route", form=route_form)
 
         # if the name has changed, check if it already exists
         if route_form.name.data != route.name:
             if Route.query.filter_by(name=route_form.name.data).first() is not None:
                 flask_session["error"] = "A route with that name already exists."
-                return render("edit_route.html", route_form=route_form)
+                return render("edit_form.html", form=route_form)
 
         route = route_form.get_edited_route(route_id)
         db.session.add(route)
@@ -42,7 +42,7 @@ def edit_route(route_id: int) -> str:
 
     # GET: return the edit route page
     route_form = RouteForm.create_from_obj(route)
-    return render("edit_route.html", title="Edit Route", route_form=route_form)
+    return render("edit_form.html", title="Edit Route", form=route_form)
 
 
 @routes.route("/delete_route/<int:route_id>", methods=["GET", "POST"])
