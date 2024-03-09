@@ -1,6 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
 
+from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, DateField, StringField, SelectField, BooleanField
 from wtforms.validators import Optional
@@ -10,13 +11,14 @@ from climbz.ner.entities_to_objects import get_area_from_entities
 
 
 class SessionForm(FlaskForm):
+    area = StringField("Area name")
     date = DateField("Date", validators=[Optional()])
     conditions = IntegerField("Conditions", validators=[Optional()])
-    area = StringField("Area name", validators=[Optional()])
     rock_type = SelectField("Rock Type of new area", validators=[Optional()])
     is_project_search = BooleanField(
         "Only adding projects (not climbing)", validators=[Optional()]
     )
+    comment = StringField("Comment", validators=[Optional()])
 
     def add_choices(self):
         """Add choices to select fields: rock types."""
@@ -100,8 +102,10 @@ class SessionForm(FlaskForm):
         """
         if obj is None:
             obj = Session()
+        obj.climber_id = current_user.id
         obj.area_id = area_id
-        obj.date = self.date.data
-        obj.conditions = self.conditions.data
-        obj.is_project_search = self.is_project_search.data
+
+        for attr in ["date", "conditions", "is_project_search", "comment"]:
+            setattr(obj, attr, getattr(self, attr).data)
+
         return obj
