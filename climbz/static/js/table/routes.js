@@ -16,7 +16,6 @@ function show_table() {
     tr.append("th").text("Height");
     tr.append("th").text("Inclination");
     tr.append("th").text("Landing");
-    tr.append("th").text("Sent");
     tr.append("th").text("Last climbed");
 
     // Create the table body
@@ -29,6 +28,9 @@ function show_table() {
         .append("tr")
         .attr("onclick", function (d) {
             return "window.location = '/route/" + d.id + "';";
+        })
+        .classed("table-success", function (d) {
+            return d.sent === true;
         });
 
     // Add the cells to the rows
@@ -44,7 +46,6 @@ function show_table() {
     rows.append("td").text(d => d.height);
     rows.append("td").text(d => d.inclination);
     rows.append("td").text(d => d.landing);
-    rows.append("td").text(d => d.sent);
     rows.append("td").text(d => d.last_climbed);
 
     // Initialize the DataTable
