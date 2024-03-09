@@ -93,9 +93,8 @@
 <div class="container">
     <h3>My opinion</h3>
     {% if route.opinions|selectattr("climber_id", "equalto", user_id)|list|length > 0 %}
-    <!-- Edit button for the opinion -->
-    <a href="{{ url_for('routes.edit_opinion', route_id=route.id) }}" class="btn btn-primary">Edit opinion</a>
     {% for opinion in route.opinions if opinion.climber_id == user_id %}
+    <a href="{{ url_for('opinions.edit_opinion', opinion_id=opinion.id) }}" class="btn btn-primary">Edit opinion</a>
     <div class="card mb-3">
         <div class="card-header">
             <h5 class="card-title">{{ opinion.climber.name }}</h5>
