@@ -33,9 +33,12 @@ function show_table() {
 
     // Add the cells to the rows
     rows.append("td").text(d => d.name);
-    rows.append("td").text(d => GRADES.find(
-        obj => obj.level === d.level)[GRADE_SCALE]
-    );
+    rows.append("td").text(d => {
+        if (d.level === null)
+            return "N/A";
+        else
+            return GRADES.find(obj => obj.level === d.level)[GRADE_SCALE];
+    });
     rows.append("td").text(d => d.area);
     rows.append("td").text(d => d.sector);
     rows.append("td").text(d => d.height);

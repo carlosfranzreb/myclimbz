@@ -65,11 +65,9 @@ class Route(db.Model):
         return level_counts.most_common(1)[0][0] if level_counts else -1
 
     @property
-    def consensus_grade(self) -> str:
-        """The `consensus_level` expressed in both grade scales"""
-        grade_obj = Grade.query.filter_by(level=self.consensus_level).first()
-        if grade_obj:
-            return f"{grade_obj.font} / {grade_obj.hueco}"
+    def consensus_grade(self) -> Grade:
+        """The `consensus_level` as a grade object"""
+        return Grade.query.filter_by(level=self.consensus_level).first()
 
     @property
     def grade(self) -> Grade:
