@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, StringField, FloatField, BooleanField
 from wtforms.validators import Optional
@@ -66,7 +67,9 @@ class RouteForm(FlaskForm):
 
         sector = Sector.query.filter_by(name=sector_name).first()
         if sector is None:
-            sector = Sector(name=sector_name, area_id=area_id)
+            sector = Sector(
+                name=sector_name, area_id=area_id, created_by=current_user.id
+            )
         return sector
 
     def get_route_from_climb_form(
