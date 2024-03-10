@@ -18,13 +18,7 @@ climbs = Blueprint("climbs", __name__)
 
 @climbs.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
-    # define the grade scale
     entities = flask_session.get("entities", dict())
-    grade_scale = "font"
-    for field in ["grade", "grade_felt"]:
-        if field in entities:
-            grade_scale = "hueco" if entities[field][0] == "V" else "font"
-            break
 
     # create forms and add choices
     session = Session.query.get(flask_session["session_id"])
