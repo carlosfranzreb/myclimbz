@@ -27,7 +27,10 @@ def add_climb() -> str:
 
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
-        invalid_climb = not climb_form.validate() if climb_form is not None else False
+        route_name = route_form.name.data
+        invalid_climb = (
+            not climb_form.validate(route_name) if climb_form is not None else False
+        )
         if not route_form.validate() or invalid_climb:
             flask_session["error"] = route_form.errors or climb_form.errors
             return render(
@@ -45,7 +48,7 @@ def add_climb() -> str:
             if "predictions" in flask_session:
                 flask_session["predictions"]["sector_id"] = sector.id
 
-        route = route_form.get_route_from_climb_form(sector)
+        route = route_form.get_object(sector)
         if route is not None and route.id is None:
             db.session.add(route)
             db.session.commit()
@@ -59,14 +62,7 @@ def add_climb() -> str:
 
         # create climb if this is not a project
         if flask_session.get("project_search", False) is False:
-            climb = Climb(
-                **{
-                    "n_attempts": climb_form.n_attempts.data,
-                    "sent": climb_form.sent.data,
-                    "route_id": route.id if route is not None else None,
-                    "session_id": flask_session["session_id"],
-                }
-            )
+            climb = climb_form.get_object(route)
             db.session.add(climb)
             db.session.commit()
             if "predictions" in flask_session:

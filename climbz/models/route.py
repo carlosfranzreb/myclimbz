@@ -34,6 +34,15 @@ class Route(db.Model):
         )
 
     @property
+    def tried(self) -> bool:
+        """Whether a climber has tried this route."""
+        return any(
+            climb.n_attempts > 0
+            for climb in self.climbs
+            if climb.session.climber_id == current_user.id
+        )
+
+    @property
     def opinion(self):
         """The opinion of a climber about this route."""
         return Opinion.query.filter_by(
@@ -50,7 +59,7 @@ class Route(db.Model):
         return len(climbers)
 
     @property
-    def n_tries(self) -> int:
+    def n_climbers(self) -> int:
         """The number of climbers that have tried this route."""
         climbers = list()
         for climb in self.climbs:

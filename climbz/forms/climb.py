@@ -1,6 +1,9 @@
+from flask import session as flask_session
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, SubmitField, BooleanField
 from wtforms.validators import Optional
+
+from climbz.models import Route, Climb
 
 
 class ClimbForm(FlaskForm):
@@ -8,4 +11,34 @@ class ClimbForm(FlaskForm):
     is_project = BooleanField("Project (not tried yet)", validators=[Optional()])
     n_attempts = IntegerField("Number of attempts", validators=[Optional()])
     sent = BooleanField("Sent", validators=[Optional()])
-    submit = SubmitField("Submit")
+    flashed = BooleanField("Flashed", validators=[Optional()])
+    submit = SubmitField("Submit", validators=[Optional()])
+
+    def validate(self, route_name: str) -> bool:
+        """
+        Validate the form. If the climb has already been tried, `flashed` must be true.
+        """
+        is_valid = True
+        if not super().validate():
+            is_valid = False
+
+        route = Route.query.filter_by(name=route_name).first()
+        if route.tried and self.flashed.data is True:
+            self.flashed.errors.append("This route has already been tried.")
+            is_valid = False
+
+        return is_valid
+
+    def get_object(self, route: Route) -> Climb:
+        """
+        Create a new climb object from the form data.
+        """
+        return Climb(
+            **{
+                "n_attempts": self.n_attempts.data,
+                "sent": self.sent.data,
+                "route_id": route.id if route is not None else None,
+                "session_id": flask_session["session_id"],
+                "flashed": self.flashed.data,
+            }
+        )

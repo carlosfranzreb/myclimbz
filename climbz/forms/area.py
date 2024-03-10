@@ -5,7 +5,7 @@ from wtforms.validators import Optional
 from climbz.models import RockType
 
 
-class AreaForm(FlaskForm):
+class AreaForm(FlaskForm):  # TODO: is this used?
     name = StringField("Area name", validators=[Optional()])
     rock_type = SelectField("Rock Type", validators=[Optional()])
     submit = SubmitField("Submit")

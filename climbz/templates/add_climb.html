@@ -89,6 +89,10 @@
                 <label for="{{ climb_form.sent.id }}">{{ climb_form.sent.label }}</label>
                 {{ climb_form.sent(id=climb_form.sent.id, class='form-check') }}
             </div>
+            <div class="form-group">
+                <label for="{{ climb_form.sent.id }}">{{ climb_form.flashed.label }}</label>
+                {{ climb_form.flashed(id=climb_form.flashed.id, class='form-check') }}
+            </div>
         </div>
         {% endif %}
 

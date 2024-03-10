@@ -72,9 +72,7 @@ class RouteForm(FlaskForm):
             )
         return sector
 
-    def get_route_from_climb_form(
-        self, sector: Sector = None, route: Route = None
-    ) -> Route:
+    def get_object(self, sector: Sector = None, route: Route = None) -> Route:
         """
         This function is used when a new climb is added. It only checks the name field
         and returns a route object.
