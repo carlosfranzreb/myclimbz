@@ -23,8 +23,13 @@ def render(*args, **kwargs) -> str:
     kwargs["username"] = current_user.name
     kwargs["user_id"] = current_user.id
     kwargs["user_role"] = current_user.role
-    if not request.path.startswith("/edit_") and request.path != "/login":
-        flask_session["call_from_url"] = request.path
+    path = request.path
+    if (
+        not path.startswith("/edit_")
+        and not path.startswith("/add_")
+        and path != "/login"
+    ):
+        flask_session["call_from_url"] = path
     return render_template(
         *args,
         **kwargs,
