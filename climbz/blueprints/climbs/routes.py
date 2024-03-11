@@ -22,8 +22,8 @@ def add_climb() -> str:
 
     # create forms and add choices
     session = Session.query.get(flask_session["session_id"])
-    climb_form = None if session.is_project_search else ClimbForm()
     route_form = RouteForm.create_empty()
+    climb_form = ClimbForm() if not session.is_project_search else None
 
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
@@ -36,8 +36,8 @@ def add_climb() -> str:
             return render(
                 "add_climb.html",
                 title="Add climb",
-                climb_form=climb_form,
                 route_form=route_form,
+                climb_form=climb_form,
             )
 
         # create new sector and new route if necessary
@@ -71,21 +71,18 @@ def add_climb() -> str:
 
         return redirect("/")
 
-    # GET: a recording was uploaded => create forms
-    if flask_session.get("project_search", False) is True:
-        climb_form = None
-    else:
-        climb_form = ClimbForm(
-            n_attempts=entities.get("n_attempts", None),
-            sent=entities.get("sent", False),
-        )
-
+    # GET: the climber wants to add a route (+climb) => create forms
+    # create the route form
     route = get_route_from_entities(entities, session.area_id)
     if route.id is None:
         route_form = RouteForm.create_from_entities(entities)
     else:
         route_form = RouteForm.create_empty()
         route_form.name.data = route.name
+
+    # create the climb form if needed
+    if session.is_project_search:
+        climb_form = None
 
     # if no sector was found, add the last sector of the current session if possible
     if route.sector_id is None and flask_session.get("session_id", False) > 0:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from flask import session as flask_session
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, SubmitField, BooleanField
@@ -13,6 +15,14 @@ class ClimbForm(FlaskForm):
     sent = BooleanField("Sent", validators=[Optional()])
     flashed = BooleanField("Flashed", validators=[Optional()])
     submit = SubmitField("Submit", validators=[Optional()])
+
+    @classmethod
+    def create_from_entities(cls, entities: dict) -> ClimbForm:
+        return cls(
+            n_attempts=entities.get("n_attempts", None),
+            sent=entities.get("sent", False),
+            flashed=entities.get("flashed", False),
+        )
 
     def validate(self, route_name: str) -> bool:
         """If the climb has already been tried before, `flashed` must be false."""

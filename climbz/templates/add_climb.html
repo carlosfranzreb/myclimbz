@@ -10,7 +10,9 @@
 
         - If is is an existing route, display only the route name and grade.
         - If it is a new route, display all the fields.
-        - If it is a project, don't display the sent and n_attempts fields.
+        - If it is a project, don't display the climb form.
+        - If it was climbed and sent, display the opinion form.
+        - If the climber is editing the climb, display only the climb form.
     -->
 
 
@@ -90,7 +92,7 @@
                 {{ climb_form.sent(id=climb_form.sent.id, class='form-check') }}
             </div>
             <div class="form-group">
-                <label for="{{ climb_form.sent.id }}">{{ climb_form.flashed.label }}</label>
+                <label for="{{ climb_form.flashed.id }}">{{ climb_form.flashed.label }}</label>
                 {{ climb_form.flashed(id=climb_form.flashed.id, class='form-check') }}
             </div>
         </div>
@@ -105,15 +107,18 @@
     </form>
 </div>
 
+<!-- Script required to hide/show climb and opinion forms (not necessary when editing a climb) -->
 {% if route_form %}
 <script>
     let route = document.querySelector("#{{ route_form.name.id }}");
     let newRouteForm = document.querySelector("#newRouteForm");
     let newClimbForm = document.querySelector("#newClimbForm");
-    if (newClimbForm !== null) {
-        let isProject = document.querySelector("#isProject");
-    }
+    let isProject = null;
+    if (newClimbForm !== null)
+        isProject = document.querySelector("#is_project");
 
+    // If the route name is not in the list of existing routes, display the route form
+    // to add the new route.
     function toggleNewRouteForm() {
         let routeValue = route.value;
         let routeExists = false;
@@ -126,10 +131,12 @@
         newRouteForm.style.display = routeExists ? "none" : "block";
     }
 
+    // If the route is added only as a project, don't display the climb form.
     function toggleNewClimbForm() {
         newClimbForm.style.display = isProject.checked ? "none" : "block";
     }
 
+    // Call the functions and set the event listeners
     toggleNewRouteForm();
     route.addEventListener("change", toggleNewRouteForm);
     if (newClimbForm !== null) {

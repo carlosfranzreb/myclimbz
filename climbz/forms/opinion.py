@@ -67,7 +67,9 @@ class OpinionForm(FlaskForm):
         return form
 
     @classmethod
-    def create_from_entities(cls, entities: dict, grade_scale: str) -> OpinionForm:
+    def create_from_entities(
+        cls, entities: dict, grade_scale: str = "font"
+    ) -> OpinionForm:
         """
         Create the form with the given entities.
 
