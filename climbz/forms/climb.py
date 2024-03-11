@@ -15,9 +15,7 @@ class ClimbForm(FlaskForm):
     submit = SubmitField("Submit", validators=[Optional()])
 
     def validate(self, route_name: str) -> bool:
-        """
-        Validate the form. If the climb has already been tried, `flashed` must be true.
-        """
+        """If the climb has already been tried before, `flashed` must be false."""
         is_valid = True
         if not super().validate():
             is_valid = False
@@ -30,9 +28,7 @@ class ClimbForm(FlaskForm):
         return is_valid
 
     def get_object(self, route: Route) -> Climb:
-        """
-        Create a new climb object from the form data.
-        """
+        """Create a new climb object from the form data."""
         return Climb(
             **{
                 "n_attempts": self.n_attempts.data,
