@@ -32,9 +32,10 @@ class ClimbForm(FlaskForm):
             is_valid = False
 
         route = Route.query.filter_by(name=route_name).first()
-        if route.tried and self.flashed.data is True:
-            self.flashed.errors.append("This route has already been tried.")
-            is_valid = False
+        if route is not None:
+            if route.tried and self.flashed.data is True:
+                self.flashed.errors.append("This route has already been tried.")
+                is_valid = False
 
         return is_valid
 

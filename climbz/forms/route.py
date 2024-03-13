@@ -86,7 +86,9 @@ class RouteForm(FlaskForm):
             route_name = self.name.data.strip().title()
             route = Route.query.filter_by(name=route_name).first()
             if route is None:
-                route = Route(name=route_name, sector=sector)
+                route = Route(
+                    name=route_name, sector=sector, created_by=current_user.id
+                )
                 for field in [
                     "height",
                     "inclination",

@@ -66,6 +66,7 @@ def add_climb() -> str:
         # add as project or create climb
         if session.is_project_search or climb_form.is_project.data:
             session.climber.projects.append(route)
+            db.session.commit()
         else:
             climb = climb_form.get_object(route)
             db.session.add(climb)
