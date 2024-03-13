@@ -2,7 +2,7 @@ from flask import request, redirect, url_for, session as flask_session
 from flask_login import current_user
 
 from climbz import create_app
-from climbz.models import Climber, Route, Area, Session, Climb, Opinion  # noqa
+from climbz.models import *  # noqa
 
 
 app = create_app("test_100")
@@ -25,6 +25,8 @@ def check_request_validity():
     if "edit" in request.endpoint or "delete" in request.endpoint:
         path, obj_id = request.path[1:].split("/")
         obj_str = path.split("_")[1]
+        # TODO: projects are not models per se and return errors
+
         obj = eval(obj_str.capitalize()).query.get(int(obj_id))
         if hasattr(obj, "created_by"):
             obj_owner = obj.created_by

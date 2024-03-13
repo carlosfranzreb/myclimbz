@@ -11,7 +11,7 @@ from flask import (
 from flask_login import login_user, current_user, logout_user
 
 from climbz import db
-from climbz.models import Climber
+from climbz.models import Climber, Route
 from climbz.forms import LoginForm, ClimberForm
 from climbz.blueprints.utils import render
 
@@ -92,3 +92,23 @@ def view_climber(climber_id: int):
         title=climber.name,
         climber=climber,
     )
+
+
+@climbers.route("/add_project/<int:route_id>")
+def add_project(route_id: int):
+    """Add route as project."""
+    climber = Climber.query.get(current_user.id)
+    route = Route.query.get(route_id)
+    climber.projects.append(route)
+    db.session.commit()
+    return redirect(flask_session.pop("call_from_url"))
+
+
+@climbers.route("/delete_project/<int:route_id>")
+def delete_project(route_id: int):
+    """Remove route from projects."""
+    climber = Climber.query.get(current_user.id)
+    route = Route.query.get(route_id)
+    climber.projects.remove(route)
+    db.session.commit()
+    return redirect(flask_session.pop("call_from_url"))

@@ -43,6 +43,11 @@ class Route(db.Model):
         )
 
     @property
+    def is_project(self) -> bool:
+        """Whether the climber has marked this route as a project."""
+        return self in current_user.projects
+
+    @property
     def opinion(self):
         """The opinion of a climber about this route."""
         return Opinion.query.filter_by(
