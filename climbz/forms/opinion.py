@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from flask_wtf import FlaskForm
+from flask_login import current_user
 from wtforms import (
     IntegerField,
     SubmitField,
@@ -28,7 +29,7 @@ class OpinionForm(FlaskForm):
     comment = StringField("Comment", validators=[Optional()])
     submit = SubmitField("Submit")
 
-    def add_choices(self, grade_scale: str):
+    def add_choices(self):
         """
         Add choices to select fields: grades and cruxes.
         """
@@ -37,24 +38,22 @@ class OpinionForm(FlaskForm):
 
         grades = Grade.query.order_by(Grade.level).all()
         self.grade.choices = [(0, "")] + [
-            (g.id, getattr(g, grade_scale)) for g in grades
+            (g.id, getattr(g, current_user.grade_scale)) for g in grades
         ]
 
     @classmethod
-    def create_empty(cls, grade_scale: str = "font") -> OpinionForm:
+    def create_empty(cls) -> OpinionForm:
         """
         Create the form and add choices to the select fields.
         """
         form = cls()
-        form.add_choices(
-            grade_scale
-        )  # TODO: the user should save the scale as a preference
+        form.add_choices()
         return form
 
     @classmethod
-    def create_from_obj(cls, obj: Opinion, grade_scale: str = "font") -> OpinionForm:
+    def create_from_obj(cls, obj: Opinion) -> OpinionForm:
         """Create the form with data from the Opinion object."""
-        form = cls.create_empty(grade_scale)
+        form = cls.create_empty()
         for field in ["landing", "rating", "comment"]:
             getattr(form, field).data = getattr(obj, field)
 

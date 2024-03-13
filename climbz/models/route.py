@@ -81,7 +81,8 @@ class Route(db.Model):
     @property
     def consensus_grade_str(self) -> str:
         """The `consensus_grade`, as displayed by the user."""
-        return self.consensus_grade.font  # TODO: use the user's preferred scale
+        grade_scale = current_user.grade_scale
+        return getattr(self.consensus_grade, grade_scale)
 
     @property
     def grade(self) -> Grade:
