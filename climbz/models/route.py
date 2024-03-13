@@ -116,9 +116,10 @@ class Route(db.Model):
             if climb.session.climber_id != climber_id:
                 continue
             n_sessions += 1
-            n_attempts_all += climb.n_attempts if climb.n_attempts is not None else 0
+            n_attempts = climb.n_attempts if climb.n_attempts is not None else 0
+            n_attempts_all += n_attempts
             if not first_send:
-                n_attempts_send += climb.n_attempts
+                n_attempts_send += n_attempts
             first_send = first_send or climb.sent
             conditions.append(climb.session.conditions)
             dates.append(climb.session.date)
