@@ -79,6 +79,11 @@ class Route(db.Model):
         return Grade.query.filter_by(level=self.consensus_level).first()
 
     @property
+    def consensus_grade_str(self) -> str:
+        """The `consensus_grade`, as displayed by the user."""
+        return self.consensus_grade.font  # TODO: use the user's preferred scale
+
+    @property
     def grade(self) -> Grade:
         """
         The grade of this route according to the climber. If the climber has not

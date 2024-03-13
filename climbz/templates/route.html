@@ -28,7 +28,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xs-12 center-block text-center">Grade: {{ route.consensus_grade }}</div>
+                <div class="col-xs-12 center-block text-center">Grade: {{ route.consensus_grade_str }}</div>
             </div>
             <div class="row">
                 <div class="col-xs-12 center-block text-center">Landing: {{ route.landing }} / 5</div>
@@ -113,6 +113,8 @@
     {% else %}
     <div class="col-xs-12">
         <p>No opinion yet</p>
+        <a href="{{ url_for('opinions.add_opinion', climber_id=user_id, route_id=route.id) }}"
+            class="btn btn-primary">Add opinion</a>
     </div>
     {% endif %}
 </div>
