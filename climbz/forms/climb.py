@@ -14,6 +14,7 @@ class ClimbForm(FlaskForm):
     n_attempts = IntegerField("Number of attempts", validators=[Optional()])
     sent = BooleanField("Sent", validators=[Optional()])
     flashed = BooleanField("Flashed", validators=[Optional()])
+    add_opinion = BooleanField("Add opinion to sent climb", validators=[Optional()])
     submit = SubmitField("Submit", validators=[Optional()])
 
     @classmethod

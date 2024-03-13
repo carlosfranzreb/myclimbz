@@ -6,7 +6,7 @@ from flask import (
 )
 
 from climbz.ner.entities_to_objects import get_route_from_entities
-from climbz.models import Climb, Session, Sector
+from climbz.models import Climb, Session, Sector, Opinion
 from climbz.forms import ClimbForm, RouteForm
 from climbz import db
 from climbz.ner.tracking import dump_predictions
@@ -29,7 +29,9 @@ def add_climb() -> str:
     if request.method == "POST":
         route_name = route_form.name.data
         invalid_climb = (
-            not climb_form.validate(route_name) if climb_form is not None else False
+            not climb_form.validate(route_name)
+            if not session.is_project_search
+            else False
         )
         if not route_form.validate() or invalid_climb:
             flask_session["error"] = route_form.errors or climb_form.errors
@@ -55,13 +57,13 @@ def add_climb() -> str:
             if "predictions" in flask_session:
                 flask_session["predictions"]["route_id"] = route.id
 
-        if flask_session.get("project_search", False) is True:
+        if session.is_project_search:
             if "project_ids" not in flask_session:
                 flask_session["project_ids"] = list()
             flask_session["project_ids"].append(route.id)
 
         # create climb if this is not a project
-        if flask_session.get("project_search", False) is False:
+        if not session.is_project_search:
             climb = climb_form.get_object(route)
             db.session.add(climb)
             db.session.commit()
@@ -69,7 +71,17 @@ def add_climb() -> str:
                 flask_session["predictions"]["climb_id"] = climb.id
                 dump_predictions()
 
-        return redirect("/")
+        # if the user wants to add an opinion, redirect to the opinion form
+        if climb_form.add_opinion.data is True:
+            opinion = Opinion.query.filter_by(
+                climber_id=session.climber_id, route_id=route.id
+            ).first()
+            if opinion is not None:
+                return redirect(f"/edit_opinion/{opinion.id}")
+            else:
+                return redirect(f"/add_opinion/{session.climber_id}/{route.id}")
+        else:
+            return redirect("/")
 
     # GET: the climber wants to add a route (+climb) => create forms
     # create the route form

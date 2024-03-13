@@ -22,7 +22,7 @@ class Opinion(db.Model):
     landing = Rating("landing")
     rating = Rating("rating")
     comment = db.Column(db.Text)
-    link = db.Column(db.String(300))  # link to a photo or video
+    link = db.Column(db.String(300))  # TODO: move this to climbs and display it
     cruxes = db.relationship(
         "Crux",
         secondary=crux_opinions,

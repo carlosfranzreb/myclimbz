@@ -1,14 +1,11 @@
 {% extends "main.html" %}
 {% block content %}
 
-<!-- 
-        Display the form for editing an existing one.
-    -->
+<!--  Display the form for editing an existing route, or adding/editing an opinion -->
 
-<h2>Log climb</h2>
+<h2>{{ title }}</h2>
 
 <div class="container">
-    <h3>Route</h3>
     <form method="POST" style="margin: 40px;">
         {{ form.hidden_tag() }}
         {% for field in form %}

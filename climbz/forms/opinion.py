@@ -46,14 +46,15 @@ class OpinionForm(FlaskForm):
         Create the form and add choices to the select fields.
         """
         form = cls()
-        form.add_choices(grade_scale)
+        form.add_choices(
+            grade_scale
+        )  # TODO: the user should save the scale as a preference
         return form
 
     @classmethod
     def create_from_obj(cls, obj: Opinion, grade_scale: str = "font") -> OpinionForm:
         """Create the form with data from the Opinion object."""
-        form = cls()
-        form.add_choices(grade_scale)
+        form = cls.create_empty(grade_scale)
         for field in ["landing", "rating", "comment"]:
             getattr(form, field).data = getattr(obj, field)
 
@@ -118,6 +119,19 @@ class OpinionForm(FlaskForm):
             "rating",
             "comment",
         ]:
+            setattr(opinion, field, getattr(self, field).data)
+
+        return opinion
+
+    def get_object(self, climber_id: int, route_id: int) -> Opinion:
+        """Create an opinion object from the form data."""
+        opinion = Opinion()
+        opinion.climber_id = climber_id
+        opinion.route_id = route_id
+        opinion.grade = Grade.query.get(int(self.grade.data))
+        opinion.cruxes = [Crux.query.get(crux_id) for crux_id in self.cruxes.data]
+
+        for field in ["landing", "rating", "comment"]:
             setattr(opinion, field, getattr(self, field).data)
 
         return opinion
