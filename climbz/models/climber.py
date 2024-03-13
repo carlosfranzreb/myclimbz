@@ -11,6 +11,7 @@ The `role` attribute is used to determine the permissions of the user. The optio
 from flask_login import UserMixin
 
 from climbz import db, login_manager
+from climbz.models import Grade
 
 
 # many-to-many relationship between climbers and routes, for storing projects
@@ -53,6 +54,45 @@ class Climber(db.Model, UserMixin):
         secondary=climber_projects,
         backref=db.backref("climbers", lazy="dynamic"),
     )
+
+    @property
+    def highest_grade_str(self) -> str:
+        """Return the highest grade sent by the climber."""
+        if not self.climbs or len(self.climbs) == 0:
+            return "N/A"
+        else:
+            max_grade = Grade.query.filter_by(level=0).first()
+            for climb in self.climbs:
+                opinion = climb.route.opinion
+                if opinion is not None and opinion.grade is not None:
+                    if opinion.grade.level > max_grade.level:
+                        max_grade = opinion.grade
+            return f"{max_grade.font} / {max_grade.hueco}"
+
+    @property
+    def n_sends(self) -> int:
+        """Return the number of routes sent by the climber, without repetitions."""
+        sent_routes = list()
+        for climb in self.climbs:
+            if climb.sent and climb.route.id not in sent_routes:
+                sent_routes.append(climb.route.id)
+        return len(sent_routes)
+
+    @property
+    def favorite_areas(self) -> list[str]:
+        """Return the 3 areas with the most sessions by the climber."""
+        areas = dict()
+        for session in self.sessions:
+            if session.area.name in areas:
+                areas[session.area.name] += 1
+            else:
+                areas[session.area.name] = 1
+        areas = {
+            k: v
+            for k, v in sorted(areas.items(), key=lambda item: item[1], reverse=True)
+        }
+        favorite_areas = list(areas.keys())[:3]
+        return favorite_areas
 
 
 @login_manager.user_loader

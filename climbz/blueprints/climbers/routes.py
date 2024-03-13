@@ -84,11 +84,11 @@ def edit_profile(climber_id: int):
 
 
 @climbers.route("/view_climber/<int:climber_id>", methods=["GET", "POST"])
-def view_profile(climber_id: int):
-    """View profile."""
+def view_climber(climber_id: int):
+    """View climber."""
     climber = Climber.query.get(climber_id)
     return render(
-        "view_profile.html",
-        title="View profile",
+        "climber.html",
+        title=climber.name,
         climber=climber,
     )

@@ -121,12 +121,13 @@
 
 <div class="container">
     <h3>Other opinions</h3>
-    <!-- TODO: link to climber's profiles -->
     {% if route.opinions|rejectattr("climber_id", "equalto", user_id)|list|length > 0 %}
     {% for opinion in route.opinions if opinion.climber_id != user_id %}
     <div class="card mb-3">
         <div class="card-header">
-            <h5 class="card-title">{{ opinion.climber.name }}</h5>
+            <a href="{{ url_for('climbers.view_climber', climber_id=opinion.climber.id) }}">
+                <h5 class="card-title">{{ opinion.climber.name }}</h5>
+            </a>
         </div>
         <div class="card-body">
             <p class="card-body">
