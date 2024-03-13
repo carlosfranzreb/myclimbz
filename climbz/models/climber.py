@@ -94,6 +94,28 @@ class Climber(db.Model, UserMixin):
         favorite_areas = list(areas.keys())[:3]
         return favorite_areas
 
+    def all_routes_as_dict(self) -> list[dict]:
+        """
+        Return all the routes the climber has tried or marked as projects as a list
+        of dictionaries.
+        """
+        added_route_ids = list()
+        routes = list()
+
+        # add tried routes
+        for climb in self.climbs:
+            if climb.route.id not in added_route_ids:
+                routes.append(climb.route.as_dict(self.id))
+                added_route_ids.append(climb.route.id)
+
+        # add projects
+        for route in self.projects:
+            if route.id not in added_route_ids:
+                routes.append(route.as_dict(self.id))
+                added_route_ids.append(route.id)
+
+        return routes
+
 
 @login_manager.user_loader
 def load_climber(climber_id: int) -> Climber:

@@ -18,6 +18,7 @@ climbs = Blueprint("climbs", __name__)
 
 @climbs.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
+    # TODO: error is raised when a new route is added as a project
     entities = flask_session.get("entities", dict())
 
     # create forms and add choices
@@ -62,8 +63,10 @@ def add_climb() -> str:
                 flask_session["project_ids"] = list()
             flask_session["project_ids"].append(route.id)
 
-        # create climb if this is not a project
-        if not session.is_project_search:
+        # add as project or create climb
+        if session.is_project_search or climb_form.is_project.data:
+            session.climber.projects.append(route)
+        else:
             climb = climb_form.get_object(route)
             db.session.add(climb)
             db.session.commit()

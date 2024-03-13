@@ -11,7 +11,7 @@ from flask_login import current_user
 import whisper
 
 from climbz.ner import transcribe, parse_climb, ClimbsModel
-from climbz.models import Route, Grade
+from climbz.models import Grade, Climber
 from climbz.blueprints.utils import render
 
 
@@ -26,8 +26,6 @@ home = Blueprint("home", __name__)
 @home.route("/", methods=["GET", "POST"])
 def page_home() -> str:
     current_session_id = flask_session.get("session_id", -1)
-    routes_dict = [route.as_dict(current_user.id) for route in Route.query.all()]
-    grades_dict = [grade.as_dict() for grade in Grade.query.all()]
 
     # POST: an audio file was uploaded
     if request.method == "POST":
@@ -58,8 +56,8 @@ def page_home() -> str:
     return render(
         "data.html",
         title="Routes",
-        routes=routes_dict,
-        grades=grades_dict,
+        routes=Climber.query.get(current_user.id).all_routes_as_dict(),
+        grades=[grade.as_dict() for grade in Grade.query.all()],
     )
 
 
