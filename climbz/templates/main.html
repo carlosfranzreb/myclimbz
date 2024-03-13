@@ -71,7 +71,8 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ url_for('climbers.logout') }}">Logout</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('climbers.edit_profile') }}">Edit profile</a></li>
+                        <li><a class="dropdown-item"
+                                href="{{ url_for('climbers.edit_profile', climber_id=user_id) }}">Edit profile</a></li>
                     </ul>
                 </li>
             </ul>

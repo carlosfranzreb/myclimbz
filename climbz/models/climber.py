@@ -33,10 +33,13 @@ class Climber(db.Model, UserMixin):
     # personal information
     name = db.Column(db.String(200), nullable=False)
     birthdate = db.Column(db.Date, nullable=True)
-    years_climbing = db.Column(db.Integer, nullable=True)
+    year_started_climbing = db.Column(db.Integer, nullable=True)
     weight = db.Column(db.Float, nullable=True)
     height = db.Column(db.Float, nullable=True)
     ape_index = db.Column(db.Float, nullable=True)
+
+    # preferences
+    grade_scale = db.Column(db.String(10), nullable=False, default="font")
 
     # relationships
     climbs = db.relationship("Climb", backref="climber", cascade="all, delete")

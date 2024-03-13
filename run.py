@@ -28,8 +28,10 @@ def check_request_validity():
         obj = eval(obj_str.capitalize()).query.get(int(obj_id))
         if hasattr(obj, "created_by"):
             obj_owner = obj.created_by
-        else:
+        elif hasattr(obj, "climber_id"):
             obj_owner = obj.climber_id
+        else:  # this is the case for climbers
+            obj_owner = obj.id
         if obj_owner != current_user.id and current_user.role != 1:
             flask_session["error"] = "You are not allowed to access this page."
             return redirect(flask_session.pop("call_from_url"))

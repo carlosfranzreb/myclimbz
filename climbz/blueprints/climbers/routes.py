@@ -10,8 +10,9 @@ from flask import (
 )
 from flask_login import login_user, current_user, logout_user
 
+from climbz import db
 from climbz.models import Climber
-from climbz.forms import LoginForm, ProfileForm
+from climbz.forms import LoginForm, ClimberForm
 from climbz.blueprints.utils import render
 
 
@@ -57,31 +58,35 @@ def logout():
     return redirect(flask_session.pop("call_from_url"))
 
 
-@climbers.route("/edit_profile", methods=["GET", "POST"])
-def edit_profile():
+@climbers.route("/edit_climber/<int:climber_id>", methods=["GET", "POST"])
+def edit_profile(climber_id: int):
     """Edit profile."""
-    form = ProfileForm()
+    form = ClimberForm()
+    climber = Climber.query.get(climber_id)
 
     # POST: a profile form was submitted => edit profile or return error
     if request.method == "POST":
         if not form.validate():
             flask_session["error"] = form.errors
-            return render("edit_profile.html", title="Edit profile", form=form)
+            return render("edit_form.html", title="Edit profile", form=form)
         # form is valid; commit changes and return to profile page
-        # TODO
+        obj = form.get_edited_obj(climber)
+        db.session.add(obj)
+        db.session.commit()
+        return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit their profile
     return render_template(
-        "edit_profile.html",
+        "edit_form.html",
         title="Edit profile",
-        form=form,
+        form=ClimberForm.create_from_obj(climber),
     )
 
 
-@climbers.route("/view_profile", methods=["GET", "POST"])
-def view_profile():
+@climbers.route("/view_climber/<int:climber_id>", methods=["GET", "POST"])
+def view_profile(climber_id: int):
     """View profile."""
-    climber = Climber.query.get(current_user.id)
+    climber = Climber.query.get(climber_id)
     return render(
         "view_profile.html",
         title="View profile",
