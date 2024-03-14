@@ -1,8 +1,6 @@
 {% extends "main.html" %}
 {% block content %}
 
-
-
 <div class="container">
     <div class="row">
         <div class="col-4 offset-md-2">
@@ -46,8 +44,8 @@
 {% if route.created_by == user_id or user_role == 1 %}
 <div class="container">
     <div class="col-xs-12 center-block text-center">
-        <a href="{{ url_for('routes.edit_route', route_id=route.id) }}" class="btn btn-primary">Edit route</a>
-        <a href="{{ url_for('routes.delete_route', route_id=route.id) }}" class="btn btn-danger">Delete route</a>
+        <a href="{{ url_for('routes.edit_route', route_id=route.id) }}" class="btn btn-primary">Edit</a>
+        <a href="{{ url_for('routes.delete_route', route_id=route.id) }}" class="btn btn-danger">Delete</a>
     </div>
 </div>
 {% endif %}
@@ -100,7 +98,8 @@
     <h3>My opinion</h3>
     {% if route.opinions|selectattr("climber_id", "equalto", user_id)|list|length > 0 %}
     {% for opinion in route.opinions if opinion.climber_id == user_id %}
-    <a href="{{ url_for('opinions.edit_opinion', opinion_id=opinion.id) }}" class="btn btn-primary">Edit opinion</a>
+    <a href="{{ url_for('opinions.edit_opinion', opinion_id=opinion.id) }}" class="btn btn-primary">Edit</a>
+    <a href="{{ url_for('opinions.delete_opinion', opinion_id=opinion.id) }}" class="btn btn-danger">Delete</a>
     <div class="card mb-3">
         <div class="card-header">
             <h5 class="card-title">{{ opinion.climber.name }}</h5>
@@ -118,9 +117,13 @@
     {% endfor %}
     {% else %}
     <div class="col-xs-12">
+        {% if route.sent %}
         <p>No opinion yet</p>
         <a href="{{ url_for('opinions.add_opinion', climber_id=user_id, route_id=route.id) }}"
-            class="btn btn-primary">Add opinion</a>
+            class="btn btn-success">Add</a>
+        {% else %}
+        <p>You need to send the route to add an opinion</p>
+        {% endif %}
     </div>
     {% endif %}
 </div>
