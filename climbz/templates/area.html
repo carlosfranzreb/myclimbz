@@ -68,19 +68,26 @@
                 <td onclick={{ onclick }}>{{ route.sector.name }}</td>
                 <td onclick={{ onclick }}>{{ route.grade.font }} / {{ route.grade.hueco }}</td>
                 <td onclick={{ onclick }}>{{ sent }}</td>
-                {% if route.created_by == user_id or user_role == 1 %}
                 <td>
+                    {% if route.created_by == user_id or user_role == 1 %}
                     <a href="{{ url_for('routes.edit_route', route_id=route.id) }}">
                         {% include 'icons/edit.html' %}
                     </a>
                     <a href="{{ url_for('routes.delete_route', route_id=route.id) }}">
                         {% include 'icons/delete.html' %}
                     </a>
-                    <!-- TODO: btn to add as project -->
+                    {% endif %}
+
+                    {% if not route.tried and not route.is_project %}
+                    <a href="{{ url_for('climbers.add_project', route_id=route.id) }}">
+                        {% include 'icons/is_not_project.html' %}
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('climbers.delete_project', route_id=route.id) }}">
+                        {% include 'icons/is_project.html' %}
+                    </a>
+                    {% endif %}
                 </td>
-                {% else %}
-                <td></td>
-                {% endif %}
             </tr>
             {% endfor %}
             {% endfor %}
