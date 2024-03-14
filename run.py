@@ -25,7 +25,8 @@ def check_request_validity():
     if "edit" in request.endpoint or "delete" in request.endpoint:
         path, obj_id = request.path[1:].split("/")
         obj_str = path.split("_")[1]
-        # TODO: projects are not models per se and return errors
+        if obj_str == "project":
+            return
 
         obj = eval(obj_str.capitalize()).query.get(int(obj_id))
         if hasattr(obj, "created_by"):
