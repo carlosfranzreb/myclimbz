@@ -4,6 +4,9 @@ from time import sleep
 import pytest
 from flask.testing import FlaskClient
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+
 
 from climbz import create_app, db
 
@@ -42,11 +45,29 @@ def run_app() -> None:
 @pytest.fixture()
 def driver() -> webdriver.Chrome:
     """Starts the Chrome webdriver and terminates it after the test."""
+
+    # start the app
     app_process = Process(target=run_app)
     app_process.start()
     sleep(10)
 
-    driver = webdriver.Chrome()
+    # start the driver
+    driver_options = webdriver.ChromeOptions()
+    driver_options.add_argument("--headless=new")
+    driver = webdriver.Chrome(options=driver_options)
+
+    # login
+    login_url = "http://localhost:5000/login"
+    driver.get(login_url)
+    WebDriverWait(driver, 10).until(lambda driver: driver.current_url == login_url)
+    driver.find_element(By.XPATH, "//input[@id='email']").send_keys("c1@climbz.com")
+    driver.find_element(By.XPATH, "//input[@id='password']").send_keys("123")
+    driver.find_element(By.XPATH, "//input[@value='Submit']").click()
+    WebDriverWait(driver, 10).until(
+        lambda driver: driver.current_url == "http://localhost:5000/"
+    )
+
+    # yield the driver and then quit it
     yield driver
     driver.quit()
     app_process.terminate()
