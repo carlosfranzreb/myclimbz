@@ -104,6 +104,8 @@ class Climber(db.Model, UserMixin):
 
         # add tried routes
         for climb in self.climbs:
+            if climb.route.id == 102:
+                print("climb.route.id", climb.route.id)
             if climb.route.id not in added_route_ids:
                 routes.append(climb.route.as_dict(self.id))
                 added_route_ids.append(climb.route.id)

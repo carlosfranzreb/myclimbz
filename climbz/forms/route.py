@@ -8,6 +8,18 @@ from wtforms.validators import Optional
 from climbz.models import Route, Sector
 
 
+FIELDS = [
+    "name",
+    "height",
+    "inclination",
+    "sit_start",
+    "latitude",
+    "longitude",
+    "comment",
+    "link",
+]
+
+
 class RouteForm(FlaskForm):
     name = StringField("Route name", validators=[Optional()])
     sector = StringField("Sector", validators=[Optional()])
@@ -16,6 +28,10 @@ class RouteForm(FlaskForm):
         "Inclination", validators=[Optional()], render_kw={"step": "5"}
     )
     sit_start = BooleanField("Sit Start", validators=[Optional()])
+    latitude = FloatField("Latitude", validators=[Optional()])
+    longitude = FloatField("Longitude", validators=[Optional()])
+    comment = StringField("Comment", validators=[Optional()])
+    link = StringField("Link", validators=[Optional()])
 
     @classmethod
     def create_empty(cls) -> RouteForm:
@@ -30,7 +46,7 @@ class RouteForm(FlaskForm):
         Create the form with data from the route object.
         """
         form = cls()
-        for field in ["name", "height", "inclination", "sit_start"]:
+        for field in FIELDS:
             getattr(form, field).data = getattr(obj, field)
         if obj.sector is not None:
             form.sector.data = obj.sector.name
@@ -47,7 +63,7 @@ class RouteForm(FlaskForm):
             grade_scale: The grade scale to use.
         """
         form = cls()
-        for field in ["name", "height", "inclination", "sit_start"]:
+        for field in FIELDS:
             if field in entities:
                 getattr(form, field).data = entities[field]
 
@@ -89,11 +105,7 @@ class RouteForm(FlaskForm):
                 route = Route(
                     name=route_name, sector=sector, created_by=current_user.id
                 )
-                for field in [
-                    "height",
-                    "inclination",
-                    "sit_start",
-                ]:
+                for field in FIELDS:
                     setattr(route, field, getattr(self, field).data)
 
         return route
@@ -114,11 +126,7 @@ class RouteForm(FlaskForm):
             sector = Sector(name=sector_name, area_id=route.sector.area_id)
         route.sector = sector
 
-        for field in [
-            "height",
-            "inclination",
-            "sit_start",
-        ]:
+        for field in FIELDS:
             setattr(route, field, getattr(self, field).data)
 
         return route

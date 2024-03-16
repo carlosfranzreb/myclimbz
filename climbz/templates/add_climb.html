@@ -95,6 +95,14 @@
                 <label for="{{ climb_form.flashed.id }}">{{ climb_form.flashed.label }}</label>
                 {{ climb_form.flashed(id=climb_form.flashed.id, class='form-check') }}
             </div>
+            <div class="form-group">
+                <label for="{{ climb_form.comment.id }}">{{ climb_form.comment.label }}</label>
+                {{ climb_form.comment(id=climb_form.comment.id, class='form-control') }}
+            </div>
+            <div class="form-group">
+                <label for="{{ climb_form.link.id }}">{{ climb_form.link.label }}</label>
+                {{ climb_form.link(id=climb_form.link.id, class='form-control') }}
+            </div>
             <!-- Hidden field to store whether the climber wants to add an opinion -->
             <div class="form-group" style="display: none;">
                 <label for="{{ climb_form.add_opinion.id }}">{{ climb_form.add_opinion.label }}</label>

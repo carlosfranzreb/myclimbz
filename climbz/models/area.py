@@ -7,6 +7,8 @@ from climbz.models import Sector
 class Area(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    comment = db.Column(db.Text)
+    link = db.Column(db.String(300))
     created_by = db.Column(db.Integer, db.ForeignKey("climber.id"), nullable=False)
     rock_type_id = db.Column(db.Integer, db.ForeignKey("rock_type.id"))
     rock_type = db.relationship("RockType", backref="climbing_areas")

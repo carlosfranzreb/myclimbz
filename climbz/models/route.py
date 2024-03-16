@@ -13,6 +13,8 @@ class Route(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey("climber.id"), nullable=False)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
+    comment = db.Column(db.Text)
+    link = db.Column(db.String(300))
 
     # route characteristics
     sit_start = db.Column(db.Boolean)
@@ -145,6 +147,10 @@ class Route(db.Model):
             "height": self.height,
             "inclination": self.inclination,
             "sit_start": self.sit_start,
+            # climber's relationship to the route
+            "tried": self.tried,
+            "project": self.is_project,
+            "sent": self.sent,
             # climber's opinion
             "landing": self.opinion.landing if self.opinion else None,
             "rating": self.opinion.rating if self.opinion else None,
@@ -152,7 +158,6 @@ class Route(db.Model):
             "cruxes": (
                 [crux.name for crux in self.opinion.cruxes] if self.opinion else None
             ),
-            "sent": self.sent,
             # climbing history
             "n_sessions": n_sessions,
             "n_attempts_all": n_attempts_all,

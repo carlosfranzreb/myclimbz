@@ -67,9 +67,7 @@ class OpinionForm(FlaskForm):
         return form
 
     @classmethod
-    def create_from_entities(
-        cls, entities: dict, grade_scale: str = "font"
-    ) -> OpinionForm:
+    def create_from_entities(cls, entities: dict) -> OpinionForm:
         """
         Create the form with the given entities.
 
@@ -79,7 +77,7 @@ class OpinionForm(FlaskForm):
         """
 
         form = cls()
-        form.add_choices(grade_scale)
+        form.add_choices()
 
         for field in ["landing", "rating", "comment"]:
             if field in entities:
@@ -87,7 +85,7 @@ class OpinionForm(FlaskForm):
 
         if "grade" in entities:
             value = entities["grade"]
-            if grade_scale == "hueco":
+            if current_user.grade_scale == "hueco":
                 grade = Grade.query.filter_by(hueco=value).first()
             else:
                 grade = Grade.query.filter_by(font=value).first()

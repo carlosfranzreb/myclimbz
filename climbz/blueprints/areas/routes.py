@@ -21,7 +21,6 @@ def table_areas() -> str:
 @areas.route
 @areas.route("/area/<int:area_id>")
 def page_area(area_id: int) -> str:
-    # TODO: btn to add route as project
     area = Area.query.get(area_id)
     return render("area.html", area=area)
 
