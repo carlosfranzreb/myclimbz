@@ -68,6 +68,8 @@ def driver() -> webdriver.Chrome:
     )
 
     # yield the driver and then quit it
-    yield driver
-    driver.quit()
-    app_process.terminate()
+    try:
+        yield driver
+    finally:
+        driver.quit()
+        app_process.terminate()
