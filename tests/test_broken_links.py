@@ -36,7 +36,7 @@ def check_links(driver, urls):
         WebDriverWait(driver, 10).until(
             lambda driver: url == clean_url(driver.current_url)
         )
-        if "404" in driver.title or "Not Found" in driver.title:
+        if "Error" in driver.title or "Exception" in driver.title:
             broken_links.append(url)
         else:
             broken_links += check_page_links(driver)
