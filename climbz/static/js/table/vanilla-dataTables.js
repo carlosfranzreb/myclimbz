@@ -693,10 +693,21 @@
             classList.add(th, "asc");
         }
         else{
-            const collator = new Intl.Collator('en', {sensitivity: 'base' })
-            alpha.sort((a, b) => {
-                return collator.compare(a.value, b.value);
-              });
+            // if an input in alpha is a date with format dd/mm/yyyy, sort the array by date
+            if (alpha.length > 0 && alpha[0].value.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+                alpha.sort((a, b) => {
+                    const [dayA, monthA, yearA] = a.value.split('/');
+                    const [dayB, monthB, yearB] = b.value.split('/');
+                    const dateA = new Date(yearA, monthA - 1, dayA);
+                    const dateB = new Date(yearB, monthB - 1, dayB);
+                    return dateA - dateB;
+                });
+            } else {
+                const collator = new Intl.Collator('en', {sensitivity: 'base' })
+                alpha.sort((a, b) => {
+                    return collator.compare(a.value, b.value);
+                });
+            }
             numeric.sort((a,b) => (a.value > b.value) ? 1 : ((b.value > a.value) ? -1 : 0));
             entries = numeric.concat(alpha);
             dir = "ascending";
