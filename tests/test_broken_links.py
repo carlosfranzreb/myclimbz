@@ -7,17 +7,26 @@ SKIP_URLS = [
     "http://localhost:5000/logout",
     "http://localhost:5000/cancel_form",
 ]
+OBJECTS = ["route", "session", "area", "climber"]
+
 SEEN_URLS = list()
 
 
 def test_broken_links(driver):
     broken_links = check_page_links(driver)
+    other_urls = [f"http://localhost:5000/{obj}/1" for obj in OBJECTS]
+    other_urls += [f"http://localhost:5000/edit_{obj}/1" for obj in OBJECTS]
+    broken_links += check_links(driver, other_urls)
     assert len(SEEN_URLS) > 0, "No links found on the page"
     assert len(broken_links) == 0, f"The following links are broken: {broken_links}"
 
 
 def check_page_links(driver):
     urls = get_urls(driver.find_elements(By.TAG_NAME, "a"))
+    return check_links(driver, urls)
+
+
+def check_links(driver, urls):
     broken_links = list()
     for url in urls:
         if url in SEEN_URLS:
