@@ -1,0 +1,9 @@
+.git/
+.pytest_cache/
+__pycache__/
+
+.coverage
+.dockerignore
+.env*
+celerybeat-schedule
+docker-compose.override.yml

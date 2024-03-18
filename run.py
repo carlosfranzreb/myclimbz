@@ -1,3 +1,5 @@
+import os
+
 from flask import request, redirect, url_for, session as flask_session
 from flask_login import current_user
 
@@ -5,7 +7,7 @@ from climbz import create_app
 from climbz.models import *  # noqa
 
 
-app = create_app("test_100")
+app = create_app()
 
 
 @app.before_request
@@ -41,4 +43,5 @@ def check_request_validity():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    debug = os.environ.get("FLASK_DEBUG", False)
+    app.run(debug=debug)
