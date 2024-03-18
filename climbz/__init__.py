@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
@@ -12,15 +14,13 @@ login_manager.login_view = "climbers.login"
 login_manager.login_message_category = "info"
 
 
-def create_app(db_name: str):
+def create_app():
     app = Flask(__name__)
     bcrypt.init_app(app)
-    app.config["SECRET_KEY"] = (
-        "your-secret-key"  # replace 'your-secret-key' with your actual secret key
-    )
+    app.config["SECRET_KEY"] = os.environ.get("CLIMBZ_SECRET_KEY")
     CSRFProtect(app)
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_name}.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("CLIMBZ_DB_URI")
     db.init_app(app)
     login_manager.init_app(app)
 
@@ -31,6 +31,7 @@ def create_app(db_name: str):
     from climbz.blueprints.climbs.routes import climbs
     from climbz.blueprints.climbers.routes import climbers
     from climbz.blueprints.opinions.routes import opinions
+    from climbz.blueprints.errors.handlers import errors
 
     app.register_blueprint(areas)
     app.register_blueprint(home)
@@ -39,5 +40,6 @@ def create_app(db_name: str):
     app.register_blueprint(climbs)
     app.register_blueprint(climbers)
     app.register_blueprint(opinions)
+    app.register_blueprint(errors)
 
     return app
