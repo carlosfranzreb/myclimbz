@@ -11,7 +11,7 @@
 <script>
     window.addEventListener('load', function () {
         start_display({{ routes | tojson }} , {{ grades | tojson }}, "{{ session_date }}");
-        create_filter("filter");
+    create_filter("filter");
         });
 </script>
 
@@ -52,9 +52,9 @@
 
     <div id="plot-axes" class="row-sm">
         <label for="x-axis-select">X Axis:</label>
-        <select id="x-axis-select" onchange="plot_data()"></select>
+        <select id="x-axis-select" onchange="show_plot()"></select>
         <label for="y-axis-select">Y Axis:</label>
-        <select id="y-axis-select" onchange="plot_data()"></select>
+        <select id="y-axis-select" onchange="show_plot()"></select>
     </div>
 
 </div>

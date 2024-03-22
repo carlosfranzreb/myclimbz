@@ -1,6 +1,6 @@
 """Functions to get objects from entities."""
 
-from climbz.models import Area, Route, Sector, Crux, RockType
+from climbz.models import Area, Route, Sector, RockType
 
 
 def get_area_from_entities(entities: dict) -> Area:
@@ -26,9 +26,5 @@ def get_route_from_entities(entities: dict, area_id: int) -> Route:
             sector = Sector.query.filter_by(name=entities["sector"]).first()
             if sector is None:
                 sector = Sector(name=entities["sector"], area_id=area_id)
-        cruxes = list()
-        if "cruxes" in entities:
-            for crux_name in entities["cruxes"]:
-                cruxes.append(Crux.query.filter_by(name=crux_name).first())
         route = Route(name=entities["name"], sector=sector)
     return route

@@ -6,7 +6,7 @@ function getTextWidth(text, obj) {
     return width;
 }
 
-var DoubleRangeSlider = function(id, title, step, data_class, data_column) { 
+var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     var self = this;
     let startX = 0, x = 0;
     self.id = id;
@@ -17,11 +17,11 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
     let max = -Infinity;
 
     const left = 0;
-    
-    let get_ranges = function() {
-        for (let climb of DATA){
+
+    let get_ranges = function () {
+        for (let climb of DATA) {
             let value = climb[data_column];
-            if (value < min) {
+            if (value < min && value !== null) {
                 min = value;
             }
             if (value > max) {
@@ -33,32 +33,32 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
 
     let wrapper = document.getElementById(id);
     let inner_html = `<div class=slider-title id=title_${id}>${title}: ${min} - ${max}</div>`
-    + `<div id=widget_${id} se-min="${min}"`
-    + `se-step="${step}"`
-    + `se-max="${max}" class="double-slider"></div>`;
+        + `<div id=widget_${id} se-min="${min}"`
+        + `se-step="${step}"`
+        + `se-max="${max}" class="double-slider"></div>`;
     wrapper.innerHTML = inner_html;
 
     let slider = document.getElementById(`widget_${id}`);
     inner_html = "<div class='slider-touch-left'><span></span></div>"
-    + "<div class='slider-touch-right'><span></span></div>"
-    + "<div class='slider-line'><span></span></div></div>";
+        + "<div class='slider-touch-right'><span></span></div>"
+        + "<div class='slider-line'><span></span></div></div>";
     slider.innerHTML = inner_html;
-    
-    let touchLeft  = slider.querySelector('.slider-touch-left');
+
+    let touchLeft = slider.querySelector('.slider-touch-left');
     let touchRight = slider.querySelector('.slider-touch-right');
-    let lineSpan   = slider.querySelector('.slider-line span');
+    let lineSpan = slider.querySelector('.slider-line span');
 
     if (step === null) {
         step = 1;
     }
 
     let buttonOffsetWidth = touchLeft.offsetWidth;
-    let buttonWidth = buttonOffsetWidth - Number(window.getComputedStyle(touchLeft).padding.replace('px', '')*2);
+    let buttonWidth = buttonOffsetWidth - Number(window.getComputedStyle(touchLeft).padding.replace('px', '') * 2);
 
-    let step_width = 2*buttonWidth + 3;
+    let step_width = 2 * buttonWidth + 3;
     let intervals = [];
-    for (let i = 0; i <= (max - min)/step + 1; i += 1) {
-        intervals.push(i*step_width);
+    for (let i = 0; i <= (max - min) / step + 1; i += 1) {
+        intervals.push(i * step_width);
     }
 
     let span_width = intervals[intervals.length - 1];
@@ -73,155 +73,140 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
     // retrieve default values
     let defaultMinValue = min;
     let defaultMaxValue = max;
-  
-    if(defaultMinValue > defaultMaxValue)
-    {
+
+    if (defaultMinValue > defaultMaxValue) {
         defaultMinValue = defaultMaxValue;
     }
-    
+
     slider.setAttribute('se-min-current', defaultMinValue);
     slider.setAttribute('se-max-current', defaultMaxValue);
-    
 
-    let maxX = slider.offsetWidth - buttonOffsetWidth - buttonWidth/2;
+
+    let maxX = slider.offsetWidth - buttonOffsetWidth - buttonWidth / 2;
     let selectedTouch = null;
 
-    self.adjust_width = function(width) {
+    self.adjust_width = function (width) {
         self.width = width;
         span_width = width - buttonOffsetWidth;
-        step_width = Math.floor(span_width/(intervals.length - 1));
+        step_width = Math.floor(span_width / (intervals.length - 1));
         for (let i in intervals) {
-            intervals[i] = i*step_width;
+            intervals[i] = i * step_width;
         }
         //add remaining width to the last interval
         intervals[intervals.length - 1] = span_width;
-        maxX = span_width - buttonWidth/2;
+        maxX = span_width - buttonWidth / 2;
 
         slider.style.width = self.width + 'px';
         wrapper.style.width = self.width + 'px';
         self.reset();
     }
-        
+
 
     // reset the slider to its default values
-    self.reset = function() {
+    self.reset = function () {
         self.setMinValue(defaultMinValue);
         slider.setAttribute('se-min-current', defaultMinValue);
         self.setMaxValue(defaultMaxValue);
         slider.setAttribute('se-max-current', defaultMaxValue);
         self.onChange(defaultMinValue, defaultMaxValue);
     }
-    
-    self.setMinValue = function(minValue)
-    {
-        let i = Math.floor((minValue - min)/step);
-        touchLeft.style.left = Math.floor(intervals[i] + buttonWidth/2) + 'px';
+
+    self.setMinValue = function (minValue) {
+        let i = Math.floor((minValue - min) / step);
+        touchLeft.style.left = Math.floor(intervals[i] + buttonWidth / 2) + 'px';
         lineSpan.style.marginLeft = intervals[i] + 'px';
         let current_max = parseFloat(slider.getAttribute('se-max-current'));
-        let j = Math.floor((current_max - min)/step);
+        let j = Math.floor((current_max - min) / step);
         lineSpan.style.width = (intervals[j + 1] - intervals[i]) + 'px';
     }
-    
-    self.setMaxValue = function(maxValue)
-    {
-        let i = Math.floor((maxValue - min)/step) + 1;
-        touchRight.style.left = Math.floor((intervals[i] - buttonWidth/2)) + 'px';
+
+    self.setMaxValue = function (maxValue) {
+        let i = Math.floor((maxValue - min) / step) + 1;
+        touchRight.style.left = Math.floor((intervals[i] - buttonWidth / 2)) + 'px';
         let current_min = parseFloat(slider.getAttribute('se-min-current'));
-        let j = Math.floor((current_min - min)/step);
+        let j = Math.floor((current_min - min) / step);
         lineSpan.style.width = (intervals[i] - intervals[j]) + 'px';
     }
-    
+
     // set defualt values
     self.setMinValue(defaultMinValue);
     self.setMaxValue(defaultMaxValue);
-    
+
     // setup touch/click events
     function onStart(event) {
-        
+
         // Prevent default dragging of selected content
         event.preventDefault();
         let eventTouch = event;
-        
-        if (event.touches)
-        {
+
+        if (event.touches) {
             eventTouch = event.touches[0];
         }
-        
-        if(this === touchLeft)
-        {
+
+        if (this === touchLeft) {
             x = touchLeft.offsetLeft;
         }
-        else
-        {
+        else {
             x = touchRight.offsetLeft;
         }
-        
+
         startX = eventTouch.pageX - x;
         selectedTouch = this;
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onStop);
         document.addEventListener('touchmove', onMove);
         document.addEventListener('touchend', onStop);
-        
-        
+
+
     }
-  
+
     function onMove(event) {
         let eventTouch = event;
-        
-        if (event.touches)
-        {
+
+        if (event.touches) {
             eventTouch = event.touches[0];
         }
-        
+
         x = eventTouch.pageX - startX;
-        
-        if (selectedTouch === touchLeft)
-        {
-            if(x > (touchRight.offsetLeft - buttonWidth))
-            {
+
+        if (selectedTouch === touchLeft) {
+            if (x > (touchRight.offsetLeft - buttonWidth)) {
                 x = (touchRight.offsetLeft - buttonWidth)
             }
-            else if(x < buttonWidth/2)
-            {
-                x = buttonWidth/2;
+            else if (x < buttonWidth / 2) {
+                x = buttonWidth / 2;
             }
-            calculateMinValue(x - buttonWidth/2);
+            calculateMinValue(x - buttonWidth / 2);
             selectedTouch.style.left = x + 'px';
         }
-        else if (selectedTouch === touchRight)
-        {
-            if(x < (touchLeft.offsetLeft + buttonWidth))
-            {
+        else if (selectedTouch === touchRight) {
+            if (x < (touchLeft.offsetLeft + buttonWidth)) {
                 x = (touchLeft.offsetLeft + buttonWidth)
             }
-            else if(x > maxX)
-            {
+            else if (x > maxX) {
                 x = maxX;
             }
-            calculateMaxValue(x + buttonWidth/2);
+            calculateMaxValue(x + buttonWidth / 2);
             selectedTouch.style.left = x + 'px';
         }
-    
+
         // update line span
-        lineSpan.style.marginLeft = (touchLeft.offsetLeft - buttonWidth/2) + 'px';
+        lineSpan.style.marginLeft = (touchLeft.offsetLeft - buttonWidth / 2) + 'px';
         lineSpan.style.width = (touchRight.offsetLeft - touchLeft.offsetLeft + buttonWidth) + 'px';
-        
-        
+
+
         // call on change
-        if(slider.getAttribute('on-change'))
-        {
+        if (slider.getAttribute('on-change')) {
             let fn = new Function('min, max', slider.getAttribute('on-change'));
             fn(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
         }
-        
-        if(self.onChange)
-        {
+
+        if (self.onChange) {
             self.onChange(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
         }
-    
+
     }
-  
+
     function onStop(event) {
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onStop);
@@ -229,106 +214,102 @@ var DoubleRangeSlider = function(id, title, step, data_class, data_column) {
         document.removeEventListener('touchend', onStop);
 
         let eventTouch = event;
-        
-        if (event.touches)
-        {
+
+        if (event.touches) {
             eventTouch = event.touches[0];
         }
-        
+
         x = eventTouch.pageX - startX;
-        
-        if (selectedTouch === touchLeft)
-        {
+
+        if (selectedTouch === touchLeft) {
             self.setMinValue(slider.getAttribute('se-min-current'));
             //calculateMinValue(x - buttonWidth/2);
-            
+
         }
-        else if (selectedTouch === touchRight)
-        {
+        else if (selectedTouch === touchRight) {
             self.setMaxValue(slider.getAttribute('se-max-current'));
             //calculateMaxValue(x + buttonWidth/2);
 
         }
-        
+
         selectedTouch = null;
-        
-        
+
+
         // call did changed
-        if(slider.getAttribute('did-changed'))
-        {
+        if (slider.getAttribute('did-changed')) {
             let fn = new Function('min, max', slider.getAttribute('did-changed'));
             fn(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
         }
-        
-        if(self.didChanged)
-        {
+
+        if (self.didChanged) {
             self.didChanged(slider.getAttribute('se-min-current'), slider.getAttribute('se-max-current'));
         }
     }
-  
+
     function calculateMinValue(x) {
-        let minValue = Math.floor((x/step_width))*step + min;
-        
+        let minValue = Math.floor((x / step_width)) * step + min;
+
         slider.setAttribute('se-min-current', minValue);
     }
 
     function calculateMaxValue(x) {
-        let maxValue = Math.floor((x/step_width))*step + min;
+        let maxValue = Math.floor((x / step_width)) * step + min;
         if (maxValue > max) {
             maxValue = max;
         }
-        
+
         slider.setAttribute('se-max-current', maxValue);
     }
-  
+
     // link events
     touchLeft.addEventListener('mousedown', onStart);
     touchRight.addEventListener('mousedown', onStart);
     touchLeft.addEventListener('touchstart', onStart);
     touchRight.addEventListener('touchstart', onStart);
-  
-    self.onChange = function(min, max)
-    {
-        if (data_class === Grade){
+
+    self.onChange = function (min, max) {
+        if (data_class === Grade) {
             document.getElementById(`title_${id}`).innerHTML = `${title}: ${GRADES[min][GRADE_SCALE]} - ${GRADES[max][GRADE_SCALE]}`;
         }
-        else{
+        else {
             document.getElementById(`title_${id}`).innerHTML = `${title}: ${min} - ${max}`;
         }
     }
-  
-    self.didChanged = function(min, max)
-    {
-        if (data_class === Grade){
+
+    self.didChanged = function (min, max) {
+        if (data_class === Grade) {
             document.getElementById(`title_${id}`).innerHTML = `${title}: ${GRADES[min][GRADE_SCALE]} - ${GRADES[max][GRADE_SCALE]}`;
         }
-        else{
+        else {
             document.getElementById(`title_${id}`).innerHTML = `${title}: ${min} - ${max}`;
         }
     }
-  
+
     self.didChanged(min, max);
-    if (data_class === Grade){
+    if (data_class === Grade) {
         let grade_toggle = document.getElementById("grade-scale-toggle");
         grade_toggle.addEventListener("change", function () {
             self.didChanged(slider.getAttribute("se-min-current"), slider.getAttribute("se-max-current"));
         });
     }
 
-    self.filter_value = function(value) {
+    self.filter_value = function (value) {
+        if (value === null)
+            return false;
+
         let min = parseInt(slider.getAttribute('se-min-current'));
         let max = parseInt(slider.getAttribute('se-max-current'));
         return value >= min && value <= max;
     }
 };
 
-var DropdownMenu = function(id, placeholder, data_column) {
+var DropdownMenu = function (id, placeholder, data_column) {
     var self = this;
     self.left = 0;
     self.id = id;
     self.data_column = data_column;
 
-    self.get_options = function() {
+    self.get_options = function () {
         let options = [];
         for (let climb of DATA) {
             let value = climb[data_column];
@@ -356,8 +337,8 @@ var DropdownMenu = function(id, placeholder, data_column) {
     wrapper.style.left = self.left + 'px';
     wrapper.classList.add('btn-wrapper');
     let inner_html = `<button class='btn btn-secondary dropdown-toggle' type='button' id='${id}_button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>${self.placeholder}</button>`
-    + `<div class='dropdown-menu' aria-labelledby='${id}_button' id='${id}_menu'>`;
-    
+        + `<div class='dropdown-menu' aria-labelledby='${id}_button' id='${id}_menu'>`;
+
     for (let i = 0; i < options.length; i++) {
         inner_html += `<button class='dropdown-item' id=${id}_${i}>${options[i]}</button>`;
     }
@@ -372,7 +353,7 @@ var DropdownMenu = function(id, placeholder, data_column) {
     self.button.addEventListener("click", openFilters);
     function openFilters() {
         self.menu.style.display =
-        self.menu.style.display === "block" ? "none" : "block";
+            self.menu.style.display === "block" ? "none" : "block";
     }
 
     self.width = (getTextWidth(self.placeholder, self.button) + 30);
@@ -383,7 +364,7 @@ var DropdownMenu = function(id, placeholder, data_column) {
     let num_options = self.options.length;
     for (let i = 0; i < num_options; i++) {
         let option = document.getElementById(`${id}_${i}`);
-        option.addEventListener("click", function() {
+        option.addEventListener("click", function () {
             if (self.options[i] === "Select all") {
                 //change "Select all" to "Deselect all" and vice versa
                 option.textContent = option.textContent === "Select all" ? "Deselect all" : "Select all";
@@ -433,14 +414,14 @@ var DropdownMenu = function(id, placeholder, data_column) {
                         button.style.backgroundColor = "#0000ff";
                     }
                     document.getElementById(`${id}_0`).textContent = "Select all";
-                } 
-            }  
+                }
+            }
         });
-    
+
     }
 
     //add event listener so that dropdown menu closes when element loses focus
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         if (!wrapper.contains(event.target)) {
             self.menu.style.display = "none";
         }
@@ -448,7 +429,7 @@ var DropdownMenu = function(id, placeholder, data_column) {
 
 
     //reset menu to have no items selected
-    self.reset = function() {
+    self.reset = function () {
         for (let i = 0; i < options.length; i++) {
             let option = document.getElementById(`${id}_${i}`);
             option.classList.remove('active');
@@ -459,7 +440,7 @@ var DropdownMenu = function(id, placeholder, data_column) {
         button.style.backgroundColor = "#6c757d";
     }
 
-    self.filter_value = function(value) {
+    self.filter_value = function (value) {
         if (Array.isArray(value)) {
             for (v of value) {
                 //if the option with value v is active, return true
@@ -473,7 +454,7 @@ var DropdownMenu = function(id, placeholder, data_column) {
     }
 }
 
-var Checkbox = function(id, title, data_column, false_value) {
+var Checkbox = function (id, title, data_column, false_value) {
     var self = this;
     self.left = 0;
     self.id = id;
@@ -489,22 +470,22 @@ var Checkbox = function(id, title, data_column, false_value) {
     let label = document.querySelector(`label[for='${id}_button']`);
     self.width = getTextWidth(title, label) + 30;
     wrapper.style.width = self.width + "px";
-    self.reset = function() {
+    self.reset = function () {
         self.button.checked = false;
     }
 
-    self.filter_value = function(value) {
+    self.filter_value = function (value) {
         if (value === false_value) {
             return !self.button.checked;
         }
-        else{
+        else {
             return true;
         }
     }
 
 }
 
-var DateRange = function(id, title, data_column) {
+var DateRange = function (id, title, data_column) {
     var self = this;
     let wrapper = document.getElementById(id);
     const left = 0;
@@ -526,33 +507,33 @@ var DateRange = function(id, title, data_column) {
                             <input id="${id}_end" type="text" class="form-control date-input" placeholder="DD/MM/YYYY" maxlength="10"/>
                         </div>
                     </div>`;
-    
+
     wrapper.innerHTML = inner_html;
 
     let startDate = document.getElementById(`${id}_start`)
     let endDate = document.getElementById(`${id}_end`)
     let keyPressed;
 
-    let keyDown = function(event) {
+    let keyDown = function (event) {
         keyPressed = event.key;
-        let i = this.selectionStart-1;
-        if ((event.key === "Backspace" && this.value[i] === "/")|| (event.key === "Delete" && this.value[i+1] === "/")) {
+        let i = this.selectionStart - 1;
+        if ((event.key === "Backspace" && this.value[i] === "/") || (event.key === "Delete" && this.value[i + 1] === "/")) {
             event.preventDefault();
         }
-        if (keyPressed === "ArrowLeft" && this.value[i-1] === "/") {
+        if (keyPressed === "ArrowLeft" && this.value[i - 1] === "/") {
             this.setSelectionRange(i, i);
         }
-        else if (keyPressed === "ArrowRight" && this.value[i+2] === "/") {
-            this.setSelectionRange(i+2, i+2);
+        else if (keyPressed === "ArrowRight" && this.value[i + 2] === "/") {
+            this.setSelectionRange(i + 2, i + 2);
         }
     }
 
     let textInput = function () {
         //get the position of the currently entered character
-        let i = this.selectionStart-1;
-        if(isNaN(parseInt(this.value[i])) && keyPressed !== "Backspace" && keyPressed !== "Delete"){
+        let i = this.selectionStart - 1;
+        if (isNaN(parseInt(this.value[i])) && keyPressed !== "Backspace" && keyPressed !== "Delete") {
             //remove the entered character if it is not a number
-            this.value = this.value.slice(0, i) + this.value.slice(i+1);
+            this.value = this.value.slice(0, i) + this.value.slice(i + 1);
             return;
         }
         let num_slashes = 0;
@@ -561,35 +542,35 @@ var DateRange = function(id, title, data_column) {
                 num_slashes++;
             }
         }
-        if (!isNaN(parseInt(this.value[i-1])) && num_slashes < 2 && keyPressed !== "Backspace" && keyPressed !== "Delete") {
-            if (!isNaN(parseInt(this.value[i-2]))){
+        if (!isNaN(parseInt(this.value[i - 1])) && num_slashes < 2 && keyPressed !== "Backspace" && keyPressed !== "Delete") {
+            if (!isNaN(parseInt(this.value[i - 2]))) {
                 this.value = this.value.slice(0, i) + "/" + this.value.slice(i);
             }
-            else{
-                this.value = this.value.slice(0, i+1) + "/" + this.value.slice(i+1);
+            else {
+                this.value = this.value.slice(0, i + 1) + "/" + this.value.slice(i + 1);
             }
         }
         //else if the cursor position is after a slash and backspace or the left arrow key is pressed, place the cursor before the slash
         else if (keyPressed === "Backspace" && this.value[i] === "/") {
-            if (i === this.value.length-1) {
+            if (i === this.value.length - 1) {
                 this.setSelectionRange(i, i);
             }
             //if backspace is pressed and the slash is the last character, remove the slash
-            if (i === this.value.length-1) {
+            if (i === this.value.length - 1) {
                 this.value = this.value.slice(0, i);
             }
         }
-        else if (keyPressed === "Delete" && this.value[i] === "/" && i === this.value.length-1) {
+        else if (keyPressed === "Delete" && this.value[i] === "/" && i === this.value.length - 1) {
             this.value = this.value.slice(0, i);
         }
         //check whether a slash has two numbers before it
-        else if (!isNaN(parseInt(this.value[i])) && !isNaN(parseInt(this.value[i-1])) && !isNaN(parseInt(this.value[i-2])) && this.value[i+1] === "/") {
+        else if (!isNaN(parseInt(this.value[i])) && !isNaN(parseInt(this.value[i - 1])) && !isNaN(parseInt(this.value[i - 2])) && this.value[i + 1] === "/") {
             //change the inputted number to be the first number after the slash
-            this.value = this.value.slice(0, i) + "/" + this.value[i] + this.value.slice(i+2);
-            this.setSelectionRange(i+2, i+2);
+            this.value = this.value.slice(0, i) + "/" + this.value[i] + this.value.slice(i + 2);
+            this.setSelectionRange(i + 2, i + 2);
         }
     }
-    
+
     startDate.addEventListener('keydown', keyDown);
     startDate.addEventListener('input', textInput);
 
@@ -597,7 +578,7 @@ var DateRange = function(id, title, data_column) {
     endDate.addEventListener('input', textInput);
 
 
-    self.reset = function() {
+    self.reset = function () {
         startDate.value = "";
         endDate.value = "";
     }
@@ -608,7 +589,7 @@ var DateRange = function(id, title, data_column) {
         return new Date(year, month - 1, day);
     }
 
-    self.filter_value = function(value) {
+    self.filter_value = function (value) {
         if (startDate.value === "" || endDate.value === "") {
             if (startDate.value === "" && endDate.value === "") {
                 return true;
@@ -617,7 +598,7 @@ var DateRange = function(id, title, data_column) {
             if (value instanceof Array) {
                 date = parseDateString(value[value.length - 1]);
             }
-            else{
+            else {
                 date = parseDateString(value);
             }
             if (startDate.value === "") {
@@ -636,14 +617,14 @@ var DateRange = function(id, title, data_column) {
         if (value instanceof Array) {
             date = parseDateString(value[value.length - 1]);
         }
-        else{
+        else {
             date = parseDateString(value);
         }
         return date >= start && date <= end;
     }
 }
 
-var RadioButton = function(id, data_column, options, truth_values) {
+var RadioButton = function (id, data_column, options, truth_values) {
     var self = this;
     const left = 0;
     self.id = id;
@@ -652,7 +633,7 @@ var RadioButton = function(id, data_column, options, truth_values) {
     let wrapper = document.getElementById(id);
     wrapper.innerHTML = "";
     wrapper.style.left = left + 'px';
-    
+
     for (i in options) {
         let form_elem = document.createElement("div");
         form_elem.className = "form-check";
@@ -685,11 +666,11 @@ var RadioButton = function(id, data_column, options, truth_values) {
     self.width = width + 30;
     wrapper.style.width = self.width + "px";
 
-    self.reset = function() {
+    self.reset = function () {
         document.getElementById(`${id}_0`).checked = true;
     }
 
-    self.filter_value = function(value) {
+    self.filter_value = function (value) {
         let checked = document.querySelector(`input[name=${id}]:checked`);
         let index = checked.id.split("_").pop();
         let t = truth_values[index];
@@ -700,7 +681,7 @@ var RadioButton = function(id, data_column, options, truth_values) {
     }
 }
 
-var FilterWidget = function(id, left) {
+var FilterWidget = function (id, left) {
     var self = this;
     self.left = left;
     self.id = id;
@@ -708,7 +689,7 @@ var FilterWidget = function(id, left) {
     wrapper.style.left = left + 'px';
     wrapper.style.width = "fit-content";
     let inner_html = `<button class='btn btn-secondary dropdown-toggle' type='button' id='${id}_button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Filter</button>`
-    + `<div class='dropdown-menu' aria-labelledby='${id}_button' id='${id}_menu'>`;
+        + `<div class='dropdown-menu' aria-labelledby='${id}_button' id='${id}_menu'>`;
     //add widgets here
     let cols = {};
     for (let filter_name in window.FILTERS) {
@@ -720,8 +701,8 @@ var FilterWidget = function(id, left) {
                 filter_array.push(filter_name);
                 cols[col][row] = filter_array;
             }
-            else{
-            cols[col][row] = filter_name;
+            else {
+                cols[col][row] = filter_name;
             }
         }
         else {
@@ -763,7 +744,7 @@ var FilterWidget = function(id, left) {
             }
 
         }
-        
+
         row.appendChild(colElement);
     }
 
@@ -777,8 +758,8 @@ var FilterWidget = function(id, left) {
         let filter_id = `${id}_${filter_name}`;
         if (widget === "slider") {
             let step = "step" in window.FILTERS[filter_name] ? window.FILTERS[filter_name]["step"] : null;
-            FILTER_WIDGETS.push(new DoubleRangeSlider(filter_id, filter_name.replace(/_/g, " "), step, 
-            window.FILTERS[filter_name]["data_class"], window.FILTERS[filter_name]["data_column"]));
+            FILTER_WIDGETS.push(new DoubleRangeSlider(filter_id, filter_name.replace(/_/g, " "), step,
+                window.FILTERS[filter_name]["data_class"], window.FILTERS[filter_name]["data_column"]));
         }
         else if (widget === "dropdown") {
             FILTER_WIDGETS.push(new DropdownMenu(filter_id, filter_name.replace(/_/g, " "), window.FILTERS[filter_name]["data_column"]));
@@ -809,12 +790,12 @@ var FilterWidget = function(id, left) {
     for (let filter of FILTER_WIDGETS) {
         let filter_name = filter.id.split("_")[1];
         if (window.FILTERS[filter_name]["filter_type"] === "slider") {
-            if (filter.width < col_widths[window.FILTERS[filter_name]["col"]] - delta){
+            if (filter.width < col_widths[window.FILTERS[filter_name]["col"]] - delta) {
                 filter.adjust_width(col_widths[window.FILTERS[filter_name]["col"]] - delta);
             }
         }
     }
-    
+
     let divider = document.createElement("div");
     divider.className = "dropdown-divider";
     menu.appendChild(divider);
@@ -847,26 +828,25 @@ var FilterWidget = function(id, left) {
     self.filter_button.addEventListener("click", openFilters);
     function openFilters() {
         self.menu.style.display =
-        self.menu.style.display === "block" ? "none" : "block";
+            self.menu.style.display === "block" ? "none" : "block";
     }
 
     // Reset all filters when the reset button is clicked
-    filter_reset.addEventListener("click", function() {
+    filter_reset.addEventListener("click", function () {
         for (let i = 0; i < FILTER_WIDGETS.length; i++) {
             FILTER_WIDGETS[i].reset();
         }
     });
 
     // Apply filters when the apply button is clicked
-    filter_apply.addEventListener("click", function() {
+    filter_apply.addEventListener("click", function () {
         display_data();
         self.menu.style.display = "none";
     });
 
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         // if the user clicks outside of the filter widget, and no widget inside it is in focus, close the filter widget
         if (!wrapper.contains(event.target) && document.activeElement.tagName === "BODY") {
-            console.log(document.activeElement);
             self.menu.style.display = "none";
         }
     });
