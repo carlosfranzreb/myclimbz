@@ -294,11 +294,15 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     }
 
     self.filter_value = function (value) {
-        if (value === null)
-            return false;
-
-        let min = parseInt(slider.getAttribute('se-min-current'));
         let max = parseInt(slider.getAttribute('se-max-current'));
+        let min = parseInt(slider.getAttribute('se-min-current'));
+        if (value === null){
+            if(min === defaultMinValue && max === defaultMaxValue){
+                return true;
+            }
+            return false;
+        }
+
         return value >= min && value <= max;
     }
 };
@@ -314,7 +318,7 @@ var DropdownMenu = function (id, placeholder, data_column) {
         for (let climb of DATA) {
             let value = climb[data_column];
             //if value is an array, add each element to options
-            if (Array.isArray(value)) {
+            if (value instanceof Array) {
                 for (v of value) {
                     if (!options.includes(v)) {
                         options.push(v);
@@ -441,16 +445,16 @@ var DropdownMenu = function (id, placeholder, data_column) {
     }
 
     self.filter_value = function (value) {
-        if (Array.isArray(value)) {
+        if (value instanceof Array) {
             for (v of value) {
                 //if the option with value v is active, return true
-                if (selected_options.length === 0 || selected_options.includes(v)) {
+                if (num_selected === 0 || selected_options.includes(v)) {
                     return true;
                 }
             }
             return false;
         }
-        return (selected_options.length === 0 || selected_options.includes(value));
+        return (num_selected === 0 || selected_options.includes(value) || num_selected === num_options - 1);
     }
 }
 
@@ -584,41 +588,41 @@ var DateRange = function (id, title, data_column) {
     }
 
     function parseDateString(dateString) {
+        if (dateString === "" || dateString === null) {
+            return null;
+        }
         const [day, month, year] = dateString.split('/');
         // Month is 0-indexed in JavaScript, so we subtract 1 from the parsed month
         return new Date(year, month - 1, day);
     }
 
     self.filter_value = function (value) {
-        if (startDate.value === "" || endDate.value === "") {
-            if (startDate.value === "" && endDate.value === "") {
-                return true;
-            }
-            let date;
-            if (value instanceof Array) {
-                date = parseDateString(value[value.length - 1]);
-            }
-            else {
-                date = parseDateString(value);
-            }
-            if (startDate.value === "") {
-                let end = parseDateString(endDate.value);
-                return date <= end;
-            }
-            if (endDate.value === "") {
-                let start = parseDateString(startDate.value);
-                return date >= start;
-            }
-        }
-
         let start = parseDateString(startDate.value);
         let end = parseDateString(endDate.value);
         let date;
+        //! If many dates are selected, use the last date
         if (value instanceof Array) {
             date = parseDateString(value[value.length - 1]);
         }
         else {
             date = parseDateString(value);
+        }
+        if (start === null || end === null) {
+            if (start === null && end === null) {
+                return true;
+            }
+            if (date === null) {
+                return false;
+            }
+            if (start === null) {
+                return date <= end;
+            }
+            if (end === null) {
+                return date >= start;
+            }
+        }
+        if (date === null) {
+            return false;
         }
         return date >= start && date <= end;
     }

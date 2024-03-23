@@ -33,7 +33,6 @@ CRUXES = [
     "Mantel",
 ];
 
-
 // Add an event listener to the checkbox "display-form-toggle"
 let display_form_toggle = document.getElementById("display-form-toggle");
 display_form_toggle.addEventListener("change", function () {

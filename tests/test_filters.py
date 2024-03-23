@@ -4,17 +4,11 @@ and for the checkbox filters, only one option is selected. Multiple filters, mul
 checkboxes, and removing filters are not tested.
 """
 
-from multiprocessing import Process
 from time import sleep
 from datetime import datetime
 
-from flask.testing import FlaskClient
-from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
-from climbz.models import Grade, Route, Crux
 from tests.conftest import run_app, driver
 
 
