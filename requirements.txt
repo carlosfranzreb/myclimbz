@@ -10,9 +10,3 @@ flask_login==0.6.3
 flask_bcrypt==1.0.1
 python-dateutil==2.9
 text2num==2.5.0
-
-# for the speech interface
-torch==2.0.1
-pytorch_lightning==2.0.6
-transformers==4.31.0
-openai-whisper
