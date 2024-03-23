@@ -115,10 +115,3 @@ input[type="radio"]+label{
 .form-control[type="text"]{
 	width: 150px;
 }
-
-.modal:nth-of-type(even) {
-    z-index: 1062 !important;
-}
-.modal-backdrop.show:nth-of-type(even) {
-    z-index: 1061 !important;
-}

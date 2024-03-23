@@ -73,24 +73,37 @@
         {% endif %}
     </nav>
 
-    <div class="modal" id="import_csv_dialog" tabindex="-1" aria-labelledby="import_csv_label" aria-hidden="true">
+    <div class="modal fade" id="import_csv_dialog" tabindex="-1" aria-labelledby="import_csv_label" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
               <h1 class="modal-title fs-5" id="import_csv_label">Import CSV file
-                <a data-bs-target="#import_csv_info" data-bs-toggle="modal" style="cursor: pointer;" id="info_icon">
+                <a onclick="toggle_info()" style="cursor: pointer;" id="info_icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
                     <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
                     <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
                 </svg>
                 </a>
               </h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <button type="button" class="btn-close" id="csv_dialog_close_button" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="csv_dialog_body">
                 <div class="mb-3">
                     <input class="form-control" type="file" id="csv_file_form">
                 </div>
+            </div>
+            <!-- TODO: go over it with C -->
+            <div class="modal-body" id="import_csv_info" style="display: none;">
+                <p>Importing a CSV file will add the data to the database. First, choose the file to be imported. You can then map columns in your spreadsheet to its equivalent in our database. It is not obligatory to fill all the options, although there are some "rules":</p>
+                <ul>
+                    <li>The Name and Area columns are obligatory and must be present on all rows.</li>
+                    <li>Dates have to be in the format "dd/mm/yyyy".</li>
+                    <li>If a boulder has been sent, there must be a date in its corresponding column.</li>
+                    <li>Inclination, landing, conditions, height and No. of attempts/sessions, if included, must be numbers. Landing and conditions on a scale of 1 to 10.</li>
+                    <li>Sit start and Sent columns must be either yes/true or no/false/empty.</li>
+                </ul>
+                <p>Here is an example CSV file:</p>
+                <img src="{{url_for('static', filename='data/example_sheet.png')}}" alt="CSV example" style="width: 100%;">
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancel_csv_button">Cancel</button>
@@ -98,23 +111,23 @@
             </div>
           </div>
         </div>
-      </div>
-
-    <div class="modal" id="import_csv_info" tabindex="-2" aria-labelledby="import_csv_info_header" aria-hidden="true" data-bs-backdrop="static">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="import_csv_info_header">Import CSV file</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="csv_dialog_body">
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="close_info_button">OK</button>
-            </div>
-          </div>
-        </div>
     </div>
+    <script>
+        function toggle_info() {
+            let modalElement = document.querySelector('.modal');
+            let modalBody = document.getElementById('csv_dialog_body');
+            let infoBody = document.getElementById('import_csv_info');
+            if (modalBody.style.display === "block" || modalBody.style.display === "") {
+                modalBody.style.display = "none";
+                infoBody.style.display = "block";
+                modalElement.style.setProperty('--bs-modal-width', '1100px');
+            } else {
+                modalBody.style.display = "block";
+                infoBody.style.display = "none";
+                modalElement.style.setProperty('--bs-modal-width', '500px');
+            }
+        }
+    </script>
 
     {% if error %}
     <script>
@@ -173,5 +186,6 @@
     <script src="{{url_for('static', filename='js/filters/filters.js')}}"></script>
     {% endif %}
 </body>
+
 
 </html>

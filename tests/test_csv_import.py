@@ -17,9 +17,11 @@ def test_csv_import(driver):
         os.getcwd(), "climbz", "static", "data", "csv_import_test.csv"
     )
     this_file_path = os.path.abspath(__file__)
+    confirm_button = driver.find_element(By.ID, "confirm_csv_button")
     csv_button = driver.find_element(By.ID, "import_csv_button")
     csv_button.click()
 
+    # send wrong file type
     csv_input = driver.find_element(By.ID, "csv_file_form")
     csv_input.send_keys(this_file_path)
     # assert that alert is shown
@@ -35,6 +37,15 @@ def test_csv_import(driver):
     assert driver.find_element(
         By.CSS_SELECTOR, '#csv_select_name option[value="Area"]'
     ).disabled
+
+    # remove the option "Name" from the select
+    name_select.send_keys("--")
+    # assert that alert sent when confirm is clicked
+    confirm_button.click()
+    alert = driver.switch_to.alert
+    assert alert.text
+    alert.accept()
+    name_select.send_keys("Name")
 
     grade_select = driver.find_element(By.ID, "csv_select_level")
     # set the option "Angle"

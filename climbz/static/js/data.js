@@ -111,6 +111,7 @@ let CSV_IMPORT_OPTIONS = {
     "n_sessions": "No. of sessions", //? Necessary?
     "dates": "Dates"
 };
+let OBLIGATORY_OPTS = ["name", "area"];
 
 function check_option_validity(name, selected_index, select) {
     let is_valid = true;
@@ -138,10 +139,6 @@ function check_option_validity(name, selected_index, select) {
         for (let row of csv_data) {
             if (row[selected_option].length > 200){
                 alert("The column " + selected_option + " contains values longer than 200 characters.");
-                return false;
-            }
-            if (name === "Name" && row[selected_option] === "") {
-                alert("The column " + selected_option + " contains empty names.");
                 return false;
             }
         }
@@ -174,7 +171,15 @@ function check_option_validity(name, selected_index, select) {
             }
         }
     }
-
+    //check if the column is obligatory and if it contains empty rows, use CSV_IMPORT_OPTIONS to get the name of the column
+    if (OBLIGATORY_OPTS.some(s => CSV_IMPORT_OPTIONS[s] === name)) {
+        for (let row of csv_data) {
+            if (row[selected_option] === ""){
+                alert("The column " + selected_option + " contains empty rows.");
+                return false;
+            }
+        }
+    }
     return is_valid;
 }
 
@@ -324,6 +329,7 @@ function remove_csv_options() {
 
 csv_file_form.addEventListener("change", import_csv);
 document.getElementById("cancel_csv_button").addEventListener("click", function (e) {csv_file_form.value = null; csv_data = null; remove_csv_options();});
+document.getElementById("csv_dialog_close_button").addEventListener("click", function (e) {csv_file_form.value = null; csv_data = null; remove_csv_options();});
 document.getElementById("confirm_csv_import_button").addEventListener("click", function (e) {
     if (csv_data === null || csv_file_form.value === null || csv_file_form.files.length === 0) {
         alert("No file selected.");
@@ -381,6 +387,9 @@ document.getElementById("confirm_csv_import_button").addEventListener("click", f
     //check that the csv_data is not full of empty rows
     if (csv_data.length !== 0 && !csv_data.every(row => {if (Object.keys(row).length === 0) {return true;}return false;})) {
         //add the csv_data to the database
+        if (!check_csv_import(csv_data)) {
+            return;
+        }
         console.log(csv_data);
         let data = JSON.stringify(csv_data);
         let form = new FormData();
@@ -407,6 +416,33 @@ document.getElementById("confirm_csv_import_button").addEventListener("click", f
     let modal = bootstrap.Modal.getInstance(myModalEl)
     modal.hide();
 });
+
+var check_csv_import = function(csv_data) {
+    //check that if the "sent" column has true, there is a "dates" column, and if a row has "sent" as true, it has a date
+    if ("sent" in csv_data[0]) {
+        let any_sent = csv_data.some(row => row["sent"] === true);
+        if (any_sent) {
+            if (!("dates" in csv_data[0])) {
+                alert("There are sent boulders, but no dates column.");
+                return false;
+            }
+            let any_no_date = csv_data.some(row => row["sent"] === true && row["dates"] === "");
+            if (any_no_date) {
+                alert("There are sent boulders without a corresponding date.");
+                return false;
+            }
+        }
+    }
+    //check that all the obligatory columns are present
+    for (let col of OBLIGATORY_OPTS) {
+        if (!csv_data[0].hasOwnProperty(col)) {
+            alert("The column " + col + " is missing.");
+            return false;
+        }
+    }
+
+    return true;
+};
 
 var stringSimilarity = function (str1, str2, substringLength, caseSensitive) {
     if (substringLength === void 0) { substringLength = 2; }
