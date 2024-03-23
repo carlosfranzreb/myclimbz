@@ -44,4 +44,5 @@ def check_request_validity():
 
 if __name__ == "__main__":
     debug = os.environ.get("FLASK_DEBUG", False)
-    app.run(host="0.0.0.0", debug=debug)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port, debug=debug)
