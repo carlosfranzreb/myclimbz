@@ -6,7 +6,7 @@ let HEIGHT = 400 - MARGIN.top - MARGIN.bottom;
 // Define the options for the x-axis
 let x_axis_options = {
     "level": "Grade",
-    "level_felt": "Grade felt",
+    "level_consensus": "Grade - Consensus",
     "area": "Area",
     "sector": "Sector",
     "conditions": "Conditions",
@@ -40,17 +40,8 @@ let x_axis_options = {
  */
 function show_plot() {
 
-    // Add the axis options to the menu
-    for (let key of Object.keys(y_axis_options))
-        document.getElementById("y-axis-select").options.add(
-            new Option(key, key)
-        );
-    for (let [key, value] of Object.entries(x_axis_options)) {
-        document.getElementById("x-axis-select").options.add(
-            new Option(value, key)
-        );
-    }
-    document.getElementById("x-axis-select").value = "level";
+    // Delete the old plot
+    d3.select("#content_div").select("svg").remove();
 
     // append the svg object to the body of the page
     let svg = d3.select("#content_div")

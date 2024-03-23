@@ -21,6 +21,7 @@
     </div>
 </div>
 
+{% if area.created_by == user_id or user_role == 1 %}
 <div class="container">
     <div class="row">
         <div class="col-xs-12 center-block text-center">
@@ -29,6 +30,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <div class="container">
     <h3>Routes</h3>
@@ -42,33 +44,58 @@
                 <th>Sent</th>
                 <th>Actions</th>
             </tr>
+        </thead>
+        <tbody>
+
             {% for sector in area.sectors %}
             {% for route in sector.routes %}
+
+            <!-- Replace boolean "route.sent" with "yes or "no" -->
+            {% if route.sent %}
+            {% set sent = "Yes" %}
+            {% else %}
+            {% set sent = "No" %}
+            {% endif %}
+
+
             {% set onclick = "window.location=\"" + url_for('routes.page_route', route_id=route.id) + "\"" %}
-        </thead>
-        </tbody>
-        <tr>
-            <td onclick={{ onclick }}>{{ route.name }}</td>
-            <td onclick={{ onclick }}>{{ route.sector.name }}</td>
-            <td onclick={{ onclick }}>{{ route.grade.font }} / {{ route.grade.hueco }}</td>
-            <td onclick={{ onclick }}>{{ route.sent }}</td>
-            <td>
-                <a href="{{ url_for('routes.edit_route', route_id=route.id) }}">
-                    {% include 'icons/edit.html' %}
-                </a>
-                <a href="{{ url_for('routes.delete_route', route_id=route.id) }}">
-                    {% include 'icons/delete.html' %}
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-        {% endfor %}
+            {% if sent == "Yes" %}
+            <tr class="table-success">
+                {% else %}
+            <tr>
+                {% endif %}
+                <td onclick={{ onclick }}>{{ route.name }}</td>
+                <td onclick={{ onclick }}>{{ route.sector.name }}</td>
+                <td onclick={{ onclick }}>{{ route.grade.font }} / {{ route.grade.hueco }}</td>
+                <td onclick={{ onclick }}>{{ sent }}</td>
+                <td>
+                    {% if route.created_by == user_id or user_role == 1 %}
+                    <a href="{{ url_for('routes.edit_route', route_id=route.id) }}">
+                        {% include 'icons/edit.html' %}
+                    </a>
+                    <a href="{{ url_for('routes.delete_route', route_id=route.id) }}">
+                        {% include 'icons/delete.html' %}
+                    </a>
+                    {% endif %}
+
+                    {% if not route.tried and not route.is_project %}
+                    <a href="{{ url_for('climbers.add_project', route_id=route.id) }}">
+                        {% include 'icons/is_not_project.html' %}
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('climbers.delete_project', route_id=route.id) }}">
+                        {% include 'icons/is_project.html' %}
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
         </tbody>
     </table>
 </div>
 
 <script>
-    // TODO: this is not working
     window.addEventListener('load', function () {
         window.data_table = new DataTable("#content_table", {
             perPage: 100,

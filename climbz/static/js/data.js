@@ -67,6 +67,19 @@ function start_display(data, grades, session_date) {
         d.last_climbed = formatDate(max_date);
         return d;
     });
+
+    // Set the options of the plot axes
+    for (let key of Object.keys(y_axis_options))
+        document.getElementById("y-axis-select").options.add(
+            new Option(key, key)
+        );
+    for (let [key, value] of Object.entries(x_axis_options)) {
+        document.getElementById("x-axis-select").options.add(
+            new Option(value, key)
+        );
+    }
+    document.getElementById("x-axis-select").value = "level";
+
     display_data();
 }
 
@@ -75,14 +88,14 @@ function display_data() {
 
     // Filter the data according to the active filters
     DISPLAYED_DATA = filter_data();
-    
+
     // Remove the previous table or plot
     d3.select("#content_div").selectAll("*").remove();
-    
+
     // hide/show plot-axes
     let plot_axes = document.getElementById("plot-axes");
     plot_axes.style.display = DISPLAY_FORM == "plot" ? "block" : "none";
-    
+
     // Display the data
     if (DISPLAY_FORM == "table")
         show_table();
@@ -90,7 +103,7 @@ function display_data() {
         show_plot();
 }
 
-function create_filter(id){
+function create_filter(id) {
     window.filter_button = new FilterWidget(id, 50);
 }
 

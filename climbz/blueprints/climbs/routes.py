@@ -6,11 +6,11 @@ from flask import (
 )
 
 from climbz.ner.entities_to_objects import get_route_from_entities
-from climbz.models import Climb, Session, Sector
+from climbz.models import Climb, Session, Sector, Opinion
 from climbz.forms import ClimbForm, RouteForm
 from climbz import db
 from climbz.ner.tracking import dump_predictions
-from climbz.blueprints.render import render
+from climbz.blueprints.utils import render
 
 
 climbs = Blueprint("climbs", __name__)
@@ -18,29 +18,28 @@ climbs = Blueprint("climbs", __name__)
 
 @climbs.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
-    # define the grade scale
     entities = flask_session.get("entities", dict())
-    grade_scale = "font"
-    for field in ["grade", "grade_felt"]:
-        if field in entities:
-            grade_scale = "hueco" if entities[field][0] == "V" else "font"
-            break
 
     # create forms and add choices
     session = Session.query.get(flask_session["session_id"])
-    climb_form = None if session.is_project_search else ClimbForm()
-    route_form = RouteForm.create_empty(grade_scale=grade_scale)
+    route_form = RouteForm.create_empty()
+    climb_form = ClimbForm() if not session.is_project_search else None
 
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
-        invalid_climb = not climb_form.validate() if climb_form is not None else False
+        route_name = route_form.name.data
+        invalid_climb = (
+            not climb_form.validate(route_name)
+            if not session.is_project_search
+            else False
+        )
         if not route_form.validate() or invalid_climb:
             flask_session["error"] = route_form.errors or climb_form.errors
             return render(
                 "add_climb.html",
                 title="Add climb",
-                climb_form=climb_form,
                 route_form=route_form,
+                climb_form=climb_form,
             )
 
         # create new sector and new route if necessary
@@ -51,51 +50,54 @@ def add_climb() -> str:
             if "predictions" in flask_session:
                 flask_session["predictions"]["sector_id"] = sector.id
 
-        route = route_form.get_route_from_climb_form(sector)
+        route = route_form.get_object(sector)
         if route is not None and route.id is None:
             db.session.add(route)
             db.session.commit()
             if "predictions" in flask_session:
                 flask_session["predictions"]["route_id"] = route.id
 
-        if flask_session.get("project_search", False) is True:
+        if session.is_project_search:
             if "project_ids" not in flask_session:
                 flask_session["project_ids"] = list()
             flask_session["project_ids"].append(route.id)
 
-        # create climb if this is not a project
-        if flask_session.get("project_search", False) is False:
-            climb = Climb(
-                **{
-                    "n_attempts": climb_form.n_attempts.data,
-                    "sent": climb_form.sent.data,
-                    "route_id": route.id if route is not None else None,
-                    "session_id": flask_session["session_id"],
-                }
-            )
+        # add as project or create climb
+        if session.is_project_search or climb_form.is_project.data:
+            session.climber.projects.append(route)
+            db.session.commit()
+        else:
+            climb = climb_form.get_object(route)
             db.session.add(climb)
             db.session.commit()
             if "predictions" in flask_session:
                 flask_session["predictions"]["climb_id"] = climb.id
                 dump_predictions()
 
-        return redirect("/")
+        # if the user wants to add an opinion, redirect to the opinion form
+        if climb_form.add_opinion.data is True:
+            opinion = Opinion.query.filter_by(
+                climber_id=session.climber_id, route_id=route.id
+            ).first()
+            if opinion is not None:
+                return redirect(f"/edit_opinion/{opinion.id}")
+            else:
+                return redirect(f"/add_opinion/{session.climber_id}/{route.id}")
+        else:
+            return redirect("/")
 
-    # GET: a recording was uploaded => create forms
-    if flask_session.get("project_search", False) is True:
-        climb_form = None
-    else:
-        climb_form = ClimbForm(
-            n_attempts=entities.get("n_attempts", None),
-            sent=entities.get("sent", False),
-        )
-
+    # GET: the climber wants to add a route (+climb) => create forms
+    # create the route form
     route = get_route_from_entities(entities, session.area_id)
     if route.id is None:
-        route_form = RouteForm.create_from_entities(entities, grade_scale)
+        route_form = RouteForm.create_from_entities(entities)
     else:
-        route_form = RouteForm.create_empty(grade_scale)
+        route_form = RouteForm.create_empty()
         route_form.name.data = route.name
+
+    # create the climb form if needed
+    if session.is_project_search:
+        climb_form = None
 
     # if no sector was found, add the last sector of the current session if possible
     if route.sector_id is None and flask_session.get("session_id", False) > 0:
@@ -131,19 +133,15 @@ def edit_climb(climb_id: int) -> str:
     if request.method == "POST":
         climb_form = ClimbForm()
         # remove the is_project field from the form
-        if not climb_form.validate():
+        if not climb_form.validate(climb.route):
             flask_session["error"] = climb_form.errors
             return render("edit_climb.html", title="Edit climb", climb_form=climb_form)
-        climb.sent = climb_form.sent.data
-        climb.n_attempts = climb_form.n_attempts.data
+        climb = climb_form.get_edited_climb(climb_id)
         db.session.commit()
-        return redirect(f"/session/{climb.session_id}")
+        return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit a climb
-    climb_form = ClimbForm(
-        n_attempts=climb.n_attempts,
-        sent=climb.sent,
-    )
+    climb_form = ClimbForm.create_from_object(climb)
     return render(
         "add_climb.html",
         title="Edit climb",

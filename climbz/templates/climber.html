@@ -1,0 +1,34 @@
+{% extends "main.html" %}
+{% block content %}
+
+<!-- Display the climber's information -->
+<h2>{{ climber.name }}</h2>
+
+<!-- Display the climber's sessions -->
+<div class="container">
+    <p>
+        Birthdate: {{ climber.birthdate }} <br>
+        Started climbing in {{ climber.year_started_climbing }}
+    </p>
+    <p>
+        Height: {{ climber.height }} m <br>
+        Weight: {{ climber.weight }} kg <br>
+        Ape index: {{ climber.ape_index }} cm <br>
+    </p>
+    <p>
+        Highest grade: {{ climber.highest_grade_str }} <br>
+        Number of sends: {{ climber.n_sends }} <br>
+        Favorite areas: {{ climber.favorite_areas|join(", ") }}
+    </p>
+    <p>
+        Created {{ climber.areas|length }} area and {{ climber.routes|length }} routes. <br>
+        Recorded {{ climber.sessions|length }} sessions, {{ climber.climbs|length }} climbs and {{
+        climber.opinions|length }} opinions.
+    </p>
+</div>
+
+
+
+
+
+{% endblock content %}
