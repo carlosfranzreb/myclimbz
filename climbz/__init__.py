@@ -17,10 +17,12 @@ login_manager.login_message_category = "info"
 def create_app():
     app = Flask(__name__)
     bcrypt.init_app(app)
-    app.config["SECRET_KEY"] = os.environ.get("CLIMBZ_SECRET_KEY")
+    app.config["SECRET_KEY"] = os.urandom(24).hex()
     CSRFProtect(app)
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("CLIMBZ_DB_URI")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+        "CLIMBZ_DB_URI", "sqlite:///prod.db"
+    )
     db.init_app(app)
     login_manager.init_app(app)
 
