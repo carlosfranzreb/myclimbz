@@ -1,6 +1,7 @@
 # web server
-gunicorn==20.1.0
-flask==2.2.5
+gunicorn==21.2
+flask==3.0
+Werkzeug==3.0.1
 
 # for the app
 Flask-SQLAlchemy==3.1.1 
@@ -9,17 +10,3 @@ flask_login==0.6.3
 flask_bcrypt==1.0.1
 python-dateutil==2.9
 text2num==2.5.0
-
-
-# for testing
-pytest==7.4.3
-selenium==4.16.0
-beautifulsoup4==4.12.2
-
-# for the NER model
-torch==2.0.1
-pytorch_lightning==2.0.6
-transformers==4.31.0
-
-# for the ASR model
-openai-whisper
