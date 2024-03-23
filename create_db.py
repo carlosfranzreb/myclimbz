@@ -5,6 +5,7 @@ Script to create the database and populate it with testing data.
 from argparse import ArgumentParser
 from datetime import datetime
 import random
+import os
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import generate_password_hash
@@ -201,7 +202,11 @@ if __name__ == "__main__":
         db_name = f"test_{args.n_routes}"
     else:
         db_name = "prod"
-    app = create_app(db_name)
+
+    os.environ["CLIMBZ_DB_URI"] = f"sqlite:///{db_name}.db"
+    os.environ["CLIMBZ_SECRET_KEY"] = os.urandom(24).hex()
+    app = create_app()
+
     with app.app_context():
         db.create_all()
         for rock_type in ROCKS:
