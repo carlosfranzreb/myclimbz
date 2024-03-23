@@ -4,8 +4,9 @@ services:
   web:
     build: .
     command: python run.py
-    # volumes:
-    #   - ./climbz/:/usr/src/app/
+    volumes:
+      - ./climbz/:/usr/src/climbz
+      - ./instance:/usr/src/instance
     ports:
       - 5000:5000
     env_file:
