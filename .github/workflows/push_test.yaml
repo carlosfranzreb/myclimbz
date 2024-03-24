@@ -1,15 +1,9 @@
 #
 name: Create and publish a Docker image
 
-# on:
-#   release:
-#     types: ["published"]
-
-# for development purposes, we will use push event
 on:
-  push:
-    branches:
-      - deploy
+  release:
+    types: ["published"]
 
 # Defines two custom environment variables for the workflow. These are used for the
 # Container registry domain, and a name for the Docker image that this workflow builds.
