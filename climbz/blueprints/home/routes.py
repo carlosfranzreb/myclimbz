@@ -15,7 +15,7 @@ from climbz.models import Grade, Climber
 from climbz.blueprints.utils import render
 
 
-ASR_MODEL = whisper.load_model("medium")
+ASR_MODEL = whisper.load_model("tiny")
 NER_MODEL = ClimbsModel.load_from_checkpoint(
     "climbz/ner/checkpoints/ner-0.ckpt", map_location="cpu"
 )

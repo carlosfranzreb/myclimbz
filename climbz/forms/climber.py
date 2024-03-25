@@ -6,10 +6,23 @@ from wtforms import (
     SubmitField,
     IntegerField,
     SelectField,
+    DateField,
 )
 from wtforms.validators import Optional
 
 from climbz.models import Climber
+
+
+FIELDS = [
+    "email",
+    "name",
+    "birthdate",
+    "year_started_climbing",
+    "weight",
+    "height",
+    "ape_index",
+    "grade_scale",
+]
 
 
 class ClimberForm(FlaskForm):
@@ -20,7 +33,7 @@ class ClimberForm(FlaskForm):
 
     # personal information
     name = StringField("Name")
-    birthdate = StringField("Birthdate", validators=[Optional()])
+    birthdate = DateField("Birthdate", validators=[Optional()])
     year_started_climbing = IntegerField("Years climbing", validators=[Optional()])
     weight = IntegerField("Weight (kg)", validators=[Optional()])
     height = IntegerField("Height (cm)", validators=[Optional()])
@@ -37,31 +50,13 @@ class ClimberForm(FlaskForm):
     def create_from_obj(cls, climber) -> ClimberForm:
         """Create the form with data from the Climber object."""
         form = cls()
-        for field in [
-            "email",
-            "name",
-            "birthdate",
-            "year_started_climbing",
-            "weight",
-            "height",
-            "ape_index",
-            "grade_scale",
-        ]:
+        for field in FIELDS:
             getattr(form, field).data = getattr(climber, field)
         return form
 
     def get_edited_obj(self, climber: Climber) -> Climber:
         """Edit the climber object with the data from the form."""
-        for field in [
-            "email",
-            "name",
-            "birthdate",
-            "year_started_climbing",
-            "weight",
-            "height",
-            "ape_index",
-            "grade_scale",
-        ]:
+        for field in FIELDS:
             form_data = getattr(self, field).data
             if form_data == "":
                 form_data = None

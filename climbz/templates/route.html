@@ -2,159 +2,175 @@
 {% block content %}
 
 <div class="container">
-    <div class="row">
-        <div class="col-4 offset-md-2">
-            <div class="col-xs-12 center-block text-center">
-                <h4>{{ route.name }}</h4>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">In {{ route.sector.name }}, {{
-                    route.sector.area.name }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">Height: {{ route.height }} m</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">Inclination: {{ route.inclination }} °</div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">
-                    Success rate: {{ route.n_sends }} / {{ route.n_climbers }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">Grade: {{ route.consensus_grade_str }}</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">Landing: {{ route.landing }} / 5</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">Landing: {{ route.rating }} / 5</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">Cruxes: {{ route.cruxes|join(", ") }}</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% if route.created_by == user_id or user_role == 1 %}
-<div class="container">
     <div class="col-xs-12 center-block text-center">
-        <a href="{{ url_for('routes.edit_route', route_id=route.id) }}" class="btn btn-primary">Edit</a>
-        <a href="{{ url_for('routes.delete_route', route_id=route.id) }}" class="btn btn-danger">Delete</a>
-    </div>
-</div>
-{% endif %}
-
-<div class="container">
-    <h3>My Sessions</h3>
-
-    {% if route.climbs|selectattr("session.climber_id", "equalto", user_id)|list|length > 0 %}
-    <table class="table table-striped">
-        <tr>
-            <th>Date</th>
-            <th>Conditions</th>
-            <th># Attempts</th>
-            <th>Sent</th>
-            <th>Actions</th>
-        </tr>
-        {% for climb in route.climbs if climb.session.climber_id == user_id %}
-
-        {% set onclick = "window.location=\"" + url_for('sessions.page_session', session_id=climb.session.id) + "\"" %}
-        <tr>
-            <td onclick={{ onclick }}>{{ climb.session.date }}</td>
-            <td onclick={{ onclick }}>{{ climb.session.conditions }}</td>
-            <td onclick={{ onclick }}>{{ climb.n_attempts }}</td>
-            <td onclick={{ onclick }}>{{ climb.sent }}</td>
-            <td>
-                <a href="{{ url_for('climbs.edit_climb', climb_id=climb.id) }}">
-                    {% include 'icons/edit.html' %}
-                </a>
-                <a href="{{ url_for('climbs.delete_climb', climb_id=climb.id) }}">
-                    {% include 'icons/delete.html' %}
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-    <div class="col-xs-12">
-        <p>No sessions yet</p>
-        {% if route.is_project %}
-        <a href="{{ url_for('climbers.add_project', route_id=route.id) }}" class="btn btn-success">Save as project</a>
-        {% else %}
-        <a href="{{ url_for('climbers.delete_project', route_id=route.id) }}" class="btn btn-danger">Remove from
-            projects</a>
+        <h4>{{ route.name }}</h4>
+        {% if route.comment %}
+        <p>{{ route.comment }}</p>
+        {% endif %}
+        {% if route.link %}
+        <a href="{{ route.link }}">Link</a>
         {% endif %}
     </div>
-    {% endif %}
-</div>
 
-<div class="container">
-    <h3>My opinion</h3>
-    {% if route.opinions|selectattr("climber_id", "equalto", user_id)|list|length > 0 %}
-    {% for opinion in route.opinions if opinion.climber_id == user_id %}
-    <a href="{{ url_for('opinions.edit_opinion', opinion_id=opinion.id) }}" class="btn btn-primary">Edit</a>
-    <a href="{{ url_for('opinions.delete_opinion', opinion_id=opinion.id) }}" class="btn btn-danger">Delete</a>
-    <div class="card mb-3">
-        <div class="card-header">
-            <h5 class="card-title">{{ opinion.climber.name }}</h5>
-        </div>
-        <div class="card-body">
-            <p class="card-body">
-                Grade: {{ opinion.grade.font }} / {{ opinion.grade.hueco }} <br>
-                Landing: {{ opinion.landing }} / 5 <br>
-                Rating: {{ opinion.rating }} / 5 <br>
-                Cruxes: {{ opinion.cruxes|map(attribute="name")|join(", ") }} <br>
-                Comment: {{ opinion.comment }}
-            </p>
+    <div class="container">
+        <div class="row">
+            <div class="col-4 offset-md-2">
+                <div class="row">
+                    <div class="col-xs-12 center-block text-center">In {{ route.sector.name }}, {{
+                        route.sector.area.name }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 center-block text-center">Height: {{ route.height }} m</div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 center-block text-center">Inclination: {{ route.inclination }} °</div>
+                </div>
+                <div class="row"> <!-- Replace the coordinates with a link to GMaps -->
+                    <div class="col-xs-12 center-block text-center">Latitude: {{ route.latitude }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 center-block text-center">Longitude: {{ route.longitude }}</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="row">
+                    <div class="col-xs-12 center-block text-center">
+                        Success rate: {{ route.n_sends }} / {{ route.n_climbers }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 center-block text-center">Grade: {{ route.consensus_grade_str }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 center-block text-center">Landing: {{ route.landing }} / 5</div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 center-block text-center">Landing: {{ route.rating }} / 5</div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 center-block text-center">Cruxes: {{ route.cruxes|join(", ") }}</div>
+                </div>
+            </div>
         </div>
     </div>
-    {% endfor %}
-    {% else %}
-    <div class="col-xs-12">
-        {% if route.sent %}
-        <p>No opinion yet</p>
-        <a href="{{ url_for('opinions.add_opinion', climber_id=user_id, route_id=route.id) }}"
-            class="btn btn-success">Add</a>
+
+    {% if route.created_by == user_id or user_role == 1 %}
+    <div class="container">
+        <div class="col-xs-12 center-block text-center">
+            <a href="{{ url_for('routes.edit_route', route_id=route.id) }}" class="btn btn-primary">Edit</a>
+            <a href="{{ url_for('routes.delete_route', route_id=route.id) }}" class="btn btn-danger">Delete</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="container">
+        <h3>My Sessions</h3>
+
+        {% if route.climbs|selectattr("session.climber_id", "equalto", user_id)|list|length > 0 %}
+        <table class="table table-striped">
+            <tr>
+                <th>Date</th>
+                <th>Conditions</th>
+                <th># Attempts</th>
+                <th>Sent</th>
+                <th>Actions</th>
+            </tr>
+            {% for climb in route.climbs if climb.session.climber_id == user_id %}
+
+            {% set onclick = "window.location=\"" + url_for('sessions.page_session', session_id=climb.session.id) + "\""
+            %}
+            <tr>
+                <td onclick={{ onclick }}>{{ climb.session.date }}</td>
+                <td onclick={{ onclick }}>{{ climb.session.conditions }}</td>
+                <td onclick={{ onclick }}>{{ climb.n_attempts }}</td>
+                <td onclick={{ onclick }}>{{ climb.sent }}</td>
+                <td>
+                    <a href="{{ url_for('climbs.edit_climb', climb_id=climb.id) }}">
+                        {% include 'icons/edit.html' %}
+                    </a>
+                    <a href="{{ url_for('climbs.delete_climb', climb_id=climb.id) }}">
+                        {% include 'icons/delete.html' %}
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
         {% else %}
-        <p>You need to send the route to add an opinion</p>
+        <div class="col-xs-12">
+            <p>No sessions yet</p>
+            {% if route.is_project %}
+            <a href="{{ url_for('climbers.add_project', route_id=route.id) }}" class="btn btn-success">Save as
+                project</a>
+            {% else %}
+            <a href="{{ url_for('climbers.delete_project', route_id=route.id) }}" class="btn btn-danger">Remove from
+                projects</a>
+            {% endif %}
+        </div>
         {% endif %}
     </div>
-    {% endif %}
-</div>
 
-<div class="container">
-    <h3>Other opinions</h3>
-    {% if route.opinions|rejectattr("climber_id", "equalto", user_id)|list|length > 0 %}
-    {% for opinion in route.opinions if opinion.climber_id != user_id %}
-    <div class="card mb-3">
-        <div class="card-header">
-            <a href="{{ url_for('climbers.view_climber', climber_id=opinion.climber.id) }}">
+    <div class="container">
+        <h3>My opinion</h3>
+        {% if route.opinions|selectattr("climber_id", "equalto", user_id)|list|length > 0 %}
+        {% for opinion in route.opinions if opinion.climber_id == user_id %}
+        <a href="{{ url_for('opinions.edit_opinion', opinion_id=opinion.id) }}" class="btn btn-primary">Edit</a>
+        <a href="{{ url_for('opinions.delete_opinion', opinion_id=opinion.id) }}" class="btn btn-danger">Delete</a>
+        <div class="card mb-3">
+            <div class="card-header">
                 <h5 class="card-title">{{ opinion.climber.name }}</h5>
-            </a>
+            </div>
+            <div class="card-body">
+                <p class="card-body">
+                    Grade: {{ opinion.grade.font }} / {{ opinion.grade.hueco }} <br>
+                    Landing: {{ opinion.landing }} / 5 <br>
+                    Rating: {{ opinion.rating }} / 5 <br>
+                    Cruxes: {{ opinion.cruxes|map(attribute="name")|join(", ") }} <br>
+                    Comment: {{ opinion.comment }}
+                </p>
+            </div>
         </div>
-        <div class="card-body">
-            <p class="card-body">
-                Grade: {{ opinion.grade.font }} / {{ opinion.grade.hueco }} <br>
-                Landing: {{ opinion.landing }} / 5 <br>
-                Rating: {{ opinion.rating }} / 5 <br>
-                Cruxes: {{ opinion.cruxes|map(attribute="name")|join(", ") }} <br>
-                Comment: {{ opinion.comment }}
-            </p>
+        {% endfor %}
+        {% else %}
+        <div class="col-xs-12">
+            {% if route.sent %}
+            <p>No opinion yet</p>
+            <a href="{{ url_for('opinions.add_opinion', climber_id=user_id, route_id=route.id) }}"
+                class="btn btn-success">Add</a>
+            {% else %}
+            <p>You need to send the route to add an opinion</p>
+            {% endif %}
         </div>
+        {% endif %}
     </div>
-    {% endfor %}
-    {% else %}
-    <div class="col-xs-12">
 
-        <p>No opinions yet</p>
+    <div class="container">
+        <h3>Other opinions</h3>
+        {% if route.opinions|rejectattr("climber_id", "equalto", user_id)|list|length > 0 %}
+        {% for opinion in route.opinions if opinion.climber_id != user_id %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <a href="{{ url_for('climbers.climber', climber_id=opinion.climber.id) }}">
+                    <h5 class="card-title">{{ opinion.climber.name }}</h5>
+                </a>
+            </div>
+            <div class="card-body">
+                <p class="card-body">
+                    Grade: {{ opinion.grade.font }} / {{ opinion.grade.hueco }} <br>
+                    Landing: {{ opinion.landing }} / 5 <br>
+                    Rating: {{ opinion.rating }} / 5 <br>
+                    Cruxes: {{ opinion.cruxes|map(attribute="name")|join(", ") }} <br>
+                    Comment: {{ opinion.comment }}
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="col-xs-12">
+
+            <p>No opinions yet</p>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
-</div>
 
-{% endblock content %}
+    {% endblock content %}

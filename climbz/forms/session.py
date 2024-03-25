@@ -42,7 +42,7 @@ class SessionForm(FlaskForm):
         """
         form = cls()
         form.add_choices()
-        for field in ["date", "conditions", "area", "is_project_search"]:
+        for field in ["date", "conditions", "area", "is_project_search", "comment"]:
             if field in entities:
                 getattr(form, field).data = entities[field]
 
@@ -72,6 +72,7 @@ class SessionForm(FlaskForm):
             "conditions": session.conditions,
             "area": session.area.name if session.area is not None else None,
             "is_project_search": session.is_project_search,
+            "comment": session.comment,
         }
         if session.area is not None and session.area.rock_type is not None:
             entities["rock"] = session.area.rock_type.name

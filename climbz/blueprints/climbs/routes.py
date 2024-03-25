@@ -18,7 +18,6 @@ climbs = Blueprint("climbs", __name__)
 
 @climbs.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
-    # TODO: error is raised when a new route is added as a project
     entities = flask_session.get("entities", dict())
 
     # create forms and add choices
@@ -134,19 +133,15 @@ def edit_climb(climb_id: int) -> str:
     if request.method == "POST":
         climb_form = ClimbForm()
         # remove the is_project field from the form
-        if not climb_form.validate():
+        if not climb_form.validate(climb.route):
             flask_session["error"] = climb_form.errors
             return render("edit_climb.html", title="Edit climb", climb_form=climb_form)
-        climb.sent = climb_form.sent.data
-        climb.n_attempts = climb_form.n_attempts.data
+        climb = climb_form.get_edited_climb(climb_id)
         db.session.commit()
         return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit a climb
-    climb_form = ClimbForm(
-        n_attempts=climb.n_attempts,
-        sent=climb.sent,
-    )
+    climb_form = ClimbForm.create_from_object(climb)
     return render(
         "add_climb.html",
         title="Edit climb",
