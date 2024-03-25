@@ -55,10 +55,9 @@ def add_session() -> str:
         if area is not None and area.id is None:
             db.session.add(area)
             db.session.commit()
-        area_id = area.id if area is not None else None
 
         # create session
-        session = session_form.get_object(area_id)
+        session = session_form.get_object(area.id)
         db.session.add(session)
         db.session.commit()
         flask_session["session_id"] = session.id

@@ -6,6 +6,7 @@ from wtforms import (
     SubmitField,
     IntegerField,
     SelectField,
+    DateField,
 )
 from wtforms.validators import Optional
 
@@ -32,7 +33,7 @@ class ClimberForm(FlaskForm):
 
     # personal information
     name = StringField("Name")
-    birthdate = StringField("Birthdate", validators=[Optional()])
+    birthdate = DateField("Birthdate", validators=[Optional()])
     year_started_climbing = IntegerField("Years climbing", validators=[Optional()])
     weight = IntegerField("Weight (kg)", validators=[Optional()])
     height = IntegerField("Height (cm)", validators=[Optional()])

@@ -91,9 +91,11 @@ class SessionForm(FlaskForm):
             if area is None:
                 if self.rock_type.data != "":
                     rock_type = RockType.query.get(self.rock_type.data)
-                    area = Area(name=area_name, rock_type=rock_type)
+                    area = Area(
+                        name=area_name, rock_type=rock_type, created_by=current_user.id
+                    )
                 else:
-                    area = Area(name=area_name)
+                    area = Area(name=area_name, created_by=current_user.id)
         return area
 
     def get_object(self, area_id: int, obj: Session = None) -> Session:
