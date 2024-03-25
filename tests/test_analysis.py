@@ -78,55 +78,37 @@ def test_climbs_per_area(driver, db_session) -> None:
     the 'Climbs per Area' numbers when the "Include unsent boulders" checkbox is
     checked.
     """
-    climber_id = 1
 
-    # get all the routes
-    areas = db_session.execute(text("SELECT id, name FROM area")).fetchall()
+    sql_query = text(
+        """
+        SELECT 
+            area.name AS area_name,
+            route.id AS route_id,
+            climb.sent AS climb_sent
+        FROM 
+            area 
+        JOIN 
+            sector ON area.id = sector.area_id 
+        JOIN 
+            route ON sector.id = route.sector_id 
+        JOIN 
+            climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
+        """
+    )
+    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
 
-    area_data = dict()
-    for area in areas:
-
-        # gather the sectors and routes in the area
-        sector_ids = [
-            res[0]
-            for res in db_session.execute(
-                text(f"SELECT id FROM sector WHERE area_id = {area[0]}")
-            ).fetchall()
-        ]
-        route_ids = list()
-        for sector_id in sector_ids:
-            route_ids.extend(
-                [
-                    res[0]
-                    for res in db_session.execute(
-                        text(f"SELECT id FROM route WHERE sector_id = {sector_id}")
-                    ).fetchall()
-                ]
-            )
-
-        # get the climbs that are tried and sent by the climber
-        area_routes, area_sent_routes = 0, 0
-        for route_id in route_ids:
-            climbs = db_session.execute(
-                text(
-                    f"""
-                    SELECT id, sent
-                    FROM climb 
-                    WHERE route_id = {route_id} AND climber_id = {climber_id}
-                    """
-                )
-            ).fetchall()
-            if len(climbs) > 0:
-                area_routes += 1
-            for climb in climbs:
-                if climb[1]:
-                    area_sent_routes += 1
-                    break
+    unique_areas = set(result[0] for result in results)
+    area_data = {area: list() for area in unique_areas}
+    for area in unique_areas:
+        n_routes = len(set(result[1] for result in results if result[0] == area))
+        n_sent_routes = len(
+            set(result[1] for result in results if result[0] == area and result[2])
+        )
 
         area_data[area[1]] = {
-            "n_routes": area_routes,
-            "n_sent_routes": area_sent_routes,
-            "success_rate": area_sent_routes / area_routes if area_routes > 0 else 0,
+            "n_routes": n_routes,
+            "n_sent_routes": n_sent_routes,
+            "success_rate": n_sent_routes / n_routes if n_routes > 0 else 0,
         }
 
     plotted_data = get_plotted_data(driver, "Area", "Climbs: total sent")
@@ -137,12 +119,12 @@ def test_climbs_per_area(driver, db_session) -> None:
     assert [area for area, _ in plotted_data] == sorted(area_names)
 
     plotted_data = get_plotted_data(driver, "Area", "Climbs: success rate")
-    assert len(plotted_data) == len(areas)
+    assert len(plotted_data) == len(area_data)
     for area, success_rate_plotted in plotted_data:
         assert success_rate_plotted == area_data[area]["success_rate"]
 
     plotted_data = get_plotted_data(driver, "Area", "Climbs: total tried")
-    assert len(plotted_data) == len(areas)
+    assert len(plotted_data) == len(area_data)
     for area, n_routes_plotted in plotted_data:
         assert n_routes_plotted == area_data[area]["n_routes"]
 
@@ -176,8 +158,6 @@ def test_attempts_per_area(driver, db_session) -> None:
             climb.id IS NOT NULL
         """
     )
-
-    # Execute the merged SQL query
     results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
 
     unique_areas = set(result[0] for result in results)
