@@ -1,3 +1,6 @@
+// Used for testing the plot
+let PLOTTED_DATA = null;
+
 // set the dimensions and margins of the graph
 let MARGIN = { top: 30, right: 30, bottom: 70, left: 60 };
 let WIDTH = 460 - MARGIN.left - MARGIN.right;
@@ -36,7 +39,7 @@ let x_axis_options = {
  * 9. If the map contains lists of numbers as keys, replace them with their averages.
  * 10. Sort the data based on the x-axis key.
  * 11. Plot the data with D3.js.
- * 12. Store the plotted data in the PLOTTED_DATA global variable.
+ * 12. Store the plotted data in the DISPLAYED_DATA global variable.
  */
 function show_plot() {
 
@@ -86,6 +89,7 @@ function show_plot() {
         unsorted_out = d3.group(this_data, d => d[x_axis]);
 
     // Compute the data to be plotted according to the selected y-axis option
+    console.log(unsorted_out);
     unsorted_out = y_axis_options[y_axis]["data"](unsorted_out);
 
     // Sort the data
@@ -133,6 +137,8 @@ function show_plot() {
         .attr("width", x.bandwidth())
         .attr("height", function (d) { return HEIGHT - y(d[1]) })
         .attr("fill", "#69b3a2");
+
+    PLOTTED_DATA = out;
 }
 
 
