@@ -107,7 +107,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
     db.session.add(models.Sector(name="A1_S1", area_id=1, created_by=1))
     db.session.add(models.Sector(name="A1_S2", area_id=1, created_by=2))
     db.session.add(models.Sector(name="A2_S1", area_id=2, created_by=2))
-    sector_ids = list(range(1, 4))
+    sector_ids = [1, 2, 3]
 
     # create 4 sessions: 3 in A1, 1 in A2
     db.session.add(
@@ -132,7 +132,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
             if route_idx > n_routes:
                 break
             sector_id = random.choice(sector_ids)
-            area_id = 1 if sector_id < 3 else 2
+            area_id = 1 if sector_id < 2 else 2
             db.session.add(
                 models.Route(
                     name=name.strip(),
