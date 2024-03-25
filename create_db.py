@@ -119,7 +119,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
         )
     )
     db.session.add(
-        models.Session(date=datetime(2023, 3, 7), conditions=1, area_id=1, climber_id=1)
+        models.Session(date=datetime(2023, 3, 7), conditions=1, area_id=2, climber_id=1)
     )
     db.session.add(
         models.Session(
@@ -145,7 +145,9 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
             )
             # with p=0.6, add climb to the session
             if random.random() < 0.6:
-                session_id = random.randint(1, 3) if area_id == 1 else 4
+                session_id = random.choice([1, 2])
+                if area_id == 2:
+                    session_id += 2
                 sent = bool(random.randint(0, 1))
                 climber_id = 1 if session_id < 4 else 2
                 db.session.add(

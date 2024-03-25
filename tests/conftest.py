@@ -18,13 +18,14 @@ def db_session() -> Session:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def docker():
+def driver():
     """Starts the Docker container and terminates it after the test."""
     try:
         os.system("docker compose up -d")
-        login()
-        yield
+        driver = login()
+        yield driver
     finally:
+        driver.quit()
         os.system("docker compose down")
 
 
@@ -41,4 +42,5 @@ def login():
     driver.find_element(By.ID, "password").send_keys("123")
     driver.find_element(By.XPATH, "//input[@type='submit']").click()
     WebDriverWait(driver, 10).until(EC.title_is("Routes"))
-    driver.quit()
+
+    return driver
