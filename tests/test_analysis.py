@@ -14,11 +14,11 @@ Useful commands when implementing tests:
 
 from time import sleep
 
+from datetime import datetime
+
 import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from sqlalchemy import text
 
 
@@ -147,47 +147,79 @@ def test_climbs_per_area(driver, db_session) -> None:
         assert n_routes_plotted == area_data[area]["n_routes"]
 
 
-# def test_attempts_per_area(app) -> None:
-#     """
-#     Ensures that the correct data is plotted for all four 'Attempts per Area' graphs: with
-#     total, avg. min. and max. values. Here we want to know how many attempts it took to send
-#     a route. Routes that have not been sent are not included in the graph.
-#     """
-#     with app.app_context():
-#         areas = Area.query.all()
-#         n_attempts = dict()
-#         for area in areas:
-#             n_attempts[area.name] = list()
-#             for sector in area.sectors:
-#                 for route in sector.routes:
-#                     if not route.sent:
-#                         continue
-#                     route_attempts = 0
-#                     for climb in route.climbs:
-#                         route_attempts += climb.n_attempts
-#                         if climb.sent:
-#                             break
-#                     n_attempts[area.name].append(route_attempts)
+def test_attempts_per_area(driver, db_session) -> None:
+    """
+    Ensures that the correct data is plotted for all four 'Attempts per Area' graphs: with
+    total, avg. min. and max. values. Here we want to know how many attempts it took to send
+    a route. Routes that have not been sent are not included in the graph.
+    """
+    sql_query = text(
+        """
+        SELECT 
+            area.name AS area_name,
+            route.id AS route_id,
+            climb.id AS climb_id,
+            climb.n_attempts AS climb_attempts,
+            climb.sent AS climb_sent,
+            session.date AS session_date
+        FROM 
+            area 
+        JOIN 
+            sector ON area.id = sector.area_id 
+        JOIN 
+            route ON sector.id = route.sector_id 
+        LEFT JOIN 
+            climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
+        LEFT JOIN 
+            session ON climb.session_id = session.id
+        WHERE
+            climb.id IS NOT NULL
+        """
+    )
 
-#     plotted_data = get_plotted_data("Area", "Attempts: total")
-#     assert len(plotted_data) == len(areas)
-#     for area, n_sent_routes_plotted in plotted_data:
-#         assert n_sent_routes_plotted == sum(n_attempts[area])
+    # Execute the merged SQL query
+    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
 
-#     plotted_data = get_plotted_data("Area", "Attempts: avg.")
-#     assert len(plotted_data) == len(areas)
-#     for area, avg_attempts_plotted in plotted_data:
-#         assert avg_attempts_plotted == sum(n_attempts[area]) / len(n_attempts[area])
+    unique_areas = set(result[0] for result in results)
+    area_data = {area: list() for area in unique_areas}
 
-#     plotted_data = get_plotted_data("Area", "Attempts: min.")
-#     assert len(plotted_data) == len(areas)
-#     for area, min_attempts_plotted in plotted_data:
-#         assert min_attempts_plotted == min(n_attempts[area])
+    for area_name in unique_areas:
+        for route_id in set(result[1] for result in results if result[0] == area_name):
+            area_data[area_name].append(0)
+            climbs = [result for result in results if result[1] == route_id]
 
-#     plotted_data = get_plotted_data("Area", "Attempts: max.")
-#     assert len(plotted_data) == len(areas)
-#     for area, max_attempts_plotted in plotted_data:
-#         assert max_attempts_plotted == max(n_attempts[area])
+            # get the earliest date at which the route was sent
+            min_send_date = datetime.max
+            for climb in climbs:
+                date = datetime.strptime(climb[5], "%Y-%m-%d")
+                if climb[4] and date < min_send_date:
+                    min_send_date = date
+
+            # add the attempts of the climbs that took place before the route was sent (incl.)
+            for climb in climbs:
+                date = datetime.strptime(climb[5], "%Y-%m-%d")
+                if date <= min_send_date:
+                    area_data[area_name][-1] += climb[3]
+
+    plotted_data = get_plotted_data(driver, "Area", "Attempts: total")
+    assert len(plotted_data) == len(area_data)
+    for area, n_sent_routes_plotted in plotted_data:
+        assert n_sent_routes_plotted == sum(area_data[area])
+
+    plotted_data = get_plotted_data("Area", "Attempts: avg.")
+    assert len(plotted_data) == len(area_data)
+    for area, avg_attempts_plotted in plotted_data:
+        assert avg_attempts_plotted == sum(area_data[area]) / len(area_data[area])
+
+    plotted_data = get_plotted_data("Area", "Attempts: min.")
+    assert len(plotted_data) == len(area_data)
+    for area, min_attempts_plotted in plotted_data:
+        assert min_attempts_plotted == min(area_data[area])
+
+    plotted_data = get_plotted_data("Area", "Attempts: max.")
+    assert len(plotted_data) == len(area_data)
+    for area, max_attempts_plotted in plotted_data:
+        assert max_attempts_plotted == max(area_data[area])
 
 
 # def test_grade_per_area(app) -> None:
