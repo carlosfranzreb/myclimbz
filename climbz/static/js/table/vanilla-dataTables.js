@@ -636,7 +636,7 @@
      */
     Columns.prototype.sort = function (column, direction, init) {
 
-        var dt = this.dt;
+        let dt = this.dt;
 
         // Check column is present
         if (dt.hasHeadings && (column < 1 || column > dt.activeHeadings.length)) {
@@ -647,58 +647,100 @@
         
         // Convert to zero-indexed
         column = column - 1;
+
+        let header_name = dt.activeHeadings[column].textContent;
         
-        var dir,
+        let dir,
             rows = dt.data,
             alpha = [],
             numeric = [],
-            a = 0,
-            n = 0,
             th = dt.activeHeadings[column];
 
             column = th.originalCellIndex;
         
-
-        each(rows, function (tr) {
-            var cell = tr.cells[column];
-            var content = cell.hasAttribute('data-content') ? cell.getAttribute('data-content') : cell.data;
-            var num = content.replace(/(\$|\,|\s|%)/g, "");
-
-            if (parseFloat(num) == num && num !== "Infinity") {
-                numeric[n++] = {
-                    value: Number(num),
-                    row: tr
-                };
-            } else {
-                alpha[a++] = {
-                    value: content,
-                    row: tr
-                };
+            let get_entries = function(arr) {
+                each(rows, function (tr) {
+                    let cell = tr.cells[column];
+                    let content = cell.hasAttribute('data-content') ? cell.getAttribute('data-content') : cell.data;
+                    arr.push({
+                        value: content,
+                        row: tr
+                    });
+                });
+                return arr;
             }
-
-        });
-
-        var entries = [];
-        // Sets ascending as default if not specified
-        if (classList.contains(th, "asc")) {
-            entries = numeric.concat(alpha).reverse();
-            dir = "descending";
-            classList.remove(th, "asc");
-            classList.add(th, "desc");
-        }
-        else if (classList.contains(th, "desc")) {
-            entries = alpha.concat(numeric).reverse();
-            dir = "ascending";
-            classList.remove(th, "desc");
-            classList.add(th, "asc");
-        }
-        else{
-            const collator = new Intl.Collator('en', {sensitivity: 'base' })
-            alpha.sort((a, b) => {
-                return collator.compare(a.value, b.value);
-              });
+            
+            let entries = [];
+            // Sets ascending as default if not specified
+            if (classList.contains(th, "asc")) {
+                entries = get_entries(entries).reverse();
+                dir = "descending";
+                classList.remove(th, "asc");
+                classList.add(th, "desc");
+            }
+            else if (classList.contains(th, "desc")) {
+                entries = get_entries(entries).reverse();
+                dir = "ascending";
+                classList.remove(th, "desc");
+                classList.add(th, "asc");
+            }
+            else{
+                each(rows, function (tr) {
+                    let cell = tr.cells[column];
+                    let content = cell.hasAttribute('data-content') ? cell.getAttribute('data-content') : cell.data;
+                    let num = content.replace(/(\$|\,|\s|%)/g, "");
+        
+                    if (parseFloat(num) == num && num !== "Infinity") {
+                        numeric.push({
+                            value: parseFloat(num),
+                            row: tr
+                        });
+                    } else {
+                        alpha.push({
+                            value: content,
+                            row: tr
+                        });
+                    }
+        
+                });
+                // if an input in alpha is a date with format dd/mm/yyyy, sort the array by date
+                if (alpha.length > 0 && alpha[0].value.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+                alpha.sort((a, b) => {
+                    const [dayA, monthA, yearA] = a.value.split('/');
+                    const [dayB, monthB, yearB] = b.value.split('/');
+                    const dateA = new Date(yearA, monthA - 1, dayA);
+                    const dateB = new Date(yearB, monthB - 1, dayB);
+                    return dateA - dateB;
+                });
+            } 
+            else if (header_name.includes("Grade")) {
+                //sort by grade array
+                //set numeric to strings
+                numeric.forEach((entry) => {
+                    entry.value = entry.value.toString();
+                });
+                entries = alpha.concat(numeric);
+                if (entries.length > 0 && entries[0].value.startsWith("V")) {
+                    entries.sort((a, b) => {
+                        return hueco_grades_list.indexOf(a.value) - hueco_grades_list.indexOf(b.value);
+                    });
+                }
+                else {
+                    entries.sort((a, b) => {
+                        return font_grades_list.indexOf(a.value) - font_grades_list.indexOf(b.value);
+                    });
+                }
+            }
+            else {
+                const collator = new Intl.Collator('en', {sensitivity: 'base' })
+                alpha.sort((a, b) => {
+                    return collator.compare(a.value, b.value);
+                });
+            }
             numeric.sort((a,b) => (a.value > b.value) ? 1 : ((b.value > a.value) ? -1 : 0));
-            entries = numeric.concat(alpha);
+            if (entries.length === 0) {
+                entries = alpha.concat(numeric);
+            }
             dir = "ascending";
             classList.add(th, "asc");
         }
@@ -714,7 +756,7 @@
         rows = entries
 
         dt.data = [];
-        var indexes = [];
+        let indexes = [];
 
         each(rows, function (v, i) {
             dt.data.push(v.row);
