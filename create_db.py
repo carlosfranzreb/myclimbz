@@ -1,5 +1,7 @@
 """
 Script to create the database and populate it with testing data.
+TODO: add projects
+TODO: add climbs of both climbers to the same route
 """
 
 from argparse import ArgumentParser
