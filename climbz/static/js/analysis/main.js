@@ -13,10 +13,13 @@ let x_axis_options = {
     "area": "Area",
     "sector": "Sector",
     "conditions": "Conditions",
-    "dates": "Date: month",
+    "dates": "Date: day",
+    "dates_month": "Date: month",
+    "dates_year": "Date: year",
     "height": "Height",
     "inclination": "Inclination",
     "landing": "Landing",
+    "rating": "Rating",
     "sit_start": "Sit start",
     "sent": "Sent",
     "cruxes": "Crux",
@@ -60,7 +63,7 @@ function show_plot() {
     let y_axis = document.getElementById("y-axis-select").value;
 
     // If the data is empty, return without plotting
-    let this_data = DISPLAYED_DATA;
+    let this_data = JSON.parse(JSON.stringify(DISPLAYED_DATA));
     if (this_data.length == 0)
         return;
 
@@ -68,15 +71,25 @@ function show_plot() {
     // Cruxes, dates and conditions are split into unique keys.
     // Dates are grouped by month.
     let unsorted_out = null;
-    if (x_axis == "cruxes" || x_axis == "dates" || x_axis == "conditions") {
-        if (x_axis == "dates")
+    if (x_axis == "cruxes" || x_axis.includes("dates") || x_axis == "conditions") {
+        if (x_axis == "dates_month") {
             this_data = this_data.map(d => {
-                d.dates = d.dates.map(date => date.substring(0, 7));
+                d.dates = d.dates.map(date => date.substring(3, 10));
                 return d;
             });
+            x_axis = "dates";
+        } else if (x_axis == "dates_year") {
+            this_data = this_data.map(d => {
+                d.dates = d.dates.map(date => date.substring(6, 10));
+                return d;
+            });
+            x_axis = "dates";
+        }
         groups = d3.group(this_data, d => d[x_axis]);
         unsorted_out = new Map();
         for (let [key, value] of groups.entries()) {
+            if (key == null)
+                continue;
             for (let crux of key) {
                 if (unsorted_out.has(crux))
                     unsorted_out.set(crux, unsorted_out.get(crux).concat(value));
@@ -88,8 +101,11 @@ function show_plot() {
     else
         unsorted_out = d3.group(this_data, d => d[x_axis]);
 
+    // Remove the null key if it exists
+    if (unsorted_out.has(null))
+        unsorted_out.delete(null);
+
     // Compute the data to be plotted according to the selected y-axis option
-    console.log(unsorted_out);
     unsorted_out = y_axis_options[y_axis]["data"](unsorted_out);
 
     // Sort the data
@@ -98,9 +114,27 @@ function show_plot() {
         out = new Map(Array.from(unsorted_out).sort((a, b) => a[0] - b[0]));
         out = fill_grades(out);
     }
-    else if (isNumeric(Array.from(unsorted_out.keys())[0]))
-        out = new Map(Array.from(unsorted_out).sort((a, b) => parseFloat(a[0]) - parseFloat(b[0])));
-    else
+    else if (isNumeric(Array.from(unsorted_out.keys())[0])) {
+        out = new Map(
+            // Sort the map by the keys
+            Array.from(unsorted_out).sort(
+                (a, b) => parseFloat(a[0]) - parseFloat(b[0])
+            )
+        );
+        // Fill in the missing keys
+        let keys = Array.from(out.keys());
+        let step = keys[1] - keys[0];
+        let first_key = keys[0];
+        let last_key = keys[keys.length - 1];
+        let new_out = new Map();
+        for (let key = first_key; key <= last_key; key += step) {
+            if (out.has(key))
+                new_out.set(key, out.get(key));
+            else
+                new_out.set(key, 0);
+        }
+        out = new_out;
+    } else
         out = new Map(Array.from(unsorted_out).sort());
 
     let x = d3.scaleBand()

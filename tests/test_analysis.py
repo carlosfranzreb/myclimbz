@@ -31,7 +31,7 @@ def get_plotted_data(
     driver: webdriver.Chrome,
     x_axis: str,
     y_axis: str,
-    toggle_grade_scale: bool = False,
+    grade_scale: str = "font",
 ) -> list:
     """
     Returns the plotted data for the given x- and y-axes.
@@ -48,11 +48,12 @@ def get_plotted_data(
 
     # toggle to show plot
     btn = driver.find_element(By.XPATH, "//input[@id='display-form-toggle']")
-    btn.find_element(By.XPATH, "..").click()
-
-    if toggle_grade_scale:
-        btn = driver.find_element(By.XPATH, "//input[@id='grade-scale-toggle']")
+    if not btn.is_selected():
         btn.find_element(By.XPATH, "..").click()
+
+    if grade_scale == "hueco":
+        grade_btn = driver.find_element(By.XPATH, "//input[@id='grade-scale-toggle']")
+        grade_btn.find_element(By.XPATH, "..").click()
 
     x_axis_select = driver.find_element(By.XPATH, "//select[@id='x-axis-select']")
     x_axis_select.click()
@@ -68,6 +69,10 @@ def get_plotted_data(
         sleep(0.5)
         plotted_data = driver.execute_script("return Array.from(PLOTTED_DATA);")
 
+    # set the grade scale back to "font" if it was changed
+    if grade_scale == "hueco":
+        grade_btn.find_element(By.XPATH, "..").click()
+
     return plotted_data
 
 
@@ -81,18 +86,11 @@ def test_climbs_per_area(driver, db_session) -> None:
 
     sql_query = text(
         """
-        SELECT 
-            area.name AS area_name,
-            route.id AS route_id,
-            climb.sent AS climb_sent
-        FROM 
-            area 
-        JOIN 
-            sector ON area.id = sector.area_id 
-        JOIN 
-            route ON sector.id = route.sector_id 
-        JOIN 
-            climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
+        SELECT area.name, route.id, climb.sent
+        FROM area 
+        JOIN sector ON area.id = sector.area_id 
+        JOIN route ON sector.id = route.sector_id 
+        JOIN climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
         """
     )
     results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
@@ -105,7 +103,7 @@ def test_climbs_per_area(driver, db_session) -> None:
             set(result[1] for result in results if result[0] == area and result[2])
         )
 
-        area_data[area[1]] = {
+        area_data[area] = {
             "n_routes": n_routes,
             "n_sent_routes": n_sent_routes,
             "success_rate": n_sent_routes / n_routes if n_routes > 0 else 0,
@@ -138,24 +136,18 @@ def test_attempts_per_area(driver, db_session) -> None:
     sql_query = text(
         """
         SELECT 
-            area.name AS area_name,
-            route.id AS route_id,
-            climb.id AS climb_id,
-            climb.n_attempts AS climb_attempts,
-            climb.sent AS climb_sent,
-            session.date AS session_date
-        FROM 
-            area 
-        JOIN 
-            sector ON area.id = sector.area_id 
-        JOIN 
-            route ON sector.id = route.sector_id 
-        LEFT JOIN 
-            climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
-        LEFT JOIN 
-            session ON climb.session_id = session.id
-        WHERE
-            climb.id IS NOT NULL
+            area.name,
+            route.id,
+            climb.id,
+            climb.n_attempts,
+            climb.sent,
+            session.date
+        FROM area 
+        JOIN sector ON area.id = sector.area_id 
+        JOIN route ON sector.id = route.sector_id 
+        LEFT JOIN climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
+        LEFT JOIN session ON climb.session_id = session.id
+        WHEREclimb.id IS NOT NULL
         """
     )
     results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
@@ -186,120 +178,139 @@ def test_attempts_per_area(driver, db_session) -> None:
     for area, n_sent_routes_plotted in plotted_data:
         assert n_sent_routes_plotted == sum(area_data[area])
 
-    plotted_data = get_plotted_data("Area", "Attempts: avg.")
+    plotted_data = get_plotted_data(driver, "Area", "Attempts: avg.")
     assert len(plotted_data) == len(area_data)
     for area, avg_attempts_plotted in plotted_data:
         assert avg_attempts_plotted == sum(area_data[area]) / len(area_data[area])
 
-    plotted_data = get_plotted_data("Area", "Attempts: min.")
+    plotted_data = get_plotted_data(driver, "Area", "Attempts: min.")
     assert len(plotted_data) == len(area_data)
     for area, min_attempts_plotted in plotted_data:
         assert min_attempts_plotted == min(area_data[area])
 
-    plotted_data = get_plotted_data("Area", "Attempts: max.")
+    plotted_data = get_plotted_data(driver, "Area", "Attempts: max.")
     assert len(plotted_data) == len(area_data)
     for area, max_attempts_plotted in plotted_data:
         assert max_attempts_plotted == max(area_data[area])
 
 
-# def test_grade_per_area(app) -> None:
-#     """Ensures that the correct data is plotted for the 'Avg. Grade per Area' and
-#     'Max. Grade per Area' graphs."""
-#     with app.app_context():
-#         areas = Area.query.all()
-#         area_levels = dict()
-#         for area in areas:
-#             area_levels[area.name] = list()
-#             for sector in area.sectors:
-#                 for route in sector.routes:
-#                     if route.sent:
-#                         area_levels[area.name].append(route.grade.level)
-#     area_grades_avg, area_grades_max = dict(), dict()
-#     for area in areas:
-#         name = area.name
-#         area_grades_avg[name] = sum(area_levels[name]) / len(area_levels[name])
-#         area_grades_max[name] = max(area_levels[name])
+def test_grade_per_area(driver, db_session) -> None:
+    """
+    Ensures that the correct data is plotted for the 'Avg. Grade per Area' and
+    'Max. Grade per Area' graphs.
+    """
 
-#     plotted_data = get_plotted_data("Area", "Grade: avg.")
-#     assert len(plotted_data) == len(areas)
-#     for area, avg_grade_plotted in plotted_data:
-#         assert avg_grade_plotted == area_grades_avg[area]
+    sql_query = text(
+        """
+        SELECT area.name, grade.level
+        FROM area 
+        JOIN sector ON area.id = sector.area_id 
+        JOIN route ON sector.id = route.sector_id 
+        JOINopinion ON opinion.route_id = route.id
+        JOINgrade ON opinion.grade_id = grade.id
+        WHEREopinion.grade_id NOT NULL AND opinion.climber_id=:climber_id
+        """
+    )
+    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
 
-#     plotted_data = get_plotted_data("Area", "Grade: max.")
-#     assert len(plotted_data) == len(areas)
-#     for area, max_grade_plotted in plotted_data:
-#         assert max_grade_plotted == area_grades_max[area]
+    unique_areas = set(result[0] for result in results)
+    area_data = {area: list() for area in unique_areas}
+    for result in results:
+        area_data[result[0]].append(result[1])
 
+    area_grades_avg, area_grades_max = dict(), dict()
+    for area in area_data:
+        area_grades_avg[area] = sum(area_data[area]) / len(area_data[area])
+        area_grades_max[area] = max(area_data[area])
 
-# def test_climbs_per_sector(app) -> None:
-#     """
-#     Ensures that the correct data is plotted for the 'Climbs per Sector' graph. The
-#     sectors are sorted alphabetically by name.
-#     """
-#     with app.app_context():
-#         sectors = Sector.query.all()
-#         n_sent_routes = {sector.name: sector.n_sent_routes for sector in sectors}
+    plotted_data = get_plotted_data(driver, "Area", "Grade: avg.")
+    assert len(plotted_data) == len(area_data)
+    for area, avg_grade_plotted in plotted_data:
+        assert avg_grade_plotted == area_grades_avg[area]
 
-#     plotted_data = get_plotted_data("Sector", "Climbs: total")
-#     assert len(plotted_data) == len(sectors)
-#     for sector, n_sent_routes_plotted in plotted_data:
-#         assert n_sent_routes_plotted == n_sent_routes[sector]
-
-#     sector_names = [sector for sector, _ in plotted_data]
-#     assert [sector for sector, _ in plotted_data] == sorted(sector_names)
+    plotted_data = get_plotted_data(driver, "Area", "Grade: max.")
+    assert len(plotted_data) == len(area_data)
+    for area, max_grade_plotted in plotted_data:
+        assert max_grade_plotted == area_grades_max[area]
 
 
-# def test_climbs_per_grade(app):
-#     """
-#     Ensures that the correct data is plotted for the 'Climbs per Grade' graph. The
-#     grades are sorted by level. The number of columns in the graph is equal to the
-#     number of grades between the lowest and highest level that have climbs, inclusive.
-#     Check also the 'Climbs per Grade' numbers when the "Grade scale" switch is toggled,
-#     i.e. change to V-scale,
-#     """
-#     with app.app_context():
-#         grades = Grade.query.all()
-#         n_sent_routes = {"font": dict(), "hueco": dict()}
-#         first_nonzero = None
-#         last_nonzero = 0
-#         for grade in grades:
-#             value = sum([route.sent for route in grade.routes])
-#             n_sent_routes["font"][grade.font] = value
-#             n_sent_routes["hueco"][grade.hueco] = value + n_sent_routes["hueco"].get(
-#                 grade.hueco, 0
-#             )
-#             if value > 0 and first_nonzero is None:
-#                 first_nonzero = grade.level
-#             elif value > 0 and last_nonzero < grade.level:
-#                 last_nonzero = grade.level
+def test_climbs_per_sector(driver, db_session) -> None:
+    """
+    Ensures that the correct data is plotted for the 'Climbs per Sector' graph. The
+    sectors are sorted alphabetically by name.
+    """
+    sql_query = text(
+        """
+        SELECT sector.name, route.id, climb.sent
+        FROM sector 
+        JOIN route ON sector.id = route.sector_id 
+        JOIN climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
+        """
+    )
+    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
 
-#         hueco_grades_unique = set()
-#         for level in range(first_nonzero, last_nonzero + 1):
-#             hueco_grade = grades[level].hueco
-#             hueco_grades_unique.add(hueco_grade)
+    unique_sectors = set(result[0] for result in results)
+    sector_data = dict()
+    for sector in unique_sectors:
+        n_routes = len(set(result[1] for result in results if result[0] == sector))
+        sector_data[sector] = n_routes
 
-#     n_columns = {
-#         "font": last_nonzero - first_nonzero + 1,
-#         "hueco": len(hueco_grades_unique),
-#     }
+    plotted_data = get_plotted_data(driver, "Sector", "Climbs: total tried")
+    assert len(plotted_data) == len(sector_data)
+    for sector, n_sent_routes_plotted in plotted_data:
+        assert n_sent_routes_plotted == sector_data[sector]
 
-#     for scale in n_sent_routes:
-#         plotted_data = get_plotted_data(
-#             "Grade", "Climbs: total", toggle_grade_scale=scale == "hueco"
-#         )
-#         assert len(plotted_data) == n_columns[scale]
-#         for grade, n_sent_routes_plotted in plotted_data:
-#             assert n_sent_routes_plotted == n_sent_routes[scale][grade]
-#         plotted_grades = [grade for grade, _ in plotted_data]
-#         grades_sorted = list()
-#         for grade in grades:
-#             grade = getattr(grade, scale)
-#             if grade in grades_sorted:
-#                 continue
-#             grades_sorted.append(grade)
-#             if len(grades_sorted) == n_columns[scale]:
-#                 break
-#         assert plotted_grades == grades_sorted
+    sector_names = [sector for sector, _ in plotted_data]
+    assert [sector for sector, _ in plotted_data] == sorted(sector_names)
+
+
+def test_climbs_per_grade(driver, db_session):
+    """
+    Ensures that the correct data is plotted for the 'Climbs per Grade' graph. The
+    grades are sorted by level. The number of columns in the graph is equal to the
+    number of grades between the lowest and highest level that have climbs, inclusive.
+    Check also the 'Climbs per Grade' numbers when the "Grade scale" switch is toggled,
+    i.e. change to V-scale,
+    """
+
+    for grade_scale in ["font", "hueco"]:
+        sql_query = text(
+            f"""
+            SELECT grade.{grade_scale}, COUNT(opinion.id)
+            FROM grade 
+            LEFT JOIN opinion
+                ON opinion.grade_id = grade.id AND opinion.climber_id=:climber_id
+            GROUP BY grade.{grade_scale}
+            ORDER BY grade.id
+            """
+        )
+        results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
+
+        # remove the grades in the ends that have no climbs
+        grade_data = {result[0]: result[1] for result in results}
+        grade_keys = list(grade_data.keys())
+        for grade_idx in range(len(grade_data)):
+            grade = grade_keys[grade_idx]
+            if grade_data[grade] > 0:
+                break
+            del grade_data[grade]
+        grade_keys = list(grade_data.keys())
+        for grade_idx in range(len(grade_data) - 1, -1, -1):
+            grade = grade_keys[grade_idx]
+            if grade_data[grade] > 0:
+                break
+            del grade_data[grade]
+
+        plotted_data = get_plotted_data(
+            driver, "Grade", "Climbs: total tried", grade_scale=grade_scale
+        )
+        assert len(plotted_data) == len(grade_data)
+        for grade, n_sent_routes_plotted in plotted_data:
+            assert grade in grade_data
+            assert n_sent_routes_plotted == grade_data[grade]
+
+        # check that the plotted grades are sorted correctly
+        assert [grade for grade, _ in plotted_data] == list(grade_data.keys())
 
 
 # def test_climbs_per_route_chars(app):
@@ -333,52 +344,75 @@ def test_attempts_per_area(driver, db_session) -> None:
 #         assert [char_value for char_value, _ in plotted_data] == sorted(char_values)
 
 
-# def test_climbs_per_crux(app) -> None:
-#     """
-#     Ensures that the correct data is plotted for the 'Climbs per Crux' graph.
-#     """
-#     with app.app_context():
-#         routes = Route.query.all()
-#         climbs_per_crux = dict()
-#         for route in routes:
-#             if not route.sent:
-#                 continue
-#             for crux in route.cruxes:
-#                 if crux.name not in climbs_per_crux:
-#                     climbs_per_crux[crux.name] = 0
-#                 climbs_per_crux[crux.name] += 1
+def test_climbs_per_crux(driver, db_session) -> None:
+    """
+    Ensures that the correct data is plotted for the 'Climbs per Crux' graph.
+    """
+    sql_query = text(
+        """
+        SELECT crux.name, COUNT(opinion.id)
+        FROM opinion
+        JOIN crux_opinions ON crux_opinions.opinion_id = opinion.id
+        JOIN crux ON crux.id = crux_opinions.crux_id
+        WHERE opinion.climber_id=:climber_id
+        GROUP BY crux.id
+        ORDER BY crux.name
+        """
+    )
+    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
+    crux_data = {result[0]: result[1] for result in results}
 
-#     plotted_data = get_plotted_data("Crux", "Climbs: total")
-#     assert len(plotted_data) == len(climbs_per_crux)
-#     for crux, n_sent_routes_plotted in plotted_data:
-#         assert n_sent_routes_plotted == climbs_per_crux[crux]
-#     cruxes = [crux for crux, _ in plotted_data]
-#     assert [crux for crux, _ in plotted_data] == sorted(cruxes)
+    plotted_data = get_plotted_data(driver, "Crux", "Climbs: total tried")
+    assert len(plotted_data) == len(crux_data)
+    for crux, n_sent_routes_plotted in plotted_data:
+        assert n_sent_routes_plotted == crux_data[crux]
+
+    # check that the plotted cruxes are sorted correctly
+    assert [crux for crux, _ in plotted_data] == list(crux_data.keys())
 
 
-# def test_climbs_per_month(app) -> None:
-#     """
-#     Ensures that the correct data is plotted for the 'Climbs per Month' graph.
-#     Dates are aggregated by month and year, and sorted chronologically.
-#     """
-#     with app.app_context():
-#         routes = Route.query.all()
-#         climbs_per_month = dict()
-#         for route in routes:
-#             if not route.sent:
-#                 continue
-#             for climb in route.climbs:
-#                 month = climb.session.date.strftime("%Y-%m")
-#                 if month not in climbs_per_month:
-#                     climbs_per_month[month] = 0
-#                 climbs_per_month[month] += 1
+def test_climbs_per_date(driver, db_session) -> None:
+    """
+    Ensures that the correct data is plotted for the 'Climbs per Month' graph.
+    Dates are aggregated by month and year, and sorted chronologically. Here,
+    contrary to most plots, routes can appear more than once.
 
-#     plotted_data = get_plotted_data("Date: month", "Climbs: total")
-#     assert len(plotted_data) == len(climbs_per_month)
-#     for month, n_sent_routes_plotted in plotted_data:
-#         assert n_sent_routes_plotted == climbs_per_month[month]
-#     months = [month for month, _ in plotted_data]
-#     assert [month for month, _ in plotted_data] == sorted(months)
+    TODO: this test is still unfinished.
+    """
+    sql_query = text(
+        """
+        SELECT session.date
+        FROM session
+        JOIN climb ON climb.session_id = session.id
+        WHERE session.climber_id = :climber_id
+        """
+    )
+    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
+    dates = sorted([datetime.strptime(result[0], "%Y-%m-%d") for result in results])
+
+    # count the number of climbs per day, month and year
+    climbs_per_day = dict()
+    climbs_per_month = dict()
+    climbs_per_year = dict()
+    for date in dates:
+        date_str = date.strftime("%d/%m/%Y")
+        for data in [climbs_per_day, climbs_per_month, climbs_per_year]:
+            if date_str not in data:
+                data[date_str] = 0
+            data[date_str] += 1
+            date_str = date_str[3:]
+
+    for x_axis, data in zip(
+        ["day", "month", "year"],
+        [climbs_per_day, climbs_per_month, climbs_per_year],
+    ):
+        plotted_data = get_plotted_data(
+            driver, f"Date: {x_axis}", "Climbs: total tried"
+        )
+        assert len(plotted_data) == len(data)
+        for date, n_sent_routes_plotted in plotted_data:
+            assert n_sent_routes_plotted == data[date]
+        assert [date for date, _ in plotted_data] == list(data.keys())
 
 
 # def test_climbs_per_conditions(app) -> None:

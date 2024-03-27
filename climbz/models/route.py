@@ -76,9 +76,9 @@ class Route(db.Model):
 
     @property
     def consensus_level(self) -> int:
-        """Most common given level to this route, or -1 if there are none."""
+        """Most common given level to this route or null."""
         level_counts = Counter(op.grade.level for op in self.opinions)
-        return level_counts.most_common(1)[0][0] if level_counts else -1
+        return level_counts.most_common(1)[0][0] if level_counts else None
 
     @property
     def consensus_grade(self) -> Grade:
