@@ -6,10 +6,10 @@
 // ! The input map is expected to be sorted and contain levels as keys
 function fill_grades(sorted_map) {
 
-    let first_idx = [...sorted_map.keys()][0];
-    if (first_idx === null)
-        first_idx = 0;
-    let last_idx = [...sorted_map.keys()][sorted_map.size - 1];
+    let sorted_levels = [...sorted_map.keys()];
+    sorted_levels = sorted_levels.filter(d => d !== null);
+    let first_idx = sorted_levels[0];
+    let last_idx = sorted_levels[sorted_levels.length - 1];
     let filled_map = new Map();
 
     for (let level = first_idx; level < last_idx + 1; level++) {
@@ -21,10 +21,10 @@ function fill_grades(sorted_map) {
     return filled_map;
 }
 
-
 // Return the average level of a list of climbs
 function get_avg_level(climbs) {
     let levels = climbs.map(d => d.level);
+    levels = levels.filter(d => d !== null);
     let avg_level = levels.reduce((a, b) => a + b) / levels.length;
     return avg_level;
 }
