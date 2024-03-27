@@ -7,6 +7,8 @@
 function fill_grades(sorted_map) {
 
     let first_idx = [...sorted_map.keys()][0];
+    if (first_idx === null)
+        first_idx = 0;
     let last_idx = [...sorted_map.keys()][sorted_map.size - 1];
     let filled_map = new Map();
 
@@ -39,7 +41,7 @@ function get_max_level(climbs) {
 function grade_axis() {
     let axis_labels = new Map();
     for (let idx in GRADES)
-        axis_labels.set(GRADES[idx].level, GRADES[idx][GRADE_SCALE]);    
+        axis_labels.set(GRADES[idx].level, GRADES[idx][GRADE_SCALE]);
 
     return axis_labels;
 }
