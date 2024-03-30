@@ -9,14 +9,13 @@ from datetime import datetime
 
 from selenium.webdriver.common.by import By
 
-from tests.conftest import run_app, driver
+from tests.conftest import driver
 
 
 def test_filters(driver):
-    driver.get("http://127.0.0.1:5000/")
     while driver.title != "Routes":
         sleep(1)
-        driver.get("http://127.0.0.1:5000/")
+        driver.get("http://localhost:5000/")
 
     reset_button = driver.find_element(By.ID, "filter_reset")
     apply_button = driver.find_element(By.ID, "filter_apply")
@@ -82,7 +81,9 @@ def cruxes_filter(driver, filter_button, apply_button) -> None:
     apply_button.click()
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
 
-    crux = "Sloper"
+    crux = driver.execute_script(
+        "return document.getElementById('filter_Crux_1').textContent"
+    )
     assert all(crux in route["cruxes"] for route in displayed_data)
 
 
