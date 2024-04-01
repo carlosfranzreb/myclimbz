@@ -206,9 +206,9 @@ def test_grade_per_area(driver, db_session) -> None:
         FROM area 
         JOIN sector ON area.id = sector.area_id 
         JOIN route ON sector.id = route.sector_id 
-        JOINopinion ON opinion.route_id = route.id
-        JOINgrade ON opinion.grade_id = grade.id
-        WHEREopinion.grade_id NOT NULL AND opinion.climber_id=:climber_id
+        JOIN opinion ON opinion.route_id = route.id
+        JOIN grade ON opinion.grade_id = grade.id
+        WHERE opinion.grade_id NOT NULL AND opinion.climber_id=:climber_id
         """
     )
     results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
@@ -336,8 +336,6 @@ def test_climbs_per_route_chars(driver, db_session) -> None:
     for result in results:
         for char_idx, char in enumerate(["height", "inclination"]):
             value = result[char_idx + 1]
-            if value not in climbs_per_chars[char]:
-                climbs_per_chars[char][value] = 0
             climbs_per_chars[char][value] += 1
 
     # remove the trailing keys that have no climbs
@@ -358,8 +356,52 @@ def test_climbs_per_route_chars(driver, db_session) -> None:
         assert len(plotted_data) == len(climbs_per_chars[char])
         for char_value, n_sent_routes_plotted in plotted_data:
             assert n_sent_routes_plotted == climbs_per_chars[char][char_value]
-        char_values = [char_value for char_value, _ in plotted_data]
-        assert [char_value for char_value, _ in plotted_data] == sorted(char_values)
+        assert [char_value for char_value, _ in plotted_data] == list(
+            climbs_per_chars[char].keys()
+        )
+
+
+def test_climbs_per_ratings(driver, db_session) -> None:
+    """
+    Ensures that the correct data is plotted for the 'Climbs per Inclination' and
+    'Climbs per Height'graphs. The characteristics are sorted alphabetically by name.
+    """
+    sql_query = text(
+        """
+        SELECT rating, landing
+        FROM opinion
+        WHERE climber_id = :climber_id
+        """
+    )
+    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
+
+    keys = list(range(1, 6))
+    ratings = ["rating", "landing"]
+    climbs_per_ratings = {rating: {key: 0 for key in keys} for rating in ratings}
+    for result in results:
+        for rat_idx, rat in enumerate(["rating", "landing"]):
+            value = result[rat_idx]
+            climbs_per_ratings[rat][value] += 1
+
+    # remove the trailing keys that have no climbs
+    for rat in ratings:
+        for key in keys:
+            if climbs_per_ratings[rat][key] > 0:
+                break
+            del climbs_per_ratings[rat][key]
+        for key in reversed(keys):
+            if climbs_per_ratings[rat][key] > 0:
+                break
+            del climbs_per_ratings[rat][key]
+
+    for rat in climbs_per_ratings:
+        plotted_data = get_plotted_data(driver, rat.capitalize(), "Climbs: total tried")
+        assert len(plotted_data) == len(climbs_per_ratings[rat])
+        for rat_value, n_sent_routes_plotted in plotted_data:
+            assert n_sent_routes_plotted == climbs_per_ratings[rat][rat_value]
+        assert [rat_value for rat_value, _ in plotted_data] == list(
+            climbs_per_ratings[rat].keys()
+        )
 
 
 def test_climbs_per_crux(driver, db_session) -> None:
