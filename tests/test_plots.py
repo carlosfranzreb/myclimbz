@@ -307,7 +307,7 @@ def test_climbs_per_route_chars(driver, db_session) -> None:
     """
     sql_query = text(
         """
-        SELECT DISTINCT(route.name), route.height, route.inclination
+        SELECT DISTINCT(route.name), route.height, route.inclination, sit_start
         FROM route
         JOIN climb ON climb.route_id = route.id
         WHERE climb.climber_id = :climber_id
@@ -318,10 +318,11 @@ def test_climbs_per_route_chars(driver, db_session) -> None:
     keys = {
         "height": list(range(1, 10)),
         "inclination": list(range(-10, 91, 5)),
+        "sit_start": [False, True],
     }
     climbs_per_chars = {char: {key: 0 for key in keys[char]} for char in keys}
     for result in results:
-        for char_idx, char in enumerate(["height", "inclination"]):
+        for char_idx, char in enumerate(keys):
             value = result[char_idx + 1]
             climbs_per_chars[char][value] += 1
 
@@ -330,7 +331,7 @@ def test_climbs_per_route_chars(driver, db_session) -> None:
 
     for char in climbs_per_chars:
         plotted_data = get_plotted_data(
-            driver, char.capitalize(), "Climbs: total tried"
+            driver, char.capitalize().replace("_", " "), "Climbs: total tried"
         )
         assert len(plotted_data) == len(climbs_per_chars[char])
         for char_value, n_sent_routes_plotted in plotted_data:
