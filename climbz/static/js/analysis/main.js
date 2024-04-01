@@ -134,6 +134,53 @@ function show_plot() {
                 new_out.set(key, 0);
         }
         out = new_out;
+    } else if (x_axis == "dates") {
+        let date_len = Array.from(unsorted_out.keys())[0].length;
+        if (date_len == 4) {
+            // Sort by year
+            out = new Map(
+                Array.from(unsorted_out).sort(
+                    (a, b) => parseInt(a[0]) - parseInt(b[0])
+                )
+            );
+        } else if (date_len == 7) {
+            // Sort first by year, then by month
+            out = new Map(
+                Array.from(unsorted_out).sort(
+                    (a, b) => {
+                        let a_year = parseInt(a[0].substring(3, 7));
+                        let b_year = parseInt(b[0].substring(3, 7));
+                        if (a_year == b_year) {
+                            let a_month = parseInt(a[0].substring(0, 2));
+                            let b_month = parseInt(b[0].substring(0, 2));
+                            return a_month - b_month;
+                        }
+                        return a_year - b_year;
+                    }
+                )
+            );
+        } else {
+            // Sort first by year, then by month, then by day
+            out = new Map(
+                Array.from(unsorted_out).sort(
+                    (a, b) => {
+                        let a_year = parseInt(a[0].substring(6, 10));
+                        let b_year = parseInt(b[0].substring(6, 10));
+                        if (a_year == b_year) {
+                            let a_month = parseInt(a[0].substring(3, 5));
+                            let b_month = parseInt(b[0].substring(3, 5));
+                            if (a_month == b_month) {
+                                let a_day = parseInt(a[0].substring(0, 2));
+                                let b_day = parseInt(b[0].substring(0, 2));
+                                return a_day - b_day;
+                            }
+                            return a_month - b_month;
+                        }
+                        return a_year - b_year;
+                    }
+                )
+            );
+        }
     } else
         out = new Map(Array.from(unsorted_out).sort());
 

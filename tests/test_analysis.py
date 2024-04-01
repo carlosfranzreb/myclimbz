@@ -376,8 +376,6 @@ def test_climbs_per_date(driver, db_session) -> None:
     Ensures that the correct data is plotted for the 'Climbs per Month' graph.
     Dates are aggregated by month and year, and sorted chronologically. Here,
     contrary to most plots, routes can appear more than once.
-
-    TODO: this test is still unfinished.
     """
     sql_query = text(
         """
