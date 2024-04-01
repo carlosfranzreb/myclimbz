@@ -13,6 +13,7 @@ Useful commands when implementing tests:
 """
 
 from time import sleep
+from collections import Counter
 
 from datetime import datetime
 
@@ -147,7 +148,7 @@ def test_attempts_per_area(driver, db_session) -> None:
         JOIN route ON sector.id = route.sector_id 
         LEFT JOIN climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
         LEFT JOIN session ON climb.session_id = session.id
-        WHEREclimb.id IS NOT NULL
+        WHERE climb.id IS NOT NULL
         """
     )
     results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
@@ -472,6 +473,59 @@ def test_climbs_per_conditions(driver, db_session) -> None:
         assert n_sent_routes_plotted == climbs_per_conditions[conditions]
     conditions = [conditions for conditions, _ in plotted_data]
     assert [conditions for conditions, _ in plotted_data] == sorted(conditions)
+
+
+def test_tries_until_send(driver, db_session) -> None:
+    """
+    Ensures that the correct data is plotted for the 'Climbs per # sessions' graph.
+    """
+    sql_query = text(
+        """
+        SELECT route.id, climb.n_attempts, climb.sent, session.date
+        FROM route 
+        LEFT JOIN climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
+        LEFT JOIN session ON climb.session_id = session.id
+        WHERE climb.id IS NOT NULL
+        """
+    )
+    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
+    route_ids = set(result[0] for result in results)
+
+    n_attempts, n_sessions = list(), list()
+    for route_id in route_ids:
+        climbs = [result for result in results if result[0] == route_id]
+        n_attempts.append(0)
+        n_sessions.append(0)
+
+        # get the earliest date at which the route was sent
+        min_send_date = datetime.max
+        for climb in climbs:
+            date = datetime.strptime(climb[3], "%Y-%m-%d")
+            if climb[2] and date < min_send_date:
+                min_send_date = date
+
+        # add the attempts of the climbs that took place before the route was sent (incl.)
+        for climb in climbs:
+            date = datetime.strptime(climb[3], "%Y-%m-%d")
+            if date <= min_send_date:
+                n_attempts[-1] += climb[1]
+                n_sessions[-1] += 1
+
+    # count the number of routes per number of attempts/sessions
+    tries_until_send = Counter(n_attempts)
+    sessions_until_send = Counter(n_sessions)
+
+    # run the tests
+    for data_dict, y_axis in zip(
+        [tries_until_send, sessions_until_send], ["No. of attempts", "No. of sessions"]
+    ):
+        plotted_data = get_plotted_data(driver, y_axis, "Climbs: total tried")
+        assert len(plotted_data) == max(data_dict.keys())
+        for n_tries, n_sent_routes_plotted in plotted_data:
+            assert n_sent_routes_plotted == data_dict[n_tries]
+        n_tries = [n for n, _ in plotted_data]
+        assert [n for n, _ in plotted_data] == sorted(n_tries)
+        # TODO: plotted data differs from computed for n_sessions
 
 
 def remove_trailing(data: dict) -> dict:
