@@ -285,21 +285,8 @@ def test_climbs_per_grade(driver, db_session):
             """
         )
         results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
-
-        # remove the grades in the ends that have no climbs
         grade_data = {result[0]: result[1] for result in results}
-        grade_keys = list(grade_data.keys())
-        for grade_idx in range(len(grade_data)):
-            grade = grade_keys[grade_idx]
-            if grade_data[grade] > 0:
-                break
-            del grade_data[grade]
-        grade_keys = list(grade_data.keys())
-        for grade_idx in range(len(grade_data) - 1, -1, -1):
-            grade = grade_keys[grade_idx]
-            if grade_data[grade] > 0:
-                break
-            del grade_data[grade]
+        grade_data = remove_trailing(grade_data)
 
         plotted_data = get_plotted_data(
             driver, "Grade", "Climbs: total tried", grade_scale=grade_scale
@@ -338,16 +325,8 @@ def test_climbs_per_route_chars(driver, db_session) -> None:
             value = result[char_idx + 1]
             climbs_per_chars[char][value] += 1
 
-    # remove the trailing keys that have no climbs
     for char in keys:
-        for key in keys[char]:
-            if climbs_per_chars[char][key] > 0:
-                break
-            del climbs_per_chars[char][key]
-        for key in reversed(keys[char]):
-            if climbs_per_chars[char][key] > 0:
-                break
-            del climbs_per_chars[char][key]
+        climbs_per_chars[char] = remove_trailing(climbs_per_chars[char])
 
     for char in climbs_per_chars:
         plotted_data = get_plotted_data(
@@ -383,16 +362,8 @@ def test_climbs_per_ratings(driver, db_session) -> None:
             value = result[rat_idx]
             climbs_per_ratings[rat][value] += 1
 
-    # remove the trailing keys that have no climbs
     for rat in ratings:
-        for key in keys:
-            if climbs_per_ratings[rat][key] > 0:
-                break
-            del climbs_per_ratings[rat][key]
-        for key in reversed(keys):
-            if climbs_per_ratings[rat][key] > 0:
-                break
-            del climbs_per_ratings[rat][key]
+        climbs_per_ratings[rat] = remove_trailing(climbs_per_ratings[rat])
 
     for rat in climbs_per_ratings:
         plotted_data = get_plotted_data(driver, rat.capitalize(), "Climbs: total tried")
@@ -496,3 +467,18 @@ def test_climbs_per_date(driver, db_session) -> None:
 #         assert n_sent_routes_plotted == climbs_per_conditions[conditions]
 #     conditions = [conditions for conditions, _ in plotted_data]
 #     assert [conditions for conditions, _ in plotted_data] == sorted(conditions)
+
+
+def remove_trailing(data: dict) -> dict:
+    """
+    Remove the trailing keys that have no climbs.
+    """
+    for idx in range(2):
+        keys = list(data.keys())
+        if idx == 1:
+            keys = list(reversed(keys))
+        for key in keys:
+            if data[key] > 0:
+                break
+            del data[key]
+    return data
