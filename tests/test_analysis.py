@@ -313,35 +313,53 @@ def test_climbs_per_grade(driver, db_session):
         assert [grade for grade, _ in plotted_data] == list(grade_data.keys())
 
 
-# def test_climbs_per_route_chars(app):
-#     """
-#     Ensures that the correct data is plotted for the 'Climbs per Landing', 'Climbs per
-#     Inclination', 'Climbs per Height' and 'Climbs per Crux' graphs. The characteristics
-#     are sorted alphabetically by name.
-#     """
-#     with app.app_context():
-#         routes = Route.query.all()
-#         climbs_per_chars = {
-#             "landing": dict(),
-#             "inclination": dict(),
-#             "height": dict(),
-#         }
-#         for route in routes:
-#             if not route.sent:
-#                 continue
-#             for char in climbs_per_chars:
-#                 char_value = getattr(route, char)
-#                 if char_value not in climbs_per_chars[char]:
-#                     climbs_per_chars[char][char_value] = 0
-#                 climbs_per_chars[char][char_value] += 1
+def test_climbs_per_route_chars(driver, db_session) -> None:
+    """
+    Ensures that the correct data is plotted for the 'Climbs per Inclination' and
+    'Climbs per Height'graphs. The characteristics are sorted alphabetically by name.
+    """
+    sql_query = text(
+        """
+        SELECT DISTINCT(route.name), route.height, route.inclination
+        FROM route
+        JOIN climb ON climb.route_id = route.id
+        WHERE climb.climber_id = :climber_id
+        """
+    )
+    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
 
-#     for char in climbs_per_chars:
-#         plotted_data = get_plotted_data(char.capitalize(), "Climbs: total")
-#         assert len(plotted_data) == len(climbs_per_chars[char])
-#         for char_value, n_sent_routes_plotted in plotted_data:
-#             assert n_sent_routes_plotted == climbs_per_chars[char][char_value]
-#         char_values = [char_value for char_value, _ in plotted_data]
-#         assert [char_value for char_value, _ in plotted_data] == sorted(char_values)
+    keys = {
+        "height": list(range(1, 10)),
+        "inclination": list(range(-10, 91, 5)),
+    }
+    climbs_per_chars = {char: {key: 0 for key in keys[char]} for char in keys}
+    for result in results:
+        for char_idx, char in enumerate(["height", "inclination"]):
+            value = result[char_idx + 1]
+            if value not in climbs_per_chars[char]:
+                climbs_per_chars[char][value] = 0
+            climbs_per_chars[char][value] += 1
+
+    # remove the trailing keys that have no climbs
+    for char in keys:
+        for key in keys[char]:
+            if climbs_per_chars[char][key] > 0:
+                break
+            del climbs_per_chars[char][key]
+        for key in reversed(keys[char]):
+            if climbs_per_chars[char][key] > 0:
+                break
+            del climbs_per_chars[char][key]
+
+    for char in climbs_per_chars:
+        plotted_data = get_plotted_data(
+            driver, char.capitalize(), "Climbs: total tried"
+        )
+        assert len(plotted_data) == len(climbs_per_chars[char])
+        for char_value, n_sent_routes_plotted in plotted_data:
+            assert n_sent_routes_plotted == climbs_per_chars[char][char_value]
+        char_values = [char_value for char_value, _ in plotted_data]
+        assert [char_value for char_value, _ in plotted_data] == sorted(char_values)
 
 
 def test_climbs_per_crux(driver, db_session) -> None:
