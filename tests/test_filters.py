@@ -9,10 +9,8 @@ from datetime import datetime
 
 from selenium.webdriver.common.by import By
 
-from tests.conftest import driver
 
-
-def test_filters(driver):
+def reset(driver):
     while driver.title != "Routes":
         sleep(1)
         driver.get("http://localhost:5000/")
@@ -21,19 +19,15 @@ def test_filters(driver):
     apply_button = driver.find_element(By.ID, "filter_apply")
     filter_button = driver.find_element(By.ID, "filter_button")
 
-    def reset_filters() -> None:
-        filter_button.click()
-        reset_button.click()
-        apply_button.click()
+    filter_button.click()
+    reset_button.click()
+    apply_button.click()
 
-    filters = [grade_filter, date_filter, cruxes_filter, sent_filter]
-
-    for filter in filters:
-        filter(driver, filter_button, apply_button)
-        reset_filters()
+    return filter_button, apply_button
 
 
-def grade_filter(driver, filter_button, apply_button) -> None:
+def test_grade_filter(driver) -> None:
+    filter_button, apply_button = reset(driver)
     grade_filter = driver.find_element(By.ID, "widget_filter_Grade")
     driver.execute_script(
         "arguments[0].removeAttribute('se-min-current')", grade_filter
@@ -55,7 +49,8 @@ def grade_filter(driver, filter_button, apply_button) -> None:
     )
 
 
-def date_filter(driver, filter_button, apply_button) -> None:
+def test_date_filter(driver) -> None:
+    filter_button, apply_button = reset(driver)
     filter = driver.find_element(By.ID, "filter_Date_start")
     # set "02/01/2023" as the start date
     min_date = "02/01/2023"
@@ -71,7 +66,8 @@ def date_filter(driver, filter_button, apply_button) -> None:
     )
 
 
-def cruxes_filter(driver, filter_button, apply_button) -> None:
+def test_cruxes_filter(driver) -> None:
+    filter_button, apply_button = reset(driver)
     filter = driver.find_element(By.ID, "filter_Crux_button")
     filter_button.click()
     filter.click()
@@ -87,8 +83,8 @@ def cruxes_filter(driver, filter_button, apply_button) -> None:
     assert all(crux in route["cruxes"] for route in displayed_data)
 
 
-def sent_filter(driver, filter_button, apply_button) -> None:
-
+def sent_filter(driver) -> None:
+    filter_button, apply_button = reset(driver)
     filter = driver.find_element(By.ID, "filter_Sends_1")
     filter_button.click()
     filter.click()
