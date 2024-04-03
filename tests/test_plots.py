@@ -525,7 +525,6 @@ def test_tries_until_send(driver, db_session) -> None:
             assert n_sent_routes_plotted == data_dict[n_tries]
         n_tries = [n for n, _ in plotted_data]
         assert [n for n, _ in plotted_data] == sorted(n_tries)
-        # TODO: plotted data differs from computed for n_sessions
 
 
 def remove_trailing(data: dict) -> dict:
