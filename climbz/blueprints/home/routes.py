@@ -14,7 +14,6 @@ home = Blueprint("home", __name__)
 
 @home.route("/", methods=["GET", "POST"])
 def page_home() -> str:
-    # GET: no audio file was uploaded => show home page
     return render(
         "data.html",
         title="Routes",
