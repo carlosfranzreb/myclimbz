@@ -4,7 +4,6 @@ services:
   web:
     image: ghcr.io/carlosfranzreb/boulders:latest
     build: .
-    command: python run.py
     volumes:
       - ./climbz/:/usr/src/climbz
       - ./instance:/usr/src/instance
@@ -17,7 +16,10 @@ services:
       "python",
       "-m",
       "debugpy",
-      "--listen",
-      "0.0.0.0:5670",
-      "run.py",
+      "--listen", "0.0.0.0:5670",
+      "-m",
+      "flask",
+      "run",
+      "--host=0.0.0.0",
+      "--port=5000",
     ]

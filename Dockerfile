@@ -13,10 +13,11 @@ RUN pip install --upgrade pip
 COPY ./requirements.txt /usr/src/requirements.txt
 RUN pip install -r requirements.txt
 
+ENV FLASK_APP=climbz
+
 # copy run.py, code and DB
-COPY ./run.py /usr/src/run.py
 COPY ./climbz /usr/src/climbz
 COPY ./instance /usr/src/instance
 
 # run the application
-CMD ["python", "run.py"]
+CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000"]

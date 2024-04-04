@@ -1,8 +1,8 @@
 import os
 
-from flask import Flask
+from flask import Flask, request, redirect, url_for, session as flask_session
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 
@@ -43,5 +43,38 @@ def create_app():
     app.register_blueprint(climbers)
     app.register_blueprint(opinions)
     app.register_blueprint(errors)
+
+    from climbz.models import Area, Climber, Climb, Opinion, Route, Session  # noqa
+
+    @app.before_request
+    def check_request_validity():
+        """
+        - Ensure that the user is logged in before accessing any non-static page
+        - If the page entails modifying an object, check that the user is allowed to do so
+        """
+        if not request.endpoint:
+            return
+        elif request.endpoint == "climbers.login" or "static" in request.endpoint:
+            return
+        elif not current_user.is_authenticated:
+            return redirect(url_for("climbers.login"))
+
+        # check if the user is allowed to access the page
+        if "edit" in request.endpoint or "delete" in request.endpoint:
+            path, obj_id = request.path[1:].split("/")
+            obj_str = path.split("_")[1]
+            if obj_str == "project":
+                return
+
+            obj = eval(obj_str.capitalize()).query.get(int(obj_id))
+            if hasattr(obj, "created_by"):
+                obj_owner = obj.created_by
+            elif hasattr(obj, "climber_id"):
+                obj_owner = obj.climber_id
+            else:  # this is the case for climbers
+                obj_owner = obj.id
+            if obj_owner != current_user.id and current_user.role != 1:
+                flask_session["error"] = "You are not allowed to access this page."
+                return redirect(flask_session.pop("call_from_url"))
 
     return app
