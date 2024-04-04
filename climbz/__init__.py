@@ -1,4 +1,5 @@
 import os
+from importlib import import_module
 
 from flask import Flask, request, redirect, url_for, session as flask_session
 from flask_bcrypt import Bcrypt
@@ -15,6 +16,7 @@ login_manager.login_message_category = "info"
 
 
 def create_app():
+    # TODO: login automatically on debug mode
     app = Flask(__name__)
     bcrypt.init_app(app)
     app.config["SECRET_KEY"] = os.urandom(24).hex()
@@ -44,8 +46,6 @@ def create_app():
     app.register_blueprint(opinions)
     app.register_blueprint(errors)
 
-    from climbz.models import Area, Climber, Climb, Opinion, Route, Session  # noqa
-
     @app.before_request
     def check_request_validity():
         """
@@ -66,7 +66,10 @@ def create_app():
             if obj_str == "project":
                 return
 
-            obj = eval(obj_str.capitalize()).query.get(int(obj_id))
+            cls_str = obj_str.capitalize()
+            cls = getattr(import_module("climbz.models"), cls_str)
+
+            obj = cls.query.get(int(obj_id))
             if hasattr(obj, "created_by"):
                 obj_owner = obj.created_by
             elif hasattr(obj, "climber_id"):
