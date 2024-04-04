@@ -97,7 +97,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
     pw = "123"
     pw_hash = generate_password_hash(pw)
     db.session.add(
-        models.Climber(name="Climber1", email="c1@climbz.com", password=pw_hash)
+        models.Climber(name="Climber1", email="c1@climbz.com", password=pw_hash, role=1)
     )
     db.session.add(
         models.Climber(name="Climber2", email="c2@climbz.com", password=pw_hash)
