@@ -10,5 +10,14 @@ services:
       - ./instance:/usr/src/instance
     ports:
       - 5000:5000
+      - 5670:5670
     env_file:
       - ./.env
+    entrypoint: [
+      "python",
+      "-m",
+      "debugpy",
+      "--listen",
+      "0.0.0.0:5670",
+      "run.py",
+    ]
