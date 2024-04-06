@@ -26,7 +26,7 @@ def add_climb() -> str:
     if request.method == "POST":
         route_name = route_form.name.data
         invalid_climb = (
-            not climb_form.validate(route_name)
+            not climb_form.validate_from_name(route_name)
             if not session.is_project_search
             else False
         )
@@ -78,14 +78,13 @@ def add_climb() -> str:
 
     # GET: the climber wants to add a route (+climb) => create forms
     route_form = RouteForm.create_empty()
-    route_form.name.data = route.name
 
     # create the climb form if needed
     if session.is_project_search:
         climb_form = None
 
-    # if no sector was found, add the last sector of the current session if possible
-    if route.sector_id is None and flask_session.get("session_id", False) > 0:
+    # add the last sector of the current session if possible
+    if flask_session.get("session_id", False) > 0:
         session = Session.query.get(flask_session["session_id"])
         sectors = [c.route.sector for c in session.climbs]
         if len(sectors) > 0:
