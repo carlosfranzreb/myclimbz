@@ -3,7 +3,7 @@ from importlib import import_module
 
 from flask import Flask, request, redirect, url_for, session as flask_session
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager, current_user
+from flask_login import LoginManager, current_user, login_user
 from flask_wtf.csrf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 
@@ -46,12 +46,26 @@ def create_app():
     app.register_blueprint(opinions)
     app.register_blueprint(errors)
 
+    # automatically login the user if defined in the environment
+    disable_login = os.environ.get("DISABLE_LOGIN", "0") == "1"
+    print("Disable login: ", disable_login)
+    print("DISABLE_LOGIN" in os.environ)
+
     @app.before_request
     def check_request_validity():
         """
         - Ensure that the user is logged in before accessing any non-static page
         - If the page entails modifying an object, check that the user is allowed to do so
         """
+        if not current_user.is_authenticated and disable_login:
+            from climbz.models import Climber
+
+            with app.test_request_context():
+                climber = Climber.query.get(1)
+                logged_in = login_user(climber)
+                print("Logged in as admin: ", logged_in)
+                print(current_user.is_authenticated)
+
         if not request.endpoint:
             return
         elif request.endpoint == "climbers.login" or "static" in request.endpoint:

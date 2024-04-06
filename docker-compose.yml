@@ -7,19 +7,8 @@ services:
     volumes:
       - ./climbz/:/usr/src/climbz
       - ./instance:/usr/src/instance
+    env_file:
+      - .env
     ports:
       - 5000:5000
       - 5670:5670
-    env_file:
-      - ./.env
-    entrypoint: [
-      "python",
-      "-m",
-      "debugpy",
-      "--listen", "0.0.0.0:5670",
-      "-m",
-      "flask",
-      "run",
-      "--host=0.0.0.0",
-      "--port=5000",
-    ]

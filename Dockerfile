@@ -10,14 +10,16 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies
 RUN pip install --upgrade pip
-COPY ./requirements.txt /usr/src/requirements.txt
+COPY ./requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
 
 ENV FLASK_APP=climbz
 
 # copy run.py, code and DB
-COPY ./climbz /usr/src/climbz
-COPY ./instance /usr/src/instance
+COPY ./climbz ./climbz
+COPY ./instance ./instance
+COPY ./entrypoint.sh ./entrypoint.sh
+RUN ["chmod", "+x", "./entrypoint.sh"]
 
 # run the application
-CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000"]
+ENTRYPOINT ["/usr/src/entrypoint.sh"]

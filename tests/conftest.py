@@ -19,28 +19,15 @@ def db_session() -> Session:
 
 @pytest.fixture(scope="session", autouse=True)
 def driver():
-    """Starts the Docker container and terminates it after the test."""
+    """
+    Starts the Docker container and terminates it after the test."""
     try:
         os.system("docker compose up -d")
-        driver = login()
+        driver_options = webdriver.ChromeOptions()
+        driver_options.add_argument("--headless=new")
+        driver = webdriver.Chrome(options=driver_options)
+        WebDriverWait(driver, 10).until(EC.title_is("Routes"))
         yield driver
     finally:
         driver.quit()
         os.system("docker compose down")
-
-
-def login():
-    # start a headless Chrome browser
-    driver_options = webdriver.ChromeOptions()
-    driver_options.add_argument("--headless=new")
-    driver = webdriver.Chrome(options=driver_options)
-    driver.get("http://127.0.0.1:5000/login")
-    WebDriverWait(driver, 10).until(EC.title_is("Login"))
-
-    # log in
-    driver.find_element(By.ID, "email").send_keys("c1@climbz.com")
-    driver.find_element(By.ID, "password").send_keys("123")
-    driver.find_element(By.XPATH, "//input[@type='submit']").click()
-    WebDriverWait(driver, 10).until(EC.title_is("Routes"))
-
-    return driver
