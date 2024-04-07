@@ -63,5 +63,7 @@ jobs:
         uses: nanasess/setup-chromedriver@v2
       - name: Install dependencies
         run: pip install -r requirements-test.txt
+      - name: Run container
+        uses: adambirds/docker-compose-action@v1.3.0
       - name: Run tests
         run: python -m pytest tests/
