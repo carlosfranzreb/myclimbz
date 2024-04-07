@@ -2,7 +2,6 @@ import os
 
 import pytest
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from sqlalchemy import create_engine
@@ -26,6 +25,7 @@ def driver():
         driver_options = webdriver.ChromeOptions()
         driver_options.add_argument("--headless=new")
         driver = webdriver.Chrome(options=driver_options)
+        driver.get("http://localhost:5000")
         WebDriverWait(driver, 10).until(EC.title_is("Routes"))
         yield driver
     finally:

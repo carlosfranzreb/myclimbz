@@ -117,15 +117,15 @@ def test_climbs_per_area(driver, db_session) -> None:
     area_names = [area for area, _ in plotted_data]
     assert [area for area, _ in plotted_data] == sorted(area_names)
 
-    plotted_data = get_plotted_data(driver, "Area", "Climbs: success rate")
-    assert len(plotted_data) == len(area_data)
-    for area, success_rate_plotted in plotted_data:
-        assert success_rate_plotted == area_data[area]["success_rate"]
-
     plotted_data = get_plotted_data(driver, "Area", "Climbs: total tried")
     assert len(plotted_data) == len(area_data)
     for area, n_routes_plotted in plotted_data:
         assert n_routes_plotted == area_data[area]["n_routes"]
+
+    plotted_data = get_plotted_data(driver, "Area", "Climbs: success rate")
+    assert len(plotted_data) == len(area_data)
+    for area, success_rate_plotted in plotted_data:
+        assert success_rate_plotted == area_data[area]["success_rate"]
 
 
 def test_attempts_per_area(driver, db_session) -> None:
@@ -459,7 +459,7 @@ def test_climbs_per_conditions(driver, db_session) -> None:
         """
     )
     results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
-    conditions = [int(result[0]) for result in results]
+    conditions = [int(result[0]) for result in results if result[0] is not None]
 
     keys = list(range(1, 6))
     climbs_per_conditions = {key: 0 for key in keys}

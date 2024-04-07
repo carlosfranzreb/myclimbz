@@ -63,61 +63,66 @@ function show_plot() {
     let y_axis = document.getElementById("y-axis-select").value;
 
     // If the data is empty, return without plotting
-    let this_data = JSON.parse(JSON.stringify(DISPLAYED_DATA));
-    if (this_data.length == 0)
+    let out = JSON.parse(JSON.stringify(DISPLAYED_DATA));
+    if (out.length == 0)
         return;
+
+    // Remove all routes that have not been tried yet
+    out = out.filter(d => d.tried == true);
 
     // Group the data by the selected x-axis key.
     // Cruxes, dates and conditions are split into unique keys.
     // Dates are grouped by month.
-    let unsorted_out = null;
+    let tmp = null;
     if (x_axis == "cruxes" || x_axis.includes("dates") || x_axis == "conditions") {
         if (x_axis == "dates_month") {
-            this_data = this_data.map(d => {
+            out = out.map(d => {
                 d.dates = d.dates.map(date => date.substring(3, 10));
                 return d;
             });
             x_axis = "dates";
         } else if (x_axis == "dates_year") {
-            this_data = this_data.map(d => {
+            out = out.map(d => {
                 d.dates = d.dates.map(date => date.substring(6, 10));
                 return d;
             });
             x_axis = "dates";
         }
-        groups = d3.group(this_data, d => d[x_axis]);
-        unsorted_out = new Map();
+        groups = d3.group(out, d => d[x_axis]);
+        tmp = new Map();
         for (let [key, value] of groups.entries()) {
             if (key == null)
                 continue;
             for (let crux of key) {
-                if (unsorted_out.has(crux))
-                    unsorted_out.set(crux, unsorted_out.get(crux).concat(value));
+                if (tmp.has(crux))
+                    tmp.set(crux, tmp.get(crux).concat(value));
                 else
-                    unsorted_out.set(crux, value);
+                    tmp.set(crux, value);
             }
         }
     }
     else
-        unsorted_out = d3.group(this_data, d => d[x_axis]);
+        tmp = d3.group(out, d => d[x_axis]);
+
+    out = tmp;
+    tmp = null;
 
     // Remove the null key if it exists
-    if (unsorted_out.has(null))
-        unsorted_out.delete(null);
+    if (out.has(null))
+        out.delete(null);
 
     // Compute the data to be plotted according to the selected y-axis option
-    unsorted_out = y_axis_options[y_axis]["data"](unsorted_out);
+    out = y_axis_options[y_axis]["data"](out);
 
     // Sort the data
-    let out = null;
     if (x_axis.includes("level")) {
-        out = new Map(Array.from(unsorted_out).sort((a, b) => a[0] - b[0]));
+        out = new Map(Array.from(out).sort((a, b) => a[0] - b[0]));
         out = fill_grades(out);
     }
-    else if (isNumeric(Array.from(unsorted_out.keys())[0])) {
+    else if (isNumeric(Array.from(out.keys())[0])) {
         out = new Map(
             // Sort the map by the keys
-            Array.from(unsorted_out).sort(
+            Array.from(out).sort(
                 (a, b) => parseFloat(a[0]) - parseFloat(b[0])
             )
         );
@@ -135,18 +140,18 @@ function show_plot() {
         }
         out = new_out;
     } else if (x_axis == "dates") {
-        let date_len = Array.from(unsorted_out.keys())[0].length;
+        let date_len = Array.from(out.keys())[0].length;
         if (date_len == 4) {
             // Sort by year
             out = new Map(
-                Array.from(unsorted_out).sort(
+                Array.from(out).sort(
                     (a, b) => parseInt(a[0]) - parseInt(b[0])
                 )
             );
         } else if (date_len == 7) {
             // Sort first by year, then by month
             out = new Map(
-                Array.from(unsorted_out).sort(
+                Array.from(out).sort(
                     (a, b) => {
                         let a_year = parseInt(a[0].substring(3, 7));
                         let b_year = parseInt(b[0].substring(3, 7));
@@ -162,7 +167,7 @@ function show_plot() {
         } else {
             // Sort first by year, then by month, then by day
             out = new Map(
-                Array.from(unsorted_out).sort(
+                Array.from(out).sort(
                     (a, b) => {
                         let a_year = parseInt(a[0].substring(6, 10));
                         let b_year = parseInt(b[0].substring(6, 10));
@@ -182,7 +187,7 @@ function show_plot() {
             );
         }
     } else
-        out = new Map(Array.from(unsorted_out).sort());
+        out = new Map(Array.from(out).sort());
 
     let x = d3.scaleBand()
         .range([0, WIDTH])

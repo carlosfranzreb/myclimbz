@@ -125,7 +125,8 @@ class Route(db.Model):
         n_sessions, n_attempts_all, n_attempts_send = 0, 0, 0
         conditions, dates = list(), list()
         first_send = False
-        for climb in self.climbs:
+        sorted_climbs = sorted(self.climbs, key=lambda climb: climb.session.date)
+        for climb in sorted_climbs:
             if climb.session.climber_id != climber_id:
                 continue
             n_attempts = climb.n_attempts if climb.n_attempts is not None else 0
