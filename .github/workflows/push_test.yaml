@@ -66,6 +66,6 @@ jobs:
       - name: Run container
         uses: adambirds/docker-compose-action@v1.3.0
         with:
-          compose-file: "./docker-compose.yaml"
+          compose-file: "./docker-compose.yml"
       - name: Run tests
         run: python -m pytest tests/
