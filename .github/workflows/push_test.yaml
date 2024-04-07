@@ -64,6 +64,6 @@ jobs:
       - name: Build docker images
         run: docker compose build
       - name: Run tests
-        run: docker compose up
+        run: docker compose up -d
       - name: Run tests
         run: python -m pytest tests/
