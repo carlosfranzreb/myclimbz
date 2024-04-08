@@ -45,7 +45,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    container: ubuntu
     permissions:
       contents: read
       packages: write
