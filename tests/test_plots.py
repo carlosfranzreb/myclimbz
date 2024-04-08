@@ -12,9 +12,11 @@ Useful commands when implementing tests:
 - Command to kill process on port: kill $(lsof -t -i:5000)
 """
 
+import os
 import requests
 
 
 def test_request():
+    print(os.system("netstat -lt"))
     response = requests.get("http://127.0.0.1:5000")
     assert response.status_code == 200
