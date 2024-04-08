@@ -1,5 +1,5 @@
 #
-name: Create and publish a Docker image
+name: Create, publish and test a Docker image
 
 on:
   pull_request:
@@ -46,7 +46,7 @@ jobs:
       - name: Install ChromeDriver
         uses: nanasess/setup-chromedriver@v2
 
-      - name: Install dependencies
+      - name: Install dependencies for testing
         run: pip install -r requirements-test.txt
 
       - name: Run tests
