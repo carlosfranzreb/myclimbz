@@ -27,11 +27,12 @@ def driver(env: str) -> Generator[webdriver.Chrome, None, None]:
     If env=dev:
         Starts the Docker container with docker compose.
     Elif env=ci:
-        Starts the server locally in a different process.
+        GitHub Actions will run the web app as a service.
     """
     if env == "dev":
         try:
-            os.system("docker compose up -d")
+            if env == "dev":
+                os.system("docker compose up -d")
             driver_options = webdriver.ChromeOptions()
             driver_options.add_argument("--headless=new")
             driver = webdriver.Chrome(options=driver_options)
@@ -40,30 +41,8 @@ def driver(env: str) -> Generator[webdriver.Chrome, None, None]:
             yield driver
         finally:
             driver.quit()
-            os.system("docker compose down")
-    elif env == "ci":
-        os.environ["CLIMBZ_DB_URI"] = "sqlite:///test_100.db"
-        os.environ["DISABLE_LOGIN"] = "1"
-        os.environ["FLASK_DEBUG"] = "0"
-        os.environ["FLASK_APP"] = "climbz"
-        app_process = Process(target=run_app)
-        app_process.start()
-        sleep(5)
-
-        try:
-            driver_options = webdriver.ChromeOptions()
-            driver_options.add_argument("--headless=new")
-            driver = webdriver.Chrome(options=driver_options)
-            driver.get("http://127.0.0.1:5000")
-            WebDriverWait(driver, 10).until(EC.title_is("Routes"))
-            yield driver
-        except Exception as e:
-            driver.quit()
-            app_process.terminate()
-            raise e
-        finally:
-            driver.quit()
-            app_process.terminate()
+            if env == "dev":
+                os.system("docker compose down")
 
 
 def run_app() -> None:
