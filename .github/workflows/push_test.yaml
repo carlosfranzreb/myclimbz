@@ -48,7 +48,7 @@ jobs:
     # needs: build-push
     steps:
       - name: Debug connection
-        uses: pip install -y requests && python debug_ci.py
+        run: pip install -y requests && python debug_ci.py
       # - name: Checkout repository
       #   uses: actions/checkout@v4
 
