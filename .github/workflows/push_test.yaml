@@ -72,11 +72,11 @@ jobs:
     #     env:
     #       DISPLAY: :99
 
-    # services:
-    #   app:
-    #     image: ghcr.io/carlosfranzreb/boulders/myclimbz:pr-${{ github.event.number }}
-    #     ports:
-    #       - 5000:5000
-    #     credentials:
-    #       username: ${{ github.actor }}
-    #       password: ${{ secrets.GITHUB_TOKEN }}
+    services:
+      app:
+        image: ghcr.io/carlosfranzreb/boulders/myclimbz:pr-${{ github.event.number }}
+        ports:
+          - 5000:5000
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
