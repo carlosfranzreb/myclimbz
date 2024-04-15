@@ -72,7 +72,7 @@ jobs:
 
     services:
       app:
-        image: ghcr.io/carlosfranzreb/boulders/myclimbz:latest
+        image: ghcr.io/carlosfranzreb/boulders/myclimbz:pr-${{ github.event.number }}
         ports:
           - 5000:5000
         credentials:
