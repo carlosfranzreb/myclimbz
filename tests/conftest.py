@@ -1,7 +1,5 @@
 import os
 from typing import Generator
-from time import sleep
-from multiprocessing import Process
 
 import pytest
 from selenium import webdriver
@@ -11,9 +9,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from climbz import create_app
-
-
-BASE_URL = None  # set by the driver fixture
 
 
 @pytest.fixture(scope="session")
@@ -32,22 +27,19 @@ def driver(env: str) -> Generator[webdriver.Chrome, None, None]:
     Elif env=ci:
         GitHub Actions will run the web app as a service.
     """
-    http = "http" if env == "dev" else "https"
-    BASE_URL = f"{http}://127.0.0.1:5000"
-    if env == "dev":
-        try:
-            if env == "dev":
-                os.system("docker compose up -d")
-            driver_options = webdriver.ChromeOptions()
-            driver_options.add_argument("--headless=new")
-            driver = webdriver.Chrome(options=driver_options)
-            driver.get(BASE_URL)
-            WebDriverWait(driver, 10).until(EC.title_is("Routes"))
-            yield driver
-        finally:
-            driver.quit()
-            if env == "dev":
-                os.system("docker compose down")
+    try:
+        if env == "dev":
+            os.system("docker compose up -d")
+        driver_options = webdriver.ChromeOptions()
+        driver_options.add_argument("--headless=new")
+        driver = webdriver.Chrome(options=driver_options)
+        driver.get("http://127.0.0.1:5000")
+        WebDriverWait(driver, 10).until(EC.title_is("Routes"))
+        yield driver
+    finally:
+        if env == "dev":
+            os.system("docker compose down")
+        driver.quit()
 
 
 def run_app() -> None:

@@ -1,8 +1,6 @@
 import requests
 
-from tests.conftest import BASE_URL
-
 
 def test_request():
-    response = requests.get(BASE_URL)
+    response = requests.get("http://127.0.0.1:5000")
     assert response.status_code == 200
