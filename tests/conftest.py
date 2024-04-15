@@ -13,6 +13,9 @@ from sqlalchemy.orm import Session
 from climbz import create_app
 
 
+BASE_URL = None  # set by the driver fixture
+
+
 @pytest.fixture(scope="session")
 def db_session() -> Session:
     """Load the test database and create a session."""
@@ -29,6 +32,8 @@ def driver(env: str) -> Generator[webdriver.Chrome, None, None]:
     Elif env=ci:
         GitHub Actions will run the web app as a service.
     """
+    http = "http" if env == "dev" else "https"
+    BASE_URL = f"{http}://127.0.0.1:5000"
     if env == "dev":
         try:
             if env == "dev":
@@ -36,7 +41,7 @@ def driver(env: str) -> Generator[webdriver.Chrome, None, None]:
             driver_options = webdriver.ChromeOptions()
             driver_options.add_argument("--headless=new")
             driver = webdriver.Chrome(options=driver_options)
-            driver.get("http://localhost:5000")
+            driver.get(BASE_URL)
             WebDriverWait(driver, 10).until(EC.title_is("Routes"))
             yield driver
         finally:
