@@ -72,7 +72,7 @@ jobs:
 
     services:
       app:
-        image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        image: ghcr.io/carlosfranzreb/boulders/myclimbz:latest
         ports:
           - 5000:5000
         credentials:
