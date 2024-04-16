@@ -5,7 +5,6 @@ checkboxes, and removing filters are not tested.
 """
 
 from time import sleep
-from datetime import datetime
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -20,9 +19,10 @@ def reset(driver):
     filter_button.click()
     sleep(2)
     driver.find_element(By.ID, "filter_reset").click()
-    sleep(1)
+    sleep(2)
     apply_button = driver.find_element(By.ID, "filter_apply")
     apply_button.click()
+    sleep(2)
 
     return filter_button, apply_button
 
@@ -37,8 +37,11 @@ def test_grade_filter(driver) -> None:
         "arguments[0].setAttribute('se-min-current','5')",
         grade_filter,
     )
+    sleep(2)
     filter_button.click()
+    sleep(2)
     apply_button.click()
+    sleep(2)
     min_level = int(grade_filter.get_attribute("se-min-current"))
     assert min_level == 5
     max_level = int(grade_filter.get_attribute("se-max-current"))
