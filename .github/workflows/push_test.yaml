@@ -66,8 +66,7 @@ jobs:
         run: Xvfb :99 &
 
       - name: Run tests
-        # run: python -m pytest tests/ --env=ci
-        run: python debug_ci.py
+        run: python -m pytest tests/ --env=ci
         env:
           DISPLAY: :99
 
