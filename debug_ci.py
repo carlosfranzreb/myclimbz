@@ -18,8 +18,8 @@ engine = create_engine("sqlite:///instance/test_100.db")
 session = Session(engine)
 
 
-# response = requests.get(HOME_URL)
-# assert response.status_code == 200, response.text
+response = requests.get(HOME_URL)
+assert response.status_code == 200, response.text
 
 
 # driver_options = webdriver.ChromeOptions()

@@ -81,4 +81,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
         env:
           DISABLE_LOGIN: 1
-          CLIMBZ_DB_URI: sqlite:///test_100.db
+          CLIMBZ_DB_URI: sqlite:///instance/test_100.db
