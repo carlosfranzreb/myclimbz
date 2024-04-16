@@ -16,7 +16,6 @@ login_manager.login_message_category = "info"
 
 
 def create_app():
-    # TODO: login automatically on debug mode
     app = Flask(__name__)
     bcrypt.init_app(app)
     app.config["SECRET_KEY"] = os.urandom(24).hex()
@@ -48,8 +47,6 @@ def create_app():
 
     # automatically login the user if defined in the environment
     disable_login = os.environ.get("DISABLE_LOGIN", "0") == "1"
-    print("Disable login: ", disable_login)
-    print("DISABLE_LOGIN" in os.environ)
 
     @app.before_request
     def check_request_validity():
