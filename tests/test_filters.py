@@ -8,13 +8,12 @@ from time import sleep
 from datetime import datetime
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 def reset(driver):
-    while driver.title != "Routes":
-        sleep(1)
-        driver.get("http://localhost:5000/")
-
+    WebDriverWait(driver, 30).until(EC.title_is("Routes"))
     reset_button = driver.find_element(By.ID, "filter_reset")
     apply_button = driver.find_element(By.ID, "filter_apply")
     filter_button = driver.find_element(By.ID, "filter_button")
