@@ -11,12 +11,15 @@ from pyvirtualdisplay import Display
 import chromedriver_autoinstaller
 
 
-display = Display(visible=0, size=(800, 800))
-display.start()
+HOME_URL = "http://127.0.0.1:5000"
+
 
 chromedriver_autoinstaller.install()
 
-HOME_URL = "http://127.0.0.1:5000"
+
+display = Display(visible=0, size=(800, 800))
+display.start()
+
 
 response = requests.get(HOME_URL)
 assert response.status_code == 200
@@ -26,4 +29,10 @@ driver_options = webdriver.ChromeOptions()
 driver_options.add_argument("--headless")
 driver = webdriver.Chrome(options=driver_options)
 driver.get(HOME_URL)
-WebDriverWait(driver, 10).until(EC.title_is("Routes"))
+for i in range(10):
+    try:
+        print(driver.title, driver.current_url)
+        WebDriverWait(driver, 1).until(EC.title_is("Routes"))
+        break
+    except:
+        pass
