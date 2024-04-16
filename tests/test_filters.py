@@ -13,13 +13,16 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 def reset(driver):
+    driver.get("http://localhost:5000/")
     WebDriverWait(driver, 30).until(EC.title_is("Routes"))
     reset_button = driver.find_element(By.ID, "filter_reset")
     apply_button = driver.find_element(By.ID, "filter_apply")
     filter_button = driver.find_element(By.ID, "filter_button")
 
     filter_button.click()
+    sleep(0.2)
     reset_button.click()
+    sleep(0.2)
     apply_button.click()
 
     return filter_button, apply_button
