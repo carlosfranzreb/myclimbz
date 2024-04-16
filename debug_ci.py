@@ -8,10 +8,13 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from pyvirtualdisplay import Display
+import chromedriver_autoinstaller
 
 
 display = Display(visible=0, size=(800, 800))
 display.start()
+
+chromedriver_autoinstaller.install()
 
 HOME_URL = "http://127.0.0.1:5000"
 
