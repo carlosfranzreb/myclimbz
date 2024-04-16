@@ -79,3 +79,5 @@ jobs:
         credentials:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          DISABLE_LOGIN: 1
