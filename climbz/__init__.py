@@ -59,9 +59,7 @@ def create_app():
 
             with app.test_request_context():
                 climber = Climber.query.get(1)
-                logged_in = login_user(climber)
-                print("Logged in as admin: ", logged_in)
-                print(current_user.is_authenticated)
+                login_user(climber)
 
         if not request.endpoint:
             return
