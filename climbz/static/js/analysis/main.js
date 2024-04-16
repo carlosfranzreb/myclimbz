@@ -72,7 +72,7 @@ function show_plot() {
 
     // Group the data by the selected x-axis key.
     // Cruxes, dates and conditions are split into unique keys.
-    // Dates are grouped by month.
+    // Dates are grouped with the desired granularity.
     let tmp = null;
     if (x_axis == "cruxes" || x_axis.includes("dates") || x_axis == "conditions") {
         if (x_axis == "dates_month") {
@@ -88,16 +88,17 @@ function show_plot() {
             });
             x_axis = "dates";
         }
-        groups = d3.group(out, d => d[x_axis]);
+
+        // Group the data by the selected key
         tmp = new Map();
-        for (let [key, value] of groups.entries()) {
-            if (key == null)
+        for (let route of out) {
+            if (route[x_axis] == null)
                 continue;
-            for (let crux of key) {
-                if (tmp.has(crux))
-                    tmp.set(crux, tmp.get(crux).concat(value));
+            for (let key_value of route[x_axis]) {
+                if (tmp.has(key_value))
+                    tmp.set(key_value, tmp.get(key_value).concat(route));
                 else
-                    tmp.set(crux, value);
+                    tmp.set(key_value, [route]);
             }
         }
     }
@@ -119,27 +120,7 @@ function show_plot() {
         out = new Map(Array.from(out).sort((a, b) => a[0] - b[0]));
         out = fill_grades(out);
     }
-    else if (isNumeric(Array.from(out.keys())[0])) {
-        out = new Map(
-            // Sort the map by the keys
-            Array.from(out).sort(
-                (a, b) => parseFloat(a[0]) - parseFloat(b[0])
-            )
-        );
-        // Fill in the missing keys
-        let keys = Array.from(out.keys());
-        let step = keys[1] - keys[0];
-        let first_key = keys[0];
-        let last_key = keys[keys.length - 1];
-        let new_out = new Map();
-        for (let key = first_key; key <= last_key; key += step) {
-            if (out.has(key))
-                new_out.set(key, out.get(key));
-            else
-                new_out.set(key, 0);
-        }
-        out = new_out;
-    } else if (x_axis == "dates") {
+    else if (x_axis === "dates") {
         let date_len = Array.from(out.keys())[0].length;
         if (date_len == 4) {
             // Sort by year
@@ -186,8 +167,32 @@ function show_plot() {
                 )
             );
         }
-    } else
+    }
+    else if (isNumeric(Array.from(out.keys())[0])) {
+        out = new Map(
+            // Sort the map by the keys
+            Array.from(out).sort(
+                (a, b) => parseFloat(a[0]) - parseFloat(b[0])
+            )
+        );
+        // Fill in the missing keys
+        let keys = Array.from(out.keys());
+        let step = keys[1] - keys[0];
+        let first_key = keys[0];
+        let last_key = keys[keys.length - 1];
+        let new_out = new Map();
+        for (let key = first_key; key <= last_key; key += step) {
+            if (out.has(key))
+                new_out.set(key, out.get(key));
+            else
+                new_out.set(key, 0);
+        }
+        out = new_out;
+
+    } else {
+        // Sort the map by the keys
         out = new Map(Array.from(out).sort());
+    }
 
     let x = d3.scaleBand()
         .range([0, WIDTH])

@@ -400,9 +400,8 @@ def test_climbs_per_crux(driver, db_session) -> None:
 
 def test_climbs_per_date(driver, db_session) -> None:
     """
-    Ensures that the correct data is plotted for the 'Climbs per Month' graph.
-    Dates are aggregated by month and year, and sorted chronologically. Here,
-    contrary to most plots, routes can appear more than once.
+    Ensures that the correct data is plotted for the 'Climbs per Date' graphs.
+    Contrary to most plots, routes can appear here more than once.
     """
     sql_query = text(
         """
