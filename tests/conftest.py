@@ -30,9 +30,9 @@ def driver(env: str) -> Generator[webdriver.Chrome, None, None]:
     try:
         if env == "dev":
             os.system("docker compose up -d")
-        driver_options = webdriver.ChromeOptions()
-        driver_options.add_argument("--headless=new")
-        driver = webdriver.Chrome(options=driver_options)
+        # driver_options = webdriver.ChromeOptions()
+        # driver_options.add_argument("--headless=new")
+        driver = webdriver.Chrome()  # options=driver_options)
         driver.get("http://127.0.0.1:5000")
         WebDriverWait(driver, 30).until(EC.title_is("Routes"))
         yield driver
