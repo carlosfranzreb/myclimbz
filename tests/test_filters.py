@@ -33,7 +33,9 @@ def test_grade_filter(driver) -> None:
         grade_filter,
     )
     filter_button.click()
+    sleep(0.2)
     apply_button.click()
+    sleep(0.2)
     min_level = int(grade_filter.get_attribute("se-min-current"))
     assert min_level == 5
     max_level = int(grade_filter.get_attribute("se-max-current"))
@@ -53,7 +55,9 @@ def test_date_filter(driver) -> None:
     driver.execute_script(f"arguments[0].value = '{min_date}'", filter)
 
     filter_button.click()
+    sleep(0.2)
     apply_button.click()
+    sleep(0.2)
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
     min_date = datetime.strptime(min_date, "%d/%m/%Y")
     assert all(
@@ -66,11 +70,15 @@ def test_cruxes_filter(driver) -> None:
     filter_button, apply_button = reset(driver)
     filter = driver.find_element(By.ID, "filter_Crux_button")
     filter_button.click()
+    sleep(0.2)
     filter.click()
+    sleep(0.2)
     crux_button = driver.find_element(By.ID, "filter_Crux_1")
     crux_button.click()
+    sleep(0.2)
 
     apply_button.click()
+    sleep(0.2)
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
 
     crux = driver.execute_script(
@@ -83,9 +91,12 @@ def test_sent_filter(driver) -> None:
     filter_button, apply_button = reset(driver)
     filter = driver.find_element(By.ID, "filter_Sends_1")
     filter_button.click()
+    sleep(0.2)
     filter.click()
+    sleep(0.2)
 
     apply_button.click()
+    sleep(0.2)
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
 
     assert all(not route["sent"] for route in displayed_data)
