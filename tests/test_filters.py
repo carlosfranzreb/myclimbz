@@ -10,6 +10,7 @@ from datetime import datetime
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import *
 
 
 def reset(driver):
@@ -17,7 +18,7 @@ def reset(driver):
     WebDriverWait(driver, 30).until(EC.title_is("Routes"))
 
     filter_button = driver.find_element(By.ID, "filter_button")
-    apply_button = driver.find_element(By.ID, "filter_apply")
+    apply_button = driver.find_elementapply_button
 
     return filter_button, apply_button
 
@@ -33,9 +34,15 @@ def test_grade_filter(driver) -> None:
         grade_filter,
     )
     filter_button.click()
-    sleep(5)
+    wait = WebDriverWait(
+        driver,
+        10,
+        ignored_exceptions=[ElementNotVisibleException, ElementNotSelectableException],
+    )
+    element = wait.until(EC.element_to_be_clickable(apply_button))
+    # sleep(5)
     apply_button.click()
-    sleep(5)
+    # sleep(5)
     min_level = int(grade_filter.get_attribute("se-min-current"))
     assert min_level == 5
     max_level = int(grade_filter.get_attribute("se-max-current"))
@@ -56,9 +63,15 @@ def test_date_filter(driver) -> None:
     driver.execute_script(f"arguments[0].value = '{min_date}'", filter)
 
     filter_button.click()
-    sleep(5)
+    wait = WebDriverWait(
+        driver,
+        10,
+        ignored_exceptions=[ElementNotVisibleException, ElementNotSelectableException],
+    )
+    element = wait.until(EC.element_to_be_clickable(apply_button))
+    # sleep(5)
     apply_button.click()
-    sleep(5)
+    # sleep(5)
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
     min_date = datetime.strptime(min_date, "%d/%m/%Y")
     assert all(
@@ -72,15 +85,21 @@ def test_cruxes_filter(driver) -> None:
     filter_button, apply_button = reset(driver)
     filter = driver.find_element(By.ID, "filter_Crux_button")
     filter_button.click()
-    sleep(5)
+    wait = WebDriverWait(
+        driver,
+        10,
+        ignored_exceptions=[ElementNotVisibleException, ElementNotSelectableException],
+    )
+    element = wait.until(EC.element_to_be_clickable(apply_button))
+    # sleep(5)
     filter.click()
-    sleep(5)
+    # sleep(5)
     crux_button = driver.find_element(By.ID, "filter_Crux_1")
     crux_button.click()
-    sleep(5)
+    # sleep(5)
 
     apply_button.click()
-    sleep(5)
+    # sleep(5)
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
 
     crux = driver.execute_script(
@@ -94,12 +113,18 @@ def test_sent_filter(driver) -> None:
     filter_button, apply_button = reset(driver)
     filter = driver.find_element(By.ID, "filter_Sends_1")
     filter_button.click()
-    sleep(5)
+    wait = WebDriverWait(
+        driver,
+        10,
+        ignored_exceptions=[ElementNotVisibleException, ElementNotSelectableException],
+    )
+    element = wait.until(EC.element_to_be_clickable(apply_button))
+    # sleep(5)
     filter.click()
-    sleep(5)
+    # sleep(5)
 
     apply_button.click()
-    sleep(5)
+    # sleep(5)
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
 
     assert all(not route["sent"] for route in displayed_data)
