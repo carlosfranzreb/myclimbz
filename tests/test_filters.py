@@ -18,7 +18,7 @@ def reset(driver):
     WebDriverWait(driver, 30).until(EC.title_is("Routes"))
 
     filter_button = driver.find_element(By.ID, "filter_button")
-    apply_button = driver.find_elementapply_button
+    apply_button = driver.find_element(By.ID, "apply_button")
 
     return filter_button, apply_button
 
