@@ -45,6 +45,7 @@ def test_grade_filter(driver) -> None:
         route["level"] >= min_level and route["level"] <= max_level
         for route in displayed_data
     )
+    reset(driver)
 
 
 def test_date_filter(driver) -> None:
@@ -64,6 +65,7 @@ def test_date_filter(driver) -> None:
         datetime.strptime(route["dates"][-1], "%d/%m/%Y") >= min_date
         for route in displayed_data
     )
+    reset(driver)
 
 
 def test_cruxes_filter(driver) -> None:
@@ -85,6 +87,7 @@ def test_cruxes_filter(driver) -> None:
         "return document.getElementById('filter_Crux_1').textContent"
     )
     assert all(crux in route["cruxes"] for route in displayed_data)
+    reset(driver)
 
 
 def test_sent_filter(driver) -> None:
@@ -100,3 +103,4 @@ def test_sent_filter(driver) -> None:
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
 
     assert all(not route["sent"] for route in displayed_data)
+    reset(driver)
