@@ -11,6 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import *
+import os
 
 
 def reset(driver):
@@ -18,7 +19,7 @@ def reset(driver):
     WebDriverWait(driver, 30).until(EC.title_is("Routes"))
 
     filter_button = driver.find_element(By.ID, "filter_button")
-    apply_button = driver.find_element(By.ID, "apply_button")
+    apply_button = driver.find_element(By.ID, "filter_apply")
 
     return filter_button, apply_button
 
@@ -131,7 +132,10 @@ def test_sent_filter(driver) -> None:
     reset(driver)
 
 
-# def get_screenshot(driver):
-#    file_name = "screenshot.png"
-#    if os.path.exists(file_name):
-#       os.remove(file_name)
+def get_screenshot(driver):
+    file_name = "screenshot_0.png"
+    i = 1
+    cwd = os.getcwd()
+    while os.path.exists(os.path.join(cwd, file_name)):
+        file_name = f"screenshot_{i}.png"
+        i += 1
