@@ -40,8 +40,8 @@ def test_grade_filter(driver) -> None:
         10,
         ignored_exceptions=[ElementNotVisibleException, ElementNotSelectableException],
     )
-    element = wait.until(EC.element_to_be_clickable(apply_button))
     # sleep(5)
+    element = wait.until(EC.element_to_be_clickable(apply_button))
     apply_button.click()
     # sleep(5)
     min_level = int(grade_filter.get_attribute("se-min-current"))
@@ -69,8 +69,8 @@ def test_date_filter(driver) -> None:
         10,
         ignored_exceptions=[ElementNotVisibleException, ElementNotSelectableException],
     )
-    element = wait.until(EC.element_to_be_clickable(apply_button))
     # sleep(5)
+    element = wait.until(EC.element_to_be_clickable(apply_button))
     apply_button.click()
     # sleep(5)
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
@@ -91,8 +91,8 @@ def test_cruxes_filter(driver) -> None:
         10,
         ignored_exceptions=[ElementNotVisibleException, ElementNotSelectableException],
     )
-    element = wait.until(EC.element_to_be_clickable(apply_button))
     # sleep(5)
+    element = wait.until(EC.element_to_be_clickable(apply_button))
     filter.click()
     # sleep(5)
     crux_button = driver.find_element(By.ID, "filter_Crux_1")
@@ -119,8 +119,8 @@ def test_sent_filter(driver) -> None:
         10,
         ignored_exceptions=[ElementNotVisibleException, ElementNotSelectableException],
     )
-    element = wait.until(EC.element_to_be_clickable(apply_button))
     # sleep(5)
+    element = wait.until(EC.element_to_be_clickable(apply_button))
     filter.click()
     # sleep(5)
 
@@ -139,3 +139,4 @@ def get_screenshot(driver):
     while os.path.exists(os.path.join(cwd, file_name)):
         file_name = f"screenshot_{i}.png"
         i += 1
+    driver.get_screenshot_as_file(file_name)
