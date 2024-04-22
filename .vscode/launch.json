@@ -20,6 +20,15 @@
       ]
     },
     {
+      "name": "Python: Flask test db",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "run.py",
+      "args": ["-d=test_100"],
+      "jinja": true,
+      "justMyCode": true,
+    },
+    {
       "name": "Python Debugger: Current File",
       "type": "debugpy",
       "request": "launch",
