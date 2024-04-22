@@ -8,8 +8,8 @@ function getTextWidth(text, obj) {
 
 var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
   var self = this;
-  let startX = 0,
-    x = 0;
+  let startX = 0;
+  x = 0;
   self.id = id;
 
   self.data_column = data_column;

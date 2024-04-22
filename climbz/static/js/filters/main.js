@@ -43,7 +43,7 @@ FILTERS = {
     "Inclination": {
         "filter_type": "slider",
         "data_class": Number,
-        "step": 5, 
+        "step": 5,
         "data_column": "inclination",
         "row": 1,
         "col": 0,
@@ -51,7 +51,7 @@ FILTERS = {
     "Landing": {
         "filter_type": "slider",
         "data_class": Number,
-        "step": 1, 
+        "step": 1,
         "data_column": "landing",
         "row": 0,
         "col": 1,
@@ -59,7 +59,7 @@ FILTERS = {
     "Attempts": {
         "filter_type": "slider",
         "data_class": Number,
-        "step": 1, 
+        "step": 1,
         "data_column": "n_attempts_send",
         "row": 2,
         "col": 0,
@@ -67,7 +67,7 @@ FILTERS = {
     "Height": {
         "filter_type": "slider",
         "data_class": Number,
-        "step": 0.5, 
+        "step": 0.5,
         "data_column": "height",
         "row": 1,
         "col": 1,

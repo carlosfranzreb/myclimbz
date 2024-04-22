@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from tests.conftest import run_app, driver
 
 
-def test_csv_import(driver):
+def test_csv_import(driver, monkeypatch):
     driver.get("http://127.0.0.1:5000/")
     while driver.title != "Routes":
         sleep(1)
@@ -83,6 +83,8 @@ def test_csv_import(driver):
     alert.accept()
     assert sent_select.value == "--"
 
+    sent_select.send_keys("Sent")
+
     dates_select = driver.find_element(By.ID, "csv_select_dates")
     # set the option "Angle"
     dates_select.send_keys("Angle")
@@ -91,6 +93,12 @@ def test_csv_import(driver):
     assert alert.text
     alert.accept()
     assert dates_select.value == "--"
+    # Confirm import with sent and without dates and check that alert is shown
+    confirm_button.click()
+    alert = driver.switch_to.alert
+    assert alert.text
+    alert.accept()
+
     dates_select.send_keys("Date")
 
     cancel_button = driver.find_element(By.ID, "cancel_csv_button")
@@ -99,4 +107,14 @@ def test_csv_import(driver):
     csv_button.click()
     assert name_select.options.length == 1
     csv_input.send_keys(csv_path)
-    # TODO: confirm import and monkeypath func to get data returned instead of writing to db
+
+    request = None
+
+    def get_request(x):
+        nonlocal request
+        request = x
+
+    monkeypatch.setattr("climbz.blueprints.home.routes.page_home", get_request)
+    confirm_button.click()
+    assert request.form["data_type"] == "csv"
+    assert request.form["csv_data"]

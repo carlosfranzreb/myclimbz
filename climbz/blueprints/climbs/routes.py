@@ -17,8 +17,11 @@ climbs = Blueprint("climbs", __name__)
 
 
 @climbs.route("/add_climb", methods=["GET", "POST"])
-def add_climb() -> str:
-    entities = flask_session.get("entities", dict())
+def add_climb(csv_entities: dict = None) -> str:
+    if csv_entities is not None:
+        entities = csv_entities
+    else:
+        entities = flask_session.get("entities", dict())
 
     # create forms and add choices
     session = Session.query.get(flask_session["session_id"])

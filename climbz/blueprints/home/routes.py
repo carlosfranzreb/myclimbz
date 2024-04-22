@@ -9,10 +9,15 @@ from flask import (
 )
 from flask_login import current_user
 import whisper
+import pandas as pd
 
 from climbz.ner import transcribe, parse_climb, ClimbsModel
 from climbz.models import Grade, Climber
 from climbz.blueprints.utils import render
+from climbz.blueprints.climbs import routes as climbs_route
+from climbz.blueprints.sessions import routes as sessions_route
+from climbz.forms.session import SessionForm
+from climbz import db
 
 
 ASR_MODEL = whisper.load_model("tiny")
@@ -59,7 +64,24 @@ def page_home() -> str:
                 return redirect("/add_session")
 
         elif data_type == "csv":
-            csv_json = request.files["csv_data"]
+            csv_json = request.form["csv_data"]
+            # group climbs by date and area
+            climbs = pd.read_json(csv_json)
+            climbs_by_date = climbs.groupby("dates")
+            for date, climbs in climbs_by_date:
+                climbs_by_area = climbs.groupby("area")
+                for area, climbs in climbs_by_area:
+                    # TODO:create a session
+                    session_form = SessionForm.create_empty()
+                    session_form.area.data = area
+                    area_obj = session_form.get_area()
+                    session_form.date.data = date
+                    sessions_route.add_session()
+                    # TODO: What to do about conditions in sessions
+
+                    for climb in climbs.itertuples():
+                        # TODO: add necessary info to entities.
+                        climbs_route.add_climb()
 
     # GET: no audio file was uploaded => show home page
     return render(

@@ -41,9 +41,9 @@ def reopen_session(session_id: int) -> str:
 
 
 @sessions.route("/add_session", methods=["GET", "POST"])
-def add_session() -> str:
+def add_session(csv_import: bool = False) -> str:
     # POST: a session form was submitted => create session or return error
-    if request.method == "POST":
+    if request.method == "POST" or csv_import:
         session_form = SessionForm.create_empty()
         if not session_form.validate():
             flask_session["error"] = session_form.errors
