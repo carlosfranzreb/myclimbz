@@ -76,9 +76,9 @@ class Route(db.Model):
 
     @property
     def consensus_level(self) -> int:
-        """Most common given level to this route, or -1 if there are none."""
+        """Most common given level to this route or null."""
         level_counts = Counter(op.grade.level for op in self.opinions)
-        return level_counts.most_common(1)[0][0] if level_counts else -1
+        return level_counts.most_common(1)[0][0] if level_counts else None
 
     @property
     def consensus_grade(self) -> Grade:
@@ -125,14 +125,15 @@ class Route(db.Model):
         n_sessions, n_attempts_all, n_attempts_send = 0, 0, 0
         conditions, dates = list(), list()
         first_send = False
-        for climb in self.climbs:
+        sorted_climbs = sorted(self.climbs, key=lambda climb: climb.session.date)
+        for climb in sorted_climbs:
             if climb.session.climber_id != climber_id:
                 continue
-            n_sessions += 1
             n_attempts = climb.n_attempts if climb.n_attempts is not None else 0
             n_attempts_all += n_attempts
             if not first_send:
                 n_attempts_send += n_attempts
+                n_sessions += 1
             first_send = first_send or climb.sent
             conditions.append(climb.session.conditions)
             dates.append(climb.session.date)

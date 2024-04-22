@@ -9,7 +9,6 @@ from flask_login import current_user
 from climbz.models import Area, Session
 from climbz.forms import SessionForm
 from climbz import db
-from climbz.ner.tracking import dump_predictions
 from climbz.blueprints.utils import render
 
 
@@ -62,20 +61,10 @@ def add_session(csv_import: bool = False) -> str:
         db.session.add(session)
         db.session.commit()
         flask_session["session_id"] = session.id
-
-        if "predictions" in flask_session:
-            flask_session["predictions"]["area_id"] = area.id
-            flask_session["predictions"]["session_id"] = session.id
-            dump_predictions()
-
-        flask_session.pop("entities", None)
         return redirect("/")
 
     # GET: the user has uploaded a recording or wants to start a session
-    if "entities" not in flask_session:
-        flask_session["entities"] = dict()
-    session_form = SessionForm.create_from_entities(flask_session["entities"])
-
+    session_form = SessionForm.create_empty()
     return render(
         "add_session.html",
         title="Add session",

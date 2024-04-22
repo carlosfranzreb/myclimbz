@@ -59,7 +59,7 @@ def logout():
 
 
 @climbers.route("/edit_climber/<int:climber_id>", methods=["GET", "POST"])
-def edit_profile(climber_id: int):
+def edit_climber(climber_id: int):
     """Edit profile."""
     form = ClimberForm()
     climber = Climber.query.get(climber_id)

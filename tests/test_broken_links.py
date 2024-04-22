@@ -1,24 +1,22 @@
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.common.exceptions import TimeoutException
 
 
-SKIP_URLS = [
-    "http://localhost:5000/logout",
-    "http://localhost:5000/cancel_form",
-]
+SKIP_ACTIONS = ["delete", "reopen", "cancel", "logout", "edit", "add"]
 OBJECTS = ["route", "session", "area", "climber"]
-
 SEEN_URLS = list()
+BROKEN_URLS = list()
 
 
 def test_broken_links(driver):
-    broken_links = check_page_links(driver)
-    other_urls = [f"http://localhost:5000/{obj}/1" for obj in OBJECTS]
-    other_urls += [f"http://localhost:5000/edit_{obj}/1" for obj in OBJECTS]
-    broken_links += check_links(driver, other_urls)
-    assert len(SEEN_URLS) > 0, "No links found on the page"
-    assert len(broken_links) == 0, f"The following links are broken: {broken_links}"
+    check_page_links(driver)
+    other_urls = [f"http://127.0.0.1:5000/{obj}/1" for obj in OBJECTS]
+    other_urls += [f"http://127.0.0.1:5000/edit_{obj}/1" for obj in OBJECTS]
+    check_links(driver, other_urls)
+    assert len(SEEN_URLS) > len(OBJECTS) * 2, "Suspiciously few URLs were checked."
+    assert len(BROKEN_URLS) == 0, f"The following links are broken: {BROKEN_URLS}"
 
 
 def check_page_links(driver):
@@ -26,21 +24,23 @@ def check_page_links(driver):
     return check_links(driver, urls)
 
 
-def check_links(driver, urls):
-    broken_links = list()
+def check_links(driver, urls: list[str]) -> list[str]:
     for url in urls:
-        if url in SEEN_URLS:
-            continue
         SEEN_URLS.append(url)
+        print(f"Checking {url}")
         driver.get(url)
-        WebDriverWait(driver, 10).until(
-            lambda driver: url == clean_url(driver.current_url)
-        )
+        try:
+            WebDriverWait(driver, 10).until(
+                lambda driver: url == clean_url(driver.current_url)
+            )
+        except TimeoutException:
+            BROKEN_URLS.append(url)
+            continue
+
         if "Error" in driver.title or "Exception" in driver.title:
-            broken_links.append(url)
+            BROKEN_URLS.append(url)
         else:
-            broken_links += check_page_links(driver)
-    return broken_links
+            check_page_links(driver)
 
 
 def get_urls(links: list[WebElement]) -> list[str]:
@@ -53,7 +53,26 @@ def get_urls(links: list[WebElement]) -> list[str]:
             continue
         if url:
             url = clean_url(url)
-            if url not in SKIP_URLS:
+
+            # skip duplicates and URLs that have already been checked
+            if url in urls or url in SEEN_URLS:
+                continue
+
+            # skip URLs that refer to objects; these are checked separately
+            is_valid = True
+            for obj in OBJECTS:
+                if f"/{obj}/" in url:
+                    is_valid = False
+                    break
+            if not is_valid:
+                continue
+
+            # skip URLs that include certain actions
+            for action in SKIP_ACTIONS:
+                if action in url:
+                    is_valid = False
+                    break
+            if is_valid:
                 urls.append(url)
     return urls
 

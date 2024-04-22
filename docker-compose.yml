@@ -1,0 +1,14 @@
+version: "0.1"
+
+services:
+  web:
+    image: ghcr.io/carlosfranzreb/boulders:latest
+    build: .
+    volumes:
+      - ./climbz/:/usr/src/climbz
+      - ./instance:/usr/src/instance
+    env_file:
+      - .env
+    ports:
+      - 5000:5000
+      - 5670:5670

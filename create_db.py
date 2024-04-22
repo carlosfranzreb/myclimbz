@@ -1,10 +1,13 @@
 """
 Script to create the database and populate it with testing data.
+TODO: add projects
+TODO: add climbs of both climbers to the same route
 """
 
 from argparse import ArgumentParser
 from datetime import datetime
 import random
+import os
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import generate_password_hash
@@ -94,7 +97,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
     pw = "123"
     pw_hash = generate_password_hash(pw)
     db.session.add(
-        models.Climber(name="Climber1", email="c1@climbz.com", password=pw_hash)
+        models.Climber(name="Climber1", email="c1@climbz.com", password=pw_hash, role=1)
     )
     db.session.add(
         models.Climber(name="Climber2", email="c2@climbz.com", password=pw_hash)
@@ -106,7 +109,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
     db.session.add(models.Sector(name="A1_S1", area_id=1, created_by=1))
     db.session.add(models.Sector(name="A1_S2", area_id=1, created_by=2))
     db.session.add(models.Sector(name="A2_S1", area_id=2, created_by=2))
-    sector_ids = list(range(1, 4))
+    sector_ids = [1, 2, 3]
 
     # create 4 sessions: 3 in A1, 1 in A2
     db.session.add(
@@ -118,7 +121,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
         )
     )
     db.session.add(
-        models.Session(date=datetime(2023, 3, 7), conditions=1, area_id=1, climber_id=1)
+        models.Session(date=datetime(2023, 3, 7), conditions=1, area_id=2, climber_id=1)
     )
     db.session.add(
         models.Session(
@@ -131,7 +134,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
             if route_idx > n_routes:
                 break
             sector_id = random.choice(sector_ids)
-            area_id = 1 if sector_id < 3 else 2
+            area_id = 1 if sector_id < 2 else 2
             db.session.add(
                 models.Route(
                     name=name.strip(),
@@ -144,7 +147,9 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
             )
             # with p=0.6, add climb to the session
             if random.random() < 0.6:
-                session_id = random.randint(1, 3) if area_id == 1 else 4
+                session_id = random.choice([1, 2])
+                if area_id == 2:
+                    session_id += 2
                 sent = bool(random.randint(0, 1))
                 climber_id = 1 if session_id < 4 else 2
                 db.session.add(
@@ -201,7 +206,11 @@ if __name__ == "__main__":
         db_name = f"test_{args.n_routes}"
     else:
         db_name = "prod"
-    app = create_app(db_name)
+
+    os.environ["CLIMBZ_DB_URI"] = f"sqlite:///{db_name}.db"
+    os.environ["CLIMBZ_SECRET_KEY"] = os.urandom(24).hex()
+    app = create_app()
+
     with app.app_context():
         db.create_all()
         for rock_type in ROCKS:
