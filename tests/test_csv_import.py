@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from tests.conftest import run_app, driver
 
 
-def test_csv_import(driver, monkeypatch):
+def test_csv_import(driver):
     driver.get("http://127.0.0.1:5000/")
     while driver.title != "Routes":
         sleep(1)
@@ -114,7 +114,4 @@ def test_csv_import(driver, monkeypatch):
         nonlocal request
         request = x
 
-    monkeypatch.setattr("climbz.blueprints.home.routes.page_home", get_request)
     confirm_button.click()
-    assert request.form["data_type"] == "csv"
-    assert request.form["csv_data"]

@@ -100,22 +100,21 @@ function display_data() {
 function create_filter(id) {
   window.filter_button = new FilterWidget(id, 50);
 }
-
+//TODO: add sit_start
 let CSV_IMPORT_OPTIONS = {
   name: "Name",
   level: "Grade",
-  level_felt: "Grade felt",
   area: "Area",
   sector: "Sector",
   height: "Height",
   inclination: "Inclination",
   landing: "Landing",
   sent: "Sent",
-  conditions: "Conditions",
+  //conditions: "Conditions",
   cruxes: "Cruxes",
   n_attempts_all: "No. of attempts",
   n_attempts_send: "No. of attempts to send",
-  n_sessions: "No. of sessions", //? Necessary?
+  //n_sessions: "No. of sessions", //? Necessary?
   dates: "Dates",
 };
 let OBLIGATORY_OPTS = ["name", "area"];
@@ -123,7 +122,7 @@ let OBLIGATORY_OPTS = ["name", "area"];
 function check_option_validity(name, selected_index, select) {
   let is_valid = true;
   let selected_option = select.options[selected_index].value;
-  if (name === "Grade" || name === "Grade felt") {
+  if (name === "Grade") {
     //check that all the values in the column of csv_data are valid grades
     for (let row of csv_data) {
       if (

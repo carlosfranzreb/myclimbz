@@ -1,12 +1,12 @@
-Area,Sector,Name,Start,Grade,Angle,Height,Landing,Style,Date,Tries,Grade felt, Sent
-la pedriza,canto cochino oeste,musgoevash,stand,6b+,0,3,7,"side pull, slopers, heel hook, rockover",10/11/2023,4, yes
-la pedriza,canto cochino oeste,la chincheta,sit,6b,0,2.5,7,"hard start, bunchy",11/11/2023,4, yes
-alcolea del pinar,a2,cuatrojos,sit,,0,4,7,"slopers, jugs, layback",18/11/2023,1,6a/+, yes
-alcolea del pinar,a2,onlyfans,sit,,60,3.5,7,"powerful, slopers, jugs",26/11/2023,10,6b+, yes
-alcolea del pinar,a2,espolon molon,stand,6a+,10,3.5,7,"undercling, slopers, sidepull",26/11/2023,4,6b, yes
-alcolea del pinar,aguilar de anguita,magmatico,stand,,0,3.5,7,"jugs, long move",06/12/2023,3,5, yes
-alcolea del pinar,aguilar de anguita,,stand,,0,3.5,7,"dynamic, bad feet",06/12/2023,5,6a, yes
-alcolea del pinar,barbizon,el pendulo,stand,6a+,10,3.5,7,"dynamic, sidepulls",22/12/2023,6, yes
-la pedriza,quebrantaherraduras,el duro,stand,6c,0,5,5,"edges, crimps, rockover",26/12/2023,10,6b+, yes
-alcolea del pinar,aguilar de anguita,,sit,,0,5,7,"small holds, balance, technical",07/01/2024,5,6b, yes
-alcolea del pinar,aguilar de anguita,Otra Pesadilla Deiv,sit,,5,3,7,"Underclings, kneebar, physical",21/01/2024,10,6c, yes
+Area,Sector,Name,Start,Grade,Angle,Height,Landing,Style,Date,Tries,Sent
+la pedriza,canto cochino oeste,musgoevash,stand,6b+,0,3,7,"side pull, slopers, heel hook, rockover",10/11/2023,yes
+la pedriza,canto cochino oeste,la chincheta,sit,6b,0,2.5,7,"hard start, bunchy",11/11/2023,yes
+alcolea del pinar,a2,cuatrojos,sit,,0,4,7,"slopers, jugs, layback",18/11/2023,1,yes
+alcolea del pinar,a2,onlyfans,sit,,60,3.5,7,"powerful, slopers, jugs",26/11/2023,10,yes
+alcolea del pinar,a2,espolon molon,stand,6a+,10,3.5,7,"undercling, slopers, sidepull",26/11/2023,4,yes
+alcolea del pinar,aguilar de anguita,magmatico,stand,,0,3.5,7,"jugs, long move",06/12/2023,3,yes
+alcolea del pinar,aguilar de anguita,,stand,,0,3.5,7,"dynamic, bad feet",06/12/2023,5,yes
+alcolea del pinar,barbizon,el pendulo,stand,6a+,10,3.5,7,"dynamic, sidepulls",22/12/2023,,yes
+la pedriza,quebrantaherraduras,el duro,stand,6c,0,5,5,"edges, crimps, rockover",26/12/2023,10,yes
+alcolea del pinar,aguilar de anguita,,sit,,0,5,7,"small holds, balance, technical",07/01/2024,5,yes
+alcolea del pinar,aguilar de anguita,Otra Pesadilla Deiv,sit,,5,3,7,"Underclings, kneebar, physical",21/01/2024,10,yes

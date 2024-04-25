@@ -15,15 +15,16 @@ climbs = Blueprint("climbs", __name__)
 
 
 @climbs.route("/add_climb", methods=["GET", "POST"])
-def add_climb() -> str:
+def add_climb(csv_import: bool = False) -> str:
 
     # create forms and add choices
     session = Session.query.get(flask_session["session_id"])
-    route_form = RouteForm.create_empty()
-    climb_form = ClimbForm() if not session.is_project_search else None
+    if not csv_import:
+        route_form = RouteForm.create_empty()
+        climb_form = ClimbForm() if not session.is_project_search else None
 
     # POST: a climb form was submitted => create climb or return error
-    if request.method == "POST":
+    if request.method == "POST" or csv_import:
         route_name = route_form.name.data
         invalid_climb = (
             not climb_form.validate_from_name(route_name)
