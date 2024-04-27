@@ -6,3 +6,4 @@ def test_request(driver: webdriver.Chrome):
     btn = driver.find_element(By.XPATH, "//input[@id='display-form-toggle']")
     if not btn.is_selected():
         btn.find_element(By.XPATH, "..").click()
+        assert btn.is_selected()
