@@ -18,6 +18,8 @@ from datetime import datetime
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from sqlalchemy import text
 
 
@@ -39,6 +41,12 @@ def get_plotted_data(
         the plotted data as a list of tuples, where each tuple is of the form
         (key, value).
     """
+
+    # check that the URL is correct
+    home_url = "http://127.0.0.1:5000"
+    if not driver.current_url == home_url:
+        driver.get(home_url)
+        WebDriverWait(driver, 30).until(EC.title_is("Routes"))
 
     # toggle to show plot
     btn = driver.find_element(By.XPATH, "//input[@id='display-form-toggle']")
