@@ -20,15 +20,16 @@ def db_session() -> Session:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def driver(env: str) -> Generator[webdriver.Chrome, None, None]:
+def driver() -> Generator[webdriver.Chrome, None, None]:
     """
     If env=dev:
         Starts the Docker container with docker compose.
     Elif env=ci:
         GitHub Actions will run the web app as a service.
     """
+    is_ci = os.environ.get("CI", False)
     try:
-        if env == "dev":
+        if not is_ci:
             os.system("docker compose up -d")
         driver_options = webdriver.ChromeOptions()
         driver_options.add_argument("--headless=new")
@@ -37,7 +38,7 @@ def driver(env: str) -> Generator[webdriver.Chrome, None, None]:
         WebDriverWait(driver, 30).until(EC.title_is("Routes"))
         yield driver
     finally:
-        if env == "dev":
+        if not is_ci:
             os.system("docker compose down")
         driver.quit()
 
@@ -45,14 +46,3 @@ def driver(env: str) -> Generator[webdriver.Chrome, None, None]:
 def run_app() -> None:
     app = create_app()
     app.run()
-
-
-def pytest_addoption(parser):
-    parser.addoption(
-        "--env", default="dev", help="testing environment", choices=("dev", "ci")
-    )
-
-
-@pytest.fixture(scope="session")
-def env(request):
-    return request.config.getoption("--env")
