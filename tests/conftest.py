@@ -33,6 +33,7 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
             os.system("docker compose up -d")
         driver_options = webdriver.ChromeOptions()
         driver_options.add_argument("--headless")
+        driver_options.add_argument("--window-size=2560,1440")
         driver = webdriver.Chrome(options=driver_options)
         driver.get("http://127.0.0.1:5000")
         WebDriverWait(driver, 30).until(EC.title_is("Routes"))

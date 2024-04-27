@@ -4,23 +4,18 @@ and for the checkbox filters, only one option is selected. Multiple filters, mul
 checkboxes, and removing filters are not tested.
 """
 
-from time import sleep
 from datetime import datetime
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import *
-import os
 
 
 def reset(driver):
     driver.get("http://localhost:5000/")
     WebDriverWait(driver, 30).until(EC.title_is("Routes"))
-
     filter_button = driver.find_element(By.ID, "filter_button")
     apply_button = driver.find_element(By.ID, "filter_apply")
-
     return filter_button, apply_button
 
 
@@ -35,17 +30,9 @@ def test_grade_filter(driver) -> None:
         grade_filter,
     )
     filter_button.click()
-    wait = WebDriverWait(
-        driver,
-        10,
-        # ignored_exceptions=[ElementNotVisibleException, ElementNotSelectableException],
-    )
-    sleep(5)
-    get_screenshot(driver)
-    element = wait.until(EC.element_to_be_clickable(apply_button))
+
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(apply_button))
     apply_button.click()
-    sleep(5)
-    get_screenshot(driver)
     min_level = int(grade_filter.get_attribute("se-min-current"))
     assert min_level == 5
     max_level = int(grade_filter.get_attribute("se-max-current"))
@@ -66,17 +53,8 @@ def test_date_filter(driver) -> None:
     driver.execute_script(f"arguments[0].value = '{min_date}'", filter)
 
     filter_button.click()
-    wait = WebDriverWait(
-        driver,
-        10,
-        ignored_exceptions=[ElementNotVisibleException, ElementNotSelectableException],
-    )
-    sleep(5)
-    get_screenshot(driver)
-    element = wait.until(EC.element_to_be_clickable(apply_button))
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(apply_button))
     apply_button.click()
-    sleep(5)
-    get_screenshot(driver)
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
     min_date = datetime.strptime(min_date, "%d/%m/%Y")
     assert all(
@@ -90,25 +68,15 @@ def test_cruxes_filter(driver) -> None:
     filter_button, apply_button = reset(driver)
     filter = driver.find_element(By.ID, "filter_Crux_button")
     filter_button.click()
-    wait = WebDriverWait(
-        driver,
-        10,
-        ignored_exceptions=[ElementNotVisibleException, ElementNotSelectableException],
-    )
-    sleep(5)
-    get_screenshot(driver)
-    element = wait.until(EC.element_to_be_clickable(apply_button))
+
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(apply_button))
     filter.click()
-    sleep(5)
-    get_screenshot(driver)
+
     crux_button = driver.find_element(By.ID, "filter_Crux_1")
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(crux_button))
     crux_button.click()
-    sleep(5)
-    get_screenshot(driver)
 
     apply_button.click()
-    sleep(5)
-    get_screenshot(driver)
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
 
     crux = driver.execute_script(
@@ -122,32 +90,13 @@ def test_sent_filter(driver) -> None:
     filter_button, apply_button = reset(driver)
     filter = driver.find_element(By.ID, "filter_Sends_1")
     filter_button.click()
-    wait = WebDriverWait(
-        driver,
-        10,
-        ignored_exceptions=[ElementNotVisibleException, ElementNotSelectableException],
-    )
-    sleep(5)
-    get_screenshot(driver)
-    element = wait.until(EC.element_to_be_clickable(apply_button))
+
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(filter))
     filter.click()
-    sleep(5)
-    get_screenshot(driver)
 
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(apply_button))
     apply_button.click()
-    sleep(5)
-    get_screenshot(driver)
-    displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
 
+    displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
     assert all(not route["sent"] for route in displayed_data)
     reset(driver)
-
-
-def get_screenshot(driver):
-    file_name = "screenshot_0.png"
-    i = 1
-    cwd = os.getcwd()
-    while os.path.exists(os.path.join(cwd, file_name)):
-        file_name = f"screenshot_{i}.png"
-        i += 1
-    driver.get_screenshot_as_file(file_name)
