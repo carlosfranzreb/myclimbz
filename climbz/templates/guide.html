@@ -5,7 +5,7 @@
     <h2>Contact Information</h2>
     <p>
         If you have questions about this software which are not answered in the guide
-        below, please contact us with this form (TODO).
+        below, please contact us at .
     </p>
 </div>
 
@@ -90,7 +90,10 @@
         it, which often differ between climbers. These are:
     </p>
     <ul>
-        <li>The <b>grade</b> of the route. We support both Hueco and Font grades.</li>
+        <li>
+            The <b>grade</b> of the route. We support both Hueco and Font grades. You
+            can pick your preferred scale in your profile settings.
+        </li>
         <li>
             The <b>cruxes</b> of the route. We have crafted a list that we hope covers
             all possible difficulties you may encounter in a climb, including hand holds
@@ -116,10 +119,10 @@
         </li>
     </ul>
     <p>
-        Climbs are part of <b>sessions</b>, which are the days you go climbing. Each
-        session takes place in an area on a certain day. You can also write a comment
-        about how you're feeling, what your purpose is for the day, or anything else
-        you wish to remember about the day. You can give the <b>conditions a rating</b>
+        Climbs are part of <b>sessions</b>, which represent the days you go climbing.
+        Each session takes place in an area on a certain day. You can also write a
+        comment about how you're feeling, what your purpose is for the day, or anything
+        else you wish to remember about the day. You can <b>rate the conditions</b>
         from 1 to 5 stars, which may include aspects like temperature, humidity,
         whether the sun is shining or the rock is wet, etc.
     </p>
@@ -129,28 +132,179 @@
 <div class="container" id="log_data">
     <h3>How to add sessions and climbs</h3>
     <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc tincidunt tincidunt. Nullam
-        nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc
-        tincidunt tincidunt. Nullam nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc tincidunt
+        Logging data is very dynamic. It is all done with one form, even if a route
+        or area does not exist yet. You can add it on the fly while logging your climb
+        or starting your session.
+    </p>
+    <p>
+        If you want to add some climbs, you first need to <b>start a session</b>. You
+        can do so by clicking the button "Start session" in the navigation bar, which
+        leads you to a form where you can select the area you're climbing in, the date
+        and rate the conditions. If the area name does not exist yet, you are shown
+        the form to add a new area.
+    </p>
+    <p>
+        When starting a session, there is a checkbox which says "Only adding projects
+        (not climbing)", which refers to what we call a <b>project search</b>. Checking
+        it means that you are not going to log any climbs, only add routes. This is
+        useful if you are exploring a new area and want to add routes to climb in the
+        future. A project search, once ended, will not be shown in the list of sessions.
+    </p>
+    <p>
+        If you have started a normal session, you can still <b>add projects</b> by
+        checking the checkbox "Project (not tried yet)". The form to log a climb will
+        be hidden, and only the route will be added. You can also mark routes created
+        by other climbers as projects outside of a session, by clicking the corresponding
+        button in the page of that route or its area table. Routes created by you that
+        you have not tried are automatically marked as projects.
+    </p>
+    <p>
+        Once you have started a session, you can <b>log a climb</b> by clicking the
+        button "Add climb" in the navigation bar. You will be asked to select the route
+        you climbed and the fields for the climb we described above.
+    </p>
+    <p>
+        If the name of the route you climbed does not exist in the area you are climbing
+        in, you are also shown the <b>form to add a new route</b>.
+    </p>
+    <p>
+        Once you are done adding the climbs of a session, you can <b>stop the session</b>
+        by clicking the button "Stop session" in the navigation bar.
     </p>
 </div>
 
 <div class="container" id="filters">
     <h3>How to filter climbs and routes</h3>
     <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc tincidunt tincidunt. Nullam
-        nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc
-        tincidunt tincidunt. Nullam nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc tincidunt
+        In the home page you can see all the routes you have either tried, sent or
+        marked as projects. There are several filters to narrow down the list. They are
+        all self-explanatory. One thing to note is that you need to click the "Apply"
+        button for the filters to take effect.
+    </p>
+    <p>
+        For example, if you are planning a trip to a certain area, you can filter the routes
+        by area with the dropdown menu titled "Area", and then select "Projects" to filter out
+        the routes you have already sent. If you are looking to try something new, you can remove
+        all climbs you have already tried by changing the slider for the number of attempts.
     </p>
 </div>
 
 <div class="container" id="plots">
     <h3>How to analyse your climbs</h3>
     <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc tincidunt tincidunt. Nullam
-        nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc
-        tincidunt tincidunt. Nullam nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc tincidunt
+        At the top of the home page, there is a toggle to switch between the table and
+        the plot. Both display the same data, i.e. the filters do not change when moving
+        from one to the other. One additional aspect to consider with the plots is that
+        you can select the axes you want to plot. Here we introduce the available values
+        for each of the axes.
     </p>
+    <h4>X-axis</h4>
+    <p>
+        The x-axis is the horizontal line of the plot. It defines how to group the data.
+        For example, if you select "Grade" as the x-axis, the routes will be grouped
+        by grade. There are x-axis values that are applied on the routes, like "Grade",
+        and other that are applied on the climbs, like "Conditions". In the latter case,
+        each route may be plotted more than once (as often as you have climbed them).
+        These are the available values for the x-axis:
+    </p>
+    <ul>
+        <li>
+            <b>Grade:</b> routes are grouped by grade. Your grade is always chosen
+            first. If you haven't given a route a grade, the consensus grade is chosen
+            instead.
+        </li>
+        <li>
+            <b>Grade - Consensus:</b> routes are grouped by the consensus grade. The
+            grade that the largest number of climbers have given to each route is chosen.
+
+        </li>
+        <li><b>Area:</b> routes are grouped by area</li>
+        <li>
+            <b>Sector:</b> routes are grouped by sector. This value should usually be used
+            together with an area filter.
+        </li>
+        <li>
+            <b>Conditions:</b> the climbs are grouped by the conditions of the session.
+        </li>
+        <li><b>Date: day:</b> climbs are grouped by day.</li>
+        <li><b>Date: month:</b> climbs are grouped by month.</li>
+        <li><b>Date: year:</b> climbs are grouped by year.</li>
+        <li><b>Height:</b> routes are grouped by height.</li>
+        <li><b>Inclination:</b> routes are grouped by inclination.</li>
+        <li>
+            <b>Landing:</b> routes are grouped by landing. Only your opinion about the
+            landing is considered. Routes for which you have not given a rating for the
+            landing will not appear in the plot.
+        </li>
+        <li>
+            <b>Rating:</b> routes are grouped by rating, the same way as with the
+            "Landing" value.
+        </li>
+        <li><b>Sit start:</b> routes are grouped by their starting position.</li>
+        <li><b>Sent:</b> routes are grouped by whether you have sent them or not</li>
+        <li>
+            <b>Cruxes:</b> routes are grouped by crux, the same way as with the
+            "Landing" value. As you can assign more than one crux to a route, routes
+            can be plotted more than once.
+        </li>
+        <li>
+            <b>No. of sessions:</b> routes are grouped by the number of sessions it
+            took you to send them. This plot does not include repeats, i.e. your climbs
+            on a route after the first send.
+        </li>
+        <li>
+            <b>No. of attempts:</b> routes are grouped by the number of attempts, in
+            the same way as with the "No. of sessions" value.
+        </li>
+    </ul>
+
+    <h4>Y-axis</h4>
+    <p>
+        The x-axis determines what is being plotted, i.e. the height of the bars that
+        are displayed. For example, if you choose "Climbs: total sent" as the y-axis,
+        the total number of routes that you have sent for each group is displayed.
+        Groups are defined by the x-axis. Here are the available values for the y-axis,
+        which define the number displayed for each group:
+    </p>
+    <ul>
+        <li>
+            <b>Attempts: total:</b> your total number of attempts on the routes. All
+            attempts you make after sending a route for the first time are not
+            considered in this plot.
+        </li>
+        <li>
+            <b>Attempts: avg.:</b> the average number of attempts you need to send a route.
+        </li>
+        <li>
+            <b>Attempts: min.:</b> the minimum number of attempts it took you to send any
+            route.
+        </li>
+        <li>
+            <b>Attempts: max.:</b> the maximum number of attempts it took you to send any
+            route.
+        </li>
+        <li>
+            <b>Climbs: total tried:</b> the total amount of routes you have tried.
+        </li>
+        <li>
+            <b>Climbs: total sent:</b> the total amount of routes you have sent of each
+            group.
+        </li>
+        <li>
+            <b>Climbs: success rate:</b> the number of climbs you have sent, divided by
+            the number of climbs you have tried.
+        </li>
+        <li>
+            <b>Grade: avg.:</b> the average grade of the routes. The grade you have given
+            to the routes has priority. For the routes to which you have not given a grade,
+            the consensus grade is taken instead.
+        </li>
+        <li>
+            <b>Grade: max.:</b> the maximum grade of the routes within each group. Grades
+            are defined in the same way as for the "Grade: avg." value.
+        </li>
+    </ul>
+
 </div>
 
 
