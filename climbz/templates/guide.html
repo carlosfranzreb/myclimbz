@@ -1,0 +1,157 @@
+{% extends "main.html" %}
+{% block content %}
+
+<div class="container">
+    <h2>Contact Information</h2>
+    <p>
+        If you have questions about this software which are not answered in the guide
+        below, please contact us with this form (TODO).
+    </p>
+</div>
+
+<div class="container">
+    <h2>User Guide</h2>
+
+    <p>
+        myClimbz is an app for tracking your sends and projects. Every time you have a
+        session outside, you can log where you climbed, how the conditions were and
+        which routes you tried. Routes are recorded with more information other
+        than the grade, such as the height and inclination, which may help you decide
+        which project to try next. Once you send a climb, you can record your opinion
+        on the grade and the crux, as well as ratings of the route and the landing.
+        All this information can be easily analysed with our plots and filters.
+    </p>
+
+    <h3>Index</h3>
+    <ul>
+        <li><a href="#data_info">What kind of data do we track?</a></li>
+        <li><a href="#log_data">How to add sessions and climbs</a></li>
+        <li><a href="#filters">How to filter climbs and routes</a></li>
+        <li><a href="#plots">How to analyse your climbs</a></li>
+    </ul>
+</div>
+
+<div class="container" id="data_info">
+    <h3>What kind of data do we track?</h3>
+    <p>
+        Routes are shared among climbers. If you are the first one to add a route to
+        myClimbz, you will be asked to fill some information about it. When another
+        climber logs a climb in the same route, they will do it on the same route you
+        created. Over time, climbers will share their opinion about the route,
+        gathering useful data points for future climbers.
+    </p>
+    <h4>Routes</h4>
+    <p>
+        Routes are stored with the following information:
+    </p>
+    <ul>
+        <li>The <b>name</b> of the route. It must be unique in the area.</li>
+        <li>
+            The <b>height</b> of the route in meters, in steps of a half meter. This
+            means that a route can be either 3 or 3.5 meters tall, nothing in between
+            is possible.
+        </li>
+        <li>The <b>inclination</b> of the route, in degrees, in steps of 5 degrees.</li>
+        <li>The <b>sector</b> where the route is located.</li>
+        <li>Whether the route has a <b>sit start</b>.</li>
+        <li>The <b>coordinates</b> that mark the location of the route.</li>
+        <li>A <b>link</b>, e.g. to a topo or a photo.</li>
+        <li>A <b>comment</b> with some useful information about the route.</li>
+    </ul>
+    <p>
+        All information besides the name is optional. You can add it later on if you're
+        in the middle of a session. If you are not sure about the height or inclination,
+        you can wait until other climbers give their opinions.
+    </p>
+    <p>
+        Each route is located in a <b>sector</b>, which in turn is located in an
+        <b>area</b>. The creators of areas may add the rock type and a link to a
+        topo or other useful information. If you're adding a route and you don't
+        select a sector, the route will be added to a sector called "Unknown".
+    </p>
+    <h4>Climbs</h4>
+    <p>
+        Once you are done trying a route, you can log a climb with the following information:
+    </p>
+    <ul>
+        <li>The <b>number of attempts</b> you spent on the route.</li>
+        <li>Whether you <b>sent</b> the route.</li>
+        <li>
+            Whether you <b>flashed</b> the route. For example, if you climb the sit
+            start of a route on your first try, it is not a flash if you have climbed
+            the stand start before. You are of course free to record anything you wish;
+            this is just the reasoning behind this field.
+        </li>
+        <li>A <b>link</b>, e.g. to a video of your best attempt of the day or some important beta.</li>
+        <li>A <b>comment</b> with your experience on the route.</li>
+    </ul>
+    <p>
+        Once you send a route, you can give your opinion on subjective aspects about
+        it, which often differ between climbers. These are:
+    </p>
+    <ul>
+        <li>The <b>grade</b> of the route. We support both Hueco and Font grades.</li>
+        <li>
+            The <b>cruxes</b> of the route. We have crafted a list that we hope covers
+            all possible difficulties you may encounter in a climb, including hand holds
+            like slopers, techniques like heel hooks or mantles, as well as more broad
+            aspects like the route being scary or requiring tension. You can select
+            multiple cruxes if you wish. Note that the cruxes may differ from the style
+            of the route: a route that predominantly consists of slopers may have an
+            undercling as the crux, for example. It depends on what you found the hardest.
+        </li>
+        <li>
+            A <b>quality rating</b> about the route, from 1 to 5 stars. This rating may
+            encompass different aspects depending on the climber, as we value
+            different things. Usually, it is a mix of the quality of the moves
+            and the rock. The setting may also play a role.
+        </li>
+        <li>
+            A <b>landing rating</b> about the route, from 1 to 5 stars. This rating
+            describes how safe the landing is, with 1 being dangerous and 5 being
+            very safe and easy to protect. Aspects like the amount of pads needed
+            to make the landing safe, the likelihood of rolling an ankle and so forth
+            play a role in this rating. The height of the route as well. As climbers
+            view safety differently, this rating may vary between climbers.
+        </li>
+    </ul>
+    <p>
+        Climbs are part of <b>sessions</b>, which are the days you go climbing. Each
+        session takes place in an area on a certain day. You can also write a comment
+        about how you're feeling, what your purpose is for the day, or anything else
+        you wish to remember about the day. You can give the <b>conditions a rating</b>
+        from 1 to 5 stars, which may include aspects like temperature, humidity,
+        whether the sun is shining or the rock is wet, etc.
+    </p>
+
+</div>
+
+<div class="container" id="log_data">
+    <h3>How to add sessions and climbs</h3>
+    <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc tincidunt tincidunt. Nullam
+        nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc
+        tincidunt tincidunt. Nullam nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc tincidunt
+    </p>
+</div>
+
+<div class="container" id="filters">
+    <h3>How to filter climbs and routes</h3>
+    <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc tincidunt tincidunt. Nullam
+        nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc
+        tincidunt tincidunt. Nullam nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc tincidunt
+    </p>
+</div>
+
+<div class="container" id="plots">
+    <h3>How to analyse your climbs</h3>
+    <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc tincidunt tincidunt. Nullam
+        nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc
+        tincidunt tincidunt. Nullam nec purus nec nunc tincidunt tincidunt. Nullam nec purus nec nunc tincidunt
+    </p>
+</div>
+
+
+{% endblock content %}
