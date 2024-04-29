@@ -11,3 +11,4 @@ class Climb(db.Model):
     climber_id = db.Column(db.Integer, db.ForeignKey("climber.id"))
     route_id = db.Column(db.Integer, db.ForeignKey("route.id"))
     session_id = db.Column(db.Integer, db.ForeignKey("session.id"))
+    # TODO: climber_id is not needed, as it can be derived from session
