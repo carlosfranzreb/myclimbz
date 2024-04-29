@@ -6,8 +6,6 @@ let GRADES = null;
 let DISPLAYED_DATA = null;
 let DISPLAY_FORM = "table";  // Table or plot
 
-let GRADE_SCALE = "font";  // Scale chosen with the toggle button
-
 let font_grades_list = null;
 let hueco_grades_list = null;
 
