@@ -62,8 +62,13 @@ def page_home() -> str:
 
 
 @home.route("/cancel_form")
-def cancel_form() -> None:
+def cancel_form() -> str:
     """Cancel the addition of a session."""
     flask_session.pop("entities", None)
     flask_session.pop("predictions", None)
     return redirect(flask_session.pop("call_from_url"))
+
+
+@home.route("/guide")
+def guide() -> str:
+    return render("guide.html", title="User Guide")
