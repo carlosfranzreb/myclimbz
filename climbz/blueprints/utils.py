@@ -23,6 +23,7 @@ def render(*args, **kwargs) -> str:
     kwargs["username"] = current_user.name
     kwargs["user_id"] = current_user.id
     kwargs["user_role"] = current_user.role
+    kwargs["user_grade_scale"] = current_user.grade_scale
     path = request.path
     if (
         not path.startswith("/edit_")

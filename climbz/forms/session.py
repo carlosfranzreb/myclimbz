@@ -11,7 +11,7 @@ from climbz.models import Area, RockType, Session
 
 class SessionForm(FlaskForm):
     area = StringField("Area name")
-    date = DateField("Date", validators=[Optional()])
+    date = DateField("Date", validators=[Optional()], default=datetime.today)
     conditions = IntegerField("Conditions", validators=[Optional()])
     rock_type = SelectField("Rock Type of new area", validators=[Optional()])
     is_project_search = BooleanField(

@@ -293,6 +293,7 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     }
   };
 
+  // TODO: @marco, how do I remove the toggle here?
   self.didChanged(min, max);
   if (data_class === Grade) {
     let grade_toggle = document.getElementById("grade-scale-toggle");
