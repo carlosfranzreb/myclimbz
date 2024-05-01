@@ -8,6 +8,8 @@ let DISPLAY_FORM = "table";  // Table or plot
 
 let GRADE_SCALE = "font";  // Scale chosen with the toggle button
 
+let font_grades_list = null;
+let hueco_grades_list = null;
 
 // Add an event listener to the checkbox "display-form-toggle"
 let display_form_toggle = document.getElementById("display-form-toggle");
@@ -19,6 +21,9 @@ display_form_toggle.addEventListener("change", function () {
 function start_display(data, grades, session_date) {
     DATA = data;
     GRADES = grades;
+
+    font_grades_list = GRADES.map(obj => obj["font"]);
+    hueco_grades_list = GRADES.map(obj => obj["hueco"]);
 
     // Parse the dates and format them to "dd/mm/yyyy"
     let parseTime = d3.timeParse("%a, %d %b %Y %H:%M:%S");

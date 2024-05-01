@@ -18,8 +18,12 @@ let y_axis_options = {
         "data": max_attempts_per_climb,
         "axis_labels": null,
     },
-    "Climbs: total": {
+    "Climbs: total tried": {
         "data": count_climbs,
+        "axis_labels": null,
+    },
+    "Climbs: total sent": {
+        "data": count_climbs_sent,
         "axis_labels": null,
     },
     "Climbs: success rate": {
@@ -42,6 +46,19 @@ function count_climbs(data) {
     out = new Map();
     for (let [key, value] of data)
         out.set(key, value.length);
+    return out;
+}
+
+// Count the number of climbs sent per x-axis key
+function count_climbs_sent(data) {
+    out = new Map();
+    for (let [key, value] of data) {
+        out.set(key, 0);
+        for (let climb of value) {
+            if (climb.sent === true)
+                out.set(key, out.get(key) + 1);
+        }
+    }
     return out;
 }
 
@@ -69,7 +86,7 @@ function avg_attempts_per_climb(data) {
 }
 
 // Compute the min attempts per climb per x-axis key
-function min_attempts_per_climb(data) { 
+function min_attempts_per_climb(data) {
     out = new Map();
     for (let [key, value] of data) {
         let attempts = value.map(d => d.n_attempts_send);
@@ -80,7 +97,7 @@ function min_attempts_per_climb(data) {
 
 
 // Compute the max attempts per climb per x-axis key
-function max_attempts_per_climb(data) { 
+function max_attempts_per_climb(data) {
     out = new Map();
     for (let [key, value] of data) {
         let attempts = value.map(d => d.n_attempts_send);
@@ -103,7 +120,7 @@ function success_rate(data) {
             out.set(key, sent_climbs.length / value.length);
     }
 
-    return out;    
+    return out;
 }
 
 

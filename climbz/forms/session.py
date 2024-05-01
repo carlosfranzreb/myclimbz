@@ -7,7 +7,6 @@ from wtforms import IntegerField, DateField, StringField, SelectField, BooleanFi
 from wtforms.validators import Optional
 
 from climbz.models import Area, RockType, Session
-from climbz.ner.entities_to_objects import get_area_from_entities
 
 
 class SessionForm(FlaskForm):
@@ -46,14 +45,15 @@ class SessionForm(FlaskForm):
             if field in entities:
                 getattr(form, field).data = entities[field]
 
-        if "area" in entities:
-            area = get_area_from_entities(entities)
-            if area.id is None and "rock" in entities:
-                rock = RockType.query.filter_by(name=entities["rock"]).first()
-                if rock is not None:
-                    form.rock_type.data = str(rock.id)
-            else:
-                form.rock_type.data = "0"
+        # ! This is commented out until the NER is implemented
+        # if "area" in entities:
+        #     area = get_area_from_entities(entities)
+        #     if area.id is None and "rock" in entities:
+        #         rock = RockType.query.filter_by(name=entities["rock"]).first()
+        #         if rock is not None:
+        #             form.rock_type.data = str(rock.id)
+        #     else:
+        #         form.rock_type.data = "0"
 
         # if date is null, set it to today
         if form.date.data is None:

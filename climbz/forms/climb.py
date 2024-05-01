@@ -61,6 +61,20 @@ class ClimbForm(FlaskForm):
 
         return is_valid
 
+    def validate_from_name(self, route_name: str) -> bool:
+        """If the climb has already been tried before, `flashed` must be false."""
+        is_valid = True
+        if not super().validate():
+            is_valid = False
+
+        route = Route.query.filter_by(name=route_name).first()
+        if route is not None:
+            if route.tried and self.flashed.data is True:
+                self.flashed.errors.append("This route has already been tried.")
+                is_valid = False
+
+        return is_valid
+
     def get_object(self, route: Route) -> Climb:
         """Create a new climb object from the form data."""
         climb = Climb(

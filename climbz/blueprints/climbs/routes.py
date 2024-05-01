@@ -5,11 +5,9 @@ from flask import (
     session as flask_session,
 )
 
-from climbz.ner.entities_to_objects import get_route_from_entities
 from climbz.models import Climb, Session, Sector, Opinion
 from climbz.forms import ClimbForm, RouteForm
 from climbz import db
-from climbz.ner.tracking import dump_predictions
 from climbz.blueprints.utils import render
 
 
@@ -18,7 +16,6 @@ climbs = Blueprint("climbs", __name__)
 
 @climbs.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
-    entities = flask_session.get("entities", dict())
 
     # create forms and add choices
     session = Session.query.get(flask_session["session_id"])
@@ -29,7 +26,7 @@ def add_climb() -> str:
     if request.method == "POST":
         route_name = route_form.name.data
         invalid_climb = (
-            not climb_form.validate(route_name)
+            not climb_form.validate_from_name(route_name)
             if not session.is_project_search
             else False
         )
@@ -47,15 +44,11 @@ def add_climb() -> str:
         if sector.id is None:
             db.session.add(sector)
             db.session.commit()
-            if "predictions" in flask_session:
-                flask_session["predictions"]["sector_id"] = sector.id
 
         route = route_form.get_object(sector)
         if route is not None and route.id is None:
             db.session.add(route)
             db.session.commit()
-            if "predictions" in flask_session:
-                flask_session["predictions"]["route_id"] = route.id
 
         if session.is_project_search:
             if "project_ids" not in flask_session:
@@ -70,9 +63,6 @@ def add_climb() -> str:
             climb = climb_form.get_object(route)
             db.session.add(climb)
             db.session.commit()
-            if "predictions" in flask_session:
-                flask_session["predictions"]["climb_id"] = climb.id
-                dump_predictions()
 
         # if the user wants to add an opinion, redirect to the opinion form
         if climb_form.add_opinion.data is True:
@@ -87,20 +77,14 @@ def add_climb() -> str:
             return redirect("/")
 
     # GET: the climber wants to add a route (+climb) => create forms
-    # create the route form
-    route = get_route_from_entities(entities, session.area_id)
-    if route.id is None:
-        route_form = RouteForm.create_from_entities(entities)
-    else:
-        route_form = RouteForm.create_empty()
-        route_form.name.data = route.name
+    route_form = RouteForm.create_empty()
 
     # create the climb form if needed
     if session.is_project_search:
         climb_form = None
 
-    # if no sector was found, add the last sector of the current session if possible
-    if route.sector_id is None and flask_session.get("session_id", False) > 0:
+    # add the last sector of the current session if possible
+    if flask_session.get("session_id", False) > 0:
         session = Session.query.get(flask_session["session_id"])
         sectors = [c.route.sector for c in session.climbs]
         if len(sectors) > 0:
