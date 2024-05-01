@@ -55,8 +55,6 @@ jobs:
 
       - name: Install ChromeDriver
         uses: nanasess/setup-chromedriver@v2
-        with:
-          chromedriver-version: 120
 
       - name: Install dependencies for testing
         run: pip install -r requirements-test.txt
@@ -65,16 +63,9 @@ jobs:
         run: Xvfb :99 &
 
       - name: Run tests
-        run: python -m pytest tests/ --env=ci
+        run: python -m pytest tests/
         env:
           DISPLAY: :99
-      - name: Commit and Push The Results From Python Selenium Action
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "actions@users.noreply.github.com"
-          git add -A
-          git commit -m "GitHub Actions Results added"
-          git push
 
     services:
       app:

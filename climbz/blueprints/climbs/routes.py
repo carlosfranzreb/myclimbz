@@ -27,7 +27,7 @@ def add_climb(csv_import: bool = False) -> str:
     if request.method == "POST" or csv_import:
         route_name = route_form.name.data
         invalid_climb = (
-            not climb_form.validate_from_name(route_name)
+            not climb_form.validate_from_name_from_name(route_name)
             if not session.is_project_search
             else False
         )
