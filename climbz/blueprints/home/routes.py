@@ -2,6 +2,7 @@ from flask import (
     Blueprint,
     redirect,
     session as flask_session,
+    request,
 )
 from flask_login import current_user
 

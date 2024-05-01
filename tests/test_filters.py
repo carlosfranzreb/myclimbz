@@ -33,8 +33,6 @@ def test_grade_filter(driver) -> None:
 
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(apply_button))
     apply_button.click()
-    sleep(5)
-    get_screenshot(driver)
     min_level = int(grade_filter.get_attribute("se-min-current"))
     assert min_level == 5
     max_level = int(grade_filter.get_attribute("se-max-current"))
@@ -57,8 +55,6 @@ def test_date_filter(driver) -> None:
     filter_button.click()
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(apply_button))
     apply_button.click()
-    sleep(5)
-    get_screenshot(driver)
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
     min_date = datetime.strptime(min_date, "%d/%m/%Y")
     assert all(
@@ -79,12 +75,8 @@ def test_cruxes_filter(driver) -> None:
     crux_button = driver.find_element(By.ID, "filter_Crux_1")
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(crux_button))
     crux_button.click()
-    sleep(5)
-    get_screenshot(driver)
 
     apply_button.click()
-    sleep(5)
-    get_screenshot(driver)
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
 
     crux = driver.execute_script(
@@ -101,8 +93,6 @@ def test_sent_filter(driver) -> None:
 
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(filter))
     filter.click()
-    sleep(5)
-    get_screenshot(driver)
 
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(apply_button))
     apply_button.click()
