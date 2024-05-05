@@ -59,6 +59,9 @@
                 <li><a type="button" class="nav-link" data-bs-toggle="modal" data-bs-target="#import_csv_dialog" id="import_csv_button">Import CSV file</a></li>
             </ul>
             <ul class="navbar-nav flex-row ms-md-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('home.guide') }}">Help</a>
+                </li>
                 <li class="nav-item dropdown mr-auto">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
@@ -158,6 +161,11 @@
         {%block content %}
         {% endblock %}
     </div>
+
+    <script>
+        // Set the user's preferred grade scale
+        let GRADE_SCALE = "{{ user_grade_scale }}";
+    </script>
 
     <!-- Bootstrap & DataTable -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"

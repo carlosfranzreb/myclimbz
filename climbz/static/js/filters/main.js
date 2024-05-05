@@ -1,12 +1,3 @@
-// --- Buttons at the top of the page
-
-// Add an event listener to the checkbox "Grade scale"
-let grade_scale_toggle = document.getElementById("grade-scale-toggle");
-grade_scale_toggle.addEventListener("change", function () {
-    GRADE_SCALE = grade_scale_toggle.checked ? "hueco" : "font";
-    display_data();
-});
-
 class Grade {
     constructor(grade) {
         this.grade_dict = GRADES.find(

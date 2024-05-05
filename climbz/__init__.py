@@ -2,6 +2,10 @@ import os
 from importlib import import_module
 
 from flask import Flask, request, redirect, url_for, session as flask_session
+import os
+from importlib import import_module
+
+from flask import Flask, request, redirect, url_for, session as flask_session
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, current_user, login_user
 from flask_wtf.csrf import CSRFProtect
@@ -18,7 +22,7 @@ login_manager.login_message_category = "info"
 def create_app():
     app = Flask(__name__)
     bcrypt.init_app(app)
-    app.config["SECRET_KEY"] = os.urandom(24).hex()
+    app.config["SECRET_KEY"] = os.environ.get("CLIMBZ_SECRET_KEY", "dev")
     CSRFProtect(app)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(

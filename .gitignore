@@ -5,3 +5,4 @@ __pycache__
 prod.db
 audios
 *.ckpt
+.env
