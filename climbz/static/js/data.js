@@ -373,7 +373,7 @@ function remove_csv_options() {
 
 csv_file_form.addEventListener("change", import_csv);
 document
-  .getElementById("cancel_csv_button")
+  .getElementById("cancel_csv_import_button")
   .addEventListener("click", function (e) {
     csv_file_form.value = null;
     csv_data = null;

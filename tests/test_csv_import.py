@@ -3,21 +3,22 @@ import os
 
 from flask.testing import FlaskClient
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 from tests.conftest import run_app, driver
 
+from time import sleep
+
 
 def test_csv_import(driver):
-    driver.get("http://127.0.0.1:5000/")
-    while driver.title != "Routes":
-        sleep(1)
-        driver.get("http://127.0.0.1:5000/")
+    driver.get("http://127.0.0.1:5000")
+    WebDriverWait(driver, 30).until(EC.title_is("Routes"))
 
     csv_path = os.path.join(
         os.getcwd(), "climbz", "static", "data", "csv_import_test.csv"
     )
     this_file_path = os.path.abspath(__file__)
-    confirm_button = driver.find_element(By.ID, "confirm_csv_button")
     csv_button = driver.find_element(By.ID, "import_csv_button")
     csv_button.click()
 
@@ -28,20 +29,23 @@ def test_csv_import(driver):
     alert = driver.switch_to.alert
     assert alert.text
     alert.accept()
+    # sleep(1)
 
     csv_input.send_keys(csv_path)
 
     name_select = driver.find_element(By.ID, "csv_select_name")
-    assert name_select.value == "Name"
+    assert name_select.accessible_name == "Name"
     # assert that the option "Area" of the name select is disabled
-    assert driver.find_element(
+    assert not driver.find_element(
         By.CSS_SELECTOR, '#csv_select_name option[value="Area"]'
-    ).disabled
+    ).is_enabled()
 
     # remove the option "Name" from the select
     name_select.send_keys("--")
     # assert that alert sent when confirm is clicked
+    confirm_button = driver.find_element(By.ID, "confirm_csv_import_button")
     confirm_button.click()
+    driver.get_screenshot_as_file("screenshot.png")
     alert = driver.switch_to.alert
     assert alert.text
     alert.accept()
@@ -54,7 +58,7 @@ def test_csv_import(driver):
     alert = driver.switch_to.alert
     assert alert.text
     alert.accept()
-    assert grade_select.value == "Grade"
+    assert grade_select.accessible_name == "Grade"
 
     height_select = driver.find_element(By.ID, "csv_select_height")
     # set the option "Date"
@@ -63,7 +67,7 @@ def test_csv_import(driver):
     alert = driver.switch_to.alert
     assert alert.text
     alert.accept()
-    assert height_select.value == "Height"
+    assert height_select.accessible_name == "Height"
 
     landing_select = driver.find_element(By.ID, "csv_select_landing")
     # set the option "Angle"
@@ -72,7 +76,7 @@ def test_csv_import(driver):
     alert = driver.switch_to.alert
     assert alert.text
     alert.accept()
-    assert landing_select.value == "Landing"
+    assert landing_select.accessible_name == "Landing"
 
     sent_select = driver.find_element(By.ID, "csv_select_sent")
     # set the option "Angle"
@@ -81,7 +85,7 @@ def test_csv_import(driver):
     alert = driver.switch_to.alert
     assert alert.text
     alert.accept()
-    assert sent_select.value == "--"
+    assert sent_select.accessible_name == "--"
 
     sent_select.send_keys("Sent")
 
@@ -92,7 +96,7 @@ def test_csv_import(driver):
     alert = driver.switch_to.alert
     assert alert.text
     alert.accept()
-    assert dates_select.value == "--"
+    assert dates_select.accessible_name == "--"
     # Confirm import with sent and without dates and check that alert is shown
     confirm_button.click()
     alert = driver.switch_to.alert
@@ -101,7 +105,7 @@ def test_csv_import(driver):
 
     dates_select.send_keys("Date")
 
-    cancel_button = driver.find_element(By.ID, "cancel_csv_button")
+    cancel_button = driver.find_element(By.ID, "cancel_csv_import_button")
     cancel_button.click()
 
     csv_button.click()

@@ -1,177 +1,305 @@
 <html>
-
-<head>
+  <head>
     <title>{{ title }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link href="{{ url_for('static', filename='css/vanilla-dataTables.css') }}" rel="stylesheet" type="text/css">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link
+      href="{{ url_for('static', filename='css/vanilla-dataTables.css') }}"
+      rel="stylesheet"
+      type="text/css"
+    />
     {% if title == "Routes" %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/slider_switch.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/filters.css') }}" />
-    <meta name="version" content="1.0.0">
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/slider_switch.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/filters.css') }}"
+    />
+    <meta name="version" content="1.0.0" />
 
     {% endif %}
-</head>
+  </head>
 
-<body>
-
+  <body>
     <form method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     </form>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="{{ url_for('home.page_home') }}" style="padding-left: 10px;">myclimbz</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+      <a
+        class="navbar-brand"
+        href="{{ url_for('home.page_home') }}"
+        style="padding-left: 10px"
+        >myclimbz</a
+      >
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-        {% if not "Add" in title and not "Edit" in title and not "Login" in title %}
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav flex-row">
-                {% if open_session %}
-                <li><a class="nav-link" href="{{ url_for('climbs.add_climb') }}">Add climb</a></li>
-                <li>
-                    <a class="nav-link" href="{{ url_for('sessions.stop_session') }}">
-                        Stop
-                        {% if open_session.is_project_search %}
-                        project search
-                        {% else %}
-                        session
-                        {% endif %}
-                    </a>
-                </li>
-                {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('sessions.add_session') }}">Start session</a>
-                </li>
-                {% endif %}
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        Lists
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('sessions.table_sessions') }}">Sessions</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('areas.table_areas') }}">Areas</a></li>
-                    </ul>
-                </li>
-                <li><a type="button" class="nav-link" data-bs-toggle="modal" data-bs-target="#import_csv_dialog" id="import_csv_button">Import CSV file</a></li>
+      {% if not "Add" in title and not "Edit" in title and not "Login" in title
+      %}
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav flex-row">
+          {% if open_session %}
+          <li>
+            <a class="nav-link" href="{{ url_for('climbs.add_climb') }}"
+              >Add climb</a
+            >
+          </li>
+          <li>
+            <a class="nav-link" href="{{ url_for('sessions.stop_session') }}">
+              Stop {% if open_session.is_project_search %} project search {%
+              else %} session {% endif %}
+            </a>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('sessions.add_session') }}"
+              >Start session</a
+            >
+          </li>
+          {% endif %}
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Lists
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="{{ url_for('sessions.table_sessions') }}"
+                  >Sessions</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="{{ url_for('areas.table_areas') }}"
+                  >Areas</a
+                >
+              </li>
             </ul>
-            <ul class="navbar-nav flex-row ms-md-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('home.guide') }}">Help</a>
-                </li>
-                <li class="nav-item dropdown mr-auto">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        {{ username }}
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('climbers.logout') }}">Logout</a></li>
-                        <li><a class="dropdown-item"
-                                href="{{ url_for('climbers.edit_climber', climber_id=user_id) }}">Edit profile</a></li>
-                    </ul>
-                </li>
+          </li>
+          <li>
+            <a
+              type="button"
+              class="nav-link"
+              data-bs-toggle="modal"
+              data-bs-target="#import_csv_dialog"
+              id="import_csv_button"
+              >Import CSV file</a
+            >
+          </li>
+        </ul>
+        <ul class="navbar-nav flex-row ms-md-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('home.guide') }}">Help</a>
+          </li>
+          <li class="nav-item dropdown mr-auto">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              {{ username }}
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class="dropdown-item" href="{{ url_for('climbers.logout') }}"
+                  >Logout</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="{{ url_for('climbers.edit_climber', climber_id=user_id) }}"
+                  >Edit profile</a
+                >
+              </li>
             </ul>
-        </div>
-        {% endif %}
+          </li>
+        </ul>
+      </div>
+      {% endif %}
     </nav>
 
-    <div class="modal fade" id="import_csv_dialog" tabindex="-1" aria-labelledby="import_csv_label" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="import_csv_label">Import CSV file
-                <a onclick="toggle_info()" style="cursor: pointer;" id="info_icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+    <div
+      class="modal fade"
+      id="import_csv_dialog"
+      tabindex="-1"
+      aria-labelledby="import_csv_label"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="import_csv_label">
+              Import CSV file
+              <a onclick="toggle_info()" style="cursor: pointer" id="info_icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-info-circle"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"
+                  />
+                  <path
+                    d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"
+                  />
                 </svg>
-                </a>
-              </h1>
-              <button type="button" class="btn-close" id="csv_dialog_close_button" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="csv_dialog_body">
-                <div class="mb-3">
-                    <input class="form-control" type="file" id="csv_file_form">
-                </div>
-            </div>
-            <!-- TODO: go over it with C -->
-            <div class="modal-body" id="import_csv_info" style="display: none;">
-                <p>Importing a CSV file will add the data to the database. First, choose the file to be imported. You can then map columns in your spreadsheet to its equivalent in our database. It is not obligatory to fill all the options, although there are some "rules":</p>
-                <ul>
-                    <li>The Name and Area columns are obligatory and must be present on all rows.</li>
-                    <li>Dates have to be in the format "dd/mm/yyyy".</li>
-                    <li>If a boulder has been sent, there must be a date in its corresponding column.</li>
-                    <li>Inclination, landing, conditions, height and No. of attempts/sessions, if included, must be numbers. Landing and conditions on a scale of 1 to 10.</li>
-                    <li>Sit start and Sent columns must be either yes/true or no/false/empty.</li>
-                </ul>
-                <p>Here is an example CSV file:</p>
-                <img src="{{url_for('static', filename='data/example_sheet.png')}}" alt="CSV example" style="width: 100%;">
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancel_csv_button">Cancel</button>
-              <button type="button" class="btn btn-primary" id="confirm_csv_import_button">Import</button>
+              </a>
+            </h1>
+            <button
+              type="button"
+              class="btn-close"
+              id="csv_dialog_close_button"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body" id="csv_dialog_body">
+            <div class="mb-3">
+              <input class="form-control" type="file" id="csv_file_form" />
             </div>
           </div>
+          <!-- TODO: go over it with C -->
+          <div class="modal-body" id="import_csv_info" style="display: none">
+            <p>
+              Importing a CSV file will add the data to the database. First,
+              choose the file to be imported. You can then map columns in your
+              spreadsheet to its equivalent in our database. It is not
+              obligatory to fill all the options, although there are some
+              "rules":
+            </p>
+            <ul>
+              <li>
+                The Name and Area columns are obligatory and must be present on
+                all rows.
+              </li>
+              <li>Dates have to be in the format "dd/mm/yyyy".</li>
+              <li>
+                If a boulder has been sent, there must be a date in its
+                corresponding column.
+              </li>
+              <li>
+                Inclination, landing, conditions, height and No. of
+                attempts/sessions, if included, must be numbers. Landing and
+                conditions on a scale of 1 to 10.
+              </li>
+              <li>
+                Sit start and Sent columns must be either yes/true or
+                no/false/empty.
+              </li>
+            </ul>
+            <p>Here is an example CSV file:</p>
+            <img
+              src="{{url_for('static', filename='data/example_sheet.png')}}"
+              alt="CSV example"
+              style="width: 100%"
+            />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+              id="cancel_csv_import_button"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="confirm_csv_import_button"
+            >
+              Import
+            </button>
+          </div>
         </div>
+      </div>
     </div>
     <script>
-        function toggle_info() {
-            let modalElement = document.querySelector('.modal');
-            let modalBody = document.getElementById('csv_dialog_body');
-            let infoBody = document.getElementById('import_csv_info');
-            if (modalBody.style.display === "block" || modalBody.style.display === "") {
-                modalBody.style.display = "none";
-                infoBody.style.display = "block";
-                modalElement.style.setProperty('--bs-modal-width', '1100px');
-            } else {
-                modalBody.style.display = "block";
-                infoBody.style.display = "none";
-                modalElement.style.setProperty('--bs-modal-width', '500px');
-            }
+      function toggle_info() {
+        let modalElement = document.querySelector(".modal");
+        let modalBody = document.getElementById("csv_dialog_body");
+        let infoBody = document.getElementById("import_csv_info");
+        if (
+          modalBody.style.display === "block" ||
+          modalBody.style.display === ""
+        ) {
+          modalBody.style.display = "none";
+          infoBody.style.display = "block";
+          modalElement.style.setProperty("--bs-modal-width", "1100px");
+        } else {
+          modalBody.style.display = "block";
+          infoBody.style.display = "none";
+          modalElement.style.setProperty("--bs-modal-width", "500px");
         }
+      }
     </script>
 
     {% if error %}
     <script>
-        console.error("An error has occurred.");
-        console.error("{{ error }}");
+      console.error("An error has occurred.");
+      console.error("{{ error }}");
     </script>
-    <div class="alert alert-danger" role="alert">
-        {{ error }}
-    </div>
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
     {% endif %}
 
     <!-- Show the current session / project search, if any-->
     {% if open_session %}
 
     <div class="alert alert-success" role="alert">
-        {% if open_session.is_project_search %}
-        Project search
-        {% else %}
-        Session
-        {% endif %}
-        in {{ open_session.area.name }}
+      {% if open_session.is_project_search %} Project search {% else %} Session
+      {% endif %} in {{ open_session.area.name }}
     </div>
     {% endif %}
 
-    <div class="container p-4">
-        {%block content %}
-        {% endblock %}
-    </div>
+    <div class="container p-4">{%block content %} {% endblock %}</div>
 
     <script>
-        // Set the user's preferred grade scale
-        let GRADE_SCALE = "{{ user_grade_scale }}";
+      // Set the user's preferred grade scale
+      let GRADE_SCALE = "{{ user_grade_scale }}";
     </script>
 
     <!-- Bootstrap & DataTable -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-        crossorigin="anonymous"></script>
-    <script src="{{url_for('static', filename='js/table/vanilla-dataTables.js')}}" type="text/javascript"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="{{url_for('static', filename='js/table/vanilla-dataTables.js')}}"
+      type="text/javascript"
+    ></script>
 
     <!-- Scripts for confirming deletes -->
     <script src="{{url_for('static', filename='js/confirm_deletion.js')}}"></script>
@@ -194,7 +322,5 @@
     <script src="{{url_for('static', filename='js/filters/main.js')}}"></script>
     <script src="{{url_for('static', filename='js/filters/filters.js')}}"></script>
     {% endif %}
-</body>
-
-
+  </body>
 </html>

@@ -8,6 +8,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+from time import sleep
+
 from climbz import create_app
 
 
@@ -35,6 +37,7 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
         driver_options.add_argument("--headless")
         driver_options.add_argument("--window-size=2560,1440")
         driver = webdriver.Chrome(options=driver_options)
+        sleep(5)
         driver.get("http://127.0.0.1:5000")
         WebDriverWait(driver, 30).until(EC.title_is("Routes"))
         yield driver
