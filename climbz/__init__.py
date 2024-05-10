@@ -2,10 +2,6 @@ import os
 from importlib import import_module
 
 from flask import Flask, request, redirect, url_for, session as flask_session
-import os
-from importlib import import_module
-
-from flask import Flask, request, redirect, url_for, session as flask_session
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, current_user, login_user
 from flask_wtf.csrf import CSRFProtect
