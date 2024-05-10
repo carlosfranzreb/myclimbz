@@ -29,7 +29,7 @@ def login():
     if request.method == "POST":
         if not form.validate():
             flask_session["error"] = form.errors
-            return render(
+            return render_template(
                 "login.html",
                 title="Login",
                 form=form,
