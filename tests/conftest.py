@@ -30,7 +30,7 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
     is_ci = os.environ.get("CI", False)
     try:
         if not is_ci:
-            os.system("docker compose up -d")
+            os.system("docker compose --env-file .env.test up -d")
         driver_options = webdriver.ChromeOptions()
         driver_options.add_argument("--headless")
         driver_options.add_argument("--window-size=2560,1440")
