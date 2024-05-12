@@ -54,7 +54,9 @@ def get_plotted_data(
         btn.find_element(By.XPATH, "..").click()
 
     if grade_scale == "hueco":
-        grade_btn = driver.find_element(By.XPATH, "//input[@id='grade-scale-toggle']")
+        grade_btn = driver.find_element(
+            By.XPATH, "//input[@id='grade-scale-toggle']"
+        )  # TODO: @Carlos Grade scale toggle doestn exist anymore
         grade_btn.find_element(By.XPATH, "..").click()
 
     x_axis_select = driver.find_element(By.XPATH, "//select[@id='x-axis-select']")
