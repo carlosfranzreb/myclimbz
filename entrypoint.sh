@@ -2,7 +2,7 @@
 
 PROD=${PROD:-0}
 if [ "$PROD" -eq 1 ]; then
-    gunicorn --bind 0.0.0.0:5000 wsgi:app
+    gunicorn --config gunicorn_config.py wsgi:app
 else
     DEBUG=${FLASK_DEBUG:-0}
     if [ "$DEBUG" -eq 0 ]; then
