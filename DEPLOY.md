@@ -34,7 +34,7 @@ If you pull new code, restart the service with `systemctl restart myclimbz`. Onc
 
 - The server is configured in `/etc/nginx/sites-available/myclimbz`
 - The config is enabled with this link: `ln -s /etc/nginx/sites-available/myclimbz /etc/nginx/sites-enabled`
-- The Nginx service can be managed with `systemctl`q
+- The Nginx service can be managed with `systemctl`
 - If any errors happen, check the error log by running: `less /var/log/nginx/error.log`
 
 
