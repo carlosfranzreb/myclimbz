@@ -23,20 +23,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from sqlalchemy import text
 
 
-def get_plotted_data(
-    driver: webdriver.Chrome,
-    x_axis: str,
-    y_axis: str,
-    grade_scale: str = "font",
-) -> list:
+def get_plotted_data(driver: webdriver.Chrome, x_axis: str, y_axis: str) -> list:
     """
     Returns the plotted data for the given x- and y-axes.
 
     Args:
         x_axis: the x-axis value
         y_axis: the y-axis value
-        toggle_grade_scale: whether to toggle the scale switch, i.e. change to V-scale
-
     Returns:
         the plotted data as a list of tuples, where each tuple is of the form
         (key, value).
@@ -53,10 +46,6 @@ def get_plotted_data(
     if not btn.is_selected():
         btn.find_element(By.XPATH, "..").click()
 
-    if grade_scale == "hueco":
-        grade_btn = driver.find_element(By.XPATH, "//input[@id='grade-scale-toggle']")
-        grade_btn.find_element(By.XPATH, "..").click()
-
     x_axis_select = driver.find_element(By.XPATH, "//select[@id='x-axis-select']")
     x_axis_select.click()
     x_axis_select.find_element(By.XPATH, f"//option[. = '{x_axis}']").click()
@@ -70,10 +59,6 @@ def get_plotted_data(
     while len(plotted_data) == 0:
         sleep(0.5)
         plotted_data = driver.execute_script("return Array.from(PLOTTED_DATA);")
-
-    # set the grade scale back to "font" if it was changed
-    if grade_scale == "hueco":
-        grade_btn.find_element(By.XPATH, "..").click()
 
     return plotted_data
 
@@ -275,31 +260,28 @@ def test_climbs_per_grade(driver, db_session):
     i.e. change to V-scale,
     """
 
-    for grade_scale in ["font", "hueco"]:
-        sql_query = text(
-            f"""
-            SELECT grade.{grade_scale}, COUNT(opinion.id)
-            FROM grade
-            LEFT JOIN opinion
-                ON opinion.grade_id = grade.id AND opinion.climber_id=:climber_id
-            GROUP BY grade.{grade_scale}
-            ORDER BY grade.id
-            """
-        )
-        results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
-        grade_data = {result[0]: result[1] for result in results}
-        grade_data = remove_trailing(grade_data)
+    sql_query = text(
+        """
+        SELECT grade.font, COUNT(opinion.id)
+        FROM grade
+        LEFT JOIN opinion
+            ON opinion.grade_id = grade.id AND opinion.climber_id=:climber_id
+        GROUP BY grade.font
+        ORDER BY grade.id
+        """
+    )
+    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
+    grade_data = {result[0]: result[1] for result in results}
+    grade_data = remove_trailing(grade_data)
 
-        plotted_data = get_plotted_data(
-            driver, "Grade", "Climbs: total tried", grade_scale=grade_scale
-        )
-        assert len(plotted_data) == len(grade_data)
-        for grade, n_sent_routes_plotted in plotted_data:
-            assert grade in grade_data
-            assert n_sent_routes_plotted == grade_data[grade]
+    plotted_data = get_plotted_data(driver, "Grade", "Climbs: total tried")
+    assert len(plotted_data) == len(grade_data)
+    for grade, n_sent_routes_plotted in plotted_data:
+        assert grade in grade_data
+        assert n_sent_routes_plotted == grade_data[grade]
 
-        # check that the plotted grades are sorted correctly
-        assert [grade for grade, _ in plotted_data] == list(grade_data.keys())
+    # check that the plotted grades are sorted correctly
+    assert [grade for grade, _ in plotted_data] == list(grade_data.keys())
 
 
 def test_climbs_per_route_chars(driver, db_session) -> None:
