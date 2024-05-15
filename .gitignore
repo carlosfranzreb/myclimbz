@@ -6,3 +6,4 @@ prod.db
 audios
 *.ckpt
 .env
+gunicorn_socket

@@ -79,3 +79,4 @@ jobs:
           FLASK_DEBUG: 1
           DISABLE_LOGIN: 1
           CLIMBZ_DB_URI: sqlite:///test_100.db
+          PROD: 0

@@ -7,6 +7,7 @@ services:
     volumes:
       - ./climbz/:/usr/src/climbz
       - ./instance:/usr/src/instance
+      - ./gunicorn_socket:/usr/src/gunicorn_socket
     env_file:
       - .env
     ports:
