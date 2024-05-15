@@ -25,4 +25,4 @@ jobs:
       - name: Push code to production server
         run: |
           echo "${{ secrets.HETZNER_KEY }}" > ~/hetzner_key.pub
-          ssh -i ~/hetzner_key.pub ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} "cd /root/boulders && bash scripts/deploy.sh"
+          ssh -o StrictHostKeyChecking=no -i ~/hetzner_key.pub ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} "cd /root/boulders && bash scripts/deploy.sh"
