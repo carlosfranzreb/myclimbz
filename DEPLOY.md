@@ -13,10 +13,11 @@ Read about the different options here: https://www.digitalocean.com/community/tu
 
 ## How to create the prod database
 
+This guide can also be used to add new users to an existing database.
+
 1. `docker compose build`
-2. `docker run --rm -it --entrypoint bash -v ./instance:/usr/src/instance -v ./climbz:/usr/src/climbz ghcr.io/carlosfr
-anzreb/boulders`
-3. From another terminal copy create_db.py and add_user_to_db.py with `cp ./create_db.py 66ba6b039776:/usr/src/create_db.py`
+2. `docker run --rm -it --entrypoint bash -v ./instance:/usr/src/instance -v ./climbz:/usr/src/climbz ghcr.io/carlosfranzreb/boulders:latest`
+3. From another terminal copy create_db.py and add_user_to_db.py with `docker cp ./create_db.py 66ba6b039776:/usr/src/create_db.py`, where `66ba6b039776` is the container ID (you can find it with `docker ps`).
 4. Create the prod database and add users
 
 ## How the app is started
