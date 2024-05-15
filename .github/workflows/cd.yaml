@@ -20,9 +20,11 @@ jobs:
   cd:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Push code to production server
-        run: |
-          echo "${{ secrets.HETZNER_KEY }}" > ~/hetzner_key.pub
-          ssh -o StrictHostKeyChecking=no -i ~/hetzner_key.pub ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} "cd /root/boulders && bash scripts/deploy.sh"
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_KEY }}
+          # port: 432
+          script: cd /root/boulders && bash scripts/deploy.sh
