@@ -41,14 +41,13 @@ def reopen_session(session_id: int) -> str:
 
 @sessions.route("/add_session", methods=["GET", "POST"])
 def add_session() -> str:
+    session_form = SessionForm.create_empty()
+
     # POST: a session form was submitted => create session or return error
     if request.method == "POST":
-        session_form = SessionForm.create_empty()
         if not session_form.validate():
             flask_session["error"] = session_form.errors
-            return render(
-                "add_session.html", title="Add session", session_form=session_form
-            )
+            return render("form.html", title="Add session", form=session_form)
 
         # if new_area, create new area; otherwise, get existing area
         area = session_form.get_area()
@@ -63,14 +62,8 @@ def add_session() -> str:
         flask_session["session_id"] = session.id
         return redirect("/")
 
-    # GET: the user has uploaded a recording or wants to start a session
-    session_form = SessionForm.create_empty()
-    return render(
-        "add_session.html",
-        title="Add session",
-        session_form=session_form,
-        area_names=[area.name for area in Area.query.order_by(Area.name).all()],
-    )
+    # GET: the user wants to start a session
+    return render("form.html", title="Add session", form=session_form)
 
 
 @sessions.route("/edit_session/<int:session_id>", methods=["GET", "POST"])

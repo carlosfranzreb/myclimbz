@@ -11,19 +11,24 @@ from climbz.models import Area, RockType, Session
 
 class SessionForm(FlaskForm):
     area = StringField("Area name")
-    date = DateField("Date", validators=[Optional()], default=datetime.today)
-    conditions = IntegerField("Conditions", validators=[Optional()])
     rock_type = SelectField("Rock Type of new area", validators=[Optional()])
     is_project_search = BooleanField(
         "Only adding projects (not climbing)", validators=[Optional()]
     )
+    date = DateField("Date", validators=[Optional()], default=datetime.today)
+    conditions = IntegerField("Conditions", validators=[Optional()])
     comment = StringField("Comment", validators=[Optional()])
 
-    def add_choices(self):
-        """Add choices to select fields: rock types."""
+    def build(self):
+        """Add rock types, existing areas and toggle flows."""
         self.rock_type.choices = [(0, "")] + [
             (r.id, r.name) for r in RockType.query.all()
         ]
+        self.area.datalist = [
+            area.name for area in Area.query.order_by(Area.name).all()
+        ]
+        self.area.toggle_ids = "rock_type"
+        self.is_project_search.toggle_ids = "date,conditions"
 
     @classmethod
     def create_empty(cls) -> SessionForm:
@@ -31,7 +36,7 @@ class SessionForm(FlaskForm):
         Create the form and add choices to the select fields.
         """
         form = cls()
-        form.add_choices()
+        form.build()
         return form
 
     @classmethod
@@ -40,7 +45,7 @@ class SessionForm(FlaskForm):
         Create the form with data from the entities.
         """
         form = cls()
-        form.add_choices()
+        form.build()
         for field in ["date", "conditions", "area", "is_project_search", "comment"]:
             if field in entities:
                 getattr(form, field).data = entities[field]
