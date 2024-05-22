@@ -150,7 +150,7 @@
         {% for opinion in route.opinions if opinion.climber_id != user_id %}
         <div class="card mb-3">
             <div class="card-header">
-                <a href="{{ url_for('climbers.climber', climber_id=opinion.climber.id) }}">
+                <a href="{{ url_for('climbers.view_climber', climber_id=opinion.climber.id) }}">
                     <h5 class="card-title">{{ opinion.climber.name }}</h5>
                 </a>
             </div>
