@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import event
 
 from climbz import db
@@ -7,7 +8,7 @@ from climbz.models.columns import Rating
 
 class Session(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date)
+    date = db.Column(db.Date, nullable=False, default=datetime.now().date())
     conditions = Rating("conditions")
     is_project_search = db.Column(db.Boolean, nullable=False, default=False)
     comment = db.Column(db.Text)

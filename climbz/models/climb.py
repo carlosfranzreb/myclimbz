@@ -3,7 +3,7 @@ from climbz import db
 
 class Climb(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    n_attempts = db.Column(db.Integer)
+    n_attempts = db.Column(db.Integer, default=0)
     sent = db.Column(db.Boolean, nullable=False)
     flashed = db.Column(db.Boolean, nullable=False)
     comment = db.Column(db.Text)

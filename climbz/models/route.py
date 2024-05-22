@@ -9,7 +9,7 @@ from climbz.models.columns import ConstrainedInteger
 
 class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200))
+    name = db.Column(db.String(200), nullable=False)
     created_by = db.Column(db.Integer, db.ForeignKey("climber.id"), nullable=False)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
@@ -17,7 +17,7 @@ class Route(db.Model):
     link = db.Column(db.String(300))
 
     # route characteristics
-    sit_start = db.Column(db.Boolean)
+    sit_start = db.Column(db.Boolean, nullable=False, default=False)
     height = db.Column(db.Float, db.CheckConstraint("height >= 0"))
     inclination = ConstrainedInteger("inclination", -20, 90)
 
