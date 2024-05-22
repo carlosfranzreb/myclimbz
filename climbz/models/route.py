@@ -1,6 +1,7 @@
 from collections import Counter
 
 from flask_login import current_user
+from sqlalchemy import UniqueConstraint
 
 from climbz import db
 from climbz.models import Grade, Opinion
@@ -25,6 +26,8 @@ class Route(db.Model):
     sector_id = db.Column(db.Integer, db.ForeignKey("sector.id"))
     climbs = db.relationship("Climb", backref="route", cascade="all, delete")
     opinions = db.relationship("Opinion", backref="route", cascade="all, delete")
+
+    UniqueConstraint("name", "sector_id", name="unique_route_name_in_sector")
 
     @property
     def sent(self) -> bool:

@@ -1,4 +1,4 @@
-from sqlalchemy import event
+from sqlalchemy import event, UniqueConstraint
 
 from climbz import db
 from climbz.models import Route
@@ -11,6 +11,8 @@ class Sector(db.Model):
     area_id = db.Column(db.Integer, db.ForeignKey("area.id"))
     routes = db.relationship("Route", backref="sector", cascade="all, delete")
     comment = db.Column(db.Text)
+
+    UniqueConstraint("name", "area_id", name="unique_sector_name_in_area")
 
     def n_sent_routes(self, climber_id: int) -> int:
         """Return the number of sent routes in this sector by a climber."""

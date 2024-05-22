@@ -28,7 +28,7 @@ class Climber(db.Model, UserMixin):
     role = db.Column(db.Integer, nullable=False, default=0)
 
     # login information
-    email = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(200), nullable=False, unique=True)
     password = db.Column(db.String(200), nullable=False)
 
     # personal information

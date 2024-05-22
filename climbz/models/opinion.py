@@ -2,6 +2,8 @@
 Table for storing climber's ratings, grades, cruxes and media for routes.
 """
 
+from sqlalchemy import UniqueConstraint
+
 from climbz import db
 from climbz.models.columns import Rating
 
@@ -27,3 +29,5 @@ class Opinion(db.Model):
         secondary=crux_opinions,
         backref=db.backref("routes", lazy="dynamic"),
     )
+
+    UniqueConstraint("route_id", "climber_id", name="unique_opinion")
