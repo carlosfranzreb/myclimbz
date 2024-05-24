@@ -8,10 +8,9 @@ from wtforms import (
     SelectField,
     SelectMultipleField,
     widgets,
+    IntegerRangeField,
 )
 from wtforms.validators import NumberRange, Optional
-from wtforms.fields import IntegerRangeField
-
 
 from climbz.models import Grade, Crux, Opinion
 

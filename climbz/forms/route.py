@@ -3,8 +3,14 @@ from __future__ import annotations
 from flask import session as flask_session
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, FloatField, BooleanField
-from wtforms.fields import URLField, DecimalRangeField, IntegerRangeField
+from wtforms import (
+    StringField,
+    FloatField,
+    BooleanField,
+    URLField,
+    DecimalRangeField,
+    IntegerRangeField,
+)
 from wtforms.validators import Optional, DataRequired, NumberRange
 
 from climbz.models import Route, Sector, Session
