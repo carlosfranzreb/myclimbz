@@ -6,7 +6,7 @@ from flask import (
 )
 from flask_login import current_user
 
-from climbz.models import Area, Session
+from climbz.models import Session
 from climbz.forms import SessionForm
 from climbz import db
 from climbz.blueprints.utils import render
