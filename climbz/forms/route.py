@@ -96,6 +96,9 @@ class RouteForm(FlaskForm):
         Create the form with data from the route object.
         """
         form = cls.create_empty(obj.sector.area_id)
+        form.height.default = obj.height
+        form.inclination.default = obj.inclination
+        delattr(form.name, "toggle_ids")
         for field in FIELDS:
             getattr(form, field).data = getattr(obj, field)
         if obj.sector is not None:
