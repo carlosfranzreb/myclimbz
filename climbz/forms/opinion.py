@@ -69,6 +69,8 @@ class OpinionForm(FlaskForm):
         """Create the form with data from the Opinion object."""
         route_name = obj.route.name
         form = cls.create_empty(route_name)
+        form.rating.default = obj.rating
+        form.landing.default = obj.landing
         for field in ["landing", "rating", "comment"]:
             getattr(form, field).data = getattr(obj, field)
 

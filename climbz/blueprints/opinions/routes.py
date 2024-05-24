@@ -30,10 +30,10 @@ def add_opinion(climber_id: int, route_id: int) -> str:
 def edit_opinion(opinion_id: int) -> str:
     opinion = Opinion.query.get(opinion_id)
     # POST: a opinion form was submitted => edit opinion or return error
-    opinion_form = OpinionForm.create_empty()
+    opinion_form = OpinionForm.create_empty(opinion.route.name)
     if request.method == "POST":
         if not opinion_form.validate():
-            return render("edit_form.html", title="Edit opinion", form=opinion_form)
+            return render("form.html", title="Edit opinion", forms=[opinion_form])
 
         opinion = opinion_form.get_edited_opinion(opinion_id)
         db.session.add(opinion)
@@ -42,7 +42,7 @@ def edit_opinion(opinion_id: int) -> str:
 
     # GET: return the edit opinion page
     opinion_form = OpinionForm.create_from_obj(opinion)
-    return render("edit_form.html", title="Edit opinion", form=opinion_form)
+    return render("form.html", title="Edit opinion", forms=[opinion_form])
 
 
 @opinions.route("/delete_opinion/<int:opinion_id>", methods=["GET", "POST"])
