@@ -1,6 +1,7 @@
 from collections import Counter
 
 from flask_login import current_user
+from sqlalchemy import UniqueConstraint
 
 from climbz import db
 from climbz.models import Grade, Opinion
@@ -9,7 +10,7 @@ from climbz.models.columns import ConstrainedInteger
 
 class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200))
+    name = db.Column(db.String(200), nullable=False)
     created_by = db.Column(db.Integer, db.ForeignKey("climber.id"), nullable=False)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
@@ -17,7 +18,7 @@ class Route(db.Model):
     link = db.Column(db.String(300))
 
     # route characteristics
-    sit_start = db.Column(db.Boolean)
+    sit_start = db.Column(db.Boolean, nullable=False, default=False)
     height = db.Column(db.Float, db.CheckConstraint("height >= 0"))
     inclination = ConstrainedInteger("inclination", -50, 90)
 
@@ -25,6 +26,8 @@ class Route(db.Model):
     sector_id = db.Column(db.Integer, db.ForeignKey("sector.id"))
     climbs = db.relationship("Climb", backref="route", cascade="all, delete")
     opinions = db.relationship("Opinion", backref="route", cascade="all, delete")
+
+    UniqueConstraint("name", "sector_id", name="unique_route_name_in_sector")
 
     @property
     def sent(self) -> bool:

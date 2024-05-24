@@ -7,3 +7,4 @@ audios
 *.ckpt
 .env
 gunicorn_socket
+myclimbz.egg-info

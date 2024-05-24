@@ -6,7 +6,7 @@ from flask import (
 )
 from flask_login import current_user
 
-from climbz.models import Area, Session
+from climbz.models import Session
 from climbz.forms import SessionForm
 from climbz import db
 from climbz.blueprints.utils import render
@@ -41,14 +41,13 @@ def reopen_session(session_id: int) -> str:
 
 @sessions.route("/add_session", methods=["GET", "POST"])
 def add_session() -> str:
+    session_form = SessionForm.create_empty()
+
     # POST: a session form was submitted => create session or return error
     if request.method == "POST":
-        session_form = SessionForm.create_empty()
         if not session_form.validate():
             flask_session["error"] = session_form.errors
-            return render(
-                "add_session.html", title="Add session", session_form=session_form
-            )
+            return render("form.html", title="Add session", forms=[session_form])
 
         # if new_area, create new area; otherwise, get existing area
         area = session_form.get_area()
@@ -63,14 +62,8 @@ def add_session() -> str:
         flask_session["session_id"] = session.id
         return redirect("/")
 
-    # GET: the user has uploaded a recording or wants to start a session
-    session_form = SessionForm.create_empty()
-    return render(
-        "add_session.html",
-        title="Add session",
-        session_form=session_form,
-        area_names=[area.name for area in Area.query.order_by(Area.name).all()],
-    )
+    # GET: the user wants to start a session
+    return render("form.html", title="Add session", forms=[session_form])
 
 
 @sessions.route("/edit_session/<int:session_id>", methods=["GET", "POST"])
@@ -79,33 +72,19 @@ def edit_session(session_id: int) -> str:
 
     # POST: a session form was submitted => create session or return error
     if request.method == "POST":
-        session_form = SessionForm.create_empty()
+        session_form = SessionForm.create_empty(is_edit=True)
         if not session_form.validate():
             flask_session["error"] = session_form.errors
-            return render(
-                "add_session.html", title="Edit session", session_form=session_form
-            )
-
-        # if new_area, create new area; otherwise, get existing area
-        area = session_form.get_area()
-        if area is not None and area.id is None:
-            db.session.add(area)
-            db.session.commit()
-        area_id = area.id if area is not None else None
+            return render("form.html", title="Edit session", forms=[session_form])
 
         # edit session with the new data
-        session = session_form.get_object(area_id, session)
+        session = session_form.get_object(session.area_id, session)
         db.session.commit()
         return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit the session
     session_form = SessionForm.create_from_object(session)
-    return render(
-        "add_session.html",
-        title="Edit session",
-        session_form=session_form,
-        area_names=[area.name for area in Area.query.order_by(Area.name).all()],
-    )
+    return render("form.html", title="Edit session", forms=[session_form])
 
 
 @sessions.route("/delete_session/<int:session_id>", methods=["GET", "POST"])

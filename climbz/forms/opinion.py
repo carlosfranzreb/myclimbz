@@ -3,14 +3,14 @@ from __future__ import annotations
 from flask_wtf import FlaskForm
 from flask_login import current_user
 from wtforms import (
-    IntegerField,
     SubmitField,
     StringField,
     SelectField,
     SelectMultipleField,
     widgets,
+    IntegerRangeField,
 )
-from wtforms.validators import Optional
+from wtforms.validators import NumberRange, Optional
 
 from climbz.models import Grade, Crux, Opinion
 
@@ -18,8 +18,22 @@ from climbz.models import Grade, Crux, Opinion
 class OpinionForm(FlaskForm):
     # the route is determined in the route form
     grade = SelectField("Grade", validators=[Optional()])
-    rating = IntegerField("Rating", validators=[Optional()])
-    landing = IntegerField("Landing", validators=[Optional()])
+    rating = IntegerRangeField(
+        "Rating",
+        validators=[
+            NumberRange(min=1, max=5, message="Please enter a rating between 1 and 5.")
+        ],
+        default=3,
+    )
+    landing = IntegerRangeField(
+        "Landing",
+        validators=[
+            NumberRange(
+                min=1, max=5, message="Please enter a landing score between 1 and 5."
+            )
+        ],
+        default=3,
+    )
     cruxes = SelectMultipleField(
         "Cruxes",
         validators=[Optional()],
@@ -29,31 +43,33 @@ class OpinionForm(FlaskForm):
     comment = StringField("Comment", validators=[Optional()])
     submit = SubmitField("Submit")
 
-    def add_choices(self):
-        """
-        Add choices to select fields: grades and cruxes.
-        """
-        cruxes = Crux.query.order_by(Crux.name).all()
-        self.cruxes.choices = [(str(c.id), c.name) for c in cruxes]
-
-        grades = Grade.query.order_by(Grade.level).all()
-        self.grade.choices = [(0, "")] + [
-            (g.id, getattr(g, current_user.grade_scale)) for g in grades
-        ]
-
     @classmethod
-    def create_empty(cls) -> OpinionForm:
+    def create_empty(cls, route_name: str) -> OpinionForm:
         """
         Create the form and add choices to the select fields.
         """
         form = cls()
-        form.add_choices()
+        form.title = f"Opinion for {route_name}"
+        cruxes = Crux.query.order_by(Crux.name).all()
+        form.cruxes.choices = [(str(c.id), c.name) for c in cruxes]
+
+        grades = Grade.query.order_by(Grade.level).all()
+        form.grade.choices = [(0, "")] + [
+            (g.id, getattr(g, current_user.grade_scale)) for g in grades
+        ]
+
+        form.rating.unit = "/ 5"
+        form.landing.unit = "/ 5"
+
         return form
 
     @classmethod
     def create_from_obj(cls, obj: Opinion) -> OpinionForm:
         """Create the form with data from the Opinion object."""
-        form = cls.create_empty()
+        route_name = obj.route.name
+        form = cls.create_empty(route_name)
+        form.rating.default = obj.rating
+        form.landing.default = obj.landing
         for field in ["landing", "rating", "comment"]:
             getattr(form, field).data = getattr(obj, field)
 
@@ -63,45 +79,6 @@ class OpinionForm(FlaskForm):
         form.cruxes.data = list()
         for crux in obj.cruxes:
             form.cruxes.data.append(str(crux.id))
-
-        return form
-
-    @classmethod
-    def create_from_entities(cls, entities: dict) -> OpinionForm:
-        """
-        Create the form with the given entities.
-
-        Args:
-            entities: Dictionary of entities to select options from.
-            grade_scale: The grade scale to use.
-        """
-
-        form = cls()
-        form.add_choices()
-
-        for field in ["landing", "rating", "comment"]:
-            if field in entities:
-                getattr(form, field).data = entities[field]
-
-        if "grade" in entities:
-            value = entities["grade"]
-            if current_user.grade_scale == "hueco":
-                grade = Grade.query.filter_by(hueco=value).first()
-            else:
-                grade = Grade.query.filter_by(font=value).first()
-            if grade is not None:
-                getattr(form, field).data = str(grade.id)
-        else:
-            getattr(form, field).data = 0
-
-        if "cruxes" in entities:
-            form.cruxes.data = list()
-            if isinstance(entities["cruxes"], str):
-                entities["cruxes"] = [entities["cruxes"]]
-            for crux in entities["cruxes"]:
-                crux_obj = Crux.query.filter_by(name=crux).first()
-                if crux_obj is not None:
-                    form.cruxes.data.append(str(crux_obj.id))
 
         return form
 

@@ -1,4 +1,5 @@
-from sqlalchemy import event
+from datetime import datetime
+from sqlalchemy import event, UniqueConstraint
 
 from climbz import db
 from climbz.models import Sector, Route, Climb
@@ -7,13 +8,15 @@ from climbz.models.columns import Rating
 
 class Session(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date)
+    date = db.Column(db.Date, nullable=False, default=datetime.now().date())
     conditions = Rating("conditions")
     is_project_search = db.Column(db.Boolean, nullable=False, default=False)
     comment = db.Column(db.Text)
     climbs = db.relationship("Climb", backref="session", cascade="all, delete")
     area_id = db.Column(db.Integer, db.ForeignKey("area.id"))
     climber_id = db.Column(db.Integer, db.ForeignKey("climber.id"))
+
+    UniqueConstraint("date", "area_id", "climber_id", name="unique_session")
 
 
 @event.listens_for(Sector, "after_delete")

@@ -8,7 +8,7 @@
     {% if title == "Routes" %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/slider_switch.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/filters.css') }}" />
-    <meta name="version" content="1.1.2">
+    <meta name="version" content="1.2.0">
 
     {% endif %}
 </head>
@@ -120,6 +120,9 @@
 
     <!-- Scripts for confirming deletes -->
     <script src="{{url_for('static', filename='js/confirm_deletion.js')}}"></script>
+
+    <!-- Script for forms -->
+    <script src="{{url_for('static', filename='js/forms.js')}}"></script>
 
     <!-- Scripts for routes -->
     {% if title == "Routes" %}

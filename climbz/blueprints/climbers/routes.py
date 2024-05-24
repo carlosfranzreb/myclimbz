@@ -68,7 +68,7 @@ def edit_climber(climber_id: int):
     if request.method == "POST":
         if not form.validate():
             flask_session["error"] = form.errors
-            return render("edit_form.html", title="Edit profile", form=form)
+            return render("form.html", title="Edit profile", forms=[form])
         # form is valid; commit changes and return to profile page
         obj = form.get_edited_obj(climber)
         db.session.add(obj)
@@ -76,11 +76,8 @@ def edit_climber(climber_id: int):
         return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit their profile
-    return render_template(
-        "edit_form.html",
-        title="Edit profile",
-        form=ClimberForm.create_from_obj(climber),
-    )
+    form = ClimberForm.create_from_obj(climber)
+    return render("form.html", title="Edit profile", forms=[form])
 
 
 @climbers.route("/climber/<int:climber_id>", methods=["GET", "POST"])

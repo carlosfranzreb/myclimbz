@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import InputRequired
 
 from climbz.models import Climber
@@ -12,7 +12,6 @@ class LoginForm(FlaskForm):
     email = StringField("Email", validators=[InputRequired()])
     password = PasswordField("Password", validators=[InputRequired()])
     remember = BooleanField("Remember me")
-    submit = SubmitField("Submit")
 
     def validate(self) -> bool:
         """

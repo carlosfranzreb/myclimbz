@@ -1,11 +1,19 @@
 from __future__ import annotations
 
+from flask import session as flask_session
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, StringField, FloatField, BooleanField
-from wtforms.validators import Optional
+from wtforms import (
+    StringField,
+    FloatField,
+    BooleanField,
+    URLField,
+    DecimalRangeField,
+    IntegerRangeField,
+)
+from wtforms.validators import Optional, DataRequired, NumberRange
 
-from climbz.models import Route, Sector
+from climbz.models import Route, Sector, Session
 
 
 FIELDS = [
@@ -21,51 +29,86 @@ FIELDS = [
 
 
 class RouteForm(FlaskForm):
-    name = StringField("Route name", validators=[Optional()])
-    sector = StringField("Sector", validators=[Optional()])
-    height = FloatField("Height", validators=[Optional()])
-    inclination = IntegerField(
-        "Inclination", validators=[Optional()], render_kw={"step": "5"}
+    name = StringField(
+        "Route name", validators=[DataRequired("Please enter the name of the route.")]
     )
-    sit_start = BooleanField("Sit Start", validators=[Optional()])
+    sector = StringField("Sector", validators=[Optional()])
+    height = DecimalRangeField(
+        "Height",
+        validators=[
+            NumberRange(
+                min=0.5,
+                max=10,
+                message="Please enter a height between 0.5 and 10 meters.",
+            )
+        ],
+        render_kw={"step": "0.5"},
+        default=3.0,
+    )
+    inclination = IntegerRangeField(
+        "Inclination",
+        validators=[
+            NumberRange(
+                min=-50,
+                max=90,
+                message="Please enter an inclination between -50 and 90 degrees.",
+            )
+        ],
+        default=0,
+        render_kw={"step": "5"},
+    )
+    sit_start = BooleanField("Sit Start", default=False)
     latitude = FloatField("Latitude", validators=[Optional()])
     longitude = FloatField("Longitude", validators=[Optional()])
     comment = StringField("Comment", validators=[Optional()])
-    link = StringField("Link", validators=[Optional()])
+    link = URLField("Link", validators=[Optional()])
 
     @classmethod
-    def create_empty(cls) -> RouteForm:
+    def create_empty(cls, area_id: int) -> RouteForm:
         """
         Create the form and add choices to the select fields.
         """
-        return cls()
+        form = cls()
+        form.title = "Route"
+        form.height.unit = "m"
+        form.inclination.unit = "°"
+        form.name.toggle_ids = (
+            "sector,height,inclination,sit_start,latitude,longitude,comment,link"
+        )
+
+        # get existing sectors and routes
+        sectors = Sector.query.filter_by(area_id=area_id).order_by(Sector.name).all()
+        sector_names = [sector.name for sector in sectors]
+        routes = list()
+        for sector in sectors:
+            routes += sector.routes
+        route_names = sorted([route.name for route in routes])
+
+        form.sector.datalist = sector_names
+        form.name.datalist = route_names  # TODO: should change according to sector
+
+        # add the last sector of the current session if possible
+        if flask_session.get("session_id", False) > 0:
+            session = Session.query.get(flask_session["session_id"])
+            sectors = [c.route.sector for c in session.climbs]
+            if len(sectors) > 0:
+                form.sector.data = sectors[-1].name
+
+        return form
 
     @classmethod
     def create_from_obj(cls, obj: Route) -> RouteForm:
         """
         Create the form with data from the route object.
         """
-        form = cls()
+        form = cls.create_empty(obj.sector.area_id)
+        form.height.default = obj.height
+        form.inclination.default = obj.inclination
+        delattr(form.name, "toggle_ids")
         for field in FIELDS:
             getattr(form, field).data = getattr(obj, field)
         if obj.sector is not None:
             form.sector.data = obj.sector.name
-
-        return form
-
-    @classmethod
-    def create_from_entities(cls, entities: dict) -> RouteForm:
-        """
-        Create the form with the given entities.
-
-        Args:
-            entities: Dictionary of entities to select options from.
-            grade_scale: The grade scale to use.
-        """
-        form = cls()
-        for field in FIELDS:
-            if field in entities:
-                getattr(form, field).data = entities[field]
 
         return form
 
