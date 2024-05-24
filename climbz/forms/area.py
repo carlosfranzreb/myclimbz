@@ -12,7 +12,6 @@ class AreaForm(FlaskForm):
 
     name = StringField("Area name", validators=[Optional()])
     rock_type = SelectField("Rock Type", validators=[Optional()])
-    submit = SubmitField("Submit")
 
     def add_choices(self):
         """Add choices to select fields: rock types."""

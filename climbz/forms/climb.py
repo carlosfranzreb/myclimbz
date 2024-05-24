@@ -3,7 +3,7 @@ from __future__ import annotations
 from flask import session as flask_session
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, SubmitField, BooleanField, StringField
+from wtforms import IntegerField, BooleanField, StringField
 from wtforms.validators import Optional
 
 from climbz.models import Route, Climb, Session
@@ -29,7 +29,6 @@ class ClimbForm(FlaskForm):
     add_opinion = BooleanField(
         "Add opinion to route after submitting this form", validators=[Optional()]
     )
-    submit = SubmitField("Submit", validators=[Optional()])
 
     @classmethod
     def create_empty(cls) -> ClimbForm:
