@@ -28,20 +28,13 @@ def page_area(area_id: int) -> str:
 @areas.route("/edit_area/<int:area_id>", methods=["GET", "POST"])
 def edit_area(area_id: int) -> str:
     area = Area.query.get(area_id)
-    area_form = AreaForm()
-    area_form.add_choices()
 
     # POST: an area form was submitted => edit area or return error
     if request.method == "POST":
-        if not area_form.validate():
+        area_form = AreaForm.create_empty()
+        if not area_form.validate(area.name):
             flask_session["error"] = area_form.errors
-            return render("edit_area.html", title="Edit area", area_form=area_form)
-
-        # if the name has changed, check if it already exists
-        if area_form.name.data != area.name:
-            if Area.query.filter_by(name=area_form.name.data).first() is not None:
-                flask_session["error"] = "An area with that name already exists."
-                return render("edit_area.html", area_form=area_form)
+            return render("form.html", title="Edit area", forms=[area_form])
 
         area.name = area_form.name.data
         area.rock_type_id = int(area_form.rock_type.data)
@@ -49,16 +42,8 @@ def edit_area(area_id: int) -> str:
         return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit an area
-    area_form.name.data = area.name
-    area_form.rock_type.data = (
-        str(area.rock_type.id) if area.rock_type is not None else 0
-    )
-    return render(
-        "edit_area.html",
-        title="Edit area",
-        area_form=area_form,
-        area_names=[area.name for area in Area.query.order_by(Area.name).all()],
-    )
+    area_form = AreaForm.create_from_obj(area)
+    return render("form.html", title="Edit area", forms=[area_form])
 
 
 @areas.route("/delete_area/<int:area_id>", methods=["GET", "POST"])
