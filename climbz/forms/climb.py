@@ -6,7 +6,7 @@ from flask_wtf import FlaskForm
 from wtforms import IntegerField, SubmitField, BooleanField, StringField
 from wtforms.validators import Optional
 
-from climbz.models import Route, Climb
+from climbz.models import Route, Climb, Session
 
 
 FIELDS = [
@@ -41,36 +41,43 @@ class ClimbForm(FlaskForm):
     @classmethod
     def create_from_object(cls, obj: Climb) -> ClimbForm:
         form = cls.create_empty()
+        form.title = f"Climb on {obj.route.name}"
         for field in FIELDS:
             getattr(form, field).data = getattr(obj, field.replace("climb_", ""))
         return form
 
-    def validate(self, route: Route) -> bool:
+    def validate(self, route: Route, session_id: int = None) -> bool:
         """If the climb has already been tried before, `flashed` must be false."""
         is_valid = True
         if not super().validate():
             is_valid = False
 
-        if route is not None:
-            if route.tried and self.flashed.data is True:
-                self.flashed.errors.append("This route has already been tried.")
-                is_valid = False
+        if route is not None and self.flashed.data is True:
+            if self.n_attempts.data is not None and self.n_attempts.data > 1:
+                self.flashed.errors.append("A flashed climb must have 1 attempt.")
+                return False
+
+            if session_id is None:
+                session_id = flask_session["session_id"]
+            session = Session.query.get(session_id)
+            climbs = Climb.query.filter_by(
+                route_id=route.id, climber_id=current_user.id
+            ).all()
+            if len(climbs) > 0:
+                first_date = min([climb.session.date for climb in climbs])
+                if session.date > first_date:
+                    print(session.date, first_date)
+                    self.flashed.errors.append(
+                        "This is not your first session. A flash is not possible."
+                    )
+                    is_valid = False
 
         return is_valid
 
     def validate_from_name(self, route_name: str) -> bool:
         """If the climb has already been tried before, `flashed` must be false."""
-        is_valid = True
-        if not super().validate():
-            is_valid = False
-
         route = Route.query.filter_by(name=route_name).first()
-        if route is not None:
-            if route.tried and self.flashed.data is True:
-                self.flashed.errors.append("This route has already been tried.")
-                is_valid = False
-
-        return is_valid
+        return self.validate(route)
 
     def get_object(self, route: Route) -> Climb:
         """Create a new climb object from the form data."""

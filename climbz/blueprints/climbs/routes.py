@@ -82,25 +82,20 @@ def add_climb() -> str:
 @climbs.route("/edit_climb/<int:climb_id>", methods=["GET", "POST"])
 def edit_climb(climb_id: int) -> str:
     climb = Climb.query.get(climb_id)
+
     # POST: a climb form was submitted => edit climb or return error
     if request.method == "POST":
         climb_form = ClimbForm()
-        # remove the is_project field from the form
-        if not climb_form.validate(climb.route):
+        if not climb_form.validate(climb.route, climb.session_id):
             flask_session["error"] = climb_form.errors
-            return render("edit_climb.html", title="Edit climb", climb_form=climb_form)
+            return render("form.html", title="Edit climb", forms=[climb_form])
         climb = climb_form.get_edited_climb(climb_id)
         db.session.commit()
         return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit a climb
     climb_form = ClimbForm.create_from_object(climb)
-    return render(
-        "add_climb.html",
-        title="Edit climb",
-        climb_form=climb_form,
-        route_name=climb.route.name,
-    )
+    return render("form.html", title="Edit climb", forms=[climb_form])
 
 
 @climbs.route("/delete_climb/<int:climb_id>")
