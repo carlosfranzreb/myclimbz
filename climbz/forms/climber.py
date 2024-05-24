@@ -7,8 +7,9 @@ from wtforms import (
     IntegerField,
     SelectField,
     DateField,
+    EmailField,
 )
-from wtforms.validators import Optional
+from wtforms.validators import Optional, DataRequired
 
 from climbz.models import Climber
 
@@ -29,10 +30,10 @@ class ClimberForm(FlaskForm):
     """Form to edit profile data."""
 
     # login information
-    email = StringField("Email")
+    email = EmailField("Email", validators=[DataRequired()])
 
     # personal information
-    name = StringField("Name")
+    name = StringField("Name", validators=[DataRequired()])
     birthdate = DateField("Birthdate", validators=[Optional()])
     year_started_climbing = IntegerField("Years climbing", validators=[Optional()])
     weight = IntegerField("Weight (kg)", validators=[Optional()])
