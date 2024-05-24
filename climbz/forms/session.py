@@ -4,18 +4,22 @@ from datetime import datetime
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, DateField, StringField, SelectField, BooleanField
-from wtforms.validators import Optional
+from wtforms.validators import Optional, DataRequired
 
 from climbz.models import Area, RockType, Session
 
 
 class SessionForm(FlaskForm):
-    area = StringField("Area name")
+    area = StringField("Area name", validators=[DataRequired("You must enter an area")])
     rock_type = SelectField("Rock Type of new area", validators=[Optional()])
     is_project_search = BooleanField(
         "Only adding projects (not climbing)", validators=[Optional()]
     )
-    date = DateField("Date", validators=[Optional()], default=datetime.today)
+    date = DateField(
+        "Date",
+        validators=[DataRequired("You must enter a date")],
+        default=datetime.today,
+    )
     conditions = IntegerField("Conditions", validators=[Optional()])
     comment = StringField("Comment", validators=[Optional()])
 
