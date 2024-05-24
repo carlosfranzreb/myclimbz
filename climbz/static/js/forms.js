@@ -1,36 +1,10 @@
-function dummy() {
-    // If the user selects an existing area, the rock type field is hidden
-    let rockTypeContainer = document.getElementById("rock_type-container");
-    let area = document.getElementById("{{ session_form.area.id }}");
-
-    // If the user clicks on the project search checkbox, date and conditions fields are hidden
-    let is_project_search = document.getElementById("{{ session_form.is_project_search.id }}");
-    let dateContainer = document.getElementById("date-container");
-    let conditionsContainer = document.getElementById("conditions-container");
-
-    function toggleRockTypeContainer() {
-        let areaValue = area.value;
-        let areaExists = false;
-        for (let existingArea of document.getElementById("existingAreas").options) {
-            if (existingArea.value == areaValue) {
-                areaExists = true;
-                break;
-            }
-        }
-        rockTypeContainer.style.display = areaExists ? "none" : "block";
+// Fire all onchange events on page load
+window.onload = function () {
+    var elements = document.querySelectorAll('*');
+    for (var i = 0; i < elements.length; i++) {
+        if (elements[i].onchange)
+            elements[i].onchange();
     }
-
-    function toggleIsProjectSearch() {
-        let isProjectSearch = is_project_search.checked;
-        dateContainer.style.display = isProjectSearch ? "none" : "block";
-        conditionsContainer.style.display = isProjectSearch ? "none" : "block";
-    }
-
-    area.addEventListener("change", toggleRockTypeContainer);
-    toggleRockTypeContainer();
-
-    is_project_search.addEventListener("change", toggleIsProjectSearch);
-    toggleIsProjectSearch();
 }
 
 // Toggle the elements according to the checkbox state
