@@ -23,24 +23,20 @@ class SessionForm(FlaskForm):
     conditions = IntegerField("Conditions", validators=[Optional()])
     comment = StringField("Comment", validators=[Optional()])
 
-    def build(self):
-        """Add rock types, existing areas and toggle flows."""
-        self.rock_type.choices = [(0, "")] + [
-            (r.id, r.name) for r in RockType.query.all()
-        ]
-        self.area.datalist = [
-            area.name for area in Area.query.order_by(Area.name).all()
-        ]
-        self.area.toggle_ids = "rock_type"
-        self.is_project_search.toggle_ids = "date,conditions"
-
     @classmethod
     def create_empty(cls) -> SessionForm:
         """
-        Create the form and add choices to the select fields.
+        Create the form and add rock types, existing areas and toggle flows.
         """
         form = cls()
-        form.build()
+        form.rock_type.choices = [(0, "")] + [
+            (r.id, r.name) for r in RockType.query.all()
+        ]
+        form.area.datalist = [
+            area.name for area in Area.query.order_by(Area.name).all()
+        ]
+        form.area.toggle_ids = "rock_type"
+        form.is_project_search.toggle_ids = "date,conditions"
         return form
 
     @classmethod
@@ -48,21 +44,10 @@ class SessionForm(FlaskForm):
         """
         Create the form with data from the entities.
         """
-        form = cls()
-        form.build()
+        form = cls.create_empty()
         for field in ["date", "conditions", "area", "is_project_search", "comment"]:
             if field in entities:
                 getattr(form, field).data = entities[field]
-
-        # ! This is commented out until the NER is implemented
-        # if "area" in entities:
-        #     area = get_area_from_entities(entities)
-        #     if area.id is None and "rock" in entities:
-        #         rock = RockType.query.filter_by(name=entities["rock"]).first()
-        #         if rock is not None:
-        #             form.rock_type.data = str(rock.id)
-        #     else:
-        #         form.rock_type.data = "0"
 
         # if date is null, set it to today
         if form.date.data is None:

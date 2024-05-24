@@ -47,7 +47,7 @@ def add_session() -> str:
     if request.method == "POST":
         if not session_form.validate():
             flask_session["error"] = session_form.errors
-            return render("form.html", title="Add session", form=session_form)
+            return render("form.html", title="Add session", forms=[session_form])
 
         # if new_area, create new area; otherwise, get existing area
         area = session_form.get_area()
@@ -63,7 +63,7 @@ def add_session() -> str:
         return redirect("/")
 
     # GET: the user wants to start a session
-    return render("form.html", title="Add session", form=session_form)
+    return render("form.html", title="Add session", forms=[session_form])
 
 
 @sessions.route("/edit_session/<int:session_id>", methods=["GET", "POST"])
@@ -75,9 +75,7 @@ def edit_session(session_id: int) -> str:
         session_form = SessionForm.create_empty()
         if not session_form.validate():
             flask_session["error"] = session_form.errors
-            return render(
-                "add_session.html", title="Edit session", session_form=session_form
-            )
+            return render("form.html", title="Edit session", forms=[session_form])
 
         # if new_area, create new area; otherwise, get existing area
         area = session_form.get_area()
@@ -93,12 +91,7 @@ def edit_session(session_id: int) -> str:
 
     # GET: the user wants to edit the session
     session_form = SessionForm.create_from_object(session)
-    return render(
-        "add_session.html",
-        title="Edit session",
-        session_form=session_form,
-        area_names=[area.name for area in Area.query.order_by(Area.name).all()],
-    )
+    return render("form.html", title="Edit session", forms=[session_form])
 
 
 @sessions.route("/delete_session/<int:session_id>", methods=["GET", "POST"])
