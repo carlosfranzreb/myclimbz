@@ -26,7 +26,7 @@ If you want to hide certain fields of your form when an option from the datalist
 
 Some fields should only be displayed if a checkbox is checked. For example, in the session form, date and conditions are only necessary when the session involves real climbing, not only adding a projects. Therefore, if the checkbox "Only adding projects" is checked, those two fields are hidden.
 
-To hide fields when a checkbox is checked, define their IDs in the `toggle_ids` attribute of the checkbox as a string containing the IDs, separated by commas. The template will then add an on change event listener to the field with the JS function `checkboxToggle`, which receives the checkbox ID and the value of the `toggle_ids` attribute.
+To hide fields when a checkbox is checked, define their IDs in the `toggle_ids` attribute of the checkbox as a string containing the IDs, separated by commas and **without spaces**. The template will then add an on change event listener to the field with the JS function `checkboxToggle`, which receives the checkbox ID and the value of the `toggle_ids` attribute.
 
 This is how it is done for the example mentioned above:
 

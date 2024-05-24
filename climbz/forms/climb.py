@@ -13,8 +13,8 @@ FIELDS = [
     "n_attempts",
     "sent",
     "flashed",
-    "comment",
-    "link",
+    "climb_comment",
+    "climb_link",
 ]
 
 
@@ -22,31 +22,28 @@ class ClimbForm(FlaskForm):
     # the route is determined in the route form
     is_project = BooleanField("Project (not tried yet)", validators=[Optional()])
     n_attempts = IntegerField("Number of attempts", validators=[Optional()])
-    comment = StringField("Comment", validators=[Optional()])
-    link = StringField("Link", validators=[Optional()])
+    climb_comment = StringField("Comment", validators=[Optional()])
+    climb_link = StringField("Link", validators=[Optional()])
     sent = BooleanField("Sent", validators=[Optional()])
     flashed = BooleanField("Flashed", validators=[Optional()])
-    add_opinion = BooleanField("Add opinion to sent climb", validators=[Optional()])
+    add_opinion = BooleanField(
+        "Add opinion to route after submitting this form", validators=[Optional()]
+    )
     submit = SubmitField("Submit", validators=[Optional()])
 
     @classmethod
-    def create_from_entities(cls, entities: dict) -> ClimbForm:
-        return cls(
-            n_attempts=entities.get("n_attempts", None),
-            sent=entities.get("sent", False),
-            flashed=entities.get("flashed", False),
-            comment=entities.get("comment", ""),
-        )
+    def create_empty(cls) -> ClimbForm:
+        form = cls()
+        form.title = "Climb"
+        form.is_project.toggle_ids = "n_attempts,climb_comment,climb_link,sent,flashed"
+        return form
 
     @classmethod
     def create_from_object(cls, obj: Climb) -> ClimbForm:
-        return cls(
-            n_attempts=obj.n_attempts,
-            sent=obj.sent,
-            flashed=obj.flashed,
-            comment=obj.comment,
-            link=obj.link,
-        )
+        form = cls.create_empty()
+        for field in FIELDS:
+            getattr(form, field).data = getattr(obj, field.replace("climb_", ""))
+        return form
 
     def validate(self, route: Route) -> bool:
         """If the climb has already been tried before, `flashed` must be false."""

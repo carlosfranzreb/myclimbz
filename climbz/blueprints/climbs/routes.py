@@ -19,8 +19,8 @@ def add_climb() -> str:
 
     # create forms and add choices
     session = Session.query.get(flask_session["session_id"])
-    route_form = RouteForm.create_empty()
-    climb_form = ClimbForm() if not session.is_project_search else None
+    route_form = RouteForm.create_empty(session.area_id)
+    climb_form = ClimbForm.create_empty() if not session.is_project_search else None
 
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
@@ -33,10 +33,7 @@ def add_climb() -> str:
         if not route_form.validate() or invalid_climb:
             flask_session["error"] = route_form.errors or climb_form.errors
             return render(
-                "add_climb.html",
-                title="Add climb",
-                route_form=route_form,
-                climb_form=climb_form,
+                "form.html", title="Add climb", forms=[route_form, climb_form]
             )
 
         # create new sector and new route if necessary
@@ -76,38 +73,10 @@ def add_climb() -> str:
         else:
             return redirect("/")
 
-    # GET: the climber wants to add a route (+climb) => create forms
-    route_form = RouteForm.create_empty()
-
-    # create the climb form if needed
+    # GET: the climber wants to add a route (+climb)
     if session.is_project_search:
         climb_form = None
-
-    # add the last sector of the current session if possible
-    if flask_session.get("session_id", False) > 0:
-        session = Session.query.get(flask_session["session_id"])
-        sectors = [c.route.sector for c in session.climbs]
-        if len(sectors) > 0:
-            route_form.sector.data = sectors[-1].name
-
-    # get existing sectors and routes
-    sectors = (
-        Sector.query.filter_by(area_id=session.area_id).order_by(Sector.name).all()
-    )
-    sector_names = [sector.name for sector in sectors]
-    routes = list()
-    for sector in sectors:
-        routes += sector.routes
-    route_names = sorted([route.name for route in routes])
-
-    return render(
-        "add_climb.html",
-        title="Add climb",
-        route_form=route_form,
-        climb_form=climb_form,
-        route_names=route_names,
-        sector_names=sector_names,
-    )
+    return render("form.html", title="Add climb", forms=[route_form, climb_form])
 
 
 @climbs.route("/edit_climb/<int:climb_id>", methods=["GET", "POST"])
