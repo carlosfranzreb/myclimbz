@@ -3,8 +3,15 @@ from datetime import datetime
 
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, DateField, StringField, SelectField, BooleanField
-from wtforms.validators import Optional, DataRequired
+from wtforms import (
+    IntegerField,
+    DateField,
+    StringField,
+    SelectField,
+    BooleanField,
+    IntegerRangeField,
+)
+from wtforms.validators import Optional, DataRequired, NumberRange
 
 from climbz.models import Area, RockType, Session
 
@@ -20,57 +27,51 @@ class SessionForm(FlaskForm):
         validators=[DataRequired("You must enter a date")],
         default=datetime.today,
     )
-    conditions = IntegerField("Conditions", validators=[Optional()])
+    conditions = IntegerRangeField(
+        "Conditions",
+        validators=[
+            NumberRange(
+                min=1, max=5, message="Please enter a landing score between 1 and 5."
+            )
+        ],
+        default=3,
+    )
     comment = StringField("Comment", validators=[Optional()])
 
     @classmethod
-    def create_empty(cls) -> SessionForm:
+    def create_empty(cls, is_edit: bool = False) -> SessionForm:
         """
         Create the form and add rock types, existing areas and toggle flows.
         """
         form = cls()
-        form.rock_type.choices = [(0, "")] + [
-            (r.id, r.name) for r in RockType.query.all()
-        ]
-        form.area.datalist = [
-            area.name for area in Area.query.order_by(Area.name).all()
-        ]
-        form.area.toggle_ids = "rock_type"
-        form.is_project_search.toggle_ids = "date,conditions"
-        return form
-
-    @classmethod
-    def create_from_entities(cls, entities: dict) -> SessionForm:
-        """
-        Create the form with data from the entities.
-        """
-        form = cls.create_empty()
-        for field in ["date", "conditions", "area", "is_project_search", "comment"]:
-            if field in entities:
-                getattr(form, field).data = entities[field]
-
-        # if date is null, set it to today
-        if form.date.data is None:
-            form.date.data = datetime.today()
-
+        if is_edit:
+            del form.area
+            del form.rock_type
+            del form.is_project_search
+        else:
+            form.rock_type.choices = [(0, "")] + [
+                (r.id, r.name) for r in RockType.query.all()
+            ]
+            form.area.datalist = [
+                area.name for area in Area.query.order_by(Area.name).all()
+            ]
+            form.area.toggle_ids = "rock_type"
+            form.is_project_search.toggle_ids = "date,conditions"
         return form
 
     @classmethod
     def create_from_object(cls, session: Session) -> SessionForm:
         """
-        Create an "entities" dictionary from the session object and call
-        create_from_entities.
+        Create an session form from a session object. This form is used to edit the
+        session, where changing the area and setting it as a project search are not
+        allowed.
         """
-        entities = {
-            "date": session.date,
-            "conditions": session.conditions,
-            "area": session.area.name if session.area is not None else None,
-            "is_project_search": session.is_project_search,
-            "comment": session.comment,
-        }
-        if session.area is not None and session.area.rock_type is not None:
-            entities["rock"] = session.area.rock_type.name
-        return cls.create_from_entities(entities)
+        form = cls.create_empty(is_edit=True)
+        form.title = f"Session on {session.area.name}"
+        form.conditions.default = session.conditions
+        for field in ["date", "conditions", "comment"]:
+            getattr(form, field).data = getattr(session, field)
+        return form
 
     def get_area(self) -> Area:
         """
@@ -97,12 +98,15 @@ class SessionForm(FlaskForm):
         Return a Session object from the form data. If an object is passed, update it.
         If not, create a new one.
         """
+        new_obj = obj is None
         if obj is None:
             obj = Session()
         obj.climber_id = current_user.id
         obj.area_id = area_id
 
-        for attr in ["date", "conditions", "is_project_search", "comment"]:
+        for attr in ["date", "conditions", "comment"]:
             setattr(obj, attr, getattr(self, attr).data)
+        if new_obj:
+            obj.is_project_search = self.is_project_search.data
 
         return obj

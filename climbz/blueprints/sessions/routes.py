@@ -72,20 +72,13 @@ def edit_session(session_id: int) -> str:
 
     # POST: a session form was submitted => create session or return error
     if request.method == "POST":
-        session_form = SessionForm.create_empty()
+        session_form = SessionForm.create_empty(is_edit=True)
         if not session_form.validate():
             flask_session["error"] = session_form.errors
             return render("form.html", title="Edit session", forms=[session_form])
 
-        # if new_area, create new area; otherwise, get existing area
-        area = session_form.get_area()
-        if area is not None and area.id is None:
-            db.session.add(area)
-            db.session.commit()
-        area_id = area.id if area is not None else None
-
         # edit session with the new data
-        session = session_form.get_object(area_id, session)
+        session = session_form.get_object(session.area_id, session)
         db.session.commit()
         return redirect(flask_session.pop("call_from_url"))
 
