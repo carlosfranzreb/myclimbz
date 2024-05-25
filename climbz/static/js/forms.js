@@ -1,12 +1,3 @@
-// Fire all onchange events on page load
-window.onload = function () {
-    var elements = document.querySelectorAll('*');
-    for (var i = 0; i < elements.length; i++) {
-        if (elements[i].onchange)
-            elements[i].onchange();
-    }
-}
-
 // Toggle the elements according to the checkbox state
 function checkboxToggle(checkbox_id, element_ids) {
     let checkbox = document.getElementById(checkbox_id);
