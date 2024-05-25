@@ -2,9 +2,9 @@
 let PLOTTED_DATA = null;
 
 // set the dimensions and margins of the graph
-let MARGIN = { top: 30, right: 30, bottom: 70, left: 60 };
-let WIDTH = 460 - MARGIN.left - MARGIN.right;
-let HEIGHT = 400 - MARGIN.top - MARGIN.bottom;
+let MARGIN = { top: 30, right: 5, bottom: 70, left: 30 };
+let WIDTH = Math.min(900, window.innerWidth - MARGIN.left - MARGIN.right);
+let HEIGHT = window.innerHeight / 2 - MARGIN.top - MARGIN.bottom;
 
 // Define the options for the x-axis
 let x_axis_options = {

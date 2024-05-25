@@ -1,5 +1,5 @@
 // TODO: minify for distribution
-(function(root, factory) {
+(function (root, factory) {
     var plugin = "DataTable";
 
     if (typeof exports === "object") {
@@ -9,7 +9,7 @@
     } else {
         root[plugin] = factory(plugin);
     }
-})(typeof global !== 'undefined' ? global : this.window || this.global, function(plugin) {
+})(typeof global !== 'undefined' ? global : this.window || this.global, function (plugin) {
     "use strict";
     var win = window,
         doc = document,
@@ -347,22 +347,22 @@
 
         if (format) {
             switch (format) {
-            case "ISO_8601":
-                date = moment(content, moment.ISO_8601).format("YYYYMMDD");
-                break;
-            case "RFC_2822":
-                date = moment(content, "ddd, MM MMM YYYY HH:mm:ss ZZ").format("YYYYMMDD");
-                break;
-            case "MYSQL":
-                date = moment(content, "YYYY-MM-DD hh:mm:ss").format("YYYYMMDD");
-                break;
-            case "UNIX":
-                date = moment(content).unix();
-                break;
+                case "ISO_8601":
+                    date = moment(content, moment.ISO_8601).format("YYYYMMDD");
+                    break;
+                case "RFC_2822":
+                    date = moment(content, "ddd, MM MMM YYYY HH:mm:ss ZZ").format("YYYYMMDD");
+                    break;
+                case "MYSQL":
+                    date = moment(content, "YYYY-MM-DD hh:mm:ss").format("YYYYMMDD");
+                    break;
+                case "UNIX":
+                    date = moment(content).unix();
+                    break;
                 // User defined format using the data-format attribute or columns[n].format option
-            default:
-                date = moment(content, format).format("YYYYMMDD");
-                break;
+                default:
+                    date = moment(content, format).format("YYYYMMDD");
+                    break;
             }
         }
 
@@ -644,67 +644,67 @@
         }
 
         dt.sorting = true;
-        
+
         // Convert to zero-indexed
         column = column - 1;
 
         let header_name = dt.activeHeadings[column].textContent;
-        
+
         let dir,
             rows = dt.data,
             alpha = [],
             numeric = [],
             th = dt.activeHeadings[column];
 
-            column = th.originalCellIndex;
-        
-            let get_entries = function(arr) {
-                each(rows, function (tr) {
-                    let cell = tr.cells[column];
-                    let content = cell.hasAttribute('data-content') ? cell.getAttribute('data-content') : cell.data;
-                    arr.push({
+        column = th.originalCellIndex;
+
+        let get_entries = function (arr) {
+            each(rows, function (tr) {
+                let cell = tr.cells[column];
+                let content = cell.hasAttribute('data-content') ? cell.getAttribute('data-content') : cell.data;
+                arr.push({
+                    value: content,
+                    row: tr
+                });
+            });
+            return arr;
+        }
+
+        let entries = [];
+        // Sets ascending as default if not specified
+        if (classList.contains(th, "asc")) {
+            entries = get_entries(entries).reverse();
+            dir = "descending";
+            classList.remove(th, "asc");
+            classList.add(th, "desc");
+        }
+        else if (classList.contains(th, "desc")) {
+            entries = get_entries(entries).reverse();
+            dir = "ascending";
+            classList.remove(th, "desc");
+            classList.add(th, "asc");
+        }
+        else {
+            each(rows, function (tr) {
+                let cell = tr.cells[column];
+                let content = cell.hasAttribute('data-content') ? cell.getAttribute('data-content') : cell.data;
+                let num = content.replace(/(\$|\,|\s|%)/g, "");
+
+                if (parseFloat(num) == num && num !== "Infinity") {
+                    numeric.push({
+                        value: parseFloat(num),
+                        row: tr
+                    });
+                } else {
+                    alpha.push({
                         value: content,
                         row: tr
                     });
-                });
-                return arr;
-            }
-            
-            let entries = [];
-            // Sets ascending as default if not specified
-            if (classList.contains(th, "asc")) {
-                entries = get_entries(entries).reverse();
-                dir = "descending";
-                classList.remove(th, "asc");
-                classList.add(th, "desc");
-            }
-            else if (classList.contains(th, "desc")) {
-                entries = get_entries(entries).reverse();
-                dir = "ascending";
-                classList.remove(th, "desc");
-                classList.add(th, "asc");
-            }
-            else{
-                each(rows, function (tr) {
-                    let cell = tr.cells[column];
-                    let content = cell.hasAttribute('data-content') ? cell.getAttribute('data-content') : cell.data;
-                    let num = content.replace(/(\$|\,|\s|%)/g, "");
-        
-                    if (parseFloat(num) == num && num !== "Infinity") {
-                        numeric.push({
-                            value: parseFloat(num),
-                            row: tr
-                        });
-                    } else {
-                        alpha.push({
-                            value: content,
-                            row: tr
-                        });
-                    }
-        
-                });
-                // if an input in alpha is a date with format dd/mm/yyyy, sort the array by date
-                if (alpha.length > 0 && alpha[0].value.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
+                }
+
+            });
+            // if an input in alpha is a date with format dd/mm/yyyy, sort the array by date
+            if (alpha.length > 0 && alpha[0].value.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
                 alpha.sort((a, b) => {
                     const [dayA, monthA, yearA] = a.value.split('/');
                     const [dayB, monthB, yearB] = b.value.split('/');
@@ -712,7 +712,7 @@
                     const dateB = new Date(yearB, monthB - 1, dayB);
                     return dateA - dateB;
                 });
-            } 
+            }
             else if (header_name.includes("Grade")) {
                 //sort by grade array
                 //set numeric to strings
@@ -732,12 +732,12 @@
                 }
             }
             else {
-                const collator = new Intl.Collator('en', {sensitivity: 'base' })
+                const collator = new Intl.Collator('en', { sensitivity: 'base' })
                 alpha.sort((a, b) => {
                     return collator.compare(a.value, b.value);
                 });
             }
-            numeric.sort((a,b) => (a.value > b.value) ? 1 : ((b.value > a.value) ? -1 : 0));
+            numeric.sort((a, b) => (a.value > b.value) ? 1 : ((b.value > a.value) ? -1 : 0));
             if (entries.length === 0) {
                 entries = alpha.concat(numeric);
             }
@@ -898,7 +898,7 @@
             }
 
             // We may have added data to an empty table
-            if ( dt.data.length ) {
+            if (dt.data.length) {
                 dt.hasRows = true;
             }
 
@@ -996,7 +996,7 @@
      * @param  {Mixed} val      - Function or property value
      * @return {Void}
      */
-    DataTable.extend = function(prop, val) {
+    DataTable.extend = function (prop, val) {
         if (typeof val === "function") {
             DataTable.prototype[prop] = val;
         } else {
@@ -1037,7 +1037,7 @@
             that.initialized = true;
 
             if (that.options.plugins) {
-                each(that.options.plugins, function(options, plugin) {
+                each(that.options.plugins, function (options, plugin) {
                     if (that[plugin] && typeof that[plugin] === "function") {
                         that[plugin] = that[plugin](options, {
                             each: each,
@@ -1064,15 +1064,15 @@
     proto.render = function (type) {
         if (type) {
             switch (type) {
-            case "page":
-                this.renderPage();
-                break;
-            case "pager":
-                this.renderPager();
-                break;
-            case "header":
-                this.renderHeader();
-                break;
+                case "page":
+                    this.renderPage();
+                    break;
+                case "pager":
+                    this.renderPager();
+                    break;
+                case "header":
+                    this.renderHeader();
+                    break;
             }
 
             return false;
