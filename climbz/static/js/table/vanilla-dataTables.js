@@ -1205,7 +1205,7 @@
 
         // Build
         that.wrapper = createElement("div", {
-            class: "dataTable-wrapper dataTable-loading px-0 px-lg-5"
+            class: "dataTable-wrapper dataTable-loading"
         });
 
         // Template for custom layouts
