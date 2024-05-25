@@ -12,13 +12,11 @@ function show_table() {
     tr.append("th").text("Name");
     tr.append("th").text("Grade");
     tr.append("th").text("Area");
-    if (window.innerWidth > 800) {
-        tr.append("th").text("Sector");
-        tr.append("th").text("Height");
-        tr.append("th").text("Inclination");
-        tr.append("th").text("Landing");
-        tr.append("th").text("Last climbed");
-    }
+    tr.append("th").text("Sector");
+    tr.append("th").text("Height");
+    tr.append("th").text("Inclination");
+    tr.append("th").text("Landing");
+    tr.append("th").text("Last climbed");
 
     // Create the table body
     let tbody = table.append("tbody");
@@ -44,13 +42,11 @@ function show_table() {
             return GRADES.find(obj => obj.level === d.level)[GRADE_SCALE];
     });
     rows.append("td").text(d => d.area);
-    if (window.innerWidth > 800) {
-        rows.append("td").text(d => d.sector);
-        rows.append("td").text(d => d.height);
-        rows.append("td").text(d => d.inclination);
-        rows.append("td").text(d => d.landing);
-        rows.append("td").text(d => d.last_climbed);
-    }
+    rows.append("td").text(d => d.sector);
+    rows.append("td").text(d => d.height);
+    rows.append("td").text(d => d.inclination);
+    rows.append("td").text(d => d.landing);
+    rows.append("td").text(d => d.last_climbed);
 
     // Initialize the DataTable
     window.data_table = new DataTable("#content_table", {
