@@ -1,18 +1,34 @@
 {% extends "main.html" %}
 {% block content %}
 
-<div class="container mt-1 px-0 px-lg-5">
+<div class="container px-0 px-lg-5">
     <div class="card mb-3">
         <div class="card-header">
-            <h5 class="card-title">{{ route.name }} {{ route.consensus_grade_str }}</h5>
-            <p>{{ route.sector.name }}, {{route.sector.area.name }}</p>
+            <div class="row">
+                <div class="col-sm">
+                    <h5 class="card-title" style="display: inline-block">{{ route.name }} {{ route.consensus_grade_str
+                        }}</h5>
+                    {% if route.created_by == user_id or user_role == 1 %}
+                    <a href="{{ url_for('routes.edit_route', route_id=route.id) }}">
+                        {% include 'icons/edit.html' %}
+                    </a>
+                    <a href="{{ url_for('routes.delete_route', route_id=route.id) }}">
+                        {% include 'icons/delete.html' %}
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="col-sm">
+                    <span>{{ route.sector.name }}, {{route.sector.area.name }}</span>
+                </div>
+            </div>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col">
                     <span style="vertical-align: middle; display: inline-block;">{% include 'icons/height.html'
                         %}</span>
-                    <span style="vertical-align: middle; display: inline-block;">{{ (route.height|string).rstrip('.0')
+                    <span style="vertical-align: middle; display: inline-block;">{{
+                        (route.height|string).rstrip('.0')
                         }} m</span>
                 </div>
                 <div class="col">
@@ -23,74 +39,47 @@
                 <div class="col">
                     <span style="vertical-align: middle; display: inline-block;">{% include 'icons/rating.html'
                         %}</span>
-                    <span style="vertical-align: middle; display: inline-block;"> {{ (route.rating|string).rstrip('.0')
+                    <span style="vertical-align: middle; display: inline-block;"> {{
+                        (route.rating|string).rstrip('.0')
                         }}/5</span>
                 </div>
                 <div class="col">
                     <span style="vertical-align: middle; display: inline-block;">{% include 'icons/landing.html'
                         %}</span>
-                    <span style="vertical-align: middle; display: inline-block;"> {{ (route.landing|string).rstrip('.0')
+                    <span style="vertical-align: middle; display: inline-block;"> {{
+                        (route.landing|string).rstrip('.0')
                         }}/5</span>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-4 offset-md-2">
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">In {{ route.sector.name }}, {{
-                    route.sector.area.name }}
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                <div class="row">
+                    <div>
+                        <b>Cruxes:</b> {{ route.cruxes|join(", ") }}
+                    </div>
+                    <div>
+                        <b>Sends / tries:</b> {{ route.n_sends }} / {{ route.n_climbers }}
+                    </div>
+
+                    <div>
+                        <b>Coordinates:</b>
+                        {% if route.latitude and route.longitude %}
+                        {{ route.latitude }}, {{ route.longitude }}
+                        {% else %}
+                        Not available
+                        {% endif %}
+                    </div>
+
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">Height: {{ route.height }} m</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">Inclination: {{ route.inclination }} °</div>
-            </div>
-            <div class="row"> <!-- Replace the coordinates with a link to GMaps -->
-                <div class="col-xs-12 center-block text-center">Latitude: {{ route.latitude }}</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">Longitude: {{ route.longitude }}</div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">
-                    Success rate: {{ route.n_sends }} / {{ route.n_climbers }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">Grade: {{ route.consensus_grade_str }}</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">Landing: {{ route.landing }} / 5</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">Rating: {{ route.rating }} / 5</div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">Cruxes: {{ route.cruxes|join(", ") }}</div>
-            </div>
-        </div>
+            </li>
+            <li class="list-group-item"> {{ route.comment }}</li>
+        </ul>
     </div>
 </div>
 
-{% if route.created_by == user_id or user_role == 1 %}
-<div class="container">
-    <div class="col-xs-12 center-block text-center">
-        <a href="{{ url_for('routes.edit_route', route_id=route.id) }}" class="btn btn-primary">Edit</a>
-        <a href="{{ url_for('routes.delete_route', route_id=route.id) }}" class="btn btn-danger">Delete</a>
-    </div>
-</div>
-{% endif %}
-
-<div class="container">
-    <h3>My Sessions</h3>
-</div>
-
-<div class="px-0 px-lg-5">
+<div class="container px-0 px-lg-5">
+    <h3 class="mx-3">My sessions</h3>
     {% if route.climbs|selectattr("session.climber_id", "equalto", user_id)|list|length > 0 %}
     <table id="content_table" class="table table-striped table-hover">
         <thead>
@@ -144,25 +133,44 @@
     {% endif %}
 </div>
 
-<div class="container">
-    <h3>My opinion</h3>
+<div class="container px-0 px-lg-5">
     {% if route.opinions|selectattr("climber_id", "equalto", user_id)|list|length > 0 %}
     {% for opinion in route.opinions if opinion.climber_id == user_id %}
-    <a href="{{ url_for('opinions.edit_opinion', opinion_id=opinion.id) }}" class="btn btn-primary">Edit</a>
-    <a href="{{ url_for('opinions.delete_opinion', opinion_id=opinion.id) }}" class="btn btn-danger">Delete</a>
+    <h3 class="mx-3" style="display: inline-block">My opinion</h3>
+    <a href="{{ url_for('opinions.edit_opinion', opinion_id=opinion.id) }}">
+        {% include 'icons/edit.html' %}
+    </a>
+    <a href="{{ url_for('opinions.delete_opinion', opinion_id=opinion.id) }}">
+        {% include 'icons/delete.html' %}
+    </a>
     <div class="card mb-3">
         <div class="card-header">
             <h5 class="card-title">{{ opinion.climber.name }}</h5>
         </div>
         <div class="card-body">
-            <p class="card-body">
-                Grade: {{ opinion.grade.font }} / {{ opinion.grade.hueco }} <br>
-                Landing: {{ opinion.landing }} / 5 <br>
-                Rating: {{ opinion.rating }} / 5 <br>
-                Cruxes: {{ opinion.cruxes|map(attribute="name")|join(", ") }} <br>
-                Comment: {{ opinion.comment }}
-            </p>
+            <div class="row">
+                <div class="col">
+                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/grade.html'
+                        %}</span>
+                    <span style="vertical-align: middle; display: inline-block;">{{ opinion.grade.user_grade
+                        }}</span>
+                </div>
+                <div class="col">
+                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/rating.html'
+                        %}</span>
+                    <span style="vertical-align: middle; display: inline-block;"> {{ opinion.rating }}/5</span>
+                </div>
+                <div class="col">
+                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/landing.html'
+                        %}</span>
+                    <span style="vertical-align: middle; display: inline-block;"> {{ route.landing }}/5</span>
+                </div>
+            </div>
         </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><b>Cruxes:</b> {{ opinion.cruxes|map(attribute="name")|join(", ") }}</li>
+            <li class="list-group-item">{{ opinion.comment }}</li>
+        </ul>
     </div>
     {% endfor %}
     {% else %}
@@ -178,9 +186,9 @@
     {% endif %}
 </div>
 
-<div class="container">
-    <h3>Other opinions</h3>
-    {% if route.opinions|rejectattr("climber_id", "equalto", user_id)|list|length > 0 %}
+{% if route.opinions|rejectattr("climber_id", "equalto", user_id)|list|length > 0 %}
+<div class="container px-0 px-lg-5">
+    <h3 class="mx-3">Other opinions</h3>
     {% for opinion in route.opinions if opinion.climber_id != user_id %}
     <div class="card mb-3">
         <div class="card-header">
@@ -189,22 +197,32 @@
             </a>
         </div>
         <div class="card-body">
-            <p class="card-body">
-                Grade: {{ opinion.grade.font }} / {{ opinion.grade.hueco }} <br>
-                Landing: {{ opinion.landing }} / 5 <br>
-                Rating: {{ opinion.rating }} / 5 <br>
-                Cruxes: {{ opinion.cruxes|map(attribute="name")|join(", ") }} <br>
-                Comment: {{ opinion.comment }}
-            </p>
+            <div class="row">
+                <div class="col">
+                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/grade.html'
+                        %}</span>
+                    <span style="vertical-align: middle; display: inline-block;">{{ opinion.grade.user_grade
+                        }}</span>
+                </div>
+                <div class="col">
+                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/rating.html'
+                        %}</span>
+                    <span style="vertical-align: middle; display: inline-block;"> {{ opinion.rating }}/5</span>
+                </div>
+                <div class="col">
+                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/landing.html'
+                        %}</span>
+                    <span style="vertical-align: middle; display: inline-block;"> {{ route.landing }}/5</span>
+                </div>
+            </div>
         </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><b>Cruxes:</b> {{ opinion.cruxes|map(attribute="name")|join(", ") }}</li>
+            <li class="list-group-item">{{ opinion.comment }}</li>
+        </ul>
     </div>
     {% endfor %}
-    {% else %}
-    <div class="col-xs-12">
-
-        <p>No opinions yet</p>
-    </div>
-    {% endif %}
 </div>
+{% endif %}
 
 {% endblock content %}
