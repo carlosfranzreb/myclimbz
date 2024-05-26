@@ -1,17 +1,40 @@
 {% extends "main.html" %}
 {% block content %}
 
-<div class="col-xs-12 center-block text-center">
-    <h4>{{ route.name }}</h4>
-    {% if route.comment %}
-    <p>{{ route.comment }}</p>
-    {% endif %}
-    {% if route.link %}
-    <a href="{{ route.link }}">Link</a>
-    {% endif %}
-</div>
-
-<div class="container">
+<div class="container mt-1 px-0 px-lg-5">
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="card-title">{{ route.name }} {{ route.consensus_grade_str }}</h5>
+            <p>{{ route.sector.name }}, {{route.sector.area.name }}</p>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/height.html'
+                        %}</span>
+                    <span style="vertical-align: middle; display: inline-block;">{{ (route.height|string).rstrip('.0')
+                        }} m</span>
+                </div>
+                <div class="col">
+                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/inclination.html'
+                        %}</span>
+                    <span style="vertical-align: middle; display: inline-block;">{{ route.inclination }}°</span>
+                </div>
+                <div class="col">
+                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/rating.html'
+                        %}</span>
+                    <span style="vertical-align: middle; display: inline-block;"> {{ (route.rating|string).rstrip('.0')
+                        }}/5</span>
+                </div>
+                <div class="col">
+                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/landing.html'
+                        %}</span>
+                    <span style="vertical-align: middle; display: inline-block;"> {{ (route.landing|string).rstrip('.0')
+                        }}/5</span>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-4 offset-md-2">
             <div class="row">
