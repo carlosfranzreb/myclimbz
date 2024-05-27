@@ -1,3 +1,5 @@
+{% import "macros.html" as macros %}
+
 {% extends "main.html" %}
 {% block content %}
 
@@ -28,6 +30,34 @@
             </div>
         </div>
     </div>
+</div>
+
+<div class="container px-0 px-lg-5 pt-0 pt-lg-5">
+    <!-- The macro is removing the trailing zero from conditions in session/1 -->
+    {% if session.climber_id == user_id %}
+        {% set actions = [
+            { "icon": "edit", "url": url_for('sessions.edit_session', session_id=session.id) },
+            { "icon": "delete", "url": url_for('sessions.delete_session', session_id=session.id) }
+        ] %}
+    {% else %}
+        {% set actions = [] %}
+    {% endif %}
+    {{ macros.card({
+        "header": {
+            "title": session.area.name ~ " on " ~ session.date,
+            "title_actions": actions,
+        },
+        "body": {
+            "facts": [
+                { "icon": "conditions", "value": session.conditions, "unit": "/5" },
+                { "icon": "n_boulders", "value": session.climbs | length, "unit": "" },
+                { "icon": "n_sends", "value": session.climbs | map(attribute='sent') | sum, "unit": "" },
+            ],
+            "list": [
+                {"value": session.comment if session.comment else ""},
+            ]
+        }
+    }) }}
 </div>
 
 {% if session.climber_id == user_id or user_role == 1 %}

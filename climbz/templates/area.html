@@ -1,3 +1,5 @@
+{% import "macros.html" as macros %}
+
 {% extends "main.html" %}
 {% block content %}
 
@@ -5,38 +7,32 @@
         - avg. height/inclination/landing/grade per sector
     -->
 
-<div class="container">
-    <div class="row">
-        <div class="col-4 offset-md-2">
-            <div class="row">
-                <div class="col-xs-12 center-block text-center">{{ area.name }}</div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="col-xs-12 center-block text-center">Rock type: {{ area.rock_type.name }} </div>
-            <div class="col-xs-12 center-block text-center"># sectors: {{ area.sectors | length }}</div>
-            <div class="col-xs-12 center-block text-center"># routes: {{ area.n_routes }}</div>
-            <div class="col-xs-12 center-block text-center"># sessions: {{ area.sessions | length }}</div>
-        </div>
-    </div>
+<div class="container px-0 px-lg-5 pt-0 pt-lg-5">
+    {% if area.created_by == user_id  or user_role == 1 %}
+    {% set actions = [
+        { "icon": "edit", "url": url_for('areas.edit_area', area_id=area.id) },
+    ] %}
+    {% else %}
+    {% set actions = [] %}
+    {% endif %}
+    {{ macros.card({
+        "header": {
+            "title": area.name,
+            "title_actions": actions,
+            "subtitle": area.rock_type.name,
+        },
+        "body": {
+            "list": [
+                {"prefix": "No. of sectors", "value": area.sectors | length},
+                {"prefix": "No. of routes", "value": area.n_routes},
+                {"prefix": "No. of sessions", "value": area.sessions | length},
+                {"value": area.comment if area.comment else ""},
+            ]
+        }
+    }) }}
 </div>
 
-{% if area.created_by == user_id or user_role == 1 %}
-<div class="container">
-    <div class="row">
-        <div class="col-xs-12 center-block text-center">
-            <a href="{{ url_for('areas.edit_area', area_id=area.id) }}" class="btn btn-primary">Edit
-                area</a>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<div class="container">
-    <h3>Routes</h3>
-</div>
-
-<div class="px-0 px-lg-5">
+<div class="container px-0 px-lg-5">
     <table id="content_table" class="table table-striped table-hover">
         <thead>
             <tr>
