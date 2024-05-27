@@ -1,81 +1,37 @@
+{% import "macros.html" as macros %}
+
 {% extends "main.html" %}
 {% block content %}
 
 <div class="container px-0 px-lg-5">
-    <div class="card mb-3">
-        <div class="card-header">
-            <div class="row">
-                <div class="col-sm">
-                    <h5 class="card-title" style="display: inline-block">{{ route.name }} {{ route.consensus_grade_str
-                        }}</h5>
-                    {% if route.created_by == user_id or user_role == 1 %}
-                    <a href="{{ url_for('routes.edit_route', route_id=route.id) }}">
-                        {% include 'icons/edit.html' %}
-                    </a>
-                    <a href="{{ url_for('routes.delete_route', route_id=route.id) }}">
-                        {% include 'icons/delete.html' %}
-                    </a>
-                    {% endif %}
-                </div>
-                <div class="col-sm">
-                    <span>{{ route.sector.name }}, {{route.sector.area.name }}</span>
-                </div>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col">
-                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/height.html'
-                        %}</span>
-                    <span style="vertical-align: middle; display: inline-block;">{{
-                        (route.height|string).rstrip('.0')
-                        }} m</span>
-                </div>
-                <div class="col">
-                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/inclination.html'
-                        %}</span>
-                    <span style="vertical-align: middle; display: inline-block;">{{ route.inclination }}°</span>
-                </div>
-                <div class="col">
-                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/rating.html'
-                        %}</span>
-                    <span style="vertical-align: middle; display: inline-block;"> {{
-                        (route.rating|string).rstrip('.0')
-                        }}/5</span>
-                </div>
-                <div class="col">
-                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/landing.html'
-                        %}</span>
-                    <span style="vertical-align: middle; display: inline-block;"> {{
-                        (route.landing|string).rstrip('.0')
-                        }}/5</span>
-                </div>
-            </div>
-        </div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item">
-                <div class="row">
-                    <div>
-                        <b>Cruxes:</b> {{ route.cruxes|join(", ") }}
-                    </div>
-                    <div>
-                        <b>Sends / tries:</b> {{ route.n_sends }} / {{ route.n_climbers }}
-                    </div>
-
-                    <div>
-                        <b>Coordinates:</b>
-                        {% if route.latitude and route.longitude %}
-                        {{ route.latitude }}, {{ route.longitude }}
-                        {% else %}
-                        Not available
-                        {% endif %}
-                    </div>
-
-                </div>
-            </li>
-            <li class="list-group-item"> {{ route.comment }}</li>
-        </ul>
-    </div>
+    {{ macros.card({
+        "header": {
+            "title": route.name ~ " " ~ route.consensus_grade_str,
+            "title_actions": [
+                { "icon": "edit", "url": url_for('routes.edit_route', route_id=route.id) },
+                { "icon": "delete", "url": url_for('routes.delete_route', route_id=route.id) }
+            ],
+            "subtitle": route.sector.name ~ ", " ~ route.sector.area.name
+        },
+        "body": {
+            "facts":
+                [
+                    { "icon": "height", "value": route.height, "unit": "m" },
+                    { "icon": "inclination", "value": route.inclination, "unit": "°" },
+                    { "icon": "rating", "value": route.rating, "unit": "/5" },
+                    { "icon": "landing", "value": route.landing, "unit": "/5" },
+                ],
+            "list": [
+                {
+                "prefix": "Coordinates",
+                "value": route.latitude ~ ", " ~ route.longitude if route.latitude and route.longitude else "N/A"
+                },
+                {"prefix": "Cruxes", "value": route.cruxes|join(", ") if route.cruxes else "N/A"},
+                {"prefix": "Sends / tries", "value": route.n_sends ~ " / " ~ route.n_climbers},
+                {"value": route.comment if route.comment else ""},
+            ]
+        }
+    }) }}
 </div>
 
 <div class="container px-0 px-lg-5">
@@ -143,35 +99,23 @@
     <a href="{{ url_for('opinions.delete_opinion', opinion_id=opinion.id) }}">
         {% include 'icons/delete.html' %}
     </a>
-    <div class="card mb-3">
-        <div class="card-header">
-            <h5 class="card-title">{{ opinion.climber.name }}</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col">
-                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/grade.html'
-                        %}</span>
-                    <span style="vertical-align: middle; display: inline-block;">{{ opinion.grade.user_grade
-                        }}</span>
-                </div>
-                <div class="col">
-                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/rating.html'
-                        %}</span>
-                    <span style="vertical-align: middle; display: inline-block;"> {{ opinion.rating }}/5</span>
-                </div>
-                <div class="col">
-                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/landing.html'
-                        %}</span>
-                    <span style="vertical-align: middle; display: inline-block;"> {{ route.landing }}/5</span>
-                </div>
-            </div>
-        </div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><b>Cruxes:</b> {{ opinion.cruxes|map(attribute="name")|join(", ") }}</li>
-            <li class="list-group-item">{{ opinion.comment }}</li>
-        </ul>
-    </div>
+    {{ macros.card({
+        "header": {
+            "title": opinion.climber.name,
+        },
+        "body": {
+            "facts":
+                [
+                    { "icon": "grade", "value": opinion.grade.user_grade, "unit": ""},
+                    { "icon": "rating", "value": opinion.rating, "unit": "/5" },
+                    { "icon": "landing", "value": opinion.landing, "unit": "/5" },
+                ],
+            "list": [
+                {"prefix": "Cruxes", "value": opinion.cruxes|map(attribute="name")|join(", ") if opinion.cruxes else "N/A"},
+                {"value": route.comment if route.comment else ""},
+            ]
+        }
+    }) }}
     {% endfor %}
     {% else %}
     <div class="col-xs-12">
@@ -190,37 +134,23 @@
 <div class="container px-0 px-lg-5">
     <h3 class="mx-3">Other opinions</h3>
     {% for opinion in route.opinions if opinion.climber_id != user_id %}
-    <div class="card mb-3">
-        <div class="card-header">
-            <a href="{{ url_for('climbers.view_climber', climber_id=opinion.climber.id) }}">
-                <h5 class="card-title">{{ opinion.climber.name }}</h5>
-            </a>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col">
-                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/grade.html'
-                        %}</span>
-                    <span style="vertical-align: middle; display: inline-block;">{{ opinion.grade.user_grade
-                        }}</span>
-                </div>
-                <div class="col">
-                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/rating.html'
-                        %}</span>
-                    <span style="vertical-align: middle; display: inline-block;"> {{ opinion.rating }}/5</span>
-                </div>
-                <div class="col">
-                    <span style="vertical-align: middle; display: inline-block;">{% include 'icons/landing.html'
-                        %}</span>
-                    <span style="vertical-align: middle; display: inline-block;"> {{ route.landing }}/5</span>
-                </div>
-            </div>
-        </div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><b>Cruxes:</b> {{ opinion.cruxes|map(attribute="name")|join(", ") }}</li>
-            <li class="list-group-item">{{ opinion.comment }}</li>
-        </ul>
-    </div>
+    {{ macros.card({
+        "header": {
+            "title": opinion.climber.name,
+        },
+        "body": {
+            "facts":
+                [
+                    { "icon": "grade", "value": opinion.grade.user_grade, "unit": ""},
+                    { "icon": "rating", "value": opinion.rating, "unit": "/5" },
+                    { "icon": "landing", "value": opinion.landing, "unit": "/5" },
+                ],
+            "list": [
+                {"prefix": "Cruxes", "value": opinion.cruxes|map(attribute="name")|join(", ") if opinion.cruxes else "N/A"},
+                {"value": route.comment if route.comment else ""},
+            ]
+        }
+    }) }}
     {% endfor %}
 </div>
 {% endif %}
