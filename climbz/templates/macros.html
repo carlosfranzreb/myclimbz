@@ -13,9 +13,7 @@
                 {% endif %}
             </div>
             {% if data['header']['subtitle'] %}
-            <div class="col-sm">
                 <span>{{ data['header']['subtitle'] }}</span>
-            </div>
             {% endif %}
         </div>
     </div>
@@ -23,7 +21,7 @@
     <div class="card-body">
         <div class="row">
             {% for fact in data['body']['facts'] %}
-            <div class="col">
+            <div class="col text-center">
                 <span style="vertical-align: middle; display: inline-block;">
                     {% include 'icons/' ~ fact['icon'] ~ '.html' %}
                 </span>
