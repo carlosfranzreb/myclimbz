@@ -22,10 +22,12 @@
             "subtitle": area.rock_type.name,
         },
         "body": {
+            "facts": [
+                {"icon": "n_sectors", "value": area.sectors | length, "unit": ""},
+                {"icon": "n_boulders", "value": area.n_routes, "unit": ""},
+                {"icon": "n_sessions", "value": area.sessions | length, "unit": ""},
+            ],
             "list": [
-                {"prefix": "No. of sectors", "value": area.sectors | length},
-                {"prefix": "No. of routes", "value": area.n_routes},
-                {"prefix": "No. of sessions", "value": area.sessions | length},
                 {"value": area.comment if area.comment else ""},
             ]
         }
