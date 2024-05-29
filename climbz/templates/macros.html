@@ -28,7 +28,11 @@
                     {% include 'icons/' ~ fact['icon'] ~ '.html' %}
                 </span>
                 <span style="vertical-align: middle; display: inline-block;">
-                    {{ (fact['value']|string).rstrip('.0') }}{{ fact['unit'] }}
+                    {% if fact['value'] is float and fact['value'] % 1 == 0 %}
+                        {{ fact['value']|int }}{{ fact['unit'] }}
+                    {% else %}
+                        {{ (fact['value']) }}{{ fact['unit'] }}
+                    {% endif %}
                 </span>
             </div>
             {% endfor %}
