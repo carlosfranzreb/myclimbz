@@ -9,6 +9,13 @@
         { "icon": "edit", "url": url_for('routes.edit_route', route_id=route.id) },
         { "icon": "delete", "url": url_for('routes.delete_route', route_id=route.id) }
     ] %}
+    {% if not route.tried %}
+        {% if route.is_project %}
+            {% set actions = actions + [{ "icon": "is_project", "url": url_for('climbers.delete_project', route_id=route.id) }] %}
+        {% else %}
+            {% set actions = actions + [{ "icon": "is_not_project", "url": url_for('climbers.add_project', route_id=route.id) }] %}
+        {% endif %}
+    {% endif %}
     {% else %}
     {% set actions = [] %}
     {% endif %}
@@ -41,17 +48,6 @@
 <div class="container px-0 px-lg-5">
     <div>
         <h3 class="ms-3" style="display: inline-block">My sessions</h3>
-        {% if not route.tried %}
-            {% if route.is_project %}
-                <a href="{{ url_for('climbers.delete_project', route_id=route.id) }}">
-                    {% include 'icons/is_project.html' %}
-                </a>
-            {% else %}
-                <a href="{{ url_for('climbers.add_project', route_id=route.id) }}">
-                    {% include 'icons/is_not_project.html' %}
-                </a>
-            {% endif %}
-        {% endif %}
     </div>
     {% if route.climbs|selectattr("session.climber_id", "equalto", user_id)|list|length > 0 %}
     <table id="content_table" class="table table-striped table-hover">
