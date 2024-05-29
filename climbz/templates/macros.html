@@ -42,14 +42,16 @@
     {% if data['body']['list'] %}
     <ul class="list-group list-group-flush">
         {% for item in data['body']['list'] %}
-        <li class="list-group-item">
-            {% if item['prefix'] %}
-            <b>{{ item['prefix'] }}:</b>
+            {% if 'prefix' in item or item['value']|length > 0 %}
+                <li class="list-group-item">
+                    {% if item['prefix'] %}
+                    <b>{{ item['prefix'] }}:</b>
+                    {% endif %}
+                    {% if item['value'] %}
+                    {{ item['value'] }}
+                    {% endif %}
+                </li>
             {% endif %}
-            {% if item['value'] %}
-            {{ item['value'] }}
-            {% endif %}
-        </li>
         {% endfor %}
     </ul>
     {% endif %}
