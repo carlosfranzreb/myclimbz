@@ -108,6 +108,10 @@ a:hover {
     border-top-right-radius: var(--bs-border-radius);
 }
 
+.table td {
+    background-color: var(--color-white-200);
+}
+
 .table-success td {
     background-color: var(--color-green-200) !important;
 }
@@ -127,6 +131,10 @@ a:hover {
 
 
 /* FILTERS */
+
+#filter .dropdown-menu {
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+}
 
 #filter_button, #filter_apply {
     background-color: var(--color-green);

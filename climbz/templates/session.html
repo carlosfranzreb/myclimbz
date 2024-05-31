@@ -3,7 +3,7 @@
 {% extends "main.html" %}
 {% block content %}
 
-<div class="container px-0 px-lg-5 pt-0 pt-lg-5">
+<div class="container px-0 px-lg-5 py-0 py-lg-4">
     {% if session.climber_id == user_id %}
         {% set actions = [
             { "icon": "edit", "url": url_for('sessions.edit_session', session_id=session.id) },

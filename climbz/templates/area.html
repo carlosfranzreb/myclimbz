@@ -7,7 +7,7 @@
         - avg. height/inclination/landing/grade per sector
     -->
 
-<div class="container px-0 px-lg-5 pt-0 pt-lg-5">
+<div class="container px-0 px-lg-5 py-0 py-lg-4">
     {% if area.created_by == user_id  or user_role == 1 %}
     {% set actions = [
         { "icon": "edit", "url": url_for('areas.edit_area', area_id=area.id) },
