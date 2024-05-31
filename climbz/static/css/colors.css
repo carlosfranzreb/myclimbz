@@ -1,0 +1,205 @@
+/* Set color palette for UI
+    Shades generated with https://uicolors.app/
+*/
+:root {
+    --color-yellow: #FFC53D;
+    --color-yellow-100: #fff0c6;
+    --color-yellow-200: #ffdf88;
+    --color-yellow-300: #FFC53D;
+    --color-yellow-400: #ffb320;
+    --color-yellow-500: #f98f07;
+    --color-yellow-600: #dd6902;
+    --color-yellow-700: #b74806;
+    --color-yellow-800: #94360c;
+    --color-yellow-900: #7a2e0d;
+    --color-yellow-950: #461602;
+    
+    --color-green: #2C666E;
+    --color-green-50: #f1faf9;
+    --color-green-100: #daf3f3;
+    --color-green-200: #bae6e7;
+    --color-green-300: #8ad4d6;
+    --color-green-400: #53b9bd;
+    --color-green-500: #379da3;
+    --color-green-600: #318089;
+    --color-green-700: #2C666E;
+    --color-green-800: #2c575e;
+    --color-green-900: #284a51;
+    --color-green-950: #163036;
+    
+    --color-white: #F0EDEE;
+    --color-white-50: #f9f7f8;
+    --color-white-100: #F0EDEE;
+    --color-white-200: #e7e1e3;
+    --color-white-300: #d5cccf;
+    --color-white-400: #bbaeb2;
+    --color-white-500: #a29197;
+    --color-white-600: #8a787e;
+    --color-white-700: #726368;
+    --color-white-800: #605458;
+    --color-white-900: #53494c;
+    --color-white-950: #2a2527;
+
+    --color-black: #0A090C;
+}
+
+body {
+    background-color: var(--color-white);
+}
+
+a {
+    text-decoration: none;
+    color: var(--color-green);
+}
+
+a:hover {
+    color: var(--color-green-400);
+}
+
+
+/* CARDS */
+
+.card, .list-group-item, .dropdown-menu {
+    background-color: var(--color-white-200);
+    color: var(--color-black);
+}
+
+.dropdown-item:hover {
+    background-color: var(--color-white-200);
+    color: var(--color-green);
+}
+
+.card-header {
+    background-color: var(--color-white-darker);
+}
+
+
+/* NAVBAR */
+
+.navbar {
+    background-color: var(--color-green);
+    color: var(--color-white);
+}
+
+.navbar-brand {
+    color: var(--color-yellow);
+}
+
+.navbar-brand:hover {
+    color: var(--color-white);
+}
+
+.nav-link {
+    color: var(--color-white);
+}
+
+.nav-link:hover {
+    color: var(--color-yellow);
+}
+
+
+/* TABLE */
+
+.table thead th:first-child {
+    border-top-left-radius: var(--bs-border-radius);
+}
+
+.table thead th:last-child {
+    border-top-right-radius: var(--bs-border-radius);
+}
+
+.table-success td {
+    background-color: var(--color-green-200) !important;
+}
+
+
+.table thead {
+    background-color: var(--color-green);
+    color: var(--color-white);
+    font-weight: normal;
+}
+
+.table thead th {
+    background-color: transparent;
+    color: inherit;
+    font-weight: normal;
+}
+
+
+/* FILTERS */
+
+#filter_button, #filter_apply {
+    background-color: var(--color-green);
+    color: var(--color-white);
+    border: 0;
+}
+
+#filter_reset {
+    background-color: var(--color-yellow);
+    color: var(--color-black);
+    border: 0;
+}
+
+.slider-line {
+    background-color: var(--color-white-50);
+}
+
+.slider-line span {
+    background-color: var(--color-green);
+}
+
+.dropdown-item.active, .dropdown-item:active {
+	background-color: var(--color-green);
+	color: var(--color-white);
+	font-weight: bold;
+}
+
+.slider-touch-left span, .slider-touch-right span {
+    background: var(--color-white);
+    border: 1px solid var(--color-white-600);
+    border-radius: 30%;
+}
+
+
+/* TOGGLE SWITCH */
+
+.slider {
+    background-color: #ccc;
+}
+
+.slider:before {
+    background-color: white;
+}
+
+input:checked + .slider {
+    background-color: var(--color-yellow);
+}
+
+
+/* FORM */
+.form-control, .form-range {
+    background-color: var(--color-white-200);
+    color: var(--color-black);
+    border: 1px solid var(--color-white-300);
+}
+
+.btn-success {
+    background-color: var(--color-green);
+    color: var(--color-white);
+    border: 0;
+}
+
+.btn-success:hover {
+    background-color: var(--color-green-600);
+}
+
+.btn-danger {
+    background-color: var(--color-yellow);
+    color: var(--color-black);
+    border: 0;
+}
+
+.btn-danger:hover {
+    background-color: var(--color-yellow-400);
+    color: var(--color-black);
+}

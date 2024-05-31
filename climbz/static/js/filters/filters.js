@@ -394,7 +394,7 @@ var DropdownMenu = function (id, placeholder, data_column) {
         } else {
           num_selected = 0;
         }
-        button.style.backgroundColor = "#6c757d";
+        button.style.backgroundColor = "#8a787e";
       } else {
         option.classList.toggle("active");
         if (option.classList.contains("active")) {
@@ -407,12 +407,12 @@ var DropdownMenu = function (id, placeholder, data_column) {
         }
         if (num_selected === num_options - 1) {
           document.getElementById(`${id}_0`).textContent = "Deselect all";
-          button.style.backgroundColor = "#6c757d";
+          button.style.backgroundColor = "#8a787e";
         } else {
           if (num_selected === 0) {
-            button.style.backgroundColor = "#6c757d";
+            button.style.backgroundColor = "#8a787e";
           } else {
-            button.style.backgroundColor = "#0000ff";
+            button.style.backgroundColor = "#2C666E";
           }
           document.getElementById(`${id}_0`).textContent = "Select all";
         }
