@@ -8,7 +8,9 @@
                 <th>Conditions</th>
                 <th># Routes</th>
                 <th># Sends</th>
-                <th>Actions</th>
+                {% if session.climber_id == user_id %}
+                    <th>Actions</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -34,8 +36,6 @@
                         </a>
                         {% endif %}
                     </td>
-                {% else %}
-                    <td></td>
                 {% endif %}
             </tr>
             {% endfor %}
