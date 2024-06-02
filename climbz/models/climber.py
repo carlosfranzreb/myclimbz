@@ -78,7 +78,7 @@ class Climber(db.Model, UserMixin):
                 if opinion is not None and opinion.grade is not None:
                     if opinion.grade.level > max_grade.level:
                         max_grade = opinion.grade
-            return f"{max_grade.font} / {max_grade.hueco}"
+            return max_grade.user_grade
 
     @property
     def n_sends(self) -> int:

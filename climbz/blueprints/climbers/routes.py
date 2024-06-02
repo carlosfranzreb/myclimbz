@@ -109,3 +109,8 @@ def delete_project(route_id: int):
     climber.projects.remove(route)
     db.session.commit()
     return redirect(flask_session.pop("call_from_url"))
+
+
+@climbers.route("/climbers")
+def table_climbers() -> str:
+    return render("climbers.html", title="Climbers", climbers=Climber.query.all())
