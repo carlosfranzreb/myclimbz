@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="icon" href="{{ url_for('static', filename='images/icon-green-small.png') }}">
     <link href="{{ url_for('static', filename='css/colors.css') }}" rel="stylesheet" type="text/css">
     <link href="{{ url_for('static', filename='css/vanilla-dataTables.css') }}" rel="stylesheet" type="text/css">
     {% if title == "Routes" %}
@@ -15,13 +16,10 @@
 </head>
 
 <body>
-
-    <form method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-    </form>
-
     <nav class="navbar navbar-expand-lg">
-        <a class="navbar-brand" href="{{ url_for('home.page_home') }}" style="padding-left: 10px;">myclimbz</a>
+        <a class="navbar-brand" href="{{ url_for('home.page_home') }}" style="padding-left: 10px;">
+            <img src="{{ url_for('static', filename='images/logo-transparent.svg') }}" width="60" height="40" class="d-inline-block align-top" alt="">
+        </a>
         {% if not "Add" in title and not "Edit" in title %}
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
