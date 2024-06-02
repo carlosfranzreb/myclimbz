@@ -8,7 +8,7 @@
                 <th>Conditions</th>
                 <th># Routes</th>
                 <th># Sends</th>
-                {% if session.climber_id == user_id %}
+                {% if sessions[0].climber_id == user_id %}
                     <th>Actions</th>
                 {% endif %}
             </tr>
