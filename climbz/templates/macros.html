@@ -1,0 +1,57 @@
+{% macro card(data) %}
+<div class="card mb-3">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-sm">
+                <h5 class="card-title" style="display: inline-block">{{ data['header']['title'] }}</h5>
+                {% if data['header']['title_actions'] %}
+                {% for action in data['header']['title_actions'] %}
+                <a href="{{ action['url'] }}">
+                    {% include 'icons/' ~ action['icon'] ~ '.html' %}
+                </a>
+                {% endfor %}
+                {% endif %}
+            </div>
+            {% if data['header']['subtitle'] %}
+                <span>{{ data['header']['subtitle'] }}</span>
+            {% endif %}
+        </div>
+    </div>
+    {% if data['body']['facts'] %}
+    <div class="card-body">
+        <div class="row">
+            {% for fact in data['body']['facts'] %}
+            <div class="col text-center">
+                <span style="vertical-align: middle; display: inline-block;">
+                    {% include 'icons/' ~ fact['icon'] ~ '.html' %}
+                </span>
+                <span style="vertical-align: middle; display: inline-block;">
+                    {% if fact['value'] is float and fact['value'] % 1 == 0 %}
+                        {{ fact['value']|int }}{{ fact['unit'] }}
+                    {% else %}
+                        {{ (fact['value']) }}{{ fact['unit'] }}
+                    {% endif %}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% if data['body']['list'] %}
+    <ul class="list-group list-group-flush">
+        {% for item in data['body']['list'] %}
+            {% if 'prefix' in item or item['value']|length > 0 %}
+                <li class="list-group-item">
+                    {% if item['prefix'] %}
+                    <b>{{ item['prefix'] }}:</b>
+                    {% endif %}
+                    {% if item['value'] %}
+                    {{ item['value'] }}
+                    {% endif %}
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endmacro %}
