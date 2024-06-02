@@ -17,7 +17,7 @@
     {% endif %}
     {{ macros.card({
         "header": {
-            "title": session.area.name,
+            "title": username ~ " in " ~ session.area.name,
             "title_actions": actions,
             "subtitle": session.date,
         },
