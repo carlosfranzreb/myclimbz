@@ -56,6 +56,17 @@ class Climber(db.Model, UserMixin):
     )
 
     @property
+    def year_started_climbing_str(self) -> str:
+        """Return the year the climber started climbing as a string."""
+        if self.year_started_climbing is None:
+            if self.sessions:
+                return str(self.sessions[0].date.year)
+            else:
+                return "N/A"
+        else:
+            return str(self.year_started_climbing)
+
+    @property
     def highest_grade_str(self) -> str:
         """Return the highest grade sent by the climber."""
         if not self.climbs or len(self.climbs) == 0:

@@ -1,34 +1,32 @@
+{% import "macros.html" as macros %}
+
 {% extends "main.html" %}
 {% block content %}
 
-<!-- Display the climber's information -->
-<h2>{{ climber.name }}</h2>
 
-<!-- Display the climber's sessions -->
-<div class="container">
-    <p>
-        Birthdate: {{ climber.birthdate }} <br>
-        Started climbing in {{ climber.year_started_climbing }}
-    </p>
-    <p>
-        Height: {{ climber.height }} m <br>
-        Weight: {{ climber.weight }} kg <br>
-        Ape index: {{ climber.ape_index }} cm <br>
-    </p>
-    <p>
-        Highest grade: {{ climber.highest_grade_str }} <br>
-        Number of sends: {{ climber.n_sends }} <br>
-        Favorite areas: {{ climber.favorite_areas|join(", ") }}
-    </p>
-    <p>
-        Created {{ climber.areas|length }} area and {{ climber.routes|length }} routes. <br>
-        Recorded {{ climber.sessions|length }} sessions, {{ climber.climbs|length }} climbs and {{
-        climber.opinions|length }} opinions.
-    </p>
+<div class="container px-0 px-lg-5 pb-2 mb-3 mt-lg-5">
+    {{ macros.card({
+        "header": {
+            "title": climber.name,
+            "subtitle": "Climbing since " ~ climber.year_started_climbing_str,
+        },
+        "body": {
+            "facts": [
+                    { "icon": "height", "value": climber.height, "unit": "m" },
+                    { "icon": "ape_index", "value": climber.ape_index, "unit": "cm" },
+                    { "icon": "grade", "value": climber.highest_grade_str , "unit": "" },
+                    { "icon": "n_sends", "value": climber.n_sends, "unit": "" },
+                ],
+            "list": [
+                {"prefix": "Favorite areas", "value": climber.favorite_areas|join(", ")},
+                {"prefix": "Areas created", "value": climber.areas|length},
+                {"prefix": "Routes created", "value": climber.routes|length},
+            ]
+        }
+    }) }}
 </div>
 
-
-
-
+{% set sessions = climber.sessions %}
+{% include "sessions_table.html" %}
 
 {% endblock content %}

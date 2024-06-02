@@ -26,7 +26,9 @@
                     {% include 'icons/' ~ fact['icon'] ~ '.html' %}
                 </span>
                 <span style="vertical-align: middle; display: inline-block;">
-                    {% if fact['value'] is float and fact['value'] % 1 == 0 %}
+                    {% if not fact['value'] %}
+                        N/A
+                    {% elif fact['value'] is float and fact['value'] % 1 == 0 %}
                         {{ fact['value']|int }}{{ fact['unit'] }}
                     {% else %}
                         {{ (fact['value']) }}{{ fact['unit'] }}
