@@ -85,7 +85,9 @@ def create_app():
                 obj_owner = obj.climber_id
             else:  # this is the case for climbers
                 obj_owner = obj.id
-            if obj_owner != current_user.id and current_user.role != 1:
+            if (obj_owner != current_user.id and current_user.role != 1) or (
+                current_user.role == 1 and cls_str in ["climb", "session"]
+            ):
                 flask_session["error"] = "You are not allowed to access this page."
                 return redirect(flask_session.pop("call_from_url"))
 
