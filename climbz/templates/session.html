@@ -17,7 +17,7 @@
     {% endif %}
     {{ macros.card({
         "header": {
-            "title": session.area.name,
+            "title": username ~ " in " ~ session.area.name,
             "title_actions": actions,
             "subtitle": session.date,
         },
@@ -42,7 +42,7 @@
                 <th>Sector</th>
                 <th># tries</th>
                 <th>Sent</th>
-                {% if session.climber_id == user_id or user_role == 1 %}
+                {% if session.climber_id == user_id %}
                 <th>Actions</th>
                 {% endif %}
             </tr>
@@ -68,15 +68,15 @@
                 <td onclick={{ onclick }}>{{ climb.n_attempts }}</td>
                 <td onclick={{ onclick }}>{{ sent }}</td>
 
-                {% if session.climber_id == user_id or user_role == 1 %}
-                <td>
-                    <a href="{{ url_for('climbs.edit_climb', climb_id=climb.id) }}">
-                        {% include 'icons/edit.html' %}
-                    </a>
-                    <a href="{{ url_for('climbs.delete_climb', climb_id=climb.id) }}">
-                        {% include 'icons/delete.html' %}
-                    </a>
-                </td>
+                {% if session.climber_id == user_id %}
+                    <td>
+                        <a href="{{ url_for('climbs.edit_climb', climb_id=climb.id) }}">
+                            {% include 'icons/edit.html' %}
+                        </a>
+                        <a href="{{ url_for('climbs.delete_climb', climb_id=climb.id) }}">
+                            {% include 'icons/delete.html' %}
+                        </a>
+                    </td>
                 {% endif %}
             </tr>
             {% endfor %}

@@ -134,27 +134,27 @@
 </div>
 
 {% if route.opinions|rejectattr("climber_id", "equalto", user_id)|list|length > 0 %}
-<div class="container px-0 px-lg-5">
-    <h3 class="ms-3">Other opinions</h3>
-    {% for opinion in route.opinions if opinion.climber_id != user_id %}
-    {{ macros.card({
-        "header": {
-            "title": opinion.climber.name,
-        },
-        "body": {
-            "facts": [
-                    { "icon": "grade", "value": opinion.grade.user_grade, "unit": ""},
-                    { "icon": "rating", "value": opinion.rating, "unit": "/5" },
-                    { "icon": "landing", "value": opinion.landing, "unit": "/5" },
-                ],
-            "list": [
-                {"prefix": "Cruxes", "value": opinion.cruxes|map(attribute="name")|join(", ") if opinion.cruxes else "N/A"},
-                {"value": route.comment if route.comment else ""},
-            ]
-        }
-    }) }}
-    {% endfor %}
-</div>
+    <div class="container px-0 px-lg-5">
+        <h3 class="ms-3">Other opinions</h3>
+        {% for opinion in route.opinions if opinion.climber_id != user_id %}
+        {{ macros.card({
+            "header": {
+                "title": opinion.climber.name,
+            },
+            "body": {
+                "facts": [
+                        { "icon": "grade", "value": opinion.grade.user_grade, "unit": ""},
+                        { "icon": "rating", "value": opinion.rating, "unit": "/5" },
+                        { "icon": "landing", "value": opinion.landing, "unit": "/5" },
+                    ],
+                "list": [
+                    {"prefix": "Cruxes", "value": opinion.cruxes|map(attribute="name")|join(", ") if opinion.cruxes else "N/A"},
+                    {"value": route.comment if route.comment else ""},
+                ]
+            }
+        }) }}
+        {% endfor %}
+    </div>
 {% endif %}
 
 {% endblock content %}

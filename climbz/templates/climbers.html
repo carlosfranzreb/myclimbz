@@ -1,0 +1,45 @@
+{% extends "main.html" %}
+{% block content %}
+
+
+<div class="container px-0 px-lg-5">
+    <h1 class="ms-3 mt-2">Climbers</h1>
+    <table id="content_table" class="table table-hover">
+        <thead>
+            <tr>
+                {% for row_name in ["Name", "Height", "# Sessions", "# Sends", "Max. Grade"] %}
+                <th>{{ row_name }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for climber in climbers %}
+            {% set onclick = "window.location=\"" + url_for('climbers.view_climber', climber_id=climber.id) + "\"" %}
+            <tr>
+                <td onclick={{ onclick }}>{{ climber.name }}</td>
+                {% if climber.height is none %}
+                    <td onclick={{ onclick }}>N/A</td>
+                {% else %}
+                    <td onclick={{ onclick }}>{{ climber.height }}m</td>
+                {% endif %}
+                <td onclick={{ onclick }}>{{ climber.sessions|length }}</td>
+                <td onclick={{ onclick }}>{{ climber.n_sends }}</td>
+                <td onclick={{ onclick }}>{{ climber.highest_grade_str }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    window.addEventListener('load', function () {
+        window.data_table = new DataTable("#content_table", {
+            perPage: 100,
+            perPageSelect: false,
+            searchable: false,
+            nextPrev: false,
+        });
+    });
+</script>
+
+{% endblock content %}
