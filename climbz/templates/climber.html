@@ -4,16 +4,16 @@
 {% block content %}
 
 
-<div class="container px-0 px-lg-5 pb-2 mb-3 mt-lg-5">
+<div class="container px-0 px-md-5 pb-2 mb-3 mt-md-5">
     {{ macros.card({
         "header": {
             "title": climber.name,
-            "subtitle": "Climbing since " ~ climber.year_started_climbing_str,
+            "subtitle": climber.age_str ~ " years old, climbing since " ~ climber.year_started_climbing_str,
         },
         "body": {
             "facts": [
-                    { "icon": "height", "value": climber.height, "unit": "m" },
-                    { "icon": "ape_index", "value": climber.ape_index, "unit": "cm" },
+                    { "icon": "height", "value": climber.height, "unit": "cm" },
+                    { "icon": "ape_index", "value": climber.ape_index|int|string, "unit": "cm" },
                     { "icon": "grade", "value": climber.highest_grade_str , "unit": "" },
                     { "icon": "n_sends", "value": climber.n_sends, "unit": "" },
                 ],

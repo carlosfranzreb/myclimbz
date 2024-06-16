@@ -3,7 +3,7 @@
 {% extends "main.html" %}
 {% block content %}
 
-<div class="container px-0 px-lg-5 pb-2 mb-3 mt-lg-5">
+<div class="container px-0 px-md-5 pb-2 mb-3 mt-md-5">
     {% if route.created_by == user_id  or user_role == 1 %}
     {% set actions = [
         { "icon": "edit", "url": url_for('routes.edit_route', route_id=route.id) },
@@ -45,7 +45,7 @@
     }) }}
 </div>
 
-<div class="container px-0 px-lg-5 py-2 my-3">
+<div class="container px-0 px-md-5 py-2 my-3">
     <div>
         <h3 class="ms-3" style="display: inline-block">My sessions</h3>
     </div>
@@ -93,7 +93,7 @@
     {% endif %}
 </div>
 
-<div class="container px-0 px-lg-5 py-2 my-3">
+<div class="container px-0 px-md-5 py-2 my-3">
     <h3 class="ms-3" style="display: inline-block">My opinion</h3>
     {% if route.opinions|selectattr("climber_id", "equalto", user_id)|list|length > 0 %}
     {% for opinion in route.opinions if opinion.climber_id == user_id %}
@@ -134,7 +134,7 @@
 </div>
 
 {% if route.opinions|rejectattr("climber_id", "equalto", user_id)|list|length > 0 %}
-    <div class="container px-0 px-lg-5">
+    <div class="container px-0 px-md-5">
         <h3 class="ms-3">Other opinions</h3>
         {% for opinion in route.opinions if opinion.climber_id != user_id %}
         {{ macros.card({
