@@ -8,6 +8,8 @@ The `role` attribute is used to determine the permissions of the user. The optio
     1: admin: can edit and delete routes and areas
 """
 
+from datetime import datetime
+
 from flask_login import UserMixin
 
 from climbz import db, login_manager
@@ -35,9 +37,8 @@ class Climber(db.Model, UserMixin):
     name = db.Column(db.String(200), nullable=False)
     birthdate = db.Column(db.Date, nullable=True)
     year_started_climbing = db.Column(db.Integer, nullable=True)
-    weight = db.Column(db.Float, nullable=True)
-    height = db.Column(db.Float, nullable=True)
-    ape_index = db.Column(db.Float, nullable=True)
+    height = db.Column(db.Integer, nullable=True)
+    ape_index = db.Column(db.Integer, nullable=True)
 
     # preferences
     grade_scale = db.Column(db.String(10), nullable=False, default="font")
@@ -65,6 +66,14 @@ class Climber(db.Model, UserMixin):
                 return "N/A"
         else:
             return str(self.year_started_climbing)
+
+    @property
+    def age_str(self) -> str:
+        """Return the age of the climber as a string."""
+        if self.birthdate is None:
+            return "N/A"
+        else:
+            return str((datetime.now().date() - self.birthdate).days // 365)
 
     @property
     def highest_grade_str(self) -> str:

@@ -21,7 +21,7 @@
     <div class="card-body">
         <div class="row">
             {% for fact in data['body']['facts'] %}
-            <div class="col text-center">
+            <div class="col text-center" style="padding: 0">
                 <span style="vertical-align: middle; display: inline-block;">
                     {% include 'icons/' ~ fact['icon'] ~ '.html' %}
                 </span>
