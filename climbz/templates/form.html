@@ -1,10 +1,10 @@
 {% extends "main.html" %}
 {% block content %}
 
-<div class="container px-2 px-lg-5">
+<div class="container px-2 px-md-5">
     <h2 class="mt-2">{{ title }}</h2>
 
-    <form method="POST" class="px-1 px-lg-5">
+    <form method="POST" class="px-1 px-md-5">
         {% for form in forms %}
         <div class="mb-4">
             {{ form.hidden_tag() }}
