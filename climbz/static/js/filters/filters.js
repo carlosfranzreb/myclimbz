@@ -6,6 +6,14 @@ function getTextWidth(text, obj) {
   return width;
 }
 
+/* Costructs a double range slider widget
+ * @param {string} id - The id of the div wrapper that contains the widget
+ * @param {string} title - The title of the widget
+ * @param {number} step - The step size of the slider
+ * @param {class} data_class - The type of data that the widget will filter, e.g. Grade, Number, Date
+ * @param {string} data_column - The column of the table that the widget will filter
+ */
+
 var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
   var self = this;
   let startX = 0,
@@ -19,18 +27,20 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
 
   const left = 0;
 
-  let get_ranges = function () {
-    for (let climb of DATA) {
-      let value = climb[data_column];
-      if (value < min && value !== null) {
-        min = value;
-      }
-      if (value > max) {
-        max = value;
-      }
+  for (let climb of DATA) {
+    let value = climb[data_column];
+    if (value < min && value !== null) {
+      min = value;
     }
-  };
-  get_ranges();
+    if (value > max) {
+      max = value;
+    }
+  }
+
+  if (min === Infinity || max === -Infinity) {
+    min = 0;
+    max = 0;
+  }
 
   let wrapper = document.getElementById(id);
   let inner_html =
@@ -58,14 +68,15 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
   let buttonOffsetWidth = touchLeft.offsetWidth;
   let buttonWidth =
     buttonOffsetWidth -
-    Number(window.getComputedStyle(touchLeft).padding.replace("px", "") * 2);
+    Number(window.getComputedStyle(touchLeft).padding.replace("px", "") * 2); // offset width - 2*padding, one for each side
 
-  let step_width = 2 * buttonWidth + 3;
+  let step_width = 2 * buttonWidth + 3; // 3 is the margin between the two buttons
   let intervals = [];
   for (let i = 0; i <= (max - min) / step + 1; i += 1) {
     intervals.push(i * step_width);
   }
 
+  // Set the width of the slider
   let span_width = intervals[intervals.length - 1];
   self.width = span_width + buttonOffsetWidth;
 
@@ -82,8 +93,8 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     defaultMinValue = defaultMaxValue;
   }
 
-  slider.setAttribute("se-min-current", defaultMinValue);
-  slider.setAttribute("se-max-current", defaultMaxValue);
+  slider.setAttribute("current-min", defaultMinValue);
+  slider.setAttribute("current-max", defaultMaxValue);
 
   let maxX = slider.offsetWidth - buttonOffsetWidth - buttonWidth / 2;
   let selectedTouch = null;
@@ -107,34 +118,36 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
   // reset the slider to its default values
   self.reset = function () {
     self.setMinValue(defaultMinValue);
-    slider.setAttribute("se-min-current", defaultMinValue);
+    slider.setAttribute("current-min", defaultMinValue);
     self.setMaxValue(defaultMaxValue);
-    slider.setAttribute("se-max-current", defaultMaxValue);
-    self.onChange(defaultMinValue, defaultMaxValue);
+    slider.setAttribute("current-max", defaultMaxValue);
+    self.changeTitle(defaultMinValue, defaultMaxValue);
   };
 
+  // set the left button to the left edge of the given minValue interval
   self.setMinValue = function (minValue) {
     let i = Math.floor((minValue - min) / step);
     touchLeft.style.left = Math.floor(intervals[i] + buttonWidth / 2) + "px";
     lineSpan.style.marginLeft = intervals[i] + "px";
-    let current_max = parseFloat(slider.getAttribute("se-max-current"));
+    let current_max = parseFloat(slider.getAttribute("current-max"));
     let j = Math.floor((current_max - min) / step);
     lineSpan.style.width = intervals[j + 1] - intervals[i] + "px";
   };
 
+  // set the right button to the right edge of the given maxValue interval
   self.setMaxValue = function (maxValue) {
     let i = Math.floor((maxValue - min) / step) + 1;
     touchRight.style.left = Math.floor(intervals[i] - buttonWidth / 2) + "px";
-    let current_min = parseFloat(slider.getAttribute("se-min-current"));
+    let current_min = parseFloat(slider.getAttribute("current-min"));
     let j = Math.floor((current_min - min) / step);
     lineSpan.style.width = intervals[i] - intervals[j] + "px";
   };
 
-  // set defualt values
+  // set default values
   self.setMinValue(defaultMinValue);
   self.setMaxValue(defaultMaxValue);
 
-  // setup touch/click events
+  // Records the start click position, and sets up the event listeners
   function onStart(event) {
     // Prevent default dragging of selected content
     event.preventDefault();
@@ -158,6 +171,8 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     document.addEventListener("touchend", onStop);
   }
 
+  // Moves the selected button, without allowing it to go out of bounds
+  // Updates line span and title
   function onMove(event) {
     let eventTouch = event;
 
@@ -190,23 +205,13 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     lineSpan.style.width =
       touchRight.offsetLeft - touchLeft.offsetLeft + buttonWidth + "px";
 
-    // call on change
-    if (slider.getAttribute("on-change")) {
-      let fn = new Function("min, max", slider.getAttribute("on-change"));
-      fn(
-        slider.getAttribute("se-min-current"),
-        slider.getAttribute("se-max-current")
-      );
-    }
-
-    if (self.onChange) {
-      self.onChange(
-        slider.getAttribute("se-min-current"),
-        slider.getAttribute("se-max-current")
-      );
-    }
+    self.changeTitle(
+      slider.getAttribute("current-min"),
+      slider.getAttribute("current-max")
+    );
   }
 
+  // removes event listeners, and sets the button to the final position
   function onStop(event) {
     document.removeEventListener("mousemove", onMove);
     document.removeEventListener("mouseup", onStop);
@@ -222,45 +227,36 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     x = eventTouch.pageX - startX;
 
     if (selectedTouch === touchLeft) {
-      self.setMinValue(slider.getAttribute("se-min-current"));
+      self.setMinValue(slider.getAttribute("current-min"));
       //calculateMinValue(x - buttonWidth/2);
     } else if (selectedTouch === touchRight) {
-      self.setMaxValue(slider.getAttribute("se-max-current"));
+      self.setMaxValue(slider.getAttribute("current-max"));
       //calculateMaxValue(x + buttonWidth/2);
     }
 
     selectedTouch = null;
 
-    // call did changed
-    if (slider.getAttribute("did-changed")) {
-      let fn = new Function("min, max", slider.getAttribute("did-changed"));
-      fn(
-        slider.getAttribute("se-min-current"),
-        slider.getAttribute("se-max-current")
-      );
-    }
-
-    if (self.didChanged) {
-      self.didChanged(
-        slider.getAttribute("se-min-current"),
-        slider.getAttribute("se-max-current")
-      );
-    }
+    self.changeTitle(
+      slider.getAttribute("current-min"),
+      slider.getAttribute("current-max")
+    );
   }
 
+  // Set the lower bound of the title according to x.
   function calculateMinValue(x) {
     let minValue = Math.floor(x / step_width) * step + min;
 
-    slider.setAttribute("se-min-current", minValue);
+    slider.setAttribute("current-min", minValue);
   }
 
+  // Set the upper bound of the title according to x.
   function calculateMaxValue(x) {
     let maxValue = Math.floor(x / step_width) * step + min;
     if (maxValue > max) {
       maxValue = max;
     }
 
-    slider.setAttribute("se-max-current", maxValue);
+    slider.setAttribute("current-max", maxValue);
   }
 
   // link events
@@ -269,7 +265,7 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
   touchLeft.addEventListener("touchstart", onStart);
   touchRight.addEventListener("touchstart", onStart);
 
-  self.onChange = function (min, max) {
+  self.changeTitle = function (min, max) {
     if (data_class === Grade) {
       document.getElementById(
         `title_${id}`
@@ -281,23 +277,11 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     }
   };
 
-  self.didChanged = function (min, max) {
-    if (data_class === Grade) {
-      document.getElementById(
-        `title_${id}`
-      ).innerHTML = `${title}: ${GRADES[min][GRADE_SCALE]} - ${GRADES[max][GRADE_SCALE]}`;
-    } else {
-      document.getElementById(
-        `title_${id}`
-      ).innerHTML = `${title}: ${min} - ${max}`;
-    }
-  };
-
-  self.didChanged(min, max);
+  self.changeTitle(min, max);
 
   self.filter_value = function (value) {
-    let max = parseInt(slider.getAttribute("se-max-current"));
-    let min = parseInt(slider.getAttribute("se-min-current"));
+    let max = parseInt(slider.getAttribute("current-max"));
+    let min = parseInt(slider.getAttribute("current-min"));
     if (value === null) {
       if (min === defaultMinValue && max === defaultMaxValue) {
         return true;
@@ -309,32 +293,32 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
   };
 };
 
+/* Constructs a dropdown menu widget
+ * @param {string} id - The id of the div wrapper that contains the widget
+ * @param {string} placeholder - The placeholder text of the dropdown menu
+ * @param {string} data_column - The column of the table that the widget will filter
+ */
 var DropdownMenu = function (id, placeholder, data_column) {
   var self = this;
   self.left = 0;
   self.id = id;
   self.data_column = data_column;
 
-  self.get_options = function () {
-    let options = [];
-    for (let climb of DATA) {
-      let value = climb[data_column];
-      //if value is an array, add each element to options
-      if (value instanceof Array) {
-        for (v of value) {
-          if (!options.includes(v) && v !== null) {
-            options.push(v);
-          }
+  self.options = [];
+  for (let climb of DATA) {
+    let value = climb[data_column];
+    //if value is an array, add each element to options
+    if (value instanceof Array) {
+      for (v of value) {
+        if (!self.options.includes(v) && v !== null) {
+          self.options.push(v);
         }
-      } else if (!options.includes(value) && value !== null) {
-        options.push(value);
       }
+    } else if (!self.options.includes(value) && value !== null) {
+      self.options.push(value);
     }
-    return options;
-  };
-  let options = self.get_options();
-  options.unshift("Select all");
-  self.options = options;
+  }
+  self.options.unshift("Select all");
   let selected_options = [];
 
   self.placeholder = placeholder;
@@ -345,22 +329,20 @@ var DropdownMenu = function (id, placeholder, data_column) {
     `<button class='btn btn-secondary dropdown-toggle' type='button' id='${id}_button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>${self.placeholder}</button>` +
     `<div class='dropdown-menu' aria-labelledby='${id}_button' id='${id}_menu'>`;
 
-  for (let i = 0; i < options.length; i++) {
-    inner_html += `<button class='dropdown-item' id=${id}_${i}>${options[i]}</button>`;
+  for (let i = 0; i < self.options.length; i++) {
+    inner_html += `<button class='dropdown-item' id=${id}_${i}>${self.options[i]}</button>`;
   }
   inner_html += "</div>";
   wrapper.innerHTML = inner_html;
-  let menu = document.getElementById(`${id}_menu`);
-  self.menu = menu;
+  self.menu = document.getElementById(`${id}_menu`);
   self.menu.style.display = "block";
   self.menu.style.display = "none";
-  let button = document.getElementById(`${id}_button`);
-  self.button = button;
-  self.button.addEventListener("click", openFilters);
+  self.button = document.getElementById(`${id}_button`);
   function openFilters() {
     self.menu.style.display =
       self.menu.style.display === "block" ? "none" : "block";
   }
+  self.button.addEventListener("click", openFilters);
 
   self.width = getTextWidth(self.placeholder, self.button) + 30;
   self.button.style.width = self.width + "px";
@@ -368,8 +350,11 @@ var DropdownMenu = function (id, placeholder, data_column) {
 
   let num_selected = 0;
   let num_options = self.options.length;
+
+  // add event listeners to each option
   for (let i = 0; i < num_options; i++) {
     let option = document.getElementById(`${id}_${i}`);
+
     option.addEventListener("click", function () {
       if (self.options[i] === "Select all") {
         //change "Select all" to "Deselect all" and vice versa
@@ -394,7 +379,7 @@ var DropdownMenu = function (id, placeholder, data_column) {
         } else {
           num_selected = 0;
         }
-        button.style.backgroundColor = "#8a787e";
+        self.button.style.backgroundColor = "var(--color-gray)"; //always gray since all selected == no selected
       } else {
         option.classList.toggle("active");
         if (option.classList.contains("active")) {
@@ -407,12 +392,12 @@ var DropdownMenu = function (id, placeholder, data_column) {
         }
         if (num_selected === num_options - 1) {
           document.getElementById(`${id}_0`).textContent = "Deselect all";
-          button.style.backgroundColor = "#8a787e";
+          self.button.style.backgroundColor = "var(--color-gray)";
         } else {
           if (num_selected === 0) {
-            button.style.backgroundColor = "#8a787e";
+            self.button.style.backgroundColor = "var(--color-gray)";
           } else {
-            button.style.backgroundColor = "#2C666E";
+            self.button.style.backgroundColor = "var(--color-green)";
           }
           document.getElementById(`${id}_0`).textContent = "Select all";
         }
@@ -436,7 +421,7 @@ var DropdownMenu = function (id, placeholder, data_column) {
     document.getElementById(`${id}_0`).textContent = "Select all";
     num_selected = 0;
     selected_options = [];
-    button.style.backgroundColor = "#6c757d";
+    self.button.style.backgroundColor = "var(--color-gray)";
   };
 
   self.filter_value = function (value) {
@@ -459,6 +444,12 @@ var DropdownMenu = function (id, placeholder, data_column) {
   };
 };
 
+/* Constructs a checkbox widget
+ * @param {string} id - The id of the div wrapper that contains the widget
+ * @param {string} title - The title of the widget
+ * @param {string} data_column - The column of the table that the widget will filter
+ * @param false_value - The value that should be filtered out when the checkbox is checked
+ */
 var Checkbox = function (id, title, data_column, false_value) {
   var self = this;
   self.left = 0;
@@ -488,6 +479,11 @@ var Checkbox = function (id, title, data_column, false_value) {
   };
 };
 
+/* Constructs a date range widget
+ * @param {string} id - The id of the div wrapper that contains the widget
+ * @param {string} title - The title of the widget
+ * @param {string} data_column - The column of the table that the widget will filter
+ */
 var DateRange = function (id, title, data_column) {
   var self = this;
   let wrapper = document.getElementById(id);
@@ -497,15 +493,14 @@ var DateRange = function (id, title, data_column) {
 
   self.data_column = data_column;
 
-  let width = 100;
-  self.width = width;
+  self.width = 100;
 
   let inner_html = `<div class="row">
-                        <div class="col">
+                        <div class="col" id="${id}_start_col">
                             <label for="${id}_start">Start date</label>
                             <input id="${id}_start" type="text" class="form-control date-input" placeholder="DD/MM/YYYY" maxlength="10"/>
                         </div>
-                        <div class="col">
+                        <div class="col" id="${id}_end_col">
                             <label for="${id}_end">End date</label>
                             <input id="${id}_end" type="text" class="form-control date-input" placeholder="DD/MM/YYYY" maxlength="10"/>
                         </div>
@@ -513,11 +508,15 @@ var DateRange = function (id, title, data_column) {
 
   wrapper.innerHTML = inner_html;
 
+  document.getElementById(`${id}_start_col`).style.margin = "0px";
+  document.getElementById(`${id}_end_col`).style.margin = "0px";
+
   let startDate = document.getElementById(`${id}_start`);
   let endDate = document.getElementById(`${id}_end`);
   let keyPressed;
 
-  let keyDown = function (event) {
+  // Sets or removes a "/" when appropriate
+  let backslashAid = function (event) {
     keyPressed = event.key;
     let i = this.selectionStart - 1;
     if (
@@ -533,7 +532,7 @@ var DateRange = function (id, title, data_column) {
     }
   };
 
-  let textInput = function () {
+  let validateInput = function () {
     //get the position of the currently entered character
     let i = this.selectionStart - 1;
     if (
@@ -593,11 +592,11 @@ var DateRange = function (id, title, data_column) {
     }
   };
 
-  startDate.addEventListener("keydown", keyDown);
-  startDate.addEventListener("input", textInput);
+  startDate.addEventListener("backslashAid", backslashAid);
+  startDate.addEventListener("input", validateInput);
 
-  endDate.addEventListener("keydown", keyDown);
-  endDate.addEventListener("input", textInput);
+  endDate.addEventListener("backslashAid", backslashAid);
+  endDate.addEventListener("input", validateInput);
 
   self.reset = function () {
     startDate.value = "";
@@ -644,6 +643,12 @@ var DateRange = function (id, title, data_column) {
   };
 };
 
+/* Constructs a radio button widget
+ * @param {string} id - The id of the div wrapper that contains the widget
+ * @param {string} data_column - The column of the table that the widget will filter
+ * @param {Array} options - The options that the radio buttons will display
+ * @param {Array} truth_values - The values that when the corresponding radio button is selected, will be filtered in
+ */
 var RadioButton = function (id, data_column, options, truth_values) {
   var self = this;
   const left = 0;
@@ -701,6 +706,10 @@ var RadioButton = function (id, data_column, options, truth_values) {
   };
 };
 
+/* Constructs a filter widget
+ * @param {string} id - The id of the div wrapper that contains the widget
+ * @param {number} left - The left position of the widget
+ */
 var FilterWidget = function (id, left) {
   var self = this;
   self.left = left;
@@ -769,7 +778,7 @@ var FilterWidget = function (id, left) {
 
   let col_widths = [];
   menu.style.display = "block";
-  let delta = 20;
+  let delta = 50;
   for (let filter_name in window.FILTERS) {
     let widget = window.FILTERS[filter_name]["filter_type"];
     let filter_id = `${id}_${filter_name}`;
@@ -890,6 +899,9 @@ var FilterWidget = function (id, left) {
 
   // Reset all filters when the reset button is clicked
   filter_reset.addEventListener("click", function () {
+    if (DATA.length === 0) {
+      return;
+    }
     for (let i = 0; i < FILTER_WIDGETS.length; i++) {
       FILTER_WIDGETS[i].reset();
     }

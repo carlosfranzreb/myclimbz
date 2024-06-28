@@ -89,7 +89,7 @@ input[type="radio"]+label{
 }
 
 .form-control{
-	width: 150px;
+	width: 130px;
 }
 
 .form-control[type="date"]::-webkit-calendar-picker-indicator {

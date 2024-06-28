@@ -22,20 +22,18 @@ def reset(driver):
 def test_grade_filter(driver) -> None:
     filter_button, apply_button = reset(driver)
     grade_filter = driver.find_element(By.ID, "widget_filter_Grade")
+    driver.execute_script("arguments[0].removeAttribute('current-min')", grade_filter)
     driver.execute_script(
-        "arguments[0].removeAttribute('se-min-current')", grade_filter
-    )
-    driver.execute_script(
-        "arguments[0].setAttribute('se-min-current','5')",
+        "arguments[0].setAttribute('current-min','5')",
         grade_filter,
     )
     filter_button.click()
 
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(apply_button))
     apply_button.click()
-    min_level = int(grade_filter.get_attribute("se-min-current"))
+    min_level = int(grade_filter.get_attribute("current-min"))
     assert min_level == 5
-    max_level = int(grade_filter.get_attribute("se-max-current"))
+    max_level = int(grade_filter.get_attribute("current-max"))
 
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
     assert all(
