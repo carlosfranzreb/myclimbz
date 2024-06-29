@@ -41,9 +41,6 @@ function start_display(data, grades, session_date) {
     return d;
   });
 
-  //make DATA empty
-  DATA = [];
-
   // Set the options of the plot axes
   for (let key of Object.keys(y_axis_options))
     document.getElementById("y-axis-select").options.add(new Option(key, key));
