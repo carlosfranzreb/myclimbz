@@ -1,5 +1,5 @@
 // If the width is below 800px, show only 3 columns. Always show the first two
-// columns. If the last column header says "Actions", show it. Otherwise, show#
+// columns. If the last column header says "Actions", show it. Otherwise, show
 // the third column.
 function table_columns() {
     if (window.innerWidth < 800) {
