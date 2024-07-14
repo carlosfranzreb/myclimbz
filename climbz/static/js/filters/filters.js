@@ -74,10 +74,10 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
 
     // Set the width of the slider
     let span_width = intervals[intervals.length - 1];
-    self.width = span_width + buttonOffsetWidth;
+    this.width = span_width + buttonOffsetWidth;
 
-    slider.style.width = self.width + "px";
-    wrapper.style.width = self.width + "px";
+    slider.style.width = this.width + "px";
+    wrapper.style.width = this.width + "px";
     wrapper.style.left = left + "px";
     wrapper.style.position = "relative";
 
@@ -92,8 +92,8 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     // Set the maximum x value that the buttons can be dragged to
     let maxX = slider.offsetWidth - buttonOffsetWidth - buttonWidth / 2;
     let selectedTouch = null;
-    self.adjust_width = function (width) {
-        self.width = width;
+    this.adjust_width = function (width) {
+        this.width = width;
         span_width = width - buttonOffsetWidth;
         step_width = Math.floor(span_width / (intervals.length - 1));
         for (let i in intervals) {
@@ -103,22 +103,22 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
         intervals[intervals.length - 1] = span_width;
         maxX = span_width - buttonWidth / 2;
 
-        slider.style.width = self.width + "px";
-        wrapper.style.width = self.width + "px";
-        self.reset();
+        slider.style.width = this.width + "px";
+        wrapper.style.width = this.width + "px";
+        this.reset();
     };
 
     // reset the slider to its default values
-    self.reset = function () {
-        self.setMinValue(defaultMinValue);
+    this.reset = function () {
+        this.setMinValue(defaultMinValue);
         slider.setAttribute("current-min", defaultMinValue);
-        self.setMaxValue(defaultMaxValue);
+        this.setMaxValue(defaultMaxValue);
         slider.setAttribute("current-max", defaultMaxValue);
-        self.changeTitle(defaultMinValue, defaultMaxValue);
+        this.changeTitle(defaultMinValue, defaultMaxValue);
     };
 
     // set the left button to the left edge of the given minValue interval
-    self.setMinValue = function (minValue) {
+    this.setMinValue = function (minValue) {
         let i = Math.floor((minValue - min) / step);
         touchLeft.style.left = Math.floor(intervals[i] + buttonWidth / 2) + "px";
         lineSpan.style.marginLeft = intervals[i] + "px";
@@ -128,7 +128,7 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     };
 
     // set the right button to the right edge of the given maxValue interval
-    self.setMaxValue = function (maxValue) {
+    this.setMaxValue = function (maxValue) {
         let i = Math.floor((maxValue - min) / step) + 1;
         touchRight.style.left = Math.floor(intervals[i] - buttonWidth / 2) + "px";
         let current_min = parseFloat(slider.getAttribute("current-min"));
@@ -137,8 +137,8 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     };
 
     // set default values
-    self.setMinValue(defaultMinValue);
-    self.setMaxValue(defaultMaxValue);
+    this.setMinValue(defaultMinValue);
+    this.setMaxValue(defaultMaxValue);
 
     // Records the start click position, and sets up the event listeners
     function onStart(event) {
@@ -198,7 +198,7 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
         lineSpan.style.width =
             touchRight.offsetLeft - touchLeft.offsetLeft + buttonWidth + "px";
 
-        self.changeTitle(
+        this.changeTitle(
             slider.getAttribute("current-min"),
             slider.getAttribute("current-max")
         );
@@ -216,12 +216,12 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
 
         x = eventTouch.pageX - startX;
         if (selectedTouch === touchLeft)
-            self.setMinValue(slider.getAttribute("current-min"));
+            this.setMinValue(slider.getAttribute("current-min"));
         else if (selectedTouch === touchRight)
-            self.setMaxValue(slider.getAttribute("current-max"));
+            this.setMaxValue(slider.getAttribute("current-max"));
 
         selectedTouch = null;
-        self.changeTitle(
+        this.changeTitle(
             slider.getAttribute("current-min"),
             slider.getAttribute("current-max")
         );
@@ -248,7 +248,7 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     touchLeft.addEventListener("touchstart", onStart);
     touchRight.addEventListener("touchstart", onStart);
 
-    self.changeTitle = function (min, max) {
+    this.changeTitle = function (min, max) {
         if (data_class === Grade) {
             document.getElementById(
                 `title_${id}`
@@ -259,9 +259,9 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
             ).innerHTML = `${title}: ${min} - ${max}`;
         }
     };
-    self.changeTitle(min, max);
+    this.changeTitle(min, max);
 
-    self.filter_value = function (value) {
+    this.filter_value = function (value) {
         let max = parseInt(slider.getAttribute("current-max"));
         let min = parseInt(slider.getAttribute("current-min"));
         if (value === null)
