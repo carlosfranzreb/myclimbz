@@ -15,18 +15,15 @@ function getTextWidth(text, obj) {
  */
 
 var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
-    var self = this;
-    let startX = 0,
-        x = 0;
-    self.id = id;
-
-    self.data_column = data_column;
-
-    let min = Infinity;
-    let max = -Infinity;
-
+    this.id = id;
+    this.data_column = data_column;
+    let startX = 0;
+    let x = 0;
     const left = 0;
 
+    // Define the min and max values of the slider
+    let min = Infinity;
+    let max = -Infinity;
     for (let climb of DATA) {
         let value = climb[data_column];
         if (value < min && value !== null) {
@@ -36,7 +33,6 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
             max = value;
         }
     }
-
     if (min === Infinity || max === -Infinity) {
         min = 0;
         max = 0;
@@ -85,20 +81,17 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     wrapper.style.left = left + "px";
     wrapper.style.position = "relative";
 
-    // retrieve default values
+    // retrieve and set default values
     let defaultMinValue = min;
     let defaultMaxValue = max;
-
-    if (defaultMinValue > defaultMaxValue) {
+    if (defaultMinValue > defaultMaxValue)
         defaultMinValue = defaultMaxValue;
-    }
-
     slider.setAttribute("current-min", defaultMinValue);
     slider.setAttribute("current-max", defaultMaxValue);
 
+    // Set the maximum x value that the buttons can be dragged to
     let maxX = slider.offsetWidth - buttonOffsetWidth - buttonWidth / 2;
     let selectedTouch = null;
-
     self.adjust_width = function (width) {
         self.width = width;
         span_width = width - buttonOffsetWidth;
@@ -217,25 +210,17 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
         document.removeEventListener("mouseup", onStop);
         document.removeEventListener("touchmove", onMove);
         document.removeEventListener("touchend", onStop);
-
         let eventTouch = event;
-
-        if (event.touches) {
+        if (event.touches)
             eventTouch = event.touches[0];
-        }
 
         x = eventTouch.pageX - startX;
-
-        if (selectedTouch === touchLeft) {
+        if (selectedTouch === touchLeft)
             self.setMinValue(slider.getAttribute("current-min"));
-            //calculateMinValue(x - buttonWidth/2);
-        } else if (selectedTouch === touchRight) {
+        else if (selectedTouch === touchRight)
             self.setMaxValue(slider.getAttribute("current-max"));
-            //calculateMaxValue(x + buttonWidth/2);
-        }
 
         selectedTouch = null;
-
         self.changeTitle(
             slider.getAttribute("current-min"),
             slider.getAttribute("current-max")
@@ -245,7 +230,6 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
     // Set the lower bound of the title according to x.
     function calculateMinValue(x) {
         let minValue = Math.floor(x / step_width) * step + min;
-
         slider.setAttribute("current-min", minValue);
     }
 
@@ -255,7 +239,6 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
         if (maxValue > max) {
             maxValue = max;
         }
-
         slider.setAttribute("current-max", maxValue);
     }
 
@@ -276,19 +259,13 @@ var DoubleRangeSlider = function (id, title, step, data_class, data_column) {
             ).innerHTML = `${title}: ${min} - ${max}`;
         }
     };
-
     self.changeTitle(min, max);
 
     self.filter_value = function (value) {
         let max = parseInt(slider.getAttribute("current-max"));
         let min = parseInt(slider.getAttribute("current-min"));
-        if (value === null) {
-            if (min === defaultMinValue && max === defaultMaxValue) {
-                return true;
-            }
-            return false;
-        }
-
+        if (value === null)
+            return min === defaultMinValue && max === defaultMaxValue;
         return value >= min && value <= max;
     };
 };
