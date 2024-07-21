@@ -7,7 +7,6 @@ class DropdownMenu {
 
     constructor(id, placeholder, data_column) {
         var self = this;
-        self.left = 0;
         self.id = id;
         self.data_column = data_column;
 
@@ -27,8 +26,6 @@ class DropdownMenu {
 
         self.placeholder = placeholder;
         let wrapper = document.getElementById(id);
-        wrapper.style.left = self.left + "px";
-        wrapper.classList.add("m-2");
         let inner_html = `
             <button class='btn btn-secondary dropdown-toggle' type='button' id='${id}_button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
                 ${self.placeholder}
@@ -50,10 +47,6 @@ class DropdownMenu {
                 self.menu.style.display === "block" ? "none" : "block";
         }
         self.button.addEventListener("click", openFilters);
-
-        self.width = getTextWidth(self.placeholder, self.button) + 30;
-        self.button.style.width = self.width + "px";
-        wrapper.style.width = self.width + "px";
 
         // add event listeners to each option
         for (let i = 0; i < self.options.length; i++) {

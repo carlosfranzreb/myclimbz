@@ -55,11 +55,12 @@ var FilterWidget = function (id, left) {
             let filter_name = cols[col][row];
             if (filter_name instanceof Array) {
                 let subrow = document.createElement("div");
-                subrow.className = "row";
+                subrow.className = "row d-inline-flex";
                 subrow.id = `${id}_col_${col}_subrow_${row}`;
                 for (let f of filter_name) {
                     let elem = document.createElement("div");
                     elem.id = `${id}_${f}`;
+                    elem.className = "col my-2";
                     elem.innerHTML = f;
                     subrow.appendChild(elem);
                 }
