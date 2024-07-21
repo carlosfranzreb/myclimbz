@@ -94,7 +94,6 @@ class DropdownMenu {
             }
             return false;
         }
-        console.log(this.selected_options, value, this.selected_options.includes(value));
         return this.selected_options.includes(value);
     };
 };
