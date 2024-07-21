@@ -48,7 +48,7 @@ var FilterWidget = function (id, left) {
 
     for (let col in cols) {
         let colElement = document.createElement("div");
-        colElement.className = "col px-4";
+        colElement.className = "col-sm px-4";
         colElement.id = `${id}_col_${col}`;
 
         for (let row in cols[col]) {
