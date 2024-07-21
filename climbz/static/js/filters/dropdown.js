@@ -6,6 +6,7 @@
 class DropdownMenu {
 
     constructor(id, placeholder, data_column) {
+        var self = this;
         this.id = id;
         this.data_column = data_column;
 
@@ -21,13 +22,12 @@ class DropdownMenu {
             } else if (!this.options.includes(value) && value !== null)
                 this.options.push(value);
         }
-        self.selected_options = [];
 
-        self.placeholder = placeholder;
+        this.placeholder = placeholder;
         let wrapper = document.getElementById(id);
         let inner_html = `
             <button class='btn btn-secondary dropdown-toggle' type='button' id='${id}_button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
-                ${self.placeholder}
+                ${this.placeholder}
             </button>
             <div class='dropdown-menu' aria-labelledby='${id}_button' id='${id}_menu'>
         `;
@@ -37,27 +37,26 @@ class DropdownMenu {
         inner_html += "</div>";
 
         wrapper.innerHTML = inner_html;
-        self.menu = document.getElementById(`${id}_menu`);
-        self.menu.style.display = "block";
-        self.menu.style.display = "none";
-        self.button = document.getElementById(`${id}_button`);
-        function openFilters() {
+        this.menu = document.getElementById(`${id}_menu`);
+        this.menu.style.display = "none";
+        this.button = document.getElementById(`${id}_button`);
+        this.button.addEventListener("click", function () {
             self.menu.style.display =
                 self.menu.style.display === "block" ? "none" : "block";
-        }
-        self.button.addEventListener("click", openFilters);
+        });
 
         // add event listeners to each option
+        this.selected_options = [];
         for (let i = 0; i < this.options.length; i++) {
             let option = document.getElementById(`${id}_${i}`);
 
+            // toggle its active class and add/remove it from selected_options
             option.addEventListener("click", function () {
-                // toggle its active class and add/remove it from selected_options
                 option.classList.toggle("active");
                 if (option.classList.contains("active")) {
-                    self.selected_options.push(this.options[i]);
+                    self.selected_options.push(self.options[i]);
                 } else {
-                    let index = self.selected_options.indexOf(this.options[i]);
+                    let index = self.selected_options.indexOf(self.options[i]);
                     self.selected_options.splice(index, 1);
                 }
             });
@@ -71,28 +70,31 @@ class DropdownMenu {
         });
     };
 
-    //reset menu to have no items selected
+    // reset menu to have no items selected
     reset() {
         for (let i = 0; i < this.options.length; i++) {
             let option = document.getElementById(`${this.id}_${i}`);
             option.classList.remove("active");
         }
-        self.selected_options = [];
-        self.button.style.backgroundColor = "var(--color-gray)";
+        this.selected_options = [];
+        this.button.style.backgroundColor = "var(--color-gray)";
     };
 
+    // Return whether the value should be kept in the dataset
     filter_value(value) {
-        if (value !== null || self.selected_options.length === 0)
+        if (value === null)
+            return false;
+        else if (this.selected_options.length === 0)
             return true;
-
-        if (value instanceof Array) {
+        else if (value instanceof Array) {
             // if the option with value v is active, return true
             for (v of value) {
-                if (self.selected_options.length === 0 || self.selected_options.includes(v))
+                if (this.selected_options.length === 0 || this.selected_options.includes(v))
                     return true;
             }
             return false;
         }
-        return self.selected_options.includes(value);
+        console.log(this.selected_options, value, this.selected_options.includes(value));
+        return this.selected_options.includes(value);
     };
 };
