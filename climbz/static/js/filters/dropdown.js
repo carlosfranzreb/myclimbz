@@ -14,7 +14,7 @@ class DropdownMenu {
         self.options = [];
         for (let climb of DATA) {
             let value = climb[data_column];
-            //if value is an array, add each element to options
+            // if value is an array, add each element to options
             if (value instanceof Array) {
                 for (let v of value) {
                     if (!self.options.includes(v) && v !== null)
@@ -23,13 +23,12 @@ class DropdownMenu {
             } else if (!self.options.includes(value) && value !== null)
                 self.options.push(value);
         }
-        self.options.unshift("Select all");
         this.selected_options = [];
 
         self.placeholder = placeholder;
         let wrapper = document.getElementById(id);
         wrapper.style.left = self.left + "px";
-        wrapper.classList.add("btn-wrapper");
+        wrapper.classList.add("m-2");
         let inner_html = `
             <button class='btn btn-secondary dropdown-toggle' type='button' id='${id}_button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
                 ${self.placeholder}
@@ -61,49 +60,18 @@ class DropdownMenu {
             let option = document.getElementById(`${id}_${i}`);
 
             option.addEventListener("click", function () {
-                if (self.options[i] === "Select all") {
-                    //change "Select all" to "Deselect all" and vice versa
-                    option.textContent =
-                        option.textContent === "Select all" ? "Deselect all" : "Select all";
-                    let all_selected = option.textContent === "Deselect all";
-                    this.selected_options = [];
-                    for (let j = 1; j < self.options.length; j++) {
-                        let option = document.getElementById(`${id}_${j}`);
-                        // If "Deselect all" is clicked, add a checkmark to all options
-                        if (all_selected) {
-                            option.classList.add("active");
-                            this.selected_options.push(self.options[j]);
-                        } else {
-                            option.classList.remove("active");
-                        }
-                    }
-                    // color is always gray since all selected == no selected
-                    self.button.style.backgroundColor = "var(--color-gray)";
-
+                // toggle its active class and add/remove it from selected_options
+                option.classList.toggle("active");
+                if (option.classList.contains("active")) {
+                    this.selected_options.push(self.options[i]);
                 } else {
-                    // toggle its active class and add/remove it from selected_options
-                    option.classList.toggle("active");
-                    if (option.classList.contains("active")) {
-                        this.selected_options.push(self.options[i]);
-                    } else {
-                        let index = this.selected_options.indexOf(self.options[i]);
-                        this.selected_options.splice(index, 1);
-                    }
-
-                    // if all options are selected, change "Select all" to "Deselect all"
-                    if (this.selected_options.length === self.options.length - 1) {
-                        document.getElementById(`${id}_0`).textContent = "Deselect all";
-                        self.button.style.backgroundColor = "var(--color-gray)";
-                    } else {
-                        let color = this.selected_options.length === 0 ? "gray" : "green";
-                        self.button.style.backgroundColor = `var(--color-${color})`;
-                        document.getElementById(`${id}_0`).textContent = "Select all";
-                    }
+                    let index = this.selected_options.indexOf(self.options[i]);
+                    this.selected_options.splice(index, 1);
                 }
             });
         }
 
-        //add event listener so that dropdown menu closes when element loses focus
+        // add event listener so that dropdown menu closes when element loses focus
         document.addEventListener("click", function (event) {
             if (!wrapper.contains(event.target)) {
                 self.menu.style.display = "none";
@@ -117,7 +85,6 @@ class DropdownMenu {
             let option = document.getElementById(`${id}_${i}`);
             option.classList.remove("active");
         }
-        document.getElementById(`${id}_0`).textContent = "Select all";
         this.selected_options = [];
         self.button.style.backgroundColor = "var(--color-gray)";
     };

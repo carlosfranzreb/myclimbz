@@ -19,7 +19,8 @@ var FilterWidget = function (id, left) {
     wrapper.style.width = "fit-content";
     let inner_html =
         `<button class='btn btn-secondary dropdown-toggle' type='button' id='${id}_button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Filter</button>` +
-        `<div class='dropdown-menu' aria-labelledby='${id}_button' id='${id}_menu'>`;
+        `<div class='dropdown-menu pb-0' aria-labelledby='${id}_button' id='${id}_menu'>`;
+
     //add widgets here
     let cols = {};
     for (let filter_name in window.FILTERS) {
@@ -42,12 +43,12 @@ var FilterWidget = function (id, left) {
 
     let menu = document.getElementById(`${id}_menu`);
     let row = document.createElement("div");
-    row.className = "row";
+    row.className = "row mx-0 my-2 px-2";
     row.id = `${id}_row`;
 
     for (let col in cols) {
         let colElement = document.createElement("div");
-        colElement.className = "col";
+        colElement.className = "col px-4";
         colElement.id = `${id}_col_${col}`;
 
         for (let row in cols[col]) {
@@ -66,14 +67,13 @@ var FilterWidget = function (id, left) {
             } else {
                 let elem = document.createElement("div");
                 elem.id = `${id}_${filter_name}`;
+                elem.className = "mb-2";
                 elem.innerHTML = filter_name;
                 colElement.appendChild(elem);
             }
         }
-
         row.appendChild(colElement);
     }
-
     menu.appendChild(row);
 
     let col_widths = [];
@@ -162,28 +162,26 @@ var FilterWidget = function (id, left) {
         }
     }
 
-    let divider = document.createElement("div");
-    divider.className = "dropdown-divider";
-    menu.appendChild(divider);
-
     let bottom_row = document.createElement("div");
-    bottom_row.className = "row";
+    bottom_row.className = "row m-0";
     bottom_row.id = `${id}_bottom_row`;
 
-    let filter_apply = document.createElement("button");
-    filter_apply.className = "btn btn-primary";
-    filter_apply.id = "filter_apply";
-    filter_apply.type = "button";
-    filter_apply.innerHTML = "Apply";
-    bottom_row.appendChild(filter_apply);
+    for (let [index, name] of ["Apply", "Reset"].entries()) {
+        let filter_div = document.createElement("div");
+        filter_div.className = "col p-0";
+        let filter_btn = document.createElement("button");
+        filter_btn.className = "btn w-100";
+        if (index === 0)
+            filter_btn.className += " rounded-end-0";
+        else
+            filter_btn.className += " rounded-start-0";
 
-    let filter_reset = document.createElement("button");
-    filter_reset.className = "btn btn-primary";
-    filter_reset.id = "filter_reset";
-    filter_reset.type = "button";
-    filter_reset.innerHTML = "Reset";
-    bottom_row.appendChild(filter_reset);
-
+        filter_btn.id = `filter_${name.toLowerCase()}`;
+        filter_btn.type = "button";
+        filter_btn.innerHTML = name;
+        filter_div.appendChild(filter_btn);
+        bottom_row.appendChild(filter_div);
+    }
     menu.appendChild(bottom_row);
 
     self.menu = menu;

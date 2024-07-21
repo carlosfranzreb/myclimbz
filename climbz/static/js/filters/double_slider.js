@@ -40,6 +40,7 @@ class DoubleRangeSlider {
         this.title_div = document.createElement("div");
         this.wrapper.appendChild(this.title_div);
         this.title_div.id = `title_${this.id}`;
+        this.title_div.className = "mb-1";
         this.changeTitle(0, max - min);
 
         // Create the slider
