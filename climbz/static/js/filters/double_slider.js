@@ -22,9 +22,11 @@ class DoubleRangeSlider {
         let max = -Infinity;
         for (let climb of DATA) {
             let value = climb[data_column];
-            if (value < min && value !== null)
+            if (value === null)
+                continue;
+            else if (value < min)
                 min = value;
-            if (value > max)
+            else if (value > max)
                 max = value;
         }
         if (min === Infinity || max === -Infinity) {
@@ -47,13 +49,13 @@ class DoubleRangeSlider {
         this.slider = document.createElement("div");
         this.wrapper.appendChild(this.slider);
         noUiSlider.create(this.slider, {
-            start: [0, max - min],
+            start: [min, max],
             connect: true,
-            range: { 'min': 0, 'max': max - min },
-            step: 1,
+            range: { 'min': min, 'max': max },
+            step: step,
         });
         this.slider.noUiSlider.on('update', (values, handle) => {
-            this.changeTitle(parseInt(values[0]), parseInt(values[1]));
+            this.changeTitle(parseFloat(values[0]), parseFloat(values[1]));
         });
 
     }
@@ -64,9 +66,11 @@ class DoubleRangeSlider {
 
     changeTitle(min, max) {
         if (this.data_class === Grade) {
-            this.title_div.innerHTML = `${this.title}: ${GRADES[min][GRADE_SCALE]} - ${GRADES[max][GRADE_SCALE]} `;
+            let grade_max = GRADES[max][GRADE_SCALE];
+            let grade_min = GRADES[min][GRADE_SCALE];
+            this.title_div.innerHTML = `${this.title}: ${grade_max} - ${grade_min}`;
         } else {
-            this.title_div.innerHTML = `${this.title}: ${min} - ${max} `;
+            this.title_div.innerHTML = `${this.title}: ${min} - ${max}`;
         }
     };
 

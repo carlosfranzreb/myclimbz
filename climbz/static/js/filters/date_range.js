@@ -132,28 +132,24 @@ class DateRange {
     };
 
     filter_value(value) {
-        let start = parseDateString(startDate.value);
-        let end = parseDateString(endDate.value);
+        let start = this.parseDateString(this.startDate.value);
+        let end = this.parseDateString(this.endDate.value);
         let date;
         //! If many dates are selected, use the last date
         if (value instanceof Array) {
-            date = parseDateString(value[value.length - 1]);
+            date = this.parseDateString(value[value.length - 1]);
         } else {
-            date = parseDateString(value);
+            date = this.parseDateString(value);
         }
         if (start === null || end === null) {
-            if (start === null && end === null) {
+            if (start === null && end === null)
                 return true;
-            }
-            if (date === null) {
+            if (date === null)
                 return false;
-            }
-            if (start === null) {
+            if (start === null)
                 return date <= end;
-            }
-            if (end === null) {
+            if (end === null)
                 return date >= start;
-            }
         }
         if (date === null) {
             return false;

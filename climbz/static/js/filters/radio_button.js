@@ -7,14 +7,12 @@
 class RadioButton {
 
     constructor(id, data_column, options, truth_values) {
-        var self = this;
-        const left = 0;
-        self.id = id;
-        self.data_column = data_column;
+        this.id = id;
+        this.data_column = data_column;
+        this.truth_values = truth_values;
 
         let wrapper = document.getElementById(id);
         wrapper.innerHTML = "";
-        wrapper.style.left = left + "px";
 
         for (let i in options) {
             let form_elem = document.createElement("div");
@@ -36,27 +34,16 @@ class RadioButton {
             label.innerHTML = options[i];
             form_elem.appendChild(label);
         }
-
-        let width = 0;
-        for (let i in options) {
-            let elem = document.getElementById(`${id}_${i}`);
-            let opt_width = getTextWidth(options[i], elem);
-            if (opt_width > width) {
-                width = opt_width;
-            }
-        }
-        self.width = width + 30;
-        wrapper.style.width = self.width + "px";
     };
 
     reset() {
-        document.getElementById(`${id}_0`).checked = true;
+        document.getElementById(`${this.id}_0`).checked = true;
     };
 
     filter_value(value) {
-        let checked = document.querySelector(`input[name=${id}]:checked`);
+        let checked = document.querySelector(`input[name=${this.id}]:checked`);
         let index = checked.id.split("_").pop();
-        let t = truth_values[index];
+        let t = this.truth_values[index];
         if (t instanceof Array) {
             return t.includes(value);
         }
