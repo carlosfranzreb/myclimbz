@@ -20,6 +20,7 @@ FILTERS = {
     "Grade": {
         "filter_type": "slider",
         "data_class": Grade,
+        "step": 1,
         "data_column": "level",
         "row": 0,
         "col": 0,
@@ -62,7 +63,6 @@ FILTERS = {
         "data_column": "height",
         "row": 1,
         "col": 1,
-        "is_float": true,
     },
     "Area": {
         "filter_type": "dropdown",
