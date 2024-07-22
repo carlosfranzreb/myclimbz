@@ -2,6 +2,11 @@
 
 This guide is for developers: how to run and develop the app.
 
+## Index
+
+1. [Creating forms](#creating-forms)
+2. [Creating filters](#creating-filters)
+
 ## Creating forms
 
 We have custom functionality that can be used when creating forms with WTForms.
@@ -33,3 +38,9 @@ This is how it is done for the example mentioned above:
 ```python
 self.is_project_search.toggle_ids = "date,conditions"
 ```
+
+## Creating filters
+
+The list of filters is defined in `filters/main.js`, in the variable `FILTERS`. When the user wants to apply some filters, the function `filter_data` of the same file is called. This function calls the method `filter_value` for each filter and climb. Besides the `filter_value` method, filter classes must have a `reset` method, where its original values are set.
+
+You can find the currently implemented filters in the folder `filters/widgets`. The whole filter menu is constructed in the file `filters/filters.js`.
