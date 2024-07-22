@@ -1,4 +1,3 @@
-// TODO: minify for distribution
 (function (root, factory) {
     var plugin = "DataTable";
 
@@ -775,6 +774,7 @@
         if (!init) {
             dt.emit("datatable.sort", column, dir);
         }
+        table_columns();
     };
 
     /**
