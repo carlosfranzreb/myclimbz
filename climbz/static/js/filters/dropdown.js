@@ -82,10 +82,10 @@ class DropdownMenu {
 
     // Return whether the value should be kept in the dataset
     filter_value(value) {
-        if (value === null)
-            return false;
-        else if (this.selected_options.length === 0)
+        if (this.selected_options.length === 0)
             return true;
+        else if (value === null)
+            return false;
         else if (value instanceof Array) {
             // if the option with value v is active, return true
             for (v of value) {
