@@ -21,24 +21,16 @@ def reset(driver):
 
 def test_grade_filter(driver) -> None:
     filter_button, apply_button = reset(driver)
-    grade_filter = driver.find_element(By.ID, "widget_filter_Grade")
-    driver.execute_script("arguments[0].removeAttribute('current-min')", grade_filter)
-    driver.execute_script(
-        "arguments[0].setAttribute('current-min','5')",
-        grade_filter,
-    )
+    grade_filter = driver.find_element(By.ID, "slider_filter_Grade")
+    driver.execute_script("arguments[0].noUiSlider.set([10, 15])", grade_filter)
     filter_button.click()
 
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable(apply_button))
     apply_button.click()
-    min_level = int(grade_filter.get_attribute("current-min"))
-    assert min_level == 5
-    max_level = int(grade_filter.get_attribute("current-max"))
 
     displayed_data = driver.execute_script("return Array.from(DISPLAYED_DATA);")
     assert all(
-        route["level"] >= min_level and route["level"] <= max_level
-        for route in displayed_data
+        route["level"] >= 10 and route["level"] <= 15 for route in displayed_data
     )
     reset(driver)
 

@@ -47,6 +47,7 @@ class DoubleRangeSlider {
 
         // Create the slider
         this.slider = document.createElement("div");
+        this.slider.id = `slider_${this.id}`;
         this.wrapper.appendChild(this.slider);
         noUiSlider.create(this.slider, {
             start: [this.min, this.max],

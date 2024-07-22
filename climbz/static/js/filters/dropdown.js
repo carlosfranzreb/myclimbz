@@ -88,7 +88,7 @@ class DropdownMenu {
             return false;
         else if (value instanceof Array) {
             // if the option with value v is active, return true
-            for (v of value) {
+            for (let v of value) {
                 if (this.selected_options.length === 0 || this.selected_options.includes(v))
                     return true;
             }
