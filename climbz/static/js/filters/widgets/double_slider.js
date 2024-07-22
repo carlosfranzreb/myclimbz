@@ -58,7 +58,6 @@ class DoubleRangeSlider {
         this.slider.noUiSlider.on('update', (values, handle) => {
             this.changeTitle(parseFloat(values[0]), parseFloat(values[1]));
         });
-
     }
 
     reset() {
