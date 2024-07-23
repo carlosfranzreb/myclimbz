@@ -11,6 +11,7 @@ from wtforms import (
     IntegerRangeField,
 )
 from wtforms.validators import NumberRange, Optional
+from wtforms.widgets import TextArea
 
 from climbz.models import Grade, Crux, Opinion
 
@@ -40,7 +41,7 @@ class OpinionForm(FlaskForm):
         widget=widgets.ListWidget(prefix_label=False),
         option_widget=widgets.CheckboxInput(),
     )
-    comment = StringField("Comment", validators=[Optional()])
+    comment = StringField("Comment", validators=[Optional()], widget=TextArea())
     submit = SubmitField("Submit")
 
     @classmethod

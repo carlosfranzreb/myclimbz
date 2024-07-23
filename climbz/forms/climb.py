@@ -5,6 +5,7 @@ from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, BooleanField, StringField
 from wtforms.validators import Optional
+from wtforms.widgets import TextArea
 
 from climbz.models import Route, Climb, Session
 
@@ -22,7 +23,7 @@ class ClimbForm(FlaskForm):
     # the route is determined in the route form
     is_project = BooleanField("Project (not tried yet)", validators=[Optional()])
     n_attempts = IntegerField("Number of attempts", validators=[Optional()])
-    climb_comment = StringField("Comment", validators=[Optional()])
+    climb_comment = StringField("Comment", validators=[Optional()], widget=TextArea())
     climb_link = StringField("Link", validators=[Optional()])
     sent = BooleanField("Sent", validators=[Optional()])
     flashed = BooleanField("Flashed", validators=[Optional()])
