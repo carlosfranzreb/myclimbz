@@ -76,10 +76,10 @@ class Climber(db.Model, UserMixin):
             return str((datetime.now().date() - self.birthdate).days // 365)
 
     @property
-    def highest_grade_str(self) -> str:
+    def max_grade(self) -> Grade:
         """Return the highest grade sent by the climber."""
         if not self.climbs or len(self.climbs) == 0:
-            return "N/A"
+            return None
         else:
             max_grade = Grade.query.filter_by(level=0).first()
             for climb in self.climbs:
@@ -87,7 +87,7 @@ class Climber(db.Model, UserMixin):
                 if opinion is not None and opinion.grade is not None:
                     if opinion.grade.level > max_grade.level:
                         max_grade = opinion.grade
-            return max_grade.user_grade
+            return max_grade
 
     @property
     def n_sends(self) -> int:
