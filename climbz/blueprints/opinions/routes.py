@@ -12,6 +12,7 @@ opinions = Blueprint("opinions", __name__)
 def add_opinion(climber_id: int, route_id: int) -> str:
     route_name = Route.query.get(route_id).name
     opinion_form = OpinionForm.create_empty(route_name)
+
     # POST: an opinion form was submitted => create opinion or return error
     if request.method == "POST":
         if not opinion_form.validate():
@@ -29,7 +30,8 @@ def add_opinion(climber_id: int, route_id: int) -> str:
 @opinions.route("/edit_opinion/<int:opinion_id>", methods=["GET", "POST"])
 def edit_opinion(opinion_id: int) -> str:
     opinion = Opinion.query.get(opinion_id)
-    # POST: a opinion form was submitted => edit opinion or return error
+
+    # POST: an opinion form was submitted => edit opinion or return error
     opinion_form = OpinionForm.create_empty(opinion.route.name)
     if request.method == "POST":
         if not opinion_form.validate():

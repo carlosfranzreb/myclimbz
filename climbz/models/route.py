@@ -29,6 +29,14 @@ class Route(db.Model):
 
     UniqueConstraint("name", "sector_id", name="unique_route_name_in_sector")
 
+    def sent_by(self, climber_id: int) -> bool:
+        """Whether a climber has sent this route."""
+        return any(
+            climb.sent
+            for climb in self.climbs
+            if climb.session.climber_id == climber_id
+        )
+
     @property
     def sent(self) -> bool:
         """Whether a climber has sent this route."""
@@ -119,6 +127,29 @@ class Route(db.Model):
         """The 3 most common cruxes given to this route."""
         crux_counts = Counter(crux.name for op in self.opinions for crux in op.cruxes)
         return [crux[0] for crux in crux_counts.most_common(3)]
+
+    def n_sessions_str(self, climber_id: int) -> str:
+        """Return the number of sessions a climber has spent on this route."""
+        n_sessions = str(
+            len([1 for climb in self.climbs if climb.session.climber_id == climber_id])
+        )
+        if n_sessions == "1":
+            return "1 session"
+        else:
+            return f"{n_sessions} sessions"
+
+    def last_media(self, climber_id: int) -> str:
+        """Return the last media URL of this climber on this route."""
+        climbs = [
+            climb for climb in self.climbs if climb.session.climber_id == climber_id
+        ]
+        sorted_climbs = sorted(climbs, key=lambda climb: climb.session.date)
+        if not sorted_climbs:
+            return "N/A"
+        elif not sorted_climbs[-1].link:
+            return "N/A"
+        else:
+            sorted_climbs[-1].link
 
     def as_dict(self, climber_id: int) -> dict:
         """
