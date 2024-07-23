@@ -43,7 +43,7 @@
                 <th># tries</th>
                 <th>Sent</th>
                 {% if session.climber_id == user_id %}
-                <th>Actions</th>
+                <th data-sortable="false">Actions</th>
                 {% endif %}
             </tr>
         </thead>
@@ -86,7 +86,7 @@
 
 <script>
     window.addEventListener('load', function () {
-        window.data_table = new DataTable("#content_table", {
+        window.data_table = new simpleDatatables.DataTable("#content_table", {
             perPage: 100,
             perPageSelect: false,
             searchable: true,

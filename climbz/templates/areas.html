@@ -11,9 +11,10 @@
     <table id="content_table" class="table table-hover">
         <thead>
             <tr>
-                {% for row_name in ["Name", "Rock Type", "# Sectors", "# Sessions", "# Routes", "Actions"] %}
+                {% for row_name in ["Name", "Rock Type", "# Sectors", "# Sessions", "# Routes"] %}
                 <th>{{ row_name }}</th>
                 {% endfor %}
+                <th data-sortable="false">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -42,12 +43,13 @@
 
 <script>
     window.addEventListener('load', function () {
-        window.data_table = new DataTable("#content_table", {
+        window.data_table = new simpleDatatables.DataTable("#content_table", {
             perPage: 100,
             perPageSelect: false,
             searchable: false,
             nextPrev: false,
         });
+        window.data_table.columns.sort(0);
     });
 </script>
 

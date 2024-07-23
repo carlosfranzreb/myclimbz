@@ -24,7 +24,9 @@
                 {% endif %}
                 <td onclick={{ onclick }}>{{ climber.sessions|length }}</td>
                 <td onclick={{ onclick }}>{{ climber.n_sends }}</td>
-                <td onclick={{ onclick }}>{{ climber.highest_grade_str }}</td>
+                <td onclick={{ onclick }} data-order="{{ route.grade.level + 1 if route.grade else 0 }}">
+                    {{ climber.highest_grade_str }}
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -33,13 +35,14 @@
 
 <script>
     window.addEventListener('load', function () {
-        window.data_table = new DataTable("#content_table", {
+        window.data_table = new simpleDatatables.DataTable("#content_table", {
             perPage: 100,
             perPageSelect: false,
-            searchable: false,
+            searchable: true,
             nextPrev: false,
         });
     });
+    window.data_table.columns.sort(2, "desc");
 </script>
 
 {% endblock content %}
