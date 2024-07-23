@@ -9,7 +9,7 @@
     <link rel="icon" href="{{ url_for('static', filename='images/icon-green-small.png') }}">
     <link href="{{ url_for('static', filename='css/colors.css') }}" rel="stylesheet" type="text/css">
     <link href="{{ url_for('static', filename='css/vanilla-dataTables.css') }}" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/nouislider.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.css" />
 </head>
 
 <body>
@@ -136,9 +136,9 @@
     <script src="{{url_for('static', filename='js/analysis/y_axis.js')}}"></script>
 
     <!-- Scripts for filters -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.js"></script>
     <script src="{{url_for('static', filename='js/filters/main.js')}}"></script>
     <script src="{{url_for('static', filename='js/filters/filters.js')}}"></script>
-    <script src="{{url_for('static', filename='js/nouislider.min.js')}}"></script>
     <script src="{{url_for('static', filename='js/filters/filters.js')}}"></script>
     <script src="{{url_for('static', filename='js/filters/widgets/checkbox.js')}}"></script>
     <script src="{{url_for('static', filename='js/filters/widgets/double_slider.js')}}"></script>
