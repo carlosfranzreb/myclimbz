@@ -28,7 +28,7 @@ class ClimbForm(FlaskForm):
     sent = BooleanField("Sent", validators=[Optional()])
     flashed = BooleanField("Flashed", validators=[Optional()])
     add_opinion = BooleanField(
-        "Add opinion to route after submitting this form", validators=[Optional()]
+        "Add opinion after submitting this form", validators=[Optional()]
     )
 
     @classmethod
@@ -59,6 +59,7 @@ class ClimbForm(FlaskForm):
 
             if session_id is None:
                 session_id = flask_session["session_id"]
+
             session = Session.query.get(session_id)
             climbs = Climb.query.filter_by(
                 route_id=route.id, climber_id=current_user.id

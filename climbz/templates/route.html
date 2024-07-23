@@ -106,6 +106,7 @@
     {{ macros.card({
         "header": {
             "title": opinion.climber.name,
+            "subtitle": "Sent" if opinion.route.sent else opinion.route.n_sessions_str(user_id),
         },
         "body": {
             "facts": [
@@ -121,14 +122,9 @@
     }) }}
     {% endfor %}
     {% else %}
-    <div class="col-xs-12">
-        {% if route.sent %}
-        <p>No opinion yet</p>
+    <div class="ms-3">
         <a href="{{ url_for('opinions.add_opinion', climber_id=user_id, route_id=route.id) }}"
             class="btn btn-success">Add</a>
-        {% else %}
-        <p  class="ms-3">You need to send the route to add an opinion</p>
-        {% endif %}
     </div>
     {% endif %}
 </div>
@@ -140,6 +136,7 @@
         {{ macros.card({
             "header": {
                 "title": opinion.climber.name,
+                "subtitle": "Sent" if opinion.route.sent else opinion.route.n_sessions_str(opinion.climber.id),
             },
             "body": {
                 "facts": [
