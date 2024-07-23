@@ -116,6 +116,7 @@
                 ],
             "list": [
                 {"prefix": "Cruxes", "value": opinion.cruxes|map(attribute="name")|join(", ") if opinion.cruxes else "N/A"},
+                {"prefix": "Media", "value": opinion.route.last_media(opinion.climber.id)},
                 {"value": route.comment if route.comment else ""},
             ]
         }
@@ -146,6 +147,7 @@
                     ],
                 "list": [
                     {"prefix": "Cruxes", "value": opinion.cruxes|map(attribute="name")|join(", ") if opinion.cruxes else "N/A"},
+                    {"prefix": "Media", "value": opinion.route.last_media(opinion.climber.id)},
                     {"value": route.comment if route.comment else ""},
                 ]
             }

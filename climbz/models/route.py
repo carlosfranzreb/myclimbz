@@ -138,6 +138,19 @@ class Route(db.Model):
         else:
             return f"{n_sessions} sessions"
 
+    def last_media(self, climber_id: int) -> str:
+        """Return the last media URL of this climber on this route."""
+        climbs = [
+            climb for climb in self.climbs if climb.session.climber_id == climber_id
+        ]
+        sorted_climbs = sorted(climbs, key=lambda climb: climb.session.date)
+        if not sorted_climbs:
+            return "N/A"
+        elif not sorted_climbs[-1].link:
+            return "N/A"
+        else:
+            sorted_climbs[-1].link
+
     def as_dict(self, climber_id: int) -> dict:
         """
         Return the relevant attributes of this route for a climber as a dictionary,
