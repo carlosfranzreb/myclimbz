@@ -16,7 +16,10 @@ function show_table() {
     tr.append("th").text("Height");
     tr.append("th").text("Inclination");
     tr.append("th").text("Landing");
-    tr.append("th").text("Last climbed");
+    tr.append("th")
+        .attr("data-type", "date")
+        .attr("data-format", "DD/MM/YYYY")
+        .text("Last climbed");
 
     // Create the table body
     let tbody = table.append("tbody");
@@ -35,12 +38,16 @@ function show_table() {
 
     // Add the cells to the rows
     rows.append("td").text(d => d.name);
-    rows.append("td").text(d => {
-        if (d.level === null)
-            return "N/A";
-        else
-            return GRADES.find(obj => obj.level === d.level)[GRADE_SCALE];
-    });
+    rows.append("td")
+        .attr("data-order", d => {
+            return d.level === null ? 0 : d.level + 1;
+        })
+        .text(d => {
+            if (d.level === null)
+                return "N/A";
+            else
+                return GRADES.find(obj => obj.level === d.level)[GRADE_SCALE];
+        });
     rows.append("td").text(d => d.area);
     rows.append("td").text(d => d.sector);
     rows.append("td").text(d => d.height);
@@ -49,10 +56,11 @@ function show_table() {
     rows.append("td").text(d => d.last_climbed);
 
     // Initialize the DataTable
-    window.data_table = new DataTable("#content_table", {
+    window.data_table = new simpleDatatables.DataTable("#content_table", {
         perPage: 100,
         perPageSelect: false,
         searchable: true,
         nextPrev: false,
     });
+    window.data_table.columns.sort(7, "desc");
 }

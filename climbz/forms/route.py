@@ -12,6 +12,7 @@ from wtforms import (
     IntegerRangeField,
 )
 from wtforms.validators import Optional, DataRequired, NumberRange
+from wtforms.widgets import TextArea
 
 from climbz.models import Route, Sector, Session
 
@@ -60,7 +61,7 @@ class RouteForm(FlaskForm):
     sit_start = BooleanField("Sit Start", default=False)
     latitude = FloatField("Latitude", validators=[Optional()])
     longitude = FloatField("Longitude", validators=[Optional()])
-    comment = StringField("Comment", validators=[Optional()])
+    comment = StringField("Comment", validators=[Optional()], widget=TextArea())
     link = URLField("Link", validators=[Optional()])
 
     @classmethod

@@ -11,6 +11,7 @@ from wtforms import (
     IntegerRangeField,
 )
 from wtforms.validators import Optional, DataRequired, NumberRange
+from wtforms.widgets import TextArea
 
 from climbz.models import Area, RockType, Session
 
@@ -35,7 +36,7 @@ class SessionForm(FlaskForm):
         ],
         default=3,
     )
-    comment = StringField("Comment", validators=[Optional()])
+    comment = StringField("Comment", validators=[Optional()], widget=TextArea())
 
     @classmethod
     def create_empty(cls, is_edit: bool = False) -> SessionForm:
