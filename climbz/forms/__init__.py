@@ -9,3 +9,4 @@ from .area import AreaForm  # noqa
 from .login import LoginForm  # noqa
 from .climber import ClimberForm  # noqa
 from .opinion import OpinionForm  # noqa
+from .change_pw import ChangePwForm  # noqa

@@ -76,6 +76,8 @@ def create_app():
                 return
 
             cls_str = obj_str.capitalize()
+            if cls_str == "Password":
+                cls_str = "Climber"
             cls = getattr(import_module("climbz.models"), cls_str)
 
             obj = cls.query.get(int(obj_id))

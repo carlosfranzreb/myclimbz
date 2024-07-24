@@ -12,7 +12,7 @@ from flask_login import login_user, current_user, logout_user
 
 from climbz import db
 from climbz.models import Climber, Route
-from climbz.forms import LoginForm, ClimberForm
+from climbz.forms import LoginForm, ClimberForm, ChangePwForm
 from climbz.blueprints.utils import render
 
 
@@ -89,6 +89,26 @@ def view_climber(climber_id: int):
         title=climber.name,
         climber=climber,
     )
+
+
+@climbers.route("/edit_password/<int:climber_id>", methods=["GET", "POST"])
+def edit_password(climber_id: int):
+    """Edit profile."""
+    form = ChangePwForm()
+    climber = Climber.query.get(climber_id)
+
+    # POST: a profile form was submitted => edit profile or return error
+    if request.method == "POST":
+        if not form.validate(climber):
+            flask_session["error"] = form.errors
+            return render("form.html", title="Edit profile", forms=[form])
+        # form is valid; commit changes and return to last page
+        climber.change_password(form.new_pw.data)
+        db.session.commit()
+        return redirect(flask_session.pop("call_from_url"))
+
+    # GET: the user wants to edit their profile
+    return render("form.html", title="Change password", forms=[form])
 
 
 @climbers.route("/add_project/<int:route_id>")
