@@ -35,6 +35,7 @@ def login():
                 form=form,
             )
         else:
+            flask_session["error"] = None
             climber = Climber.query.filter_by(email=form.email.data).first()
             login_user(climber, remember=form.remember.data)
             if "call_from_url" in flask_session:
