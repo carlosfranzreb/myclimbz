@@ -55,12 +55,15 @@
                 </li>
             </ul>
             <ul class="navbar-nav ms-md-auto mb-2 mb-md-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('home.guide') }}">Help</a>
+                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         {{ username }}
                     </a>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="{{ url_for('climbers.logout') }}">Logout</a></li>
                         <li>
                             <a class="dropdown-item" href="{{ url_for('climbers.edit_climber', climber_id=user_id) }}">
@@ -73,9 +76,6 @@
                             </a>
                         </li>
                     </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('home.guide') }}">Help</a>
                 </li>
             </ul>
         </div>
