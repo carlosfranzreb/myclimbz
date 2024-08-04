@@ -9,10 +9,11 @@ from flask import (
     session as flask_session,
 )
 from flask_login import login_user, current_user, logout_user
+from flask_bcrypt import generate_password_hash
 
 from climbz import db
 from climbz.models import Climber, Route
-from climbz.forms import LoginForm, ClimberForm, ChangePwForm
+from climbz.forms import LoginForm, ClimberForm, ChangePwForm, NewPwForm
 from climbz.blueprints.utils import render
 
 
@@ -67,7 +68,7 @@ def edit_climber(climber_id: int):
 
     # POST: a profile form was submitted => edit profile or return error
     if request.method == "POST":
-        if not form.validate():
+        if not form.validate(climber_id):
             flask_session["error"] = form.errors
             return render("form.html", title="Edit profile", forms=[form])
         # form is valid; commit changes and return to profile page
@@ -81,10 +82,33 @@ def edit_climber(climber_id: int):
     return render("form.html", title="Edit profile", forms=[form])
 
 
-@climbers.route("/register_climber", methods=["GET", "POST"])
-def register_climber():
+@climbers.route("/register", methods=["GET", "POST"])
+def register():
     """Create new user."""
-    pass
+    form = ClimberForm()
+    pw_form = NewPwForm()
+
+    # POST: a profile form was submitted => edit profile or return error
+    if request.method == "POST":
+        if not form.validate() or not pw_form.validate():
+            print(form.errors, pw_form.errors)
+            return render_template(
+                "register.html", title="Register", form=form, pw_form=pw_form
+            )
+
+        # form is valid; commit changes and return
+        climber = form.get_edited_obj(Climber())
+        climber.password = generate_password_hash(pw_form.new_pw.data)
+        db.session.add(climber)
+        db.session.commit()
+
+        login_user(climber)
+        return redirect(url_for("home.page_home"))
+
+    # GET: the guest wants to register as a user
+    return render_template(
+        "register.html", title="Register", form=form, pw_form=pw_form
+    )
 
 
 @climbers.route("/climber/<int:climber_id>", methods=["GET", "POST"])

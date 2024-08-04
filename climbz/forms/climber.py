@@ -1,4 +1,6 @@
 from __future__ import annotations
+from collections.abc import Sequence
+from typing import Any, Mapping
 
 from flask_wtf import FlaskForm
 from wtforms import (
@@ -10,6 +12,7 @@ from wtforms import (
     EmailField,
 )
 from wtforms.validators import Optional, DataRequired
+from sqlalchemy import func
 
 from climbz.models import Climber
 
@@ -33,8 +36,8 @@ class ClimberForm(FlaskForm):
 
     # personal information
     name = StringField("Name", validators=[DataRequired()])
-    birthdate = DateField("Birthdate", validators=[Optional()])
-    year_started_climbing = IntegerField("Climbing since", validators=[Optional()])
+    birthdate = DateField("Birth date", validators=[Optional()])
+    year_started_climbing = IntegerField("Climbing since year", validators=[Optional()])
     height = IntegerField("Height (cm)", validators=[Optional()])
     ape_index = IntegerField("Ape index (cm)", validators=[Optional()])
 
@@ -44,6 +47,32 @@ class ClimberForm(FlaskForm):
     )
 
     submit = SubmitField("Submit")
+
+    def validate(self, climber_id: int = None) -> bool:
+        """
+        - Check that the name and email are unique
+        """
+        is_valid = True
+        if not super().validate():
+            is_valid = False
+
+        # check that the email is unique
+        climber = Climber.query.filter(
+            func.lower(Climber.email) == self.email.data.lower()
+        ).first()
+        if climber and climber.id != climber_id:
+            self.email.errors.append("Email already in use")
+            is_valid = False
+
+        # check that the name is unique
+        climber = Climber.query.filter(
+            func.lower(Climber.name) == self.name.data.lower()
+        ).first()
+        if climber and climber.id != climber_id:
+            self.name.errors.append("Name already in use")
+            is_valid = False
+
+        return is_valid
 
     @classmethod
     def create_from_obj(cls, climber) -> ClimberForm:
