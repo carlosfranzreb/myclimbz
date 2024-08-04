@@ -67,11 +67,12 @@ def create_app():
         elif (
             request.endpoint == "climbers.login"
             or request.endpoint == "climbers.register"
+            or request.endpoint == "home.guide"
             or "static" in request.endpoint
         ):
             return
         elif not current_user.is_authenticated:
-            return redirect(url_for("climbers.login"))
+            return redirect(url_for("climbers.login", next=request.endpoint))
 
         # check if the user is allowed to access the page
         if "edit" in request.endpoint or "delete" in request.endpoint:

@@ -220,6 +220,15 @@ input:checked + .slider {
     color: var(--color-white);
 }
 
+.bg-success .text-link {
+    color: var(--color-white);
+    text-decoration: underline;
+}
+
+.bg-success .text-link:hover {
+    color: var(--color-yellow);
+}
+
 .white-btn {
     background-color: var(--color-white) !important;
     color: var(--color-black) !important;

@@ -2,6 +2,9 @@ from flask import (
     Blueprint,
     redirect,
     session as flask_session,
+    render_template,
+    request,
+    url_for,
 )
 from flask_login import current_user
 
@@ -32,4 +35,8 @@ def cancel_form() -> str:
 
 @home.route("/guide")
 def guide() -> str:
-    return render("guide.html", title="User Guide")
+    next = request.referrer
+    if "guide" in next:
+        next = url_for("home.page_home")
+
+    return render_template("guide.html", title="User Guide", next=next)

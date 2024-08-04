@@ -91,7 +91,6 @@ def register():
     # POST: a profile form was submitted => edit profile or return error
     if request.method == "POST":
         if not form.validate() or not pw_form.validate():
-            print(form.errors, pw_form.errors)
             return render_template(
                 "register.html", title="Register", form=form, pw_form=pw_form
             )

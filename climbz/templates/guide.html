@@ -1,5 +1,25 @@
-{% extends "main.html" %}
-{% block content %}
+<html>
+
+<head>
+    <title>User guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="{{ url_for('static', filename='css/colors.css') }}" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bg-success">
+
+<!-- Add a floating button to the bottom right corner of the page. -->
+<div>
+    <a href="{{ next }}" class="btn btn-danger fixed-bottom">
+        Return
+    </a>
+</div>
+
+<div class="container py-4 w-25 px-md-5">
+    <img src="{{ url_for('static', filename='images/logo-green.png') }}" alt="myClimbz logo" class="img-fluid">
+</div>
 
 <div class="container">
     <h2>Contact Information</h2>
@@ -24,11 +44,11 @@
 
     <h3>Index</h3>
     <ul>
-        <li><a href="#data_info">What kind of data do we track?</a></li>
-        <li><a href="#log_data">How to add sessions and climbs</a></li>
-        <li><a href="#filters">How to filter climbs and routes</a></li>
-        <li><a href="#plots">How to analyse your climbs</a></li>
-        <li><a href="#icons">What do the icons mean?</a></li>
+        <li><a class="text-link" href="#data_info">What kind of data do we track?</a></li>
+        <li><a class="text-link" href="#log_data">How to add sessions and climbs</a></li>
+        <li><a class="text-link" href="#filters">How to filter climbs and routes</a></li>
+        <li><a class="text-link" href="#plots">How to analyse your climbs</a></li>
+        <li><a class="text-link" href="#icons">What do the icons mean?</a></li>
     </ul>
 </div>
 
@@ -407,4 +427,5 @@
     </ul>
 </div>  
 
-{% endblock content %}
+</body>
+</html>
