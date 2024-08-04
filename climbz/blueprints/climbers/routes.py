@@ -81,6 +81,12 @@ def edit_climber(climber_id: int):
     return render("form.html", title="Edit profile", forms=[form])
 
 
+@climbers.route("/register_climber", methods=["GET", "POST"])
+def register_climber():
+    """Create new user."""
+    pass
+
+
 @climbers.route("/climber/<int:climber_id>", methods=["GET", "POST"])
 def view_climber(climber_id: int):
     """View climber."""

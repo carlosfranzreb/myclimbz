@@ -213,3 +213,14 @@ input:checked + .slider {
     background-color: var(--color-yellow-400);
     color: var(--color-black);
 }
+
+/* LOGIN */
+.bg-success {
+    background-color: var(--color-green) !important;
+    color: var(--color-white);
+}
+
+.white-btn {
+    background-color: var(--color-white) !important;
+    color: var(--color-black) !important;
+}
