@@ -12,7 +12,7 @@ from datetime import datetime
 
 from flask_login import UserMixin
 
-from climbz import db, login_manager
+from climbz import db, login_manager, bcrypt
 from climbz.models import Grade
 
 
@@ -135,6 +135,10 @@ class Climber(db.Model, UserMixin):
                 added_route_ids.append(route.id)
 
         return routes
+
+    def change_password(self, new_pw: str) -> None:
+        """Change the password of the climber."""
+        self.password = bcrypt.generate_password_hash(new_pw)
 
 
 @login_manager.user_loader

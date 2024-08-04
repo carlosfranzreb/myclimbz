@@ -1,17 +1,42 @@
-{% extends "main.html" %}
-{% block content %}
+<html>
+
+<head>
+    <title>User guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="{{ url_for('static', filename='css/colors.css') }}" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bg-success">
+
+<!-- Add a floating button to the bottom right corner of the page. -->
+<div>
+    <a href="{{ next }}" class="btn btn-danger fixed-bottom">
+        Return
+    </a>
+</div>
+
+<div class="container py-4 w-25 px-md-5">
+    <img src="{{ url_for('static', filename='images/logo-green.png') }}" alt="myClimbz logo" class="img-fluid">
+</div>
 
 <div class="container">
     <h2>Contact Information</h2>
     <p>
         If you have questions about this software which are not answered in the guide
-        below, please contact us at .
+        below, please contact us via e-mail at myclimbz@outlook.com. Suggestions for
+        improving the app are also welcome.
+    </p>
+    <p>
+        We have also created a subreddit (
+            <a class="text-link" href="https://www.reddit.com/r/myclimbz">r/myclimbz</a>
+        ) to discuss the app and your experiences with it.
     </p>
 </div>
 
 <div class="container">
     <h2>User Guide</h2>
-
     <p>
         myClimbz is an app for tracking your sends and projects. Every time you have a
         session outside, you can log where you climbed, how the conditions were and
@@ -24,11 +49,23 @@
 
     <h3>Index</h3>
     <ul>
-        <li><a href="#data_info">What kind of data do we track?</a></li>
-        <li><a href="#log_data">How to add sessions and climbs</a></li>
-        <li><a href="#filters">How to filter climbs and routes</a></li>
-        <li><a href="#plots">How to analyse your climbs</a></li>
+        <li><a class="text-link" href="#privacy">Privacy policy</a></li>
+        <li><a class="text-link" href="#data_info">What kind of data do we track?</a></li>
+        <li><a class="text-link" href="#log_data">How to add sessions and climbs</a></li>
+        <li><a class="text-link" href="#filters">How to filter climbs and routes</a></li>
+        <li><a class="text-link" href="#plots">How to analyse your climbs</a></li>
+        <li><a class="text-link" href="#icons">What do the icons mean?</a></li>
     </ul>
+</div>
+
+<div class="container" id="privacy">
+    <h3>Privacy policy</h3>
+    <p>
+        We do not track any personal information about you. The only data we store is
+        the one you deliberately store. This includes your profile as well as the areas,
+        climbs, etc. you log, as well as your opinions on the routes. We do not use cookies
+        or any other tracking technology. We do not share your data with anyone.
+    </p>
 </div>
 
 <div class="container" id="data_info">
@@ -36,10 +73,11 @@
     <p>
         Routes are shared among climbers. If you are the first one to add a route to
         myClimbz, you will be asked to fill some information about it. When another
-        climber logs a climb in the same route, they will do it on the same route you
-        created. Over time, climbers will share their opinion about the route,
-        gathering useful data points for future climbers.
+        climber logs a climb in the same route, they will do it on the route you created.
+        Over time, climbers will share their opinion about the route, gathering useful
+        data points for future climbers.
     </p>
+
     <h4>Routes</h4>
     <p>
         Routes are stored with the following information:
@@ -47,11 +85,14 @@
     <ul>
         <li>The <b>name</b> of the route. It must be unique in the area.</li>
         <li>
-            The <b>height</b> of the route in meters, in steps of a half meter. This
-            means that a route can be either 3 or 3.5 meters tall, nothing in between
-            is possible.
+            The <b>height</b> {% include 'icons/height.html' %} of the route in meters,
+            in steps of a half meter. This means that a route can be either 3 or 3.5 meters
+            tall, nothing in between is possible.
         </li>
-        <li>The <b>inclination</b> of the route, in degrees, in steps of 5 degrees.</li>
+        <li>
+            The <b>inclination</b> {% include 'icons/inclination.html' %} of the route, in
+            degrees, in steps of 5 degrees.
+        </li>
         <li>The <b>sector</b> where the route is located.</li>
         <li>Whether the route has a <b>sit start</b>.</li>
         <li>The <b>coordinates</b> that mark the location of the route.</li>
@@ -104,15 +145,15 @@
             undercling as the crux, for example. It depends on what you found the hardest.
         </li>
         <li>
-            A <b>quality rating</b> about the route, from 1 to 5 stars. This rating may
-            encompass different aspects depending on the climber, as we value
-            different things. Usually, it is a mix of the quality of the moves
+            A <b>quality rating</b> {% include 'icons/rating.html' %} about the route, from
+            1 to 5 stars. This rating may encompass different aspects depending on the climber,
+            as we value different things. Usually, it is a mix of the quality of the moves
             and the rock. The setting may also play a role.
         </li>
         <li>
-            A <b>landing rating</b> about the route, from 1 to 5 stars. This rating
-            describes how safe the landing is, with 1 being dangerous and 5 being
-            very safe and easy to protect. Aspects like the amount of pads needed
+            A <b>landing rating</b> {% include 'icons/landing.html' %} about the route, from
+            1 to 5 stars. This rating describes how safe the landing is, with 1 being dangerous
+            and 5 being very safe and easy to protect. Aspects like the amount of pads needed
             to make the landing safe, the likelihood of rolling an ankle and so forth
             play a role in this rating. The height of the route as well. As climbers
             view safety differently, this rating may vary between climbers.
@@ -304,8 +345,104 @@
             are defined in the same way as for the "Grade: avg." value.
         </li>
     </ul>
-
 </div>
 
+<div class="container" id="icons">
+    <h3>Icons</h3>
+    <p>
+        The app has several kinds of cards that display information. Currently, areas,
+        routes, sessions and opinions have cards. On the second row of these cards, a series of
+        icons followed by some facts are shown. Each icon has a different meaning, and
+        we will explain them here. There are also icons for certain actions, which we define at
+        the end of this section.
+    </p>
 
-{% endblock content %}
+    <h4>Icons for areas</h4>
+    <ul>
+        <li>
+            {% include 'icons/n_sectors.html' %} Sectors: the number of sectors in the area.
+        </li>
+        <li>
+            {% include 'icons/n_boulders.html' %} Boulders: the number of boulders in the area.
+        </li>
+        <li>
+            {% include 'icons/n_sessions.html' %} Sessions: the number of sessions logged
+            in the area.
+        </li>
+    </ul>
+
+    <h4>Icons for sessions</h4>
+    <ul>
+        <li>
+            {% include 'icons/conditions.html' %} Conditions: the rating for the conditions
+            on the day of the session, from 1 to 5.
+        </li>
+        <li>
+            {% include 'icons/n_boulders.html' %} Boulders: the number of boulders you
+            have tried in the session.
+        </li>
+        <li>
+            {% include 'icons/n_sends.html' %} Boulders: the number of boulders you
+            have sent in the session.
+        </li>
+    </ul>
+
+    <h4>Icons for routes</h4>
+    <ul>
+        <li>
+            {% include 'icons/height.html' %} Height: the height of the route in meters.
+        </li>
+        <li>
+            {% include 'icons/inclination.html' %} Inclination: the inclination of the
+            route in degrees.
+        </li>
+        <li>
+            {% include 'icons/rating.html' %} Rating: the quality rating of the route.
+        </li>
+        <li>
+            {% include 'icons/landing.html' %} Landing: the landing rating of the route.
+        </li>
+    </ul>
+
+    <h4>Icons for opinions</h4>
+    <ul>
+        <li>
+            {% include 'icons/grade.html' %} Grade: the grade given to the route by the
+            climber.
+        </li>
+        <li>
+            {% include 'icons/rating.html' %} Quality: the quality rating given to the
+            route by the climber.
+        </li>
+        <li>
+            {% include 'icons/landing.html' %} Landing: the landing rating given to the
+            route by the climber.
+        </li>
+    </ul>
+
+
+    <h4>Icons for actions</h4>
+    <p>These icons are clickable and can be used to perform actions.</p>
+    <ul>
+        <li>
+            {% include 'icons/edit.html' %} Edit: button to edit the object.
+        </li>
+        <li>
+            {% include 'icons/delete.html' %} Delete: button to delete the object. A
+            confirmation dialog will appear before the object is deleted.
+        </li>
+        <li>
+            {% include 'icons/is_not_project.html' %} Add project: button to mark a route
+            as a project. It means that you haven't either tried it or marked it as a
+            project yet.
+        </li>
+        <li>
+            {% include 'icons/is_project.html' %} Delete project: button to delete a
+            route from the list of projects. It means that you have marked this route
+            as a project.
+        </li>
+    </ul>
+</div>  
+
+</body>
+</html>

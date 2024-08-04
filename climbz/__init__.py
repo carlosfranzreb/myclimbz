@@ -52,7 +52,8 @@ def create_app():
     def check_request_validity():
         """
         - Ensure that the user is logged in before accessing any non-static page
-        - If the page entails modifying an object, check that the user is allowed to do so
+        - If the page entails modifying an object, check that the user is allowed
+            to do so
         """
         if not current_user.is_authenticated and disable_login:
             from climbz.models import Climber
@@ -63,10 +64,15 @@ def create_app():
 
         if not request.endpoint:
             return
-        elif request.endpoint == "climbers.login" or "static" in request.endpoint:
+        elif (
+            request.endpoint == "climbers.login"
+            or request.endpoint == "climbers.register"
+            or request.endpoint == "home.guide"
+            or "static" in request.endpoint
+        ):
             return
         elif not current_user.is_authenticated:
-            return redirect(url_for("climbers.login"))
+            return redirect(url_for("climbers.login", next=request.endpoint))
 
         # check if the user is allowed to access the page
         if "edit" in request.endpoint or "delete" in request.endpoint:
@@ -76,6 +82,8 @@ def create_app():
                 return
 
             cls_str = obj_str.capitalize()
+            if cls_str == "Password":
+                cls_str = "Climber"
             cls = getattr(import_module("climbz.models"), cls_str)
 
             obj = cls.query.get(int(obj_id))

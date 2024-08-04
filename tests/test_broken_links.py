@@ -26,8 +26,10 @@ def check_page_links(driver):
 
 def check_links(driver, urls: list[str]) -> list[str]:
     for url in urls:
+        if url in SEEN_URLS:
+            continue
+        print(url)
         SEEN_URLS.append(url)
-        print(f"Checking {url}")
         driver.get(url)
         try:
             WebDriverWait(driver, 10).until(
@@ -52,6 +54,8 @@ def get_urls(links: list[WebElement]) -> list[str]:
         except Exception:
             continue
         if url:
+            if "reddit" in url:
+                continue
             url = clean_url(url)
 
             # skip duplicates and URLs that have already been checked
