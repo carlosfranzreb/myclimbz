@@ -1,30 +1,25 @@
 // If the width is below 800px, show only 3 columns. Always show the first two
 // columns. If the last column header says "Actions", show it. Otherwise, show
 // the third column.
-function table_columns() {
+function hide_columns() {
     if (window.innerWidth < 800) {
-        let rows = document.querySelectorAll("#content_table tr");
+        // load the table and get its last header
+        let table = window.data_table;
+        let n_cols = table.columns.size();
+        let last_header = table.dom.querySelectorAll(
+            "thead tr th"
+        )[n_cols - 1].textContent
 
-        let n_cols = rows[0].querySelectorAll("th").length;
-        let last_header = rows[0].querySelectorAll("th")[n_cols - 1].textContent;
-        let visible_idxs = [0, 1];
+        // hide columns based on the last header
+        let hide_indices = [...Array(n_cols).keys()].slice(2);
         if (last_header !== "Actions")
-            visible_idxs.push(2);
+            hide_indices = hide_indices.slice(1);
         else
-            visible_idxs.push(n_cols - 1);
-
-        for (let row of rows) {
-            for (let tag_name of ["th", "td"]) {
-                let cells = row.querySelectorAll(tag_name);
-                for (let i = 0; i < cells.length; i++) {
-                    if (!visible_idxs.includes(i))
-                        cells[i].style.display = "none";
-                }
-            }
-        }
+            hide_indices = hide_indices.slice(0, -1);
+        table.columns.hide((hide_indices));
     }
 }
 
 // Add the event listener to the window
-window.addEventListener("resize", table_columns);
-window.addEventListener("load", table_columns);
+window.addEventListener("resize", hide_columns);
+window.addEventListener("load", hide_columns);
