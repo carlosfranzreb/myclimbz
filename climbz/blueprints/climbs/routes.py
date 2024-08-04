@@ -5,7 +5,7 @@ from flask import (
     session as flask_session,
 )
 
-from climbz.models import Climb, Session, Sector, Opinion
+from climbz.models import Climb, Session, Opinion
 from climbz.forms import ClimbForm, RouteForm
 from climbz import db
 from climbz.blueprints.utils import render

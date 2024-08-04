@@ -141,16 +141,15 @@ class RouteForm(FlaskForm):
         - If the route is new, create it and return it, without adding it to the DB.
         - If the route exists, return it.
         """
-        route = None
-        if len(self.name.data) > 0:
-            route_name = self.name.data.strip().title()
-            route = Route.query.filter_by(name=route_name).first()
-            if route is None:
-                route = Route(
-                    name=route_name, sector=sector, created_by=current_user.id
-                )
-                for field in FIELDS:
-                    setattr(route, field, getattr(self, field).data)
+        if len(self.name.data) == 0:
+            return None
+
+        route_name = self.name.data.strip().title()
+        route = Route.query.filter_by(name=route_name).first()
+        if route is None:
+            route = Route(name=route_name, sector=sector, created_by=current_user.id)
+            for field in FIELDS:
+                setattr(route, field, getattr(self, field).data)
 
         return route
 
