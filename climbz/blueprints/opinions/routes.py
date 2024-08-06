@@ -34,7 +34,7 @@ def edit_opinion(opinion_id: int) -> str:
     title = f"Edit opinion for {opinion.route.name}"
 
     # POST: an opinion form was submitted => edit opinion or return error
-    opinion_form = OpinionForm.create_empty(opinion.route.name)
+    opinion_form = OpinionForm.create_empty()
     if request.method == "POST":
         if not opinion_form.validate():
             return render("form.html", title=title, forms=[opinion_form])
