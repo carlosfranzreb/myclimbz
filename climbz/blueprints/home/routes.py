@@ -36,7 +36,9 @@ def cancel_form() -> str:
 @home.route("/guide")
 def guide() -> str:
     next = request.referrer
-    if not next or "guide" in next:
+    if not current_user.is_authenticated:
+        next = url_for("climbers.register")
+    elif not next or "guide" in next:
         next = url_for("home.page_home")
 
     return render_template("guide.html", title="User Guide", next=next)

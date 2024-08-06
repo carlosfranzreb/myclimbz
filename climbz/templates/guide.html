@@ -10,11 +10,17 @@
 
 <body class="bg-success">
 
-<!-- Add a floating button to the bottom right corner of the page. -->
+<!-- Add a floating button to the bottom of the page. -->
 <div>
-    <a href="{{ next }}" class="btn btn-danger fixed-bottom">
-        Return
-    </a>
+    {% if "register" in next %}
+        <a href="{{ next }}" class="btn btn-danger fixed-bottom">
+            Sign up
+        </a>
+    {% else %}
+        <a href="{{ next }}" class="btn btn-danger fixed-bottom">
+            Return
+        </a>
+    {% endif %}
 </div>
 
 <div class="container py-4 w-25 px-md-5">
