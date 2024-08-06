@@ -45,12 +45,11 @@ class OpinionForm(FlaskForm):
     submit = SubmitField("Submit")
 
     @classmethod
-    def create_empty(cls, route_name: str) -> OpinionForm:
+    def create_empty(cls) -> OpinionForm:
         """
         Create the form and add choices to the select fields.
         """
         form = cls()
-        form.title = f"Opinion for {route_name}"
         cruxes = Crux.query.order_by(Crux.name).all()
         form.cruxes.choices = [(str(c.id), c.name) for c in cruxes]
 
