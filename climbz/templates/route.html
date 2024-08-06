@@ -34,6 +34,10 @@
                 ],
             "list": [
                 {
+                "prefix": "Sit start",
+                "value": "Yes" if route.sit_start else "No"
+                },
+                {
                 "prefix": "Coordinates",
                 "value": route.latitude ~ ", " ~ route.longitude if route.latitude and route.longitude else "N/A"
                 },
