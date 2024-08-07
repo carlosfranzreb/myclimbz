@@ -1,10 +1,12 @@
 // If the width is below 800px, show only 3 columns. Always show the first two
 // columns. If the last column header says "Actions", show it. Otherwise, show
 // the third column.
+// Also, when the cursor is over the table, change the cursor to a pointer.
 function hide_columns() {
+    let table = window.data_table;
+    table.dom.style.cursor = "pointer";
     if (window.innerWidth < 800) {
         // load the table and get its last header
-        let table = window.data_table;
         let n_cols = table.columns.size();
         let last_header = table.dom.querySelectorAll(
             "thead tr th"

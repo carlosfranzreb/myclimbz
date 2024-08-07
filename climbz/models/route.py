@@ -88,7 +88,7 @@ class Route(db.Model):
     @property
     def consensus_level(self) -> int:
         """Most common given level to this route or null."""
-        level_counts = Counter(op.grade.level for op in self.opinions)
+        level_counts = Counter(op.grade.level for op in self.opinions if op.grade)
         return level_counts.most_common(1)[0][0] if level_counts else None
 
     @property
@@ -172,6 +172,10 @@ class Route(db.Model):
             conditions.append(climb.session.conditions)
             dates.append(climb.session.date)
 
+        level_mine = None
+        if self.opinion and self.opinion.grade:
+            level_mine = self.opinion.grade.level
+
         return {
             # route characteristics
             "id": self.id,
@@ -189,7 +193,7 @@ class Route(db.Model):
             # climber's opinion
             "landing": self.opinion.landing if self.opinion else None,
             "rating": self.opinion.rating if self.opinion else None,
-            "level_mine": self.opinion.grade.level if self.opinion else None,
+            "level_mine": level_mine,
             "cruxes": (
                 [crux.name for crux in self.opinion.cruxes] if self.opinion else None
             ),

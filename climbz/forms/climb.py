@@ -34,14 +34,12 @@ class ClimbForm(FlaskForm):
     @classmethod
     def create_empty(cls) -> ClimbForm:
         form = cls()
-        form.title = "Climb"
         form.is_project.toggle_ids = "n_attempts,climb_comment,climb_link,sent,flashed"
         return form
 
     @classmethod
     def create_from_object(cls, obj: Climb) -> ClimbForm:
         form = cls.create_empty()
-        form.title = f"Climb on {obj.route.name}"
         for field in FIELDS:
             getattr(form, field).data = getattr(obj, field.replace("climb_", ""))
         return form

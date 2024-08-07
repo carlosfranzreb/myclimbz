@@ -21,6 +21,7 @@ def add_climb() -> str:
     session = Session.query.get(flask_session["session_id"])
     route_form = RouteForm.create_empty(session.area_id)
     climb_form = ClimbForm.create_empty() if not session.is_project_search else None
+    title = "Add climb"
 
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
@@ -31,10 +32,8 @@ def add_climb() -> str:
             else False
         )
         if not route_form.validate() or invalid_climb:
-            flask_session["error"] = route_form.errors or climb_form.errors
-            return render(
-                "form.html", title="Add climb", forms=[route_form, climb_form]
-            )
+            flask_session["error"] = "An error occurred. Fix it and resubmit."
+            return render("form.html", title=title, forms=[route_form, climb_form])
 
         # create new sector and new route if necessary
         sector = route_form.get_sector(session.area_id)
@@ -76,26 +75,29 @@ def add_climb() -> str:
     # GET: the climber wants to add a route (+climb)
     if session.is_project_search:
         climb_form = None
-    return render("form.html", title="Add climb", forms=[route_form, climb_form])
+    route_form.title = "Route"
+    climb_form.title = "Climb"
+    return render("form.html", title=title, forms=[route_form, climb_form])
 
 
 @climbs.route("/edit_climb/<int:climb_id>", methods=["GET", "POST"])
 def edit_climb(climb_id: int) -> str:
     climb = Climb.query.get(climb_id)
+    title = f"Edit climb on {climb.route.name}"
 
     # POST: a climb form was submitted => edit climb or return error
     if request.method == "POST":
         climb_form = ClimbForm()
         if not climb_form.validate(climb.route, climb.session_id):
-            flask_session["error"] = climb_form.errors
-            return render("form.html", title="Edit climb", forms=[climb_form])
+            flask_session["error"] = "An error occurred. Fix it and resubmit."
+            return render("form.html", title=title, forms=[climb_form])
         climb = climb_form.get_edited_climb(climb_id)
         db.session.commit()
         return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit a climb
     climb_form = ClimbForm.create_from_object(climb)
-    return render("form.html", title="Edit climb", forms=[climb_form])
+    return render("form.html", title=title, forms=[climb_form])
 
 
 @climbs.route("/delete_climb/<int:climb_id>")

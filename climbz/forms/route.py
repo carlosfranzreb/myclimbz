@@ -70,7 +70,6 @@ class RouteForm(FlaskForm):
         Create the form and add choices to the select fields.
         """
         form = cls()
-        form.title = "Route"
         form.height.unit = "m"
         form.inclination.unit = "°"
         form.name.toggle_ids = (

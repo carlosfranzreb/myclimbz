@@ -67,7 +67,6 @@ class SessionForm(FlaskForm):
         allowed.
         """
         form = cls.create_empty(is_edit=True)
-        form.title = f"Session on {session.area.name}"
         form.conditions.default = session.conditions
         for field in ["date", "conditions", "comment"]:
             getattr(form, field).data = getattr(session, field)

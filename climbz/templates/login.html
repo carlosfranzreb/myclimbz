@@ -26,38 +26,36 @@
     <div class="container pt-4 px-2 px-md-5">
         <form method="POST" onkeydown="return event.key != 'Enter';">
             {{ form.hidden_tag() }}
-            <fieldset class="form-group">
-                <div class="form-group">
-                    {{ form.email.label(class="form-control-label") }}
-                    {% if form.email.errors %}
+            <div class="form-group">
+                {{ form.email.label(class="form-control-label") }}
+                {% if form.email.errors %}
                     {{ form.email(class="form-control form-control-lg is-invalid") }}
                     <div class="invalid-feedback">
                         {% for error in form.email.errors %}
-                        <span>{{ error }}</span>
+                            <span>{{ error }}</span>
                         {% endfor %}
                     </div>
-                    {% else %}
+                {% else %}
                     {{ form.email(class="form-control form-control-lg") }}
-                    {% endif %}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.password.label(class="form-control-label") }}
+                {% if form.password.errors %}
+                {{ form.password(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.password.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
                 </div>
-                <div class="form-group">
-                    {{ form.password.label(class="form-control-label") }}
-                    {% if form.password.errors %}
-                    {{ form.password(class="form-control form-control-lg is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.password.errors %}
-                        <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    {{ form.password(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                <div class="form-check mt-1">
-                    {{ form.remember(class="form-check-input") }}
-                    {{ form.remember.label(class="form-check-label") }}
-                </div>
-            </fieldset>
+                {% else %}
+                {{ form.password(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-check mt-1">
+                {{ form.remember(class="form-check-input") }}
+                {{ form.remember.label(class="form-check-label") }}
+            </div>
             <div class="form-group mt-1">
                 <input type="submit" class="btn btn-danger" value="Login">
                 <a class="btn white-btn" href="{{ url_for('climbers.register') }}">

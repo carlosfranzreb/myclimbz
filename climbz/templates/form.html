@@ -4,63 +4,86 @@
 <div class="container px-2 px-md-5">
     <h2 class="mt-2">{{ title }}</h2>
 
-    <form method="POST" class="px-1 px-md-5">
+    <form method="POST">
         {% for form in forms %}
-        <div class="mb-4">
-            {{ form.hidden_tag() }}
-            {% if form.title %}
-            <h4>{{ form.title }}</h4>
-            {% endif %}
+            <div class="mb-4">
+                {{ form.hidden_tag() }}
 
-            {% for field in form %}
-            {% if field.name != 'csrf_token' and field.name != "submit" and field != form.existing_route %}
-            <div class="form-group">
-                <label for="{{ field.id }}">{{ field.label }}</label>
-
-                {% if field.type == 'IntegerRangeField' or field.type == 'DecimalRangeField' %}
-                <span>= </span>
-                <output>{{ field.default }}</output>
-                <span>{{ field.unit }}</span>
-                {{ field(id=field.id, class='form-range',
-                oninput="this.previousElementSibling.previousElementSibling.value
-                = this.value") }}
-
-
-                {% elif field.type == 'BooleanField' %}
-                {% if field.toggle_ids %}
-                {{ field(id=field.id, class='form-check', onchange='checkboxToggle("' + field.id + '", "' +
-                field.toggle_ids
-                +
-                '")') }}
-                {% else %}
-                {{ field(id=field.id, class='form-check') }}
+                <!-- Form titles are used for multi-forms -->
+                {% if form.title %}
+                    <h4>{{ form.title }}</h4>
                 {% endif %}
 
+                {% for field in form %}
+                    {% if field.name != 'csrf_token' and field.name != "submit" and field != form.existing_route %}
+                        <div class="form-group">
 
-                {% elif field.datalist %}
-                {% set datalist_name = field.name + '-list' %}
-                <datalist id="{{ field.name }}-list">
-                    {% for item in field.datalist %}
-                    <option value="{{ item }}"></option>
-                    {% endfor %}
-                </datalist>
-                {% if field.toggle_ids %}
-                {{ field(id=field.id, class='form-control', list=datalist_name, autocomplete='off',
-                onchange='datalistToggle("' + field.id + '", "' + datalist_name + '", "' + field.toggle_ids
-                +
-                '")') }}
-                {% else %}
-                {{ field(id=field.id, class='form-control', list=datalist_name, autocomplete='off') }}
-                {% endif %}
+                            <!-- Add the field label -->
+                            <label for="{{ field.id }}" id="{{ field.id }}-label">{{ field.label }}</label>
 
-                {% else %}
-                {{ field(id=field.id, class='form-control') }}
+                            <!-- Add a range input if the field has a type of IntegerRangeField or DecimalRangeField -->
+                            {% if field.type == 'IntegerRangeField' or field.type == 'DecimalRangeField' %}
+                                <span>= </span>
+                                <output>{{ field.default }}</output>
+                                <span>{{ field.unit }}</span>
+                                {{ field(id=field.id, class='form-range',
+                                oninput="this.previousElementSibling.previousElementSibling.value
+                                = this.value") }}
 
-                {% endif %}
+                            <!-- Add a checkbox if the field has a type of BooleanField -->
+                            {% elif field.type == 'BooleanField' %}
+                                {% if field.toggle_ids %}
+                                    {{ field(
+                                        id=field.id,
+                                        class='form-check',
+                                        onchange='checkboxToggle("' + field.id + '", "' + field.toggle_ids + '")'
+                                    ) }}
+                                {% else %}
+                                    {{ field(id=field.id, class='form-check') }}
+                                {% endif %}
+
+                            <!-- Add a datalist if the field has a datalist attribute -->
+                            {% elif field.datalist %}
+                                {% set datalist_name = field.name + '-list' %}
+                                <datalist id="{{ field.name }}-list">
+                                    {% for item in field.datalist %}
+                                    <option value="{{ item }}"></option>
+                                    {% endfor %}
+                                </datalist>
+                                {% if field.toggle_ids %}
+                                    {{ field(
+                                        id=field.id,
+                                        class='form-control',
+                                        list=datalist_name,
+                                        autocomplete='off',
+                                        onchange='datalistToggle("' + field.id + '", "' + datalist_name + '", "' + field.toggle_ids + '")'
+                                    ) }}
+                                {% else %}
+                                    {{ field(id=field.id, class='form-control', list=datalist_name, autocomplete='off') }}
+                                {% endif %}
+
+                            <!-- Otherwise, we assume the field is a text input -->
+                            {% else %}
+                                {{ field(id=field.id, class='form-control') }}
+                            {% endif %}
+
+                            <!-- Add error messages if there are any -->
+                            {% if field.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in field.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                <script>
+                                    document.getElementById("{{ field.id }}").classList.add("is-invalid");
+                                    document.getElementById("{{ field.id }}-label").style.color = "red";
+                                </script>
+                            {% endif %}
+
+                        </div>
+                    {% endif %}
+                {% endfor %}
             </div>
-            {% endif %}
-            {% endfor %}
-        </div>
         {% endfor %}
 
         <div class="form-group">

@@ -42,12 +42,13 @@ def reopen_session(session_id: int) -> str:
 @sessions.route("/add_session", methods=["GET", "POST"])
 def add_session() -> str:
     session_form = SessionForm.create_empty()
+    title = "Add session"
 
     # POST: a session form was submitted => create session or return error
     if request.method == "POST":
         if not session_form.validate():
-            flask_session["error"] = session_form.errors
-            return render("form.html", title="Add session", forms=[session_form])
+            flask_session["error"] = "An error occurred. Fix it and resubmit."
+            return render("form.html", title=title, forms=[session_form])
 
         # if new_area, create new area; otherwise, get existing area
         area = session_form.get_area()
@@ -63,19 +64,20 @@ def add_session() -> str:
         return redirect("/")
 
     # GET: the user wants to start a session
-    return render("form.html", title="Add session", forms=[session_form])
+    return render("form.html", title=title, forms=[session_form])
 
 
 @sessions.route("/edit_session/<int:session_id>", methods=["GET", "POST"])
 def edit_session(session_id: int) -> str:
     session = Session.query.get(session_id)
+    title = f"Edit session on {session.area.name}"
 
     # POST: a session form was submitted => create session or return error
     if request.method == "POST":
         session_form = SessionForm.create_empty(is_edit=True)
         if not session_form.validate():
-            flask_session["error"] = session_form.errors
-            return render("form.html", title="Edit session", forms=[session_form])
+            flask_session["error"] = "An error occurred. Fix it and resubmit."
+            return render("form.html", title=title, forms=[session_form])
 
         # edit session with the new data
         session = session_form.get_object(session.area_id, session)
@@ -84,7 +86,7 @@ def edit_session(session_id: int) -> str:
 
     # GET: the user wants to edit the session
     session_form = SessionForm.create_from_object(session)
-    return render("form.html", title="Edit session", forms=[session_form])
+    return render("form.html", title=title, forms=[session_form])
 
 
 @sessions.route("/delete_session/<int:session_id>", methods=["GET", "POST"])
