@@ -124,7 +124,7 @@ class RouteForm(FlaskForm):
         else:
             sector_name = "Unknown"
 
-        sector = Sector.query.filter_by(name=sector_name).first()
+        sector = Sector.query.filter_by(name=sector_name, area_id=area_id).first()
         if sector is None:
             sector = Sector(
                 name=sector_name, area_id=area_id, created_by=current_user.id
