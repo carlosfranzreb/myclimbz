@@ -73,10 +73,11 @@ def add_climb() -> str:
             return redirect("/")
 
     # GET: the climber wants to add a route (+climb)
+    route_form.title = "Route"
     if session.is_project_search:
         climb_form = None
-    route_form.title = "Route"
-    climb_form.title = "Climb"
+    else:
+        climb_form.title = "Climb"
     return render("form.html", title=title, forms=[route_form, climb_form])
 
 

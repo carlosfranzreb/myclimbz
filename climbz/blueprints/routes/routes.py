@@ -52,4 +52,9 @@ def delete_route(route_id: int) -> str:
     route = Route.query.get(route_id)
     db.session.delete(route)
     db.session.commit()
-    return redirect(flask_session.pop("call_from_url"))
+
+    last_url = flask_session.pop("call_from_url")
+    if "route" in last_url:
+        return redirect(url_for("areas.page_area", area_id=route.sector.area_id))
+    else:
+        return redirect(last_url)
