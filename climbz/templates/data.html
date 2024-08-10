@@ -19,15 +19,11 @@
 <div class="row-sm gy-1">
 
     <!-- Switch to define the display form -->
-    <div class="row-sm px-2 px-md-5 py-3">
-        <span>Table</span>
-        <span>
-            <label class="switch">
-                <input type="checkbox" id="display-form-toggle">
-                <span class="slider round"></span>
-            </label>
-        </span>
-        <span>Plot</span>
+    <div class="form-check form-switch row-sm px-2 px-md-5 py-3">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="display-form-toggle">
+            <label class="form-check-label" for="display-form-toggle">Plot</label>
+        </div>
     </div>
 
     <!-- Filters; filled by the scripts -->
