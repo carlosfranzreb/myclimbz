@@ -1,12 +1,6 @@
 {% extends "main.html" %}
 {% block content %}
 
-<style>
-    ul {
-    list-style-type: none;
-    }
-</style>
-
 <div class="container px-2 px-md-5">
     <h2 class="mt-2">{{ title }}</h2>
 
@@ -25,8 +19,8 @@
                         <div class="form-group">
 
                             <!-- Add the field label -->
-                            <label for="{{ field.id }}" id="{{ field.id }}-label">{{ field.label }}</label>
-
+                            {{ field.label(id=field.id + "-label") }}
+                            
                             <!-- Add a range input if the field has a type of IntegerRangeField or DecimalRangeField -->
                             {% if field.type == 'IntegerRangeField' or field.type == 'DecimalRangeField' %}
                                 <span>= </span>
@@ -36,7 +30,7 @@
                                 oninput="this.previousElementSibling.previousElementSibling.value
                                 = this.value") }}
 
-                            <!-- Add a checkbox if the field has a type of BooleanField -->
+                            <!-- Add a checkbox if the field has a type of BooleanField and place the label beside it -->
                             {% elif field.type == 'BooleanField' %}
                                 {% if field.toggle_ids %}
                                     {{ field(
@@ -47,6 +41,14 @@
                                 {% else %}
                                     {{ field(id=field.id, class='form-check') }}
                                 {% endif %}
+                                <script>
+                                    document.getElementById("{{ field.id }}").parentElement.classList.add("d-flex")
+                                    document.getElementById("{{ field.id }}").parentElement.style.marginTop = "0.5em"
+                                    document.getElementById("{{ field.id }}").parentElement.style.marginBottom = "0.75em";
+                                    document.getElementById("{{ field.id }}").style.cursor = "pointer";
+                                    document.getElementById("{{ field.id }}-label").style.cursor = "pointer";
+                                    document.getElementById("{{ field.id }}-label").classList.add("label-checkbox");
+                                </script>
 
                             <!-- Add a datalist if the field has a datalist attribute -->
                             {% elif field.datalist %}
