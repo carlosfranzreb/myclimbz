@@ -15,20 +15,13 @@
         });
 </script>
 
-<!-- This div is used to display the data in the chart; it is centered -->
 <div class="row-sm gy-1">
 
-    <!-- Switch to define the display form -->
-    <div class="form-check form-switch row-sm px-2 px-md-5 py-3">
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" role="switch" id="display-form-toggle">
-            <label class="form-check-label" for="display-form-toggle">Plot</label>
-        </div>
-    </div>
-
-    <!-- Filters; filled by the scripts -->
-    <div class="row-sm px-md-5 px-2 pt-md-1">
+    <div class="row-sm py-2 px-md-5 px-2 pt-md-1 d-flex align-items-center">
+        <!-- Filters; filled by the scripts -->
         <div id="filter"></div>
+        <!-- Switch to define the display form -->
+        <a type="button" class="btn btn-danger ms-1" id="display-form-toggle">Plot</a>
     </div>
 
     <!-- Table to display the data; filled by the scripts -->

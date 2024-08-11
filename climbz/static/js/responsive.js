@@ -6,8 +6,12 @@ function hide_columns() {
     let table = window.data_table;
     table.dom.style.cursor = "pointer";
     if (window.innerWidth < 800) {
-        // load the table and get its last header
+        // load the table and check if it hiding is needed
         let n_cols = table.columns.size();
+        if (n_cols <= 3) return;
+        if (!table.columns.visible(n_cols - 1)) return;
+
+        // get the last header
         let last_header = table.dom.querySelectorAll(
             "thead tr th"
         )[n_cols - 1].textContent
