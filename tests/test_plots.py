@@ -42,9 +42,9 @@ def get_plotted_data(driver: webdriver.Chrome, x_axis: str, y_axis: str) -> list
         WebDriverWait(driver, 30).until(EC.title_is("Routes"))
 
     # toggle to show plot
-    btn = driver.find_element(By.XPATH, "//input[@id='display-form-toggle']")
-    if not btn.is_selected():
-        btn.find_element(By.XPATH, "..").click()
+    btn = driver.find_element(By.XPATH, "//a[@id='display-form-toggle']")
+    if "plot" in btn.text.lower():
+        btn.click()
 
     x_axis_select = driver.find_element(By.XPATH, "//select[@id='x-axis-select']")
     x_axis_select.click()

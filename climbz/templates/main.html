@@ -2,7 +2,7 @@
 
 <head>
     <title>{{ title }}</title>
-    <meta name="version" content="1.7.3">
+    <meta name="version" content="1.7.4">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
@@ -13,6 +13,21 @@
 </head>
 
 <body>
+
+    <style>
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(240, 237, 238, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+        }
+        .navbar-toggler,
+        .navbar-toggler:focus,
+        .navbar-toggler:active,
+        .navbar-toggler-icon:focus {
+            outline: none;
+            border: none;
+            box-shadow: none;
+        }
+    </style>
+
     <nav class="navbar navbar-expand-lg">
         <a class="navbar-brand" href="{{ url_for('home.page_home') }}" style="padding-left: 10px;">
             <img src="{{ url_for('static', filename='images/logo-transparent.svg') }}" width="60" height="40" class="d-inline-block align-top" alt="">
@@ -20,10 +35,10 @@
         {% if not "Add" in title and not "Edit" in title %}
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+            <span class="navbar-toggler-icon" style="color: white; border: null;"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="collapse navbar-collapse ps-2" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
                 {% if open_session %}
                 <li><a class="nav-link" href="{{ url_for('climbs.add_climb') }}">Add climb</a></li>

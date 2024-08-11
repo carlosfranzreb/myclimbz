@@ -9,10 +9,12 @@ let DISPLAY_FORM = "table"; // Table or plot
 let font_grades_list = null;
 let hueco_grades_list = null;
 
-// Add an event listener to the checkbox "display-form-toggle"
+// Add an event listener to the button "display-form-toggle"
 let display_form_toggle = document.getElementById("display-form-toggle");
-display_form_toggle.addEventListener("change", function () {
-    DISPLAY_FORM = display_form_toggle.checked ? "plot" : "table";
+display_form_toggle.addEventListener("click", function () {
+    let btn_value = display_form_toggle.innerHTML.toLowerCase();
+    display_form_toggle.innerHTML = btn_value == "table" ? "Plot" : "Table";
+    DISPLAY_FORM = btn_value.toLowerCase();
     display_data();
 });
 
@@ -66,8 +68,12 @@ function display_data() {
     plot_axes.style.display = DISPLAY_FORM == "plot" ? "block" : "none";
 
     // Display the data
-    if (DISPLAY_FORM == "table") show_table();
-    else show_plot();
+    if (DISPLAY_FORM == "table") {
+        show_table();
+        hide_columns();
+    } else {
+        show_plot();
+    }
 }
 
 function create_filter(id) {
