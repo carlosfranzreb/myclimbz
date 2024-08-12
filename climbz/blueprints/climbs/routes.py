@@ -33,7 +33,11 @@ def add_climb() -> str:
         )
         if not route_form.validate() or invalid_climb:
             flask_session["error"] = "An error occurred. Fix it and resubmit."
-            return render("form.html", title=title, forms=[route_form, climb_form])
+            if not session.is_project_search:
+                forms = [route_form, climb_form]
+            else:
+                forms = [route_form]
+            return render("form.html", title=title, forms=forms)
 
         # create new sector and new route if necessary
         sector = route_form.get_sector(session.area_id)
@@ -61,7 +65,7 @@ def add_climb() -> str:
             db.session.commit()
 
         # if the user wants to add an opinion, redirect to the opinion form
-        if climb_form.add_opinion.data is True:
+        if climb_form and climb_form.add_opinion.data is True:
             opinion = Opinion.query.filter_by(
                 climber_id=session.climber_id, route_id=route.id
             ).first()
@@ -70,7 +74,7 @@ def add_climb() -> str:
             else:
                 return redirect(f"/add_opinion/{session.climber_id}/{route.id}")
         else:
-            return redirect("/")
+            return redirect(flask_session.pop("call_from_url"))
 
     # GET: the climber wants to add a route (+climb)
     route_form.title = "Route"
