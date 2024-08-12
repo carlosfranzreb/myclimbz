@@ -75,10 +75,10 @@ def add_climb() -> str:
     # GET: the climber wants to add a route (+climb)
     route_form.title = "Route"
     if session.is_project_search:
-        climb_form = None
+        return render("form.html", title=title, forms=[route_form])
     else:
         climb_form.title = "Climb"
-    return render("form.html", title=title, forms=[route_form, climb_form])
+        return render("form.html", title=title, forms=[route_form, climb_form])
 
 
 @climbs.route("/edit_climb/<int:climb_id>", methods=["GET", "POST"])
