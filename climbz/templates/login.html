@@ -30,7 +30,7 @@
                 {{ form.email.label(class="form-control-label") }}
                 {% if form.email.errors %}
                     {{ form.email(class="form-control form-control-lg is-invalid") }}
-                    <div class="invalid-feedback">
+                    <div class="invalid-feedback yellow-error-msg">
                         {% for error in form.email.errors %}
                             <span>{{ error }}</span>
                         {% endfor %}
@@ -43,7 +43,7 @@
                 {{ form.password.label(class="form-control-label") }}
                 {% if form.password.errors %}
                 {{ form.password(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback">
+                <div class="invalid-feedback yellow-error-msg">
                     {% for error in form.password.errors %}
                     <span>{{ error }}</span>
                     {% endfor %}
@@ -60,6 +60,11 @@
                 <input type="submit" class="btn btn-danger" value="Login">
                 <a class="btn white-btn" href="{{ url_for('climbers.register') }}">
                     Sign up
+                </a>
+            </div>
+            <div class="form-group mt-1">
+                <a class="text-link" href="{{ url_for('climbers.forgot_password') }}">
+                    Forgot password?
                 </a>
             </div>
         </form>

@@ -1,5 +1,8 @@
 """ Pages related to the administration of users. """
 
+import secrets
+import string
+
 from flask import (
     render_template,
     url_for,
@@ -10,10 +13,11 @@ from flask import (
 )
 from flask_login import login_user, current_user, logout_user
 from flask_bcrypt import generate_password_hash
+from flask_mail import Message
 
-from climbz import db
+from climbz import db, mail
 from climbz.models import Climber, Route
-from climbz.forms import LoginForm, ClimberForm, ChangePwForm, NewPwForm
+from climbz.forms import LoginForm, ClimberForm, ChangePwForm, NewPwForm, ForgotPwForm
 from climbz.blueprints.utils import render
 
 
@@ -108,6 +112,50 @@ def register():
     return render_template(
         "register.html", title="Register", form=form, pw_form=pw_form
     )
+
+
+@climbers.route("/forgot_password", methods=["GET", "POST"])
+def forgot_password():
+    """Form to get a new password by e-mail."""
+    form = ForgotPwForm()
+    title = "Forgot password"
+
+    # POST: a profile form was submitted => edit profile or return error
+    if request.method == "POST":
+        if not form.validate():
+            return render_template("forgot_pw.html", title=title, form=form)
+
+        # # check if the e-mail is in the database
+        climber = Climber.query.filter_by(email=form.email.data).first()
+        if climber is None:
+            form.email.errors.append("E-mail not found.")
+            return render_template("forgot_pw.html", title=title, form=form)
+
+        # form is valid; change password and send e-mail
+        alphabet = string.ascii_letters + string.digits
+        new_pw = "".join(secrets.choice(alphabet) for _ in range(20))
+        climber.change_password(new_pw)
+        db.session.commit()
+
+        msg = Message(
+            subject="myclimbz - new password",
+            sender="myclimbz@outlook.de",
+            recipients=[climber.email],
+        )
+        msg.body = f"""
+        You requested a new password for your myclimbz account.
+
+        Your new password is: {new_pw}.
+
+        You can login with this password and change it in your profile.
+        Here is the link to the login page: https://myclimbz.com/login
+        """
+        mail.send(msg)
+
+        return redirect(url_for("climbers.login"))
+
+    # GET: the user wants to edit their profile
+    return render_template("forgot_pw.html", title=title, form=form)
 
 
 @climbers.route("/climber/<int:climber_id>", methods=["GET", "POST"])
