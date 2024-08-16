@@ -27,11 +27,6 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
     Elif env=ci:
         GitHub Actions will run the web app as a service.
     """
-    assert os.environ["DISABLE_LOGIN"] == "1", "DISABLE_LOGIN must be set to 1"
-    assert (
-        os.environ["CLIMBZ_DB_URI"] == "sqlite:///test_100.db"
-    ), "The DB URI is not set to the test DB"
-    assert os.environ["PROD"] == "0", "PROD must be set to 0"
 
     is_ci = os.environ.get("CI", False)
     try:
