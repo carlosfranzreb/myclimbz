@@ -19,7 +19,6 @@ login_manager.login_message_category = "info"
 
 def create_app():
     app = Flask(__name__)
-    # app.testing = os.environ.get("TESTING", "0") == "1"
 
     bcrypt.init_app(app)
     app.config["SECRET_KEY"] = os.environ.get("CLIMBZ_SECRET_KEY", "dev")
