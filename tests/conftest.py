@@ -31,7 +31,13 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
     is_ci = os.environ.get("CI", False)
     try:
         if not is_ci:
+            assert os.environ["DISABLE_LOGIN"] == "1", "DISABLE_LOGIN must be set to 1"
+            assert (
+                os.environ["CLIMBZ_DB_URI"] == "sqlite:///test_100.db"
+            ), "The DB URI is not set to the test DB"
+            assert os.environ["PROD"] == "0", "PROD must be set to 0"
             os.system("docker compose up -d")
+
         driver_options = webdriver.ChromeOptions()
         driver_options.add_argument("--headless")
         driver_options.add_argument("--window-size=2560,1440")
@@ -39,6 +45,7 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
         driver.get("http://127.0.0.1:5000")
         WebDriverWait(driver, 30).until(EC.title_is("Routes"))
         yield driver
+
     finally:
         if not is_ci:
             os.system("docker compose down")
