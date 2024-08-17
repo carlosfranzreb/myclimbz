@@ -11,3 +11,4 @@ from .climber import ClimberForm  # noqa
 from .opinion import OpinionForm  # noqa
 from .change_pw import ChangePwForm  # noqa
 from .new_pw import NewPwForm  # noqa
+from .forgot_pw import ForgotPwForm  # noqa

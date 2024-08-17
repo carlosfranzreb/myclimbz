@@ -233,3 +233,8 @@ li:has(input[type="checkbox"]), .label-checkbox {
     background-color: var(--color-white) !important;
     color: var(--color-black) !important;
 }
+
+/* Errors on registration */
+.yellow-error-msg {
+    color: var(--color-yellow);
+}

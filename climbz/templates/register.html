@@ -26,7 +26,7 @@
                 {{ form.name.label(class="form-control-label") }}
                 {% if form.name.errors %}
                 {{ form.name(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback">
+                <div class="invalid-feedback yellow-error-msg">
                     {% for error in form.name.errors %}
                     <span>{{ error }}</span>
                     {% endfor %}
@@ -40,7 +40,7 @@
                 {{ form.email.label(class="form-control-label") }}
                 {% if form.email.errors %}
                 {{ form.email(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback">
+                <div class="invalid-feedback yellow-error-msg">
                     {% for error in form.email.errors %}
                     <span>{{ error }}</span>
                     {% endfor %}
@@ -54,7 +54,7 @@
                 {{ pw_form.new_pw.label(class="pw_-control-label") }}
                 {% if pw_form.new_pw.errors %}
                 {{ pw_form.new_pw(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback">
+                <div class="invalid-feedback yellow-error-msg">
                     {% for error in pw_form.new_pw.errors %}
                     <span>{{ error }}</span>
                     {% endfor %}
@@ -68,7 +68,7 @@
                 {{ pw_form.confirm_pw.label(class="form-control-label") }}
                 {% if pw_form.confirm_pw.errors %}
                 {{ pw_form.confirm_pw(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback">
+                <div class="invalid-feedback yellow-error-msg">
                     {% for error in pw_form.confirm_pw.errors %}
                     <span>{{ error }}</span>
                     {% endfor %}
@@ -82,7 +82,7 @@
                 {{ form.grade_scale.label(class="form-control-label") }}
                 {% if form.grade_scale.errors %}
                 {{ form.grade_scale(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback">
+                <div class="invalid-feedback yellow-error-msg">
                     {% for error in form.grade_scale.errors %}
                     <span>{{ error }}</span>
                     {% endfor %}
@@ -98,7 +98,7 @@
                 {{ form.birthdate.label(class="form-control-label") }}
                 {% if form.birthdate.errors %}
                 {{ form.birthdate(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback">
+                <div class="invalid-feedback yellow-error-msg">
                     {% for error in form.birthdate.errors %}
                     <span>{{ error }}</span>
                     {% endfor %}
@@ -112,7 +112,7 @@
                 {{ form.year_started_climbing.label(class="form-control-label") }}
                 {% if form.year_started_climbing.errors %}
                 {{ form.year_started_climbing(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback">
+                <div class="invalid-feedback yellow-error-msg">
                     {% for error in form.year_started_climbing.errors %}
                     <span>{{ error }}</span>
                     {% endfor %}
@@ -126,7 +126,7 @@
                 {{ form.height.label(class="form-control-label") }}
                 {% if form.height.errors %}
                 {{ form.height(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback">
+                <div class="invalid-feedback yellow-error-msg">
                     {% for error in form.height.errors %}
                     <span>{{ error }}</span>
                     {% endfor %}
@@ -140,7 +140,7 @@
                 {{ form.ape_index.label(class="form-control-label") }}
                 {% if form.ape_index.errors %}
                 {{ form.ape_index(class="form-control form-control-lg is-invalid") }}
-                <div class="invalid-feedback">
+                <div class="invalid-feedback yellow-error-msg">
                     {% for error in form.ape_index.errors %}
                     <span>{{ error }}</span>
                     {% endfor %}
@@ -148,6 +148,10 @@
                 {% else %}
                 {{ form.ape_index(class="form-control form-control-lg") }}
                 {% endif %}
+            </div>
+
+            <div class="form-group mt-2">
+                {{ pw_form.recaptcha }}
             </div>
 
             <div class="form-group mt-2">
