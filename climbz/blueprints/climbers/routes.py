@@ -1,8 +1,10 @@
 """ Pages related to the administration of users. """
 
+import os
 import secrets
 import string
 
+import requests
 from flask import (
     render_template,
     url_for,
@@ -10,6 +12,7 @@ from flask import (
     Blueprint,
     request,
     session as flask_session,
+    abort,
 )
 from flask_login import login_user, current_user, logout_user
 from flask_bcrypt import generate_password_hash
@@ -20,6 +23,10 @@ from climbz.models import Climber, Route
 from climbz.forms import LoginForm, ClimberForm, ChangePwForm, NewPwForm, ForgotPwForm
 from climbz.blueprints.utils import render
 
+
+GOOGLE_RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify"
+RECAPTCHA_PUBLIC_KEY = os.environ["RECAPTCHA_PUBLIC_KEY"]
+RECAPTCHA_PRIVATE_KEY = os.environ["RECAPTCHA_PRIVATE_KEY"]
 
 climbers = Blueprint("climbers", __name__)
 
@@ -94,9 +101,22 @@ def register():
 
     # POST: a profile form was submitted => edit profile or return error
     if request.method == "POST":
+
+        # validate the recaptcha
+        secret_response = request.form["g-recaptcha-response"]
+        verify_response = requests.post(
+            url=f"{GOOGLE_RECAPTCHA_VERIFY_URL}?secret={RECAPTCHA_PRIVATE_KEY}&response={secret_response}"
+        ).json()
+        if not verify_response["success"] or verify_response["score"] < 0.5:
+            abort(403)
+
         if not form.validate() or not pw_form.validate():
             return render_template(
-                "register.html", title="Register", form=form, pw_form=pw_form
+                "register.html",
+                title="Register",
+                form=form,
+                pw_form=pw_form,
+                recaptcha=RECAPTCHA_PUBLIC_KEY,
             )
 
         # form is valid; commit changes and return
@@ -110,7 +130,11 @@ def register():
 
     # GET: the guest wants to register as a user
     return render_template(
-        "register.html", title="Register", form=form, pw_form=pw_form
+        "register.html",
+        title="Register",
+        form=form,
+        pw_form=pw_form,
+        recaptcha=RECAPTCHA_PUBLIC_KEY,
     )
 
 
@@ -122,14 +146,27 @@ def forgot_password():
 
     # POST: a profile form was submitted => edit profile or return error
     if request.method == "POST":
+
+        # validate the recaptcha
+        secret_response = request.form["g-recaptcha-response"]
+        verify_response = requests.post(
+            url=f"{GOOGLE_RECAPTCHA_VERIFY_URL}?secret={RECAPTCHA_PRIVATE_KEY}&response={secret_response}"
+        ).json()
+        if not verify_response["success"] or verify_response["score"] < 0.5:
+            abort(403)
+
         if not form.validate():
-            return render_template("forgot_pw.html", title=title, form=form)
+            return render_template(
+                "forgot_pw.html", title=title, form=form, recaptcha=RECAPTCHA_PUBLIC_KEY
+            )
 
         # # check if the e-mail is in the database
         climber = Climber.query.filter_by(email=form.email.data).first()
         if climber is None:
             form.email.errors.append("E-mail not found.")
-            return render_template("forgot_pw.html", title=title, form=form)
+            return render_template(
+                "forgot_pw.html", title=title, form=form, recaptcha=RECAPTCHA_PUBLIC_KEY
+            )
 
         # form is valid; change password and send e-mail
         alphabet = string.ascii_letters + string.digits
@@ -155,7 +192,9 @@ def forgot_password():
         return redirect(url_for("climbers.login"))
 
     # GET: the user wants to edit their profile
-    return render_template("forgot_pw.html", title=title, form=form)
+    return render_template(
+        "forgot_pw.html", title=title, form=form, recaptcha=RECAPTCHA_PUBLIC_KEY
+    )
 
 
 @climbers.route("/climber/<int:climber_id>", methods=["GET", "POST"])

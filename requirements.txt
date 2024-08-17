@@ -12,6 +12,7 @@ flask_bcrypt==1.0.1
 python-dateutil==2.9
 text2num==2.5.0
 WTForms-SQLAlchemy==0.4.1
+requests==2.32.3
 
 # for debugging
 debugpy==1.8.1

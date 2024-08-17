@@ -19,7 +19,7 @@ def req_file(filename: str) -> list[str]:
 
 REQUIRED = req_file("requirements.txt")
 EXTRAS = {}
-VERSION = "1.7.6"
+VERSION = "1.7.7"
 
 setup(
     name=NAME,
