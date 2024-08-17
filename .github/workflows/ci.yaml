@@ -80,3 +80,7 @@ jobs:
           DISABLE_LOGIN: 1
           CLIMBZ_DB_URI: sqlite:///test_100.db
           PROD: 0
+          RECAPTCHA_PUBLIC_KEY: test
+          RECAPTCHA_PRIVATE_KEY: test
+          MAIL_USERNAME: test@myclimbz.es
+          MAIL_PASSWORD: test
