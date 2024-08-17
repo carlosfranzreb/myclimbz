@@ -4,7 +4,7 @@ Form used in the form to register a new climber.
 
 from __future__ import annotations
 
-from flask_wtf import FlaskForm, RecaptchaField
+from flask_wtf import FlaskForm
 from wtforms import PasswordField
 from wtforms.validators import DataRequired
 
@@ -14,7 +14,6 @@ class NewPwForm(FlaskForm):
 
     new_pw = PasswordField("Password", validators=[DataRequired()])
     confirm_pw = PasswordField("Confirm password", validators=[DataRequired()])
-    recaptcha = RecaptchaField()
 
     def validate(self) -> bool:
         """

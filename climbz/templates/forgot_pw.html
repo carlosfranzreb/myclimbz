@@ -16,11 +16,11 @@
 
     <div class="container pt-4 px-2 px-md-5">
         <h4>Get a new password</h4>
-        <p>We will send you a new password by e-mail.</p>
+        <p>We will send you a new password by email.</p>
     </div>
 
     <div class="container pt-4 px-2 px-md-5">
-        <form method="POST" onkeydown="return event.key != 'Enter';">
+        <form id="forgot-pw-form" method="POST" onkeydown="return event.key != 'Enter';">
             {{ form.hidden_tag() }}
 
             <div class="form-group">
@@ -37,12 +37,11 @@
                 {% endif %}
             </div>
 
-            <div class="form-group">
-                {{ form.recaptcha }}
-            </div>
-
             <div class="form-group mt-2">
-                <input type="submit" class="btn btn-danger" value="Submit">
+                <button class="g-recaptcha btn btn-danger" 
+                        data-sitekey=" {{ recaptcha }}" 
+                        data-callback='onSubmit' 
+                        data-action='submit'>Submit</button>
             </div>
         </form>
     </div>
@@ -51,5 +50,13 @@
         <h4>I remembered my password</h4>
         <a href="{{ url_for('climbers.login') }}" class="btn btn-danger">Login</a>
     </div>
+
+     <script>
+        function onSubmit(token) {
+            document.getElementById("forgot-pw-form").submit();
+        }
+    </script>
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+
 </body>
 <html>
