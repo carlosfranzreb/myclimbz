@@ -4,7 +4,9 @@ function show_table() {
     // Create the table
     let table = d3.select("#content_div").append("table")
         .attr("id", "content_table")
-        .attr("class", "table table-hover");
+        .attr("class", "table table-hover")
+        .attr("data-sort-col", 7)
+        .attr("data-sort-order", "desc");
 
     // Create the table head
     let thead = table.append("thead");
@@ -54,13 +56,4 @@ function show_table() {
     rows.append("td").text(d => d.inclination);
     rows.append("td").text(d => d.landing);
     rows.append("td").text(d => d.last_climbed);
-
-    // Initialize the DataTable
-    window.data_table = new simpleDatatables.DataTable("#content_table", {
-        perPage: 100,
-        perPageSelect: false,
-        searchable: true,
-        nextPrev: false,
-    });
-    window.data_table.columns.sort(7, "desc");
 }

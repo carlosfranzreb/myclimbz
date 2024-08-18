@@ -4,7 +4,7 @@
 
 <div class="container px-0 px-md-5">
     <h1 class="ms-3 mt-2">Climbers</h1>
-    <table id="content_table" class="table table-hover">
+    <table id="content_table" class="table table-hover" data-sort-col="2" data-sort-order="desc">
         <thead>
             <tr>
                 {% for row_name in ["Name", "Height", "# Sessions", "# Sends", "Max. Grade"] %}
@@ -32,17 +32,5 @@
         </tbody>
     </table>
 </div>
-
-<script>
-    window.addEventListener('load', function () {
-        window.data_table = new simpleDatatables.DataTable("#content_table", {
-            perPage: 100,
-            perPageSelect: false,
-            searchable: true,
-            nextPrev: false,
-        });
-    });
-    window.data_table.columns.sort(2, "desc");
-</script>
 
 {% endblock content %}

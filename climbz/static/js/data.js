@@ -11,12 +11,13 @@ let hueco_grades_list = null;
 
 // Add an event listener to the button "display-form-toggle"
 let display_form_toggle = document.getElementById("display-form-toggle");
-display_form_toggle.addEventListener("click", function () {
-    let btn_value = display_form_toggle.innerHTML.toLowerCase();
-    display_form_toggle.innerHTML = btn_value == "table" ? "Plot" : "Table";
-    DISPLAY_FORM = btn_value.toLowerCase();
-    display_data();
-});
+if (display_form_toggle)
+    display_form_toggle.addEventListener("click", function () {
+        let btn_value = display_form_toggle.innerHTML.toLowerCase();
+        display_form_toggle.innerHTML = btn_value == "table" ? "Plot" : "Table";
+        DISPLAY_FORM = btn_value.toLowerCase();
+        display_data();
+    });
 
 function start_display(data, grades, session_date) {
     DATA = data;

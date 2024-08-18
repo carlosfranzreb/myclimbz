@@ -23,7 +23,10 @@ def table_sessions() -> str:
 
 @sessions.route("/session/<int:session_id>")
 def page_session(session_id: int) -> str:
-    return render("session.html", session=Session.query.get(session_id))
+    session = Session.query.get(session_id)
+    return render(
+        "session.html", title=f"Session on {session.area.name}", session=session
+    )
 
 
 @sessions.route("/stop_session", methods=["GET", "POST"])
