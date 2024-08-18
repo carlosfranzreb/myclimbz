@@ -91,12 +91,12 @@ a:hover {
     color: var(--color-white);
 }
 
-.nav-link {
+.nav-link, .nav-link:focus {
     color: var(--color-white);
 }
 
-.nav-link:hover {
-    color: var(--color-yellow);
+.nav-link:hover, .nav-link.show {
+    color: var(--color-yellow) !important;
 }
 
 
