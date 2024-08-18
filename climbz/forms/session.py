@@ -56,7 +56,7 @@ class SessionForm(FlaskForm):
                 area.name for area in Area.query.order_by(Area.name).all()
             ]
             form.area.toggle_ids = "rock_type"
-            form.is_project_search.toggle_ids = "date,conditions"
+            form.is_project_search.toggle_ids = "date,conditions,comment"
         return form
 
     @classmethod
