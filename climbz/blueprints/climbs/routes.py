@@ -65,7 +65,7 @@ def add_climb() -> str:
             db.session.commit()
 
         # if the user wants to add an opinion, redirect to the opinion form
-        if climb_form and climb_form.add_opinion.data is True:
+        if route_form.add_opinion.data is True:
             opinion = Opinion.query.filter_by(
                 climber_id=session.climber_id, route_id=route.id
             ).first()
