@@ -30,4 +30,4 @@ class Opinion(db.Model):
         backref=db.backref("routes", lazy="dynamic"),
     )
 
-    UniqueConstraint("route_id", "climber_id", name="unique_opinion")
+    UniqueConstraint(route_id, climber_id, name="unique_opinion")

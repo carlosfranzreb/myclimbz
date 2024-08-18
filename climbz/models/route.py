@@ -27,7 +27,7 @@ class Route(db.Model):
     climbs = db.relationship("Climb", backref="route", cascade="all, delete")
     opinions = db.relationship("Opinion", backref="route", cascade="all, delete")
 
-    UniqueConstraint("name", "sector_id", name="unique_route_name_in_sector")
+    UniqueConstraint(name, sector_id, name="unique_route_name_in_sector")
 
     def sent_by(self, climber_id: int) -> bool:
         """Whether a climber has sent this route."""

@@ -16,7 +16,7 @@ class Session(db.Model):
     area_id = db.Column(db.Integer, db.ForeignKey("area.id"))
     climber_id = db.Column(db.Integer, db.ForeignKey("climber.id"))
 
-    UniqueConstraint("date", "area_id", "climber_id", name="unique_session")
+    UniqueConstraint(date, area_id, climber_id, name="unique_session")
 
 
 @event.listens_for(Sector, "after_delete")

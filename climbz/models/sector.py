@@ -12,7 +12,7 @@ class Sector(db.Model):
     routes = db.relationship("Route", backref="sector", cascade="all, delete")
     comment = db.Column(db.Text)
 
-    UniqueConstraint("name", "area_id", name="unique_sector_name_in_area")
+    UniqueConstraint(name, area_id, name="unique_sector_name_in_area")
 
     def n_sent_routes(self, climber_id: int) -> int:
         """Return the number of sent routes in this sector by a climber."""
