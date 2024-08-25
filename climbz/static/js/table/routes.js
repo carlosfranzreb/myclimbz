@@ -56,4 +56,6 @@ function show_table() {
     rows.append("td").text(d => d.inclination);
     rows.append("td").text(d => d.landing);
     rows.append("td").text(d => d.last_climbed);
+
+    init_datatable();
 }
