@@ -20,7 +20,7 @@
                 {% if climber.height is none %}
                     <td onclick={{ onclick }}>N/A</td>
                 {% else %}
-                    <td onclick={{ onclick }}>{{ climber.height }}m</td>
+                    <td onclick={{ onclick }}>{{ climber.height|int }}cm</td>
                 {% endif %}
                 <td onclick={{ onclick }}>{{ climber.sessions|length }}</td>
                 <td onclick={{ onclick }}>{{ climber.n_sends }}</td>
