@@ -1,7 +1,7 @@
 function init_datatable() {
 
     // Check if the DataTable already exists
-    if (window.data_table !== undefined)
+    if (window.data_table !== null)
         return;
 
     // Initialize the DataTable

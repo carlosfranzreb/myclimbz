@@ -63,6 +63,7 @@ function display_data() {
 
     // Remove the previous table or plot
     d3.select("#content_div").selectAll("*").remove();
+    window.data_table = null;
 
     // hide/show plot-axes
     let plot_axes = document.getElementById("plot-axes");
