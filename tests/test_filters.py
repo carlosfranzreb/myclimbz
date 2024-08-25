@@ -13,7 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 def reset(driver):
     driver.get("http://localhost:5000/")
-    WebDriverWait(driver, 30).until(EC.title_is("Routes"))
+    WebDriverWait(driver, 30).until(EC.title_is("myclimbz - Home"))
     filter_button = driver.find_element(By.ID, "filter_button")
     apply_button = driver.find_element(By.ID, "filter_apply")
     return filter_button, apply_button
