@@ -22,6 +22,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from sqlalchemy import text
 
+from .conftest import HOME_TITLE
+
 
 def get_plotted_data(driver: webdriver.Chrome, x_axis: str, y_axis: str) -> list:
     """
@@ -39,7 +41,7 @@ def get_plotted_data(driver: webdriver.Chrome, x_axis: str, y_axis: str) -> list
     home_url = "http://127.0.0.1:5000"
     if driver.current_url not in [home_url, home_url + "/"]:
         driver.get(home_url)
-        WebDriverWait(driver, 30).until(EC.title_is("Routes"))
+        WebDriverWait(driver, 30).until(EC.title_is(HOME_TITLE))
 
     # toggle to show plot
     btn = driver.find_element(By.XPATH, "//a[@id='display-form-toggle']")

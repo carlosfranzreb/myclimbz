@@ -12,6 +12,9 @@ from sqlalchemy.orm import Session
 from climbz import create_app
 
 
+HOME_TITLE = "myclimbz - Home"
+
+
 @pytest.fixture(scope="session")
 def db_session() -> Session:
     """Load the test database and create a session."""
