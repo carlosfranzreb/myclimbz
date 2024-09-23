@@ -9,5 +9,9 @@
   "files.associations": {
     "*.html": "jinja-html"
   },
-  "emmet.includeLanguages": { "jinja-html": "html" }
+  "emmet.includeLanguages": { "jinja-html": "html" },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
