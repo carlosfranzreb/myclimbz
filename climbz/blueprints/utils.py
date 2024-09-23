@@ -1,17 +1,16 @@
-"""
-Our own wrapper for the render_template function from Flask, adding arguments that are
-always required.
-"""
-
 from flask import render_template, session as flask_session, request
 from flask_login import current_user, login_required
 
+from climbz import db
 from climbz.models import Session
 
 
 @login_required
 def render(*args, **kwargs) -> str:
     """
+    Our own wrapper for the render_template function from Flask, adding arguments that are
+    always required.
+
     - A title is required.
     - If an error is defined in the session, it is popped and added to the kwargs.
     - If an open session is defined in the session, it is added to the kwargs.
@@ -32,3 +31,17 @@ def render(*args, **kwargs) -> str:
         *args,
         **kwargs,
     )
+
+
+def commit_db() -> str:
+    """
+    Commit the current session to the database. If an error occurs, add a readable
+    error message to the session and rollback the DB session.
+    TODO: use this everywhere in the code!
+    """
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        flask_session["error"] = f"An error occurred: {e}"  # TODO: more readable!
+    return flask_session.get("call_from_url", "/")

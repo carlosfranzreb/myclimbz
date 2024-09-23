@@ -14,4 +14,4 @@ class Climb(db.Model):
     route_id = db.Column(db.Integer, db.ForeignKey("route.id"))
     session_id = db.Column(db.Integer, db.ForeignKey("session.id"))
 
-    UniqueConstraint("route_id", "session_id")
+    UniqueConstraint(route_id, session_id, name="unique_route_in_session")
