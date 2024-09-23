@@ -1,3 +1,12 @@
+"""
+Form for the climb model.
+
+This form can be used together with a RouteForm object. Because RouteForm also has
+the fields "comment" and "link", here they are prepended with "climb_" to avoid
+conflicts. Otherwise, Flask-WTF overrides these fields with the values from the
+RouteForm object.
+"""
+
 from __future__ import annotations
 
 from flask import session as flask_session
@@ -94,5 +103,5 @@ class ClimbForm(FlaskForm):
     def add_form_data_to_object(self, obj: Climb) -> Climb:
         """Add the form data to the object."""
         for field in FIELDS:
-            setattr(obj, field, getattr(self, field).data)
+            setattr(obj, field.replace("climb_", ""), getattr(self, field).data)
         return obj
