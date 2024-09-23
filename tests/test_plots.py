@@ -22,6 +22,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from sqlalchemy import text
 
+from .conftest import HOME_TITLE
+
 
 def get_plotted_data(driver: webdriver.Chrome, x_axis: str, y_axis: str) -> list:
     """
@@ -39,7 +41,7 @@ def get_plotted_data(driver: webdriver.Chrome, x_axis: str, y_axis: str) -> list
     home_url = "http://127.0.0.1:5000"
     if driver.current_url not in [home_url, home_url + "/"]:
         driver.get(home_url)
-        WebDriverWait(driver, 30).until(EC.title_is("Routes"))
+        WebDriverWait(driver, 30).until(EC.title_is(HOME_TITLE))
 
     # toggle to show plot
     btn = driver.find_element(By.XPATH, "//a[@id='display-form-toggle']")
@@ -76,8 +78,9 @@ def test_climbs_per_area(driver, db_session) -> None:
         SELECT area.name, route.id, climb.sent
         FROM area 
         JOIN sector ON area.id = sector.area_id 
-        JOIN route ON sector.id = route.sector_id 
+        JOIN route ON sector.id = route.sector_id
         JOIN climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
+        GROUP BY route.id
         """
     )
     results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
@@ -193,9 +196,11 @@ def test_grade_per_area(driver, db_session) -> None:
         FROM area
         JOIN sector ON area.id = sector.area_id
         JOIN route ON sector.id = route.sector_id
+        JOIN climb ON route.id = climb.route_id
         JOIN opinion ON opinion.route_id = route.id
         JOIN grade ON opinion.grade_id = grade.id
-        WHERE opinion.grade_id NOT NULL AND opinion.climber_id=:climber_id
+        WHERE opinion.grade_id NOT NULL AND climb.climber_id=:climber_id
+        GROUP BY route.id
         """
     )
     results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
@@ -262,26 +267,39 @@ def test_climbs_per_grade(driver, db_session):
 
     sql_query = text(
         """
-        SELECT grade.font, COUNT(opinion.id)
-        FROM grade
-        LEFT JOIN opinion
-            ON opinion.grade_id = grade.id AND opinion.climber_id=:climber_id
+        SELECT grade.font, COUNT(DISTINCT(opinion.id))
+        FROM opinion
+        JOIN climb ON
+            climb.climber_id = opinion.climber_id AND
+            climb.route_id = opinion.route_id
+        JOIN grade ON opinion.grade_id = grade.id
+        WHERE opinion.climber_id = :climber_id
         GROUP BY grade.font
         ORDER BY grade.id
         """
     )
     results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
     grade_data = {result[0]: result[1] for result in results}
-    grade_data = remove_trailing(grade_data)
 
+    # check that all plotted grades are correct
     plotted_data = get_plotted_data(driver, "Grade", "Climbs: total tried")
-    assert len(plotted_data) == len(grade_data)
     for grade, n_sent_routes_plotted in plotted_data:
-        assert grade in grade_data
-        assert n_sent_routes_plotted == grade_data[grade]
+        if n_sent_routes_plotted == 0:
+            assert grade not in grade_data
+        else:
+            assert grade in grade_data
+            assert n_sent_routes_plotted == grade_data[grade], f"Failed for {grade}"
+
+    # check that all appropriate grades are plotted
+    plotted_grades = [grade for grade, _ in plotted_data]
+    data_grades = list(grade_data.keys())
+    plotted_grades_indices = list()
+    for grade in data_grades:
+        assert grade in plotted_grades, f"Failed for {grade}"
+        plotted_grades_indices.append(data_grades.index(grade))
 
     # check that the plotted grades are sorted correctly
-    assert [grade for grade, _ in plotted_data] == list(grade_data.keys())
+    assert plotted_grades_indices == sorted(plotted_grades_indices)
 
 
 def test_climbs_per_route_chars(driver, db_session) -> None:
@@ -332,9 +350,11 @@ def test_climbs_per_ratings(driver, db_session) -> None:
     """
     sql_query = text(
         """
-        SELECT rating, landing
+        SELECT DISTINCT(route.id), opinion.rating, opinion.landing
         FROM opinion
-        WHERE climber_id = :climber_id
+        INNER JOIN route ON opinion.route_id = route.id
+        INNER JOIN climb ON climb.route_id = route.id
+        WHERE opinion.climber_id = :climber_id
         """
     )
     results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
@@ -344,7 +364,7 @@ def test_climbs_per_ratings(driver, db_session) -> None:
     climbs_per_ratings = {rating: {key: 0 for key in keys} for rating in ratings}
     for result in results:
         for rat_idx, rat in enumerate(["rating", "landing"]):
-            value = result[rat_idx]
+            value = result[rat_idx + 1]
             climbs_per_ratings[rat][value] += 1
 
     for rat in ratings:
@@ -352,12 +372,14 @@ def test_climbs_per_ratings(driver, db_session) -> None:
 
     for rat in climbs_per_ratings:
         plotted_data = get_plotted_data(driver, rat.capitalize(), "Climbs: total tried")
-        assert len(plotted_data) == len(climbs_per_ratings[rat])
+        assert len(plotted_data) == len(climbs_per_ratings[rat]), f"Failed for {rat}"
         for rat_value, n_sent_routes_plotted in plotted_data:
-            assert n_sent_routes_plotted == climbs_per_ratings[rat][rat_value]
+            assert (
+                n_sent_routes_plotted == climbs_per_ratings[rat][rat_value]
+            ), f"Failed for {rat}, {rat_value}"
         assert [rat_value for rat_value, _ in plotted_data] == list(
             climbs_per_ratings[rat].keys()
-        )
+        ), f"Failed for {rat}, {rat_value}"
 
 
 def test_climbs_per_crux(driver, db_session) -> None:

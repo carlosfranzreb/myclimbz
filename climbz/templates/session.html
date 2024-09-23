@@ -35,7 +35,7 @@
 </div>
 
 <div class="container px-0 px-md-5">
-    <table id="content_table" class="table table-hover">
+    <table id="content_table" class="table table-hover" data-sort-col="0" data-sort-order="asc">
         <thead>
             <tr>
                 <th>Route</th>
@@ -83,16 +83,5 @@
         </tbody>
     </table>
 </div>
-
-<script>
-    window.addEventListener('load', function () {
-        window.data_table = new simpleDatatables.DataTable("#content_table", {
-            perPage: 100,
-            perPageSelect: false,
-            searchable: true,
-            nextPrev: false,
-        });
-    });
-</script>
 
 {% endblock content %}

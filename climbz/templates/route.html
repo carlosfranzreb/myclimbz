@@ -54,7 +54,7 @@
         <h3 class="ms-3" style="display: inline-block">My sessions</h3>
     </div>
     {% if route.climbs|selectattr("session.climber_id", "equalto", user_id)|list|length > 0 %}
-    <table id="content_table" class="table">
+    <table id="content_table" class="table" data-sort-col="0" data-sort-order="desc">
         <thead>
             <tr>
                 <th>Date</th>

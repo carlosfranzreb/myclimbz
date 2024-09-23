@@ -198,12 +198,11 @@ var FilterWidget = function (id, left) {
 
     // Reset all filters when the reset button is clicked
     filter_reset.addEventListener("click", function () {
-        if (DATA.length === 0) {
+        if (DATA.length === 0)
             return;
-        }
-        for (let i = 0; i < FILTER_WIDGETS.length; i++) {
+
+        for (let i = 0; i < FILTER_WIDGETS.length; i++)
             FILTER_WIDGETS[i].reset();
-        }
     });
 
     // Apply filters when the apply button is clicked

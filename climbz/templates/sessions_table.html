@@ -1,6 +1,6 @@
 <div class="container px-0 px-md-5">
     <h1 class="ms-3 mt-2">Sessions</h1>
-    <table id="content_table" class="table table-hover">
+    <table id="content_table" class="table table-hover" data-sort-col="0" data-sort-order="desc">
         <thead>
             <tr>
                 <th data-type="date" data-format="DD/MM/YYYY">Date</th>
@@ -42,17 +42,3 @@
         </tbody>
     </table>
 </div>
-
-         
-
-<script>
-    window.addEventListener('load', function () {
-        window.data_table = new simpleDatatables.DataTable("#content_table", {
-            perPage: 100,
-            perPageSelect: false,
-            searchable: false,
-            nextPrev: false,
-        });
-        window.data_table.columns.sort(0, "desc");
-    });
-</script>

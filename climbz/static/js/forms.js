@@ -26,8 +26,3 @@ function datalistToggle(input_id, datalist_id, element_ids) {
         element.style.display = is_datalist_option ? "none" : "block";
     }
 }
-
-// List of checkboxes should have centered labels
-window.onload = function () {
-
-};

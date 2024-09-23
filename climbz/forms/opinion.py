@@ -84,23 +84,26 @@ class OpinionForm(FlaskForm):
     def get_edited_opinion(self, opinion_id: int) -> Opinion:
         """Edit the opinion with the data from the form and return it."""
         opinion = Opinion.query.get(opinion_id)
-        opinion.grade = Grade.query.get(int(self.grade.data))
-        opinion.cruxes = [Crux.query.get(crux_id) for crux_id in self.cruxes.data]
-
-        for field in [
-            "landing",
-            "rating",
-            "comment",
-        ]:
-            setattr(opinion, field, getattr(self, field).data)
-
+        opinion = self._add_fields_to_object(opinion)
         return opinion
 
     def get_object(self, climber_id: int, route_id: int) -> Opinion:
-        """Create an opinion object from the form data."""
-        opinion = Opinion()
-        opinion.climber_id = climber_id
-        opinion.route_id = route_id
+        """
+        Create an opinion object from the form data.
+        If the climber has already given an opinion for this route, edit it.
+        """
+        opinion = Opinion.query.filter_by(
+            climber_id=climber_id, route_id=route_id
+        ).first()
+        if opinion is None:
+            opinion = Opinion()
+            opinion.climber_id = climber_id
+            opinion.route_id = route_id
+
+        opinion = self._add_fields_to_object(opinion)
+        return opinion
+
+    def _add_fields_to_object(self, opinion: Opinion) -> Opinion:
         opinion.grade = Grade.query.get(int(self.grade.data))
         opinion.cruxes = [Crux.query.get(crux_id) for crux_id in self.cruxes.data]
 

@@ -63,6 +63,9 @@ class RouteForm(FlaskForm):
     longitude = FloatField("Longitude", validators=[Optional()])
     comment = StringField("Comment", validators=[Optional()], widget=TextArea())
     link = URLField("Link", validators=[Optional()])
+    add_opinion = BooleanField(
+        "Add opinion after submitting this form", validators=[Optional()]
+    )
 
     @classmethod
     def create_empty(cls, area_id: int) -> RouteForm:

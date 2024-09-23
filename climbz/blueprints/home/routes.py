@@ -19,7 +19,7 @@ home = Blueprint("home", __name__)
 def page_home() -> str:
     return render(
         "data.html",
-        title="Routes",
+        title="Home",
         routes=Climber.query.get(current_user.id).all_routes_as_dict(),
         grades=[grade.as_dict() for grade in Grade.query.all()],
     )
@@ -41,4 +41,4 @@ def guide() -> str:
     elif not next or "guide" in next:
         next = url_for("home.page_home")
 
-    return render_template("guide.html", title="User Guide", next=next)
+    return render_template("guide.html", title="myclimbz - User Guide", next=next)

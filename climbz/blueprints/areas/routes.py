@@ -22,7 +22,7 @@ def table_areas() -> str:
 @areas.route("/area/<int:area_id>")
 def page_area(area_id: int) -> str:
     area = Area.query.get(area_id)
-    return render("area.html", area=area)
+    return render("area.html", title=area.name, area=area)
 
 
 @areas.route("/edit_area/<int:area_id>", methods=["GET", "POST"])

@@ -43,7 +43,7 @@ let y_axis_options = {
 
 // Count the number of climbs per x-axis key
 function count_climbs(data) {
-    out = new Map();
+    let out = new Map();
     for (let [key, value] of data)
         out.set(key, value.length);
     return out;

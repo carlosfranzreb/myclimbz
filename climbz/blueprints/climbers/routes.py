@@ -201,11 +201,7 @@ def forgot_password():
 def view_climber(climber_id: int):
     """View climber."""
     climber = Climber.query.get(climber_id)
-    return render(
-        "climber.html",
-        title=climber.name,
-        climber=climber,
-    )
+    return render("climber.html", title=climber.name, climber=climber)
 
 
 @climbers.route("/edit_password/<int:climber_id>", methods=["GET", "POST"])

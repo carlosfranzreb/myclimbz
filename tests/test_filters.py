@@ -10,10 +10,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+from .conftest import HOME_TITLE
+
 
 def reset(driver):
     driver.get("http://localhost:5000/")
-    WebDriverWait(driver, 30).until(EC.title_is("Routes"))
+    WebDriverWait(driver, 30).until(EC.title_is(HOME_TITLE))
     filter_button = driver.find_element(By.ID, "filter_button")
     apply_button = driver.find_element(By.ID, "filter_apply")
     return filter_button, apply_button

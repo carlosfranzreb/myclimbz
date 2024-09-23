@@ -17,7 +17,7 @@ routes = Blueprint("routes", __name__)
 @routes.route("/route/<int:route_id>")
 def page_route(route_id: int) -> str:
     route = Route.query.get(route_id)
-    return render("route.html", route=route)
+    return render("route.html", title=route.name, route=route)
 
 
 @routes.route("/edit_route/<int:route_id>", methods=["GET", "POST"])
@@ -35,7 +35,7 @@ def edit_route(route_id: int) -> str:
             if Route.query.filter_by(name=route_form.name.data).first() is not None:
                 route_form.name.errors.append("A route with that name already exists.")
                 flask_session["error"] = "An error occurred. Fix it and resubmit."
-                return render("form.html", forms=[route_form])
+                return render("form.html", title=title, forms=[route_form])
 
         route = route_form.get_edited_route(route_id)
         db.session.add(route)

@@ -27,9 +27,6 @@ class ClimbForm(FlaskForm):
     climb_link = StringField("Link", validators=[Optional()])
     sent = BooleanField("Sent", validators=[Optional()])
     flashed = BooleanField("Flashed", validators=[Optional()])
-    add_opinion = BooleanField(
-        "Add opinion after submitting this form", validators=[Optional()]
-    )
 
     @classmethod
     def create_empty(cls) -> ClimbForm:

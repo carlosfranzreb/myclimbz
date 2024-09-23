@@ -1,5 +1,6 @@
 import os
 from typing import Generator
+from time import sleep
 
 import pytest
 from selenium import webdriver
@@ -9,6 +10,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from climbz import create_app
+
+
+HOME_TITLE = "myclimbz - Home"
 
 
 @pytest.fixture(scope="session")
@@ -43,7 +47,7 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
         driver_options.add_argument("--window-size=2560,1440")
         driver = webdriver.Chrome(options=driver_options)
         driver.get("http://127.0.0.1:5000")
-        WebDriverWait(driver, 30).until(EC.title_is("Routes"))
+        WebDriverWait(driver, 30).until(EC.title_is("myclimbz - Home"))
         yield driver
 
     finally:
