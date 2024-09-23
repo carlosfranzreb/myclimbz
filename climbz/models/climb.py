@@ -1,3 +1,5 @@
+from sqlalchemy import UniqueConstraint
+
 from climbz import db
 
 
@@ -11,3 +13,5 @@ class Climb(db.Model):
     climber_id = db.Column(db.Integer, db.ForeignKey("climber.id"))
     route_id = db.Column(db.Integer, db.ForeignKey("route.id"))
     session_id = db.Column(db.Integer, db.ForeignKey("session.id"))
+
+    UniqueConstraint("route_id", "session_id")
