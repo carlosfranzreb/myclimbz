@@ -49,6 +49,17 @@ def edit_opinion(opinion_id: int) -> str:
     return render("form.html", title=title, forms=[opinion_form])
 
 
+@opinions.route(
+    "/get_opinion_form/<int:climber_id>/<int:route_id>", methods=["GET", "POST"]
+)
+def get_opinion_form(climber_id: int, route_id: int) -> str:
+    opinion = Opinion.query.filter_by(climber_id=climber_id, route_id=route_id).first()
+    if opinion is not None:
+        return redirect(f"/edit_opinion/{opinion.id}")
+    else:
+        return redirect(f"/add_opinion/{climber_id}/{route_id}")
+
+
 @opinions.route("/delete_opinion/<int:opinion_id>", methods=["GET", "POST"])
 def delete_opinion(opinion_id: int) -> str:
     opinion = Opinion.query.get(opinion_id)

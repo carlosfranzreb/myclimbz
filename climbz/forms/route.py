@@ -83,23 +83,25 @@ class RouteForm(FlaskForm):
             "sector,height,inclination,sit_start,latitude,longitude,comment,link"
         )
 
-        # get existing sectors and routes that have already been tried in this session
-        sectors = Sector.query.filter_by(area_id=area_id).order_by(Sector.name).all()
-        sector_names = [sector.name for sector in sectors]
-        form.sector.datalist = sector_names
-
         session = Session.query.get(flask_session["session_id"])
-        tried_route_ids = [climb.route.id for climb in session.climbs]
-        routes = list()
-        for sector in sectors:
-            routes += [
-                route for route in sector.routes if route.id not in tried_route_ids
-            ]
-        route_names = sorted([route.name for route in routes])
-        form.name.datalist = route_names  # TODO: should change according to sector
+        if session is not None:
 
-        # add the last sector of the current session if possible
-        if flask_session.get("session_id", False) > 0:
+            # get existing sectors and routes that have already been tried in this session
+            sectors = (
+                Sector.query.filter_by(area_id=area_id).order_by(Sector.name).all()
+            )
+            sector_names = [sector.name for sector in sectors]
+            form.sector.datalist = sector_names
+            tried_route_ids = [climb.route.id for climb in session.climbs]
+            routes = list()
+            for sector in sectors:
+                routes += [
+                    route for route in sector.routes if route.id not in tried_route_ids
+                ]
+            route_names = sorted([route.name for route in routes])
+            form.name.datalist = route_names  # TODO: should change according to sector
+
+            # add the last sector of the current session if possible
             session = Session.query.get(flask_session["session_id"])
             sectors = [c.route.sector for c in session.climbs]
             if len(sectors) > 0:

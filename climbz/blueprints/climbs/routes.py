@@ -66,13 +66,7 @@ def add_climb() -> str:
 
         # if the user wants to add an opinion, redirect to the opinion form
         if route_form.add_opinion.data is True:
-            opinion = Opinion.query.filter_by(
-                climber_id=session.climber_id, route_id=route.id
-            ).first()
-            if opinion is not None:
-                return redirect(f"/edit_opinion/{opinion.id}")
-            else:
-                return redirect(f"/add_opinion/{session.climber_id}/{route.id}")
+            return redirect(f"/get_opinion_form/{session.climber_id}/{route.id}")
         else:
             return redirect(flask_session.pop("call_from_url"))
 

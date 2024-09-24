@@ -41,7 +41,12 @@ def edit_route(route_id: int) -> str:
         route = route_form.get_edited_route(route_id)
         db.session.add(route)
         db.session.commit()
-        return redirect(url_for("routes.page_route", route_id=route.id))
+
+        # if the user wants to add an opinion, redirect to the opinion form
+        if route_form.add_opinion.data is True:
+            return redirect(f"/get_opinion_form/{current_user.id}/{route.id}")
+        else:
+            return redirect(flask_session.pop("call_from_url"))
 
     # GET: return the edit route page
     route_form = RouteForm.create_from_obj(route)
