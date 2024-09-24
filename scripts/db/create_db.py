@@ -97,10 +97,15 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
     pw = "123"
     pw_hash = generate_password_hash(pw)
     db.session.add(
-        models.Climber(name="Climber1", email="c1@climbz.com", password=pw_hash, role=1)
+        models.Climber(name="Climber1", email="c1@climbz.com", password=pw_hash)
     )
     db.session.add(
         models.Climber(name="Climber2", email="c2@climbz.com", password=pw_hash)
+    )
+    db.session.add(
+        models.Climber(
+            name="ClimberAdmin", email="admin@climbz.com", password=pw_hash, role=1
+        )
     )
 
     db.session.add(models.Area(name="A1", rock_type_id=1, created_by=1))
@@ -135,16 +140,16 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                 break
             sector_id = random.choice(sector_ids)
             area_id = 1 if sector_id < 2 else 2
-            db.session.add(
-                models.Route(
-                    name=name.strip(),
-                    sit_start=bool(route_idx % 3),
-                    sector_id=sector_id,
-                    height=route_idx % 5 + 1,
-                    inclination=random.randrange(-10, 90, 5),
-                    created_by=random.choice([1, 2]),
-                )
+            route = models.Route(
+                name=name.strip(),
+                sit_start=bool(route_idx % 3),
+                sector_id=sector_id,
+                height=route_idx % 5 + 1,
+                inclination=random.randrange(-10, 90, 5),
+                created_by=random.choice([1, 2]),
             )
+            db.session.add(route)
+
             # add climb to the session with p=0.7
             if random.random() < 0.7:
                 session_id = random.choice([1, 2])
@@ -202,6 +207,12 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                             ],
                         )
                     )
+
+            # otherwise add it as a project with p=0.5
+            elif random.random() < 0.5:
+                climber_id = random.choice([1, 2])
+                climber = db.session.get(models.Climber, climber_id)
+                climber.projects.append(route)
 
 
 if __name__ == "__main__":
