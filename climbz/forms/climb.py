@@ -59,24 +59,28 @@ class ClimbForm(FlaskForm):
         if not super().validate():
             is_valid = False
 
-        if route is not None and self.flashed.data is True:
+        if route is None:
+            return is_valid
+
+        if session_id is None:
+            session_id = flask_session["session_id"]
+
+        # check whether the route has already been tried in this session
+        climbs = Climb.query.filter_by(route_id=route.id, session_id=session_id).all()
+        if len(climbs) > 0:
+            flask_session["error"] = (
+                "This route has already been tried in this session."
+            )
+            is_valid = False
+
+        # check whether a flash is valid
+        if self.flashed.data is True:
+            if not self.sent.data:
+                self.flashed.errors.append("A flashed climb must be sent.")
+                is_valid = False
             if self.n_attempts.data is not None and self.n_attempts.data > 1:
                 self.flashed.errors.append("A flashed climb must have 1 attempt.")
-                return False
-
-            # check whether the route has already been tried in this session
-            climbs = Climb.query.filter_by(
-                route_id=route.id, session_id=session_id
-            ).all()
-            if len(climbs) > 0:
-                self.flashed.errors.append(
-                    "This route has already been tried in this session."
-                )
                 is_valid = False
-
-            # check whether a flash is possible
-            if session_id is None:
-                session_id = flask_session["session_id"]
             session = Session.query.get(session_id)
             climbs = Climb.query.filter_by(
                 route_id=route.id, climber_id=current_user.id

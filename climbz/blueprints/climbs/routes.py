@@ -32,7 +32,8 @@ def add_climb() -> str:
             else False
         )
         if not route_form.validate() or invalid_climb:
-            flask_session["error"] = "An error occurred. Fix it and resubmit."
+            if flask_session.get("error", None) is None:
+                flask_session["error"] = "An error occurred. Fix it and resubmit."
             if not session.is_project_search:
                 forms = [route_form, climb_form]
             else:
