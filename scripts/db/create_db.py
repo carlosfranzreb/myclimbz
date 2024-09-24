@@ -138,6 +138,10 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
         for route_idx, name in enumerate(f.readlines()):
             if route_idx > n_routes:
                 break
+
+            # route 1 must be created by climber 1 for testing purposes
+            route_creator = random.choice([1, 2]) if route_idx > 0 else 1
+
             sector_id = random.choice(sector_ids)
             area_id = 1 if sector_id < 2 else 2
             route = models.Route(
@@ -146,7 +150,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                 sector_id=sector_id,
                 height=route_idx % 5 + 1,
                 inclination=random.randrange(-10, 90, 5),
-                created_by=random.choice([1, 2]),
+                created_by=route_creator,
             )
             db.session.add(route)
 
