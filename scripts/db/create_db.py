@@ -145,8 +145,8 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                     created_by=random.choice([1, 2]),
                 )
             )
-            # with p=0.6, add climb to the session
-            if random.random() < 0.6:
+            # add climb to the session with p=0.7
+            if random.random() < 0.7:
                 session_id = random.choice([1, 2])
                 if area_id == 2:
                     session_id += 2
@@ -162,14 +162,21 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                         climber_id=climber_id,
                     )
                 )
-                # for area 1, with p=0.2, add climb to a second session
-                if area_id == 1 and random.random() < 0.2:
-                    remaining_sessions = list(range(1, 4))
-                    remaining_sessions.remove(session_id)
-                    session_id = random.choice(remaining_sessions)
+
+                # add climb to a second session with p=0.7
+                if random.random() < 0.7:
+                    match session_id:
+                        case 1:
+                            second_session_id = 2
+                        case 2:
+                            second_session_id = 1
+                        case 3:
+                            second_session_id = 4
+                        case 4:
+                            second_session_id = 3
                     db.session.add(
                         models.Climb(
-                            session_id=session_id,
+                            session_id=second_session_id,
                             route_id=route_idx + 1,
                             n_attempts=random.randint(1, 10),
                             sent=bool(random.randint(0, 1)),
