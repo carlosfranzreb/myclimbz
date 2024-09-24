@@ -8,7 +8,7 @@ from flask import (
 from climbz.models import Climb, Session, Opinion
 from climbz.forms import ClimbForm, RouteForm
 from climbz import db
-from climbz.blueprints.utils import render, commit_db
+from climbz.blueprints.utils import render
 
 
 climbs = Blueprint("climbs", __name__)
@@ -58,11 +58,10 @@ def add_climb() -> str:
         # add as project or create climb
         if session.is_project_search or climb_form.is_project.data:
             session.climber.projects.append(route)
-            db.session.commit()
         else:
             climb = climb_form.get_object(route)
             db.session.add(climb)
-            commit_db()
+        db.session.commit()
 
         # if the user wants to add an opinion, redirect to the opinion form
         if route_form.add_opinion.data is True:

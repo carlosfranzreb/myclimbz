@@ -31,17 +31,3 @@ def render(*args, **kwargs) -> str:
         *args,
         **kwargs,
     )
-
-
-def commit_db() -> str:
-    """
-    Commit the current session to the database. If an error occurs, add a readable
-    error message to the session and rollback the DB session.
-    TODO: use this everywhere in the code!
-    """
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        flask_session["error"] = f"An error occurred: {e}"  # TODO: more readable!
-    return flask_session.get("call_from_url", "/")

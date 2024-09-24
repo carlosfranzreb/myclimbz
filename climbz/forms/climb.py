@@ -51,7 +51,10 @@ class ClimbForm(FlaskForm):
         return form
 
     def validate(self, route: Route, session_id: int = None) -> bool:
-        """If the climb has already been tried before, `flashed` must be false."""
+        """
+        - If the climb has already been tried before, `flashed` must be false.
+        - The route must not exist in the current session.
+        """
         is_valid = True
         if not super().validate():
             is_valid = False
@@ -61,9 +64,19 @@ class ClimbForm(FlaskForm):
                 self.flashed.errors.append("A flashed climb must have 1 attempt.")
                 return False
 
+            # check whether the route has already been tried in this session
+            climbs = Climb.query.filter_by(
+                route_id=route.id, session_id=session_id
+            ).all()
+            if len(climbs) > 0:
+                self.flashed.errors.append(
+                    "This route has already been tried in this session."
+                )
+                is_valid = False
+
+            # check whether a flash is possible
             if session_id is None:
                 session_id = flask_session["session_id"]
-
             session = Session.query.get(session_id)
             climbs = Climb.query.filter_by(
                 route_id=route.id, climber_id=current_user.id
@@ -80,9 +93,7 @@ class ClimbForm(FlaskForm):
         return is_valid
 
     def validate_from_name(self, route_name: str) -> bool:
-        """If the climb has already been tried before, `flashed` must be false."""
-        route = Route.query.filter_by(name=route_name).first()
-        return self.validate(route)
+        return self.validate(Route.query.filter_by(name=route_name).first())
 
     def get_object(self, route: Route) -> Climb:
         """Create a new climb object from the form data."""
