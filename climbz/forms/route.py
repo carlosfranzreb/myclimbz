@@ -83,8 +83,9 @@ class RouteForm(FlaskForm):
             "sector,height,inclination,sit_start,latitude,longitude,comment,link"
         )
 
-        session = Session.query.get(flask_session["session_id"])
-        if session is not None:
+        session_id = flask_session.get("session_id", None)
+        if session_id is not None:
+            session = Session.query.get(session_id)
 
             # get existing sectors and routes that have already been tried in this session
             sectors = (
@@ -102,7 +103,6 @@ class RouteForm(FlaskForm):
             form.name.datalist = route_names  # TODO: should change according to sector
 
             # add the last sector of the current session if possible
-            session = Session.query.get(flask_session["session_id"])
             sectors = [c.route.sector for c in session.climbs]
             if len(sectors) > 0:
                 form.sector.data = sectors[-1].name

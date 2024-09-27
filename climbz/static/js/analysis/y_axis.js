@@ -59,7 +59,7 @@ function count_climbs_sent(data) {
 	return out;
 }
 
-// Count the number of attempts per x-axis key
+// Count the number of attempts until first send per x-axis key
 function count_attempts(data) {
 	out = new Map();
 	for (let [key, value] of data) {

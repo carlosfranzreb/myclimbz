@@ -10,8 +10,7 @@ class Climb(db.Model):
     flashed = db.Column(db.Boolean, nullable=False)
     comment = db.Column(db.Text)
     link = db.Column(db.String(300))
-    climber_id = db.Column(db.Integer, db.ForeignKey("climber.id"))
     route_id = db.Column(db.Integer, db.ForeignKey("route.id"))
-    session_id = db.Column(db.Integer, db.ForeignKey("session.id"))
+    session_id = db.Column(db.Integer, db.ForeignKey("climbing_session.id"))
 
     UniqueConstraint(route_id, session_id, name="unique_route_in_session")

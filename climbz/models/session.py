@@ -7,6 +7,7 @@ from climbz.models.columns import Rating
 
 
 class Session(db.Model):
+    __tablename__ = "climbing_session"
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False, default=datetime.now().date())
     conditions = Rating("conditions")

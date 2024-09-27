@@ -161,14 +161,14 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                     session_id += 2
                 sent = bool(random.randint(0, 1))
                 climber_id = 1 if session_id < 4 else 2
+                n_attempts = random.randint(1, 10)
                 db.session.add(
                     models.Climb(
                         session_id=session_id,
                         route_id=route_idx + 1,
-                        n_attempts=random.randint(1, 10),
+                        n_attempts=n_attempts,
                         sent=sent,
-                        flashed=bool(random.randint(0, 1)) if sent else False,
-                        climber_id=climber_id,
+                        flashed=True if sent and n_attempts == 1 else False,
                     )
                 )
 
@@ -187,10 +187,9 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                         models.Climb(
                             session_id=second_session_id,
                             route_id=route_idx + 1,
-                            n_attempts=random.randint(1, 10),
+                            n_attempts=random.randint(2, 10),
                             sent=bool(random.randint(0, 1)),
                             flashed=False,
-                            climber_id=climber_id,
                         )
                     )
 

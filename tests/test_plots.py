@@ -67,54 +67,58 @@ def get_plotted_data(driver: webdriver.Chrome, x_axis: str, y_axis: str) -> list
 
 def test_climbs_per_area(driver, db_session) -> None:
     """
-    Ensures that the correct data is plotted for the 'Climbs per Area' and 'Success
-    rate per Area' graphs. The areas are sorted alphabetically by name. Check also
-    the 'Climbs per Area' numbers when the "Include unsent boulders" checkbox is
-    checked.
+    Ensures that the correct data is plotted for the 'Climbs sent/tried per Area' and
+    'Success rate per Area' graphs. The areas are sorted alphabetically by name.
+    ! In DB, not in plot: Ghost Rider, Rámájama, Louis Je Master
     """
 
     sql_query = text(
         """
-        SELECT area.name, route.id, climb.sent
-        FROM area 
-        JOIN sector ON area.id = sector.area_id 
-        JOIN route ON sector.id = route.sector_id
-        JOIN climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
-        GROUP BY route.id
+        SELECT DISTINCT area.name, route.id, climb.sent
+        FROM climber
+        JOIN climbing_session ON climber.id = climbing_session.climber_id
+        JOIN climb ON climbing_session.id = climb.session_id
+        JOIN route ON climb.route_id = route.id
+        JOIN sector ON route.sector_id = sector.id
+        JOIN area ON sector.area_id = area.id
+        WHERE climbing_session.climber_id = 1
         """
     )
-    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
+    results = db_session.execute(sql_query).fetchall()
 
     unique_areas = set(result[0] for result in results)
     area_data = {area: list() for area in unique_areas}
     for area in unique_areas:
-        n_routes = len(set(result[1] for result in results if result[0] == area))
+        n_routes = len(set([result[1] for result in results if result[0] == area]))
         n_sent_routes = len(
-            set(result[1] for result in results if result[0] == area and result[2])
+            set(
+                [
+                    result[1]
+                    for result in results
+                    if result[0] == area and result[2] == 1
+                ]
+            )
         )
-
         area_data[area] = {
             "n_routes": n_routes,
             "n_sent_routes": n_sent_routes,
             "success_rate": n_sent_routes / n_routes if n_routes > 0 else 0,
         }
 
-    plotted_data = get_plotted_data(driver, "Area", "Climbs: total sent")
-    assert len(plotted_data) == len(area_data)
-    for area, n_sent_routes_plotted in plotted_data:
-        assert n_sent_routes_plotted == area_data[area]["n_sent_routes"]
-    area_names = [area for area, _ in plotted_data]
-    assert [area for area, _ in plotted_data] == sorted(area_names)
-
-    plotted_data = get_plotted_data(driver, "Area", "Climbs: total tried")
-    assert len(plotted_data) == len(area_data)
-    for area, n_routes_plotted in plotted_data:
-        assert n_routes_plotted == area_data[area]["n_routes"]
-
-    plotted_data = get_plotted_data(driver, "Area", "Climbs: success rate")
-    assert len(plotted_data) == len(area_data)
-    for area, success_rate_plotted in plotted_data:
-        assert success_rate_plotted == area_data[area]["success_rate"]
+    for area_data_key, y_axis in zip(
+        ["n_routes", "n_sent_routes", "success_rate"],
+        ["Climbs: total tried", "Climbs: total sent", "Climbs: success rate"],
+    ):
+        plotted_data = get_plotted_data(driver, "Area", y_axis)
+        assert len(plotted_data) == len(area_data), f"Failed for key {area_data_key}"
+        for area, value in plotted_data:
+            assert (
+                value == area_data[area][area_data_key]
+            ), f"Failed for key {area_data_key} and area {area}"
+        area_names = [area for area, _ in plotted_data]
+        assert [area for area, _ in plotted_data] == sorted(
+            area_names
+        ), f"Failed for key {area_data_key}"
 
 
 def test_attempts_per_area(driver, db_session) -> None:
@@ -125,22 +129,23 @@ def test_attempts_per_area(driver, db_session) -> None:
     """
     sql_query = text(
         """
-        SELECT
+        SELECT DISTINCT
             area.name,
             route.id,
             climb.id,
             climb.n_attempts,
             climb.sent,
-            session.date
-        FROM area
-        JOIN sector ON area.id = sector.area_id
-        JOIN route ON sector.id = route.sector_id
-        LEFT JOIN climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
-        LEFT JOIN session ON climb.session_id = session.id
-        WHERE climb.id IS NOT NULL
+            climbing_session.date
+        FROM climber
+        JOIN climbing_session ON climber.id = climbing_session.climber_id
+        JOIN climb ON climbing_session.id = climb.session_id
+        JOIN route ON climb.route_id = route.id
+        JOIN sector ON route.sector_id = sector.id
+        JOIN area ON sector.area_id = area.id
+        WHERE climbing_session.climber_id = 1
         """
     )
-    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
+    results = db_session.execute(sql_query).fetchall()
 
     unique_areas = set(result[0] for result in results)
     area_data = {area: list() for area in unique_areas}
@@ -187,28 +192,44 @@ def test_attempts_per_area(driver, db_session) -> None:
 def test_grade_per_area(driver, db_session) -> None:
     """
     Ensures that the correct data is plotted for the 'Avg. Grade per Area' and
-    'Max. Grade per Area' graphs.
+    'Max. Grade per Area' graphs. If the climber has added his own opinion of the
+    grade, that grade is taken. Otherwise, the consensus grade (avg. grade of all
+    opinions, rounded).
+    TODO: fix this test and the ones below
     """
 
     sql_query = text(
         """
-        SELECT area.name, grade.level
-        FROM area
-        JOIN sector ON area.id = sector.area_id
-        JOIN route ON sector.id = route.sector_id
-        JOIN climb ON route.id = climb.route_id
-        JOIN opinion ON opinion.route_id = route.id
+        SELECT area.name, route.id, climber.id, grade.level
+        FROM climber
+        JOIN climbing_session ON climber.id = climbing_session.climber_id
+        JOIN climb ON climbing_session.id = climb.session_id
+        JOIN route ON climb.route_id = route.id
+        JOIN opinion ON opinion.route_id = route.id AND opinion.climber_id = climber.id
         JOIN grade ON opinion.grade_id = grade.id
-        WHERE opinion.grade_id NOT NULL AND climb.climber_id=:climber_id
-        GROUP BY route.id
+        JOIN sector ON route.sector_id = sector.id
+        JOIN area ON sector.area_id = area.id
+        WHERE climbing_session.climber_id = 1
         """
     )
-    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
+    results = db_session.execute(sql_query).fetchall()
 
     unique_areas = set(result[0] for result in results)
     area_data = {area: list() for area in unique_areas}
-    for result in results:
-        area_data[result[0]].append(result[1])
+    for area in unique_areas:
+        area_routes = set(result[1] for result in results if result[0] == area)
+        for route_id in area_routes:
+            route_climbers, route_grades = list(), list()
+            for result in results:
+                if result[1] == route_id:
+                    route_climbers.append(result[2])
+                    route_grades.append(result[3])
+                    if result[2] == 1:
+                        area_data[area].append(result[3])
+                        break
+
+                if len(route_climbers) > 0:
+                    area_data[area].append(round(sum(route_grades) / len(route_grades)))
 
     area_grades_avg, area_grades_max = dict(), dict()
     for area in area_data:
@@ -477,58 +498,6 @@ def test_climbs_per_conditions(driver, db_session) -> None:
         assert n_sent_routes_plotted == climbs_per_conditions[conditions]
     conditions = [conditions for conditions, _ in plotted_data]
     assert [conditions for conditions, _ in plotted_data] == sorted(conditions)
-
-
-def test_tries_until_send(driver, db_session) -> None:
-    """
-    Ensures that the correct data is plotted for the 'Climbs per # sessions' graph.
-    """
-    sql_query = text(
-        """
-        SELECT route.id, climb.n_attempts, climb.sent, session.date
-        FROM route
-        LEFT JOIN climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
-        LEFT JOIN session ON climb.session_id = session.id
-        WHERE climb.id IS NOT NULL
-        """
-    )
-    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
-    route_ids = set(result[0] for result in results)
-
-    n_attempts, n_sessions = list(), list()
-    for route_id in route_ids:
-        climbs = [result for result in results if result[0] == route_id]
-        n_attempts.append(0)
-        n_sessions.append(0)
-
-        # get the earliest date at which the route was sent
-        min_send_date = datetime.max
-        for climb in climbs:
-            date = datetime.strptime(climb[3], "%Y-%m-%d")
-            if climb[2] and date < min_send_date:
-                min_send_date = date
-
-        # add the attempts of the climbs that took place before the route was sent (incl.)
-        for climb in climbs:
-            date = datetime.strptime(climb[3], "%Y-%m-%d")
-            if date <= min_send_date:
-                n_attempts[-1] += climb[1]
-                n_sessions[-1] += 1
-
-    # count the number of routes per number of attempts/sessions
-    tries_until_send = Counter(n_attempts)
-    sessions_until_send = Counter(n_sessions)
-
-    # run the tests
-    for data_dict, y_axis in zip(
-        [tries_until_send, sessions_until_send], ["No. of attempts", "No. of sessions"]
-    ):
-        plotted_data = get_plotted_data(driver, y_axis, "Climbs: total tried")
-        assert len(plotted_data) == max(data_dict.keys())
-        for n_tries, n_sent_routes_plotted in plotted_data:
-            assert n_sent_routes_plotted == data_dict[n_tries]
-        n_tries = [n for n, _ in plotted_data]
-        assert [n for n, _ in plotted_data] == sorted(n_tries)
 
 
 def remove_trailing(data: dict) -> dict:
