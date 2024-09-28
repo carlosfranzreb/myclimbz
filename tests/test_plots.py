@@ -12,6 +12,7 @@ Useful commands when implementing tests:
 - Command to kill process on port: kill $(lsof -t -i:5000)
 """
 
+import json
 from time import sleep
 from collections import Counter
 from datetime import datetime
@@ -195,41 +196,56 @@ def test_grade_per_area(driver, db_session) -> None:
     'Max. Grade per Area' graphs. If the climber has added his own opinion of the
     grade, that grade is taken. Otherwise, the consensus grade (avg. grade of all
     opinions, rounded).
-    TODO: fix this test and the ones below
     """
 
+    # gather the opinions of each climber
     sql_query = text(
         """
-        SELECT area.name, route.id, climber.id, grade.level
+        SELECT DISTINCT route.id, opinion.climber_id, grade.level
+        FROM route
+        JOIN climb ON route.id = climb.route_id
+        JOIN opinion ON route.id = opinion.route_id
+        JOIN grade ON opinion.grade_id = grade.id
+        """
+    )
+    opinion_results = db_session.execute(sql_query).fetchall()
+    opinions = dict()
+    for result in opinion_results:
+        if result[1] not in opinions:
+            opinions[result[1]] = dict()
+        opinions[result[1]][result[0]] = result[2]
+
+    # iterate over the routes tried by climber 1
+    sql_query = text(
+        """
+        SELECT DISTINCT area.name, route.id
         FROM climber
         JOIN climbing_session ON climber.id = climbing_session.climber_id
         JOIN climb ON climbing_session.id = climb.session_id
         JOIN route ON climb.route_id = route.id
-        JOIN opinion ON opinion.route_id = route.id AND opinion.climber_id = climber.id
-        JOIN grade ON opinion.grade_id = grade.id
         JOIN sector ON route.sector_id = sector.id
         JOIN area ON sector.area_id = area.id
         WHERE climbing_session.climber_id = 1
         """
     )
-    results = db_session.execute(sql_query).fetchall()
+    climber_results = db_session.execute(sql_query).fetchall()
 
-    unique_areas = set(result[0] for result in results)
-    area_data = {area: list() for area in unique_areas}
-    for area in unique_areas:
-        area_routes = set(result[1] for result in results if result[0] == area)
-        for route_id in area_routes:
-            route_climbers, route_grades = list(), list()
-            for result in results:
-                if result[1] == route_id:
-                    route_climbers.append(result[2])
-                    route_grades.append(result[3])
-                    if result[2] == 1:
-                        area_data[area].append(result[3])
-                        break
-
-                if len(route_climbers) > 0:
-                    area_data[area].append(round(sum(route_grades) / len(route_grades)))
+    area_data = dict()
+    for result in climber_results:
+        area_name, route_id = result
+        if area_name not in area_data:
+            area_data[area_name] = list()
+        if route_id in opinions[1]:
+            area_data[area_name].append(opinions[1][route_id])
+        else:
+            route_opinions = list()
+            for climber_id in opinions:
+                if climber_id != 1 and route_id in opinions[climber_id]:
+                    route_opinions.append(opinions[climber_id][route_id])
+            if len(route_opinions) > 0:
+                area_data[area_name].append(
+                    Counter(route_opinions).most_common(1)[0][0]
+                )
 
     area_grades_avg, area_grades_max = dict(), dict()
     for area in area_data:
@@ -239,12 +255,12 @@ def test_grade_per_area(driver, db_session) -> None:
     plotted_data = get_plotted_data(driver, "Area", "Grade: avg.")
     assert len(plotted_data) == len(area_data)
     for area, avg_grade_plotted in plotted_data:
-        assert avg_grade_plotted == area_grades_avg[area]
+        assert avg_grade_plotted == area_grades_avg[area], f"Failed for {area}"
 
     plotted_data = get_plotted_data(driver, "Area", "Grade: max.")
     assert len(plotted_data) == len(area_data)
     for area, max_grade_plotted in plotted_data:
-        assert max_grade_plotted == area_grades_max[area]
+        assert max_grade_plotted == area_grades_max[area], f"Failed for {area}"
 
 
 def test_climbs_per_sector(driver, db_session) -> None:
