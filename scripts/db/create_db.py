@@ -149,7 +149,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                 sit_start=bool(route_idx % 3),
                 sector_id=sector_id,
                 height=route_idx % 5 + 1,
-                inclination=random.randrange(-10, 90, 5),
+                inclination=random.randrange(-50, 90, 5),
                 created_by=route_creator,
             )
             db.session.add(route)

@@ -270,13 +270,16 @@ def test_climbs_per_sector(driver, db_session) -> None:
     """
     sql_query = text(
         """
-        SELECT sector.name, route.id, climb.sent
-        FROM sector
-        JOIN route ON sector.id = route.sector_id
-        JOIN climb ON route.id = climb.route_id AND climb.climber_id = :climber_id
+        SELECT DISTINCT sector.name, route.id, climb.sent
+        FROM climber
+        JOIN climbing_session ON climber.id = climbing_session.climber_id
+        JOIN climb ON climbing_session.id = climb.session_id
+        JOIN route ON climb.route_id = route.id
+        JOIN sector ON route.sector_id = sector.id
+        WHERE climbing_session.climber_id = 1
         """
     )
-    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
+    results = db_session.execute(sql_query).fetchall()
 
     unique_sectors = set(result[0] for result in results)
     sector_data = dict()
@@ -298,25 +301,52 @@ def test_climbs_per_grade(driver, db_session):
     Ensures that the correct data is plotted for the 'Climbs per Grade' graph. The
     grades are sorted by level. The number of columns in the graph is equal to the
     number of grades between the lowest and highest level that have climbs, inclusive.
-    Check also the 'Climbs per Grade' numbers when the "Grade scale" switch is toggled,
-    i.e. change to V-scale,
     """
 
+    # gather the opinions of each climber
     sql_query = text(
         """
-        SELECT grade.font, COUNT(DISTINCT(opinion.id))
-        FROM opinion
-        JOIN climb ON
-            climb.climber_id = opinion.climber_id AND
-            climb.route_id = opinion.route_id
+        SELECT DISTINCT route.id, opinion.climber_id, grade.font
+        FROM route
+        JOIN climb ON route.id = climb.route_id
+        JOIN opinion ON route.id = opinion.route_id
         JOIN grade ON opinion.grade_id = grade.id
-        WHERE opinion.climber_id = :climber_id
-        GROUP BY grade.font
-        ORDER BY grade.id
         """
     )
-    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
-    grade_data = {result[0]: result[1] for result in results}
+    opinion_results = db_session.execute(sql_query).fetchall()
+    opinions = dict()
+    for result in opinion_results:
+        if result[1] not in opinions:
+            opinions[result[1]] = dict()
+        opinions[result[1]][result[0]] = result[2]
+
+    # iterate over the routes tried by climber 1
+    sql_query = text(
+        """
+        SELECT DISTINCT climb.route_id
+        FROM climber
+        JOIN climbing_session ON climber.id = climbing_session.climber_id
+        JOIN climb ON climbing_session.id = climb.session_id
+        WHERE climbing_session.climber_id = 1
+        """
+    )
+    climber_results = db_session.execute(sql_query).fetchall()
+
+    grade_data = dict()
+    for result in climber_results:
+        route_id = result[0]
+
+        level = None
+        if route_id in opinions[1]:
+            level = opinions[1][route_id]
+        elif route_id in opinions[2]:
+            level = opinions[2][route_id]
+
+        if level is not None:
+            if level not in grade_data:
+                grade_data[level] = 1
+            else:
+                grade_data[level] += 1
 
     # check that all plotted grades are correct
     plotted_data = get_plotted_data(driver, "Grade", "Climbs: total tried")
@@ -346,17 +376,19 @@ def test_climbs_per_route_chars(driver, db_session) -> None:
     """
     sql_query = text(
         """
-        SELECT DISTINCT(route.name), route.height, route.inclination, sit_start
-        FROM route
-        JOIN climb ON climb.route_id = route.id
-        WHERE climb.climber_id = :climber_id
+        SELECT DISTINCT route.name, route.height, route.inclination, sit_start
+        FROM climber
+        JOIN climbing_session ON climber.id = climbing_session.climber_id
+        JOIN climb ON climbing_session.id = climb.session_id
+        JOIN route ON climb.route_id = route.id
+        WHERE climbing_session.climber_id = 1
         """
     )
-    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
+    results = db_session.execute(sql_query).fetchall()
 
     keys = {
         "height": list(range(1, 10)),
-        "inclination": list(range(-10, 91, 5)),
+        "inclination": list(range(-50, 91, 5)),
         "sit_start": [False, True],
     }
     climbs_per_chars = {char: {key: 0 for key in keys[char]} for char in keys}
@@ -453,13 +485,13 @@ def test_climbs_per_date(driver, db_session) -> None:
     """
     sql_query = text(
         """
-        SELECT session.date
-        FROM session
-        JOIN climb ON climb.session_id = session.id
-        WHERE session.climber_id = :climber_id
+        SELECT climbing_session.date
+        FROM climbing_session
+        JOIN climb ON climb.session_id = climbing_session.id
+        WHERE climbing_session.climber_id = 1
         """
     )
-    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
+    results = db_session.execute(sql_query).fetchall()
     dates = sorted([datetime.strptime(result[0], "%Y-%m-%d") for result in results])
 
     # count the number of climbs per day, month and year
@@ -493,13 +525,13 @@ def test_climbs_per_conditions(driver, db_session) -> None:
     """
     sql_query = text(
         """
-        SELECT session.conditions
-        FROM session
-        JOIN climb ON climb.session_id = session.id
-        WHERE climb.climber_id = 1
+        SELECT climbing_session.conditions
+        FROM climbing_session
+        JOIN climb ON climb.session_id = climbing_session.id
+        WHERE climbing_session.climber_id = 1
         """
     )
-    results = db_session.execute(sql_query, {"climber_id": 1}).fetchall()
+    results = db_session.execute(sql_query).fetchall()
     conditions = [int(result[0]) for result in results if result[0] is not None]
 
     keys = list(range(1, 6))
