@@ -17,7 +17,8 @@ The CSV sheet can have the following columns:
 - Date: the date of the climb, in the format "DD/MM/YYYY".
 - Tries: the number of tries for the climb.
 - Sent: whether the climb was sent ("yes" or "no").
-- Grade felt: the grade felt by the climber, in Font scale.
+- Grade felt: the grade felt by the climber, in Font scale. If this field is empty,
+    the grade is taken from the "Grade" field.
 - Video: a link to a video of the climb.
 - Comments: any comments about the climb. They are added to the opinion comment.
 
@@ -28,12 +29,6 @@ We use this assumption to decide whether a send also counts as a flash.
 If a CSV row doesn't comprise route information (from area to landing), it means that
 this is another session on the same route. This is because the rows were merged in the
 CSV. The opinion is taken from the last row of the route.
-
-TODO:
-1. update cruxes in create_db and apply them
-2. update rock types from Marco's PR
-3. Check again that this works.
-4. Apply these changes to the prod database and merge the PRs.
 """
 
 import os
@@ -103,11 +98,10 @@ def add_climbs(csv_file: str, db, climber_id: int):
                 cruxes_str = row["Style (crux)"].split(", ")
                 cruxes_obj = list()
                 for crux_str in cruxes_str:
-                    crux = Crux.query.filter_by(name=crux_str.capitalize()).first()
+                    crux_str = crux_str.strip().capitalize()
+                    crux = Crux.query.filter_by(name=crux_str).first()
                     if not crux and crux_str.endswith("s"):
-                        crux = Crux.query.filter_by(
-                            name=crux_str[:-1].capitalize()
-                        ).first()
+                        crux = Crux.query.filter_by(name=crux_str[:-1]).first()
                     if not crux:
                         print(f"Crux {crux_str} not found in the database.")
                     else:
@@ -130,7 +124,7 @@ def add_climbs(csv_file: str, db, climber_id: int):
                 route_id=route.id,
                 n_attempts=n_attempts,
                 sent=sent,
-                flashed=sent and previously_climbed is None and n_attempts == 1,
+                flashed=sent and not previously_climbed and n_attempts == 1,
                 link=row["Video"],
                 comment=row["Comments"],
             )
@@ -149,7 +143,9 @@ def add_climbs(csv_file: str, db, climber_id: int):
                 opinion = Opinion(
                     climber_id=climber_id,
                     route_id=route.id,
-                    grade=Grade.query.filter_by(font=row["Grade felt"]).first(),
+                    grade=Grade.query.filter_by(
+                        font=row["Grade felt"] if row["Grade felt"] else row["Grade"]
+                    ).first(),
                     landing=int(row["Landing"]) if row["Landing"] else None,
                     rating=round(int(row["Rating"]) / 2) if row["Rating"] else None,
                     cruxes=cruxes_obj,

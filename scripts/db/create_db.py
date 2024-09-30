@@ -76,18 +76,19 @@ CRUXES = [
     "Sidepull",
     "Undercling",
     # Other
-    "Balance",
     "Compression",
-    "Coordination",
     "Dyno",
     "Endurance",
-    "Laybacking",
     "Lock-off",
     "Mantel",
     "Power",
-    "Rockover",
     "Scary",
     "Tension",
+    # new in 1.8.0
+    "Balance",
+    "Coordination",
+    "Laybacking",
+    "Rockover",
 ]
 
 GRADES = [

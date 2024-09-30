@@ -6,6 +6,7 @@ This guide is for developers: how to run and develop the app.
 
 1. [Creating forms](#creating-forms)
 2. [Creating filters](#creating-filters)
+3. [Updating the prod DB](#update-the-prod-database)
 
 ## Creating forms
 
@@ -44,3 +45,12 @@ self.is_project_search.toggle_ids = "date,conditions"
 The list of filters is defined in `filters/main.js`, in the variable `FILTERS`. When the user wants to apply some filters, the function `filter_data` of the same file is called. This function calls the method `filter_value` for each filter and climb. Besides the `filter_value` method, filter classes must have a `reset` method, where its original values are set.
 
 You can find the currently implemented filters in the folder `filters/widgets`. The whole filter menu is constructed in the file `filters/filters.js`.
+
+## Update the prod database
+
+If you change the scheme of the database, you need to create a new production database and add the old data. This can be done from the sqlite CLI with `ATTACH`, which allows you to insert data from one database to another. Here is an example:
+
+```sql
+ATTACH DATABASE "instance/prod_hetzner.db" AS "OLD";
+INSERT INTO climber SELECT * from OLD.climber;
+```
