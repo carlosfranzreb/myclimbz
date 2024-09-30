@@ -76,12 +76,15 @@ CRUXES = [
     "Sidepull",
     "Undercling",
     # Other
+    "Balance",
     "Compression",
+    "Coordination",
     "Dyno",
     "Endurance",
     "Lock-off",
     "Mantel",
     "Power",
+    "Rockover",
     "Scary",
     "Tension",
 ]
