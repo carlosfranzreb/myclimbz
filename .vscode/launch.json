@@ -47,6 +47,14 @@
 			"request": "launch",
 			"program": "${file}",
 			"console": "integratedTerminal"
+		},
+		{
+			"name": "debug csv2db",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${file}",
+			"console": "integratedTerminal",
+			"args": ["boulders4db.csv", "test_100", "4"]
 		}
 	]
 }
