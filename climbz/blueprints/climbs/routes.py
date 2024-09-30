@@ -32,7 +32,8 @@ def add_climb() -> str:
             else False
         )
         if not route_form.validate() or invalid_climb:
-            flask_session["error"] = "An error occurred. Fix it and resubmit."
+            if flask_session.get("error", None) is None:
+                flask_session["error"] = "An error occurred. Fix it and resubmit."
             if not session.is_project_search:
                 forms = [route_form, climb_form]
             else:
@@ -58,21 +59,14 @@ def add_climb() -> str:
         # add as project or create climb
         if session.is_project_search or climb_form.is_project.data:
             session.climber.projects.append(route)
-            db.session.commit()
         else:
             climb = climb_form.get_object(route)
             db.session.add(climb)
-            db.session.commit()
+        db.session.commit()
 
         # if the user wants to add an opinion, redirect to the opinion form
         if route_form.add_opinion.data is True:
-            opinion = Opinion.query.filter_by(
-                climber_id=session.climber_id, route_id=route.id
-            ).first()
-            if opinion is not None:
-                return redirect(f"/edit_opinion/{opinion.id}")
-            else:
-                return redirect(f"/add_opinion/{session.climber_id}/{route.id}")
+            return redirect(f"/get_opinion_form/{session.climber_id}/{route.id}")
         else:
             return redirect(flask_session.pop("call_from_url"))
 

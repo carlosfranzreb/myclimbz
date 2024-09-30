@@ -76,17 +76,19 @@ CRUXES = [
     "Sidepull",
     "Undercling",
     # Other
-    "Balance",
     "Compression",
-    "Coordination",
     "Dyno",
     "Endurance",
     "Lock-off",
     "Mantel",
     "Power",
-    "Rockover",
     "Scary",
     "Tension",
+    # new in 1.8.0
+    "Balance",
+    "Coordination",
+    "Laybacking",
+    "Rockover",
 ]
 
 GRADES = [
@@ -134,10 +136,15 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
     pw = "123"
     pw_hash = generate_password_hash(pw)
     db.session.add(
-        models.Climber(name="Climber1", email="c1@climbz.com", password=pw_hash, role=1)
+        models.Climber(name="Climber1", email="c1@climbz.com", password=pw_hash)
     )
     db.session.add(
         models.Climber(name="Climber2", email="c2@climbz.com", password=pw_hash)
+    )
+    db.session.add(
+        models.Climber(
+            name="ClimberAdmin", email="admin@climbz.com", password=pw_hash, role=1
+        )
     )
 
     db.session.add(models.Area(name="A1", rock_type_id=1, created_by=1))
@@ -170,48 +177,58 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
         for route_idx, name in enumerate(f.readlines()):
             if route_idx > n_routes:
                 break
+
+            # route 1 must be created by climber 1 for testing purposes
+            route_creator = random.choice([1, 2]) if route_idx > 0 else 1
+
             sector_id = random.choice(sector_ids)
             area_id = 1 if sector_id < 2 else 2
-            db.session.add(
-                models.Route(
-                    name=name.strip(),
-                    sit_start=bool(route_idx % 3),
-                    sector_id=sector_id,
-                    height=route_idx % 5 + 1,
-                    inclination=random.randrange(-10, 90, 5),
-                    created_by=random.choice([1, 2]),
-                )
+            route = models.Route(
+                name=name.strip(),
+                sit_start=bool(route_idx % 3),
+                sector_id=sector_id,
+                height=route_idx % 5 + 1,
+                inclination=random.randrange(-50, 90, 5),
+                created_by=route_creator,
             )
-            # with p=0.6, add climb to the session
-            if random.random() < 0.6:
+            db.session.add(route)
+
+            # add climb to the session with p=0.7
+            if random.random() < 0.7:
                 session_id = random.choice([1, 2])
                 if area_id == 2:
                     session_id += 2
                 sent = bool(random.randint(0, 1))
                 climber_id = 1 if session_id < 4 else 2
+                n_attempts = random.randint(1, 10)
                 db.session.add(
                     models.Climb(
                         session_id=session_id,
                         route_id=route_idx + 1,
-                        n_attempts=random.randint(1, 10),
+                        n_attempts=n_attempts,
                         sent=sent,
-                        flashed=bool(random.randint(0, 1)) if sent else False,
-                        climber_id=climber_id,
+                        flashed=True if sent and n_attempts == 1 else False,
                     )
                 )
-                # for area 1, with p=0.2, add climb to a second session
-                if area_id == 1 and random.random() < 0.2:
-                    remaining_sessions = list(range(1, 4))
-                    remaining_sessions.remove(session_id)
-                    session_id = random.choice(remaining_sessions)
+
+                # add climb to a second session with p=0.7
+                if random.random() < 0.7:
+                    match session_id:
+                        case 1:
+                            second_session_id = 2
+                        case 2:
+                            second_session_id = 1
+                        case 3:
+                            second_session_id = 4
+                        case 4:
+                            second_session_id = 3
                     db.session.add(
                         models.Climb(
-                            session_id=session_id,
+                            session_id=second_session_id,
                             route_id=route_idx + 1,
-                            n_attempts=random.randint(1, 10),
+                            n_attempts=random.randint(2, 10),
                             sent=bool(random.randint(0, 1)),
                             flashed=False,
-                            climber_id=climber_id,
                         )
                     )
 
@@ -232,6 +249,12 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
                             ],
                         )
                     )
+
+            # otherwise add it as a project with p=0.5
+            elif random.random() < 0.5:
+                climber_id = random.choice([1, 2])
+                climber = db.session.get(models.Climber, climber_id)
+                climber.projects.append(route)
 
 
 if __name__ == "__main__":

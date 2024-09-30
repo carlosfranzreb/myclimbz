@@ -1,12 +1,16 @@
 {
-  "python.testing.cwd": "${workspaceFolder}",
-  "python.testing.pytestEnabled": true,
-  "python.testing.unittestEnabled": false,
-  "flake8.args": ["--max-line-length=120", "--ignore=E203"],
-  "python.analysis.diagnosticSeverityOverrides": {
-    "reportShadowedImports": "none"
-  },
-  "files.associations": {
-    "*.html": "jinja-html"
-  }
+	"python.testing.cwd": "${workspaceFolder}",
+	"python.testing.pytestEnabled": true,
+	"python.testing.unittestEnabled": false,
+	"flake8.args": ["--max-line-length=120", "--ignore=E203"],
+	"python.analysis.diagnosticSeverityOverrides": {
+		"reportShadowedImports": "none"
+	},
+	"files.associations": {
+		"*.html": "jinja-html"
+	},
+	"emmet.includeLanguages": { "jinja-html": "html" },
+	"[javascript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	}
 }

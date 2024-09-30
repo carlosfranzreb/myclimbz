@@ -44,7 +44,6 @@ class Climber(db.Model, UserMixin):
     grade_scale = db.Column(db.String(10), nullable=False, default="font")
 
     # relationships
-    climbs = db.relationship("Climb", backref="climber", cascade="all, delete")
     sessions = db.relationship("Session", backref="climber", cascade="all, delete")
     opinions = db.relationship("Opinion", backref="climber", cascade="all, delete")
     routes = db.relationship("Route", backref="creator")
@@ -55,6 +54,14 @@ class Climber(db.Model, UserMixin):
         secondary=climber_projects,
         backref=db.backref("climbers", lazy="dynamic"),
     )
+
+    @property
+    def climbs(self) -> list:
+        """Return all the climbs of the climber."""
+        climbs = list()
+        for session in self.sessions:
+            climbs.extend(session.climbs)
+        return climbs
 
     @property
     def year_started_climbing_str(self) -> str:

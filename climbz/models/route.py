@@ -19,7 +19,7 @@ class Route(db.Model):
 
     # route characteristics
     sit_start = db.Column(db.Boolean, nullable=False, default=False)
-    height = db.Column(db.Float, db.CheckConstraint("height >= 0"))
+    height = db.Column(db.Float, db.CheckConstraint("height >= 1"))
     inclination = ConstrainedInteger("inclination", -50, 90)
 
     # relationships

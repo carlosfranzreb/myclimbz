@@ -42,7 +42,7 @@
                                     {{ field(id=field.id, class='form-check') }}
                                 {% endif %}
                                 <script>
-                                    document.getElementById("{{ field.id }}").parentElement.classList.add("d-flex")
+                                    document.getElementById("{{ field.id }}").parentElement.style.display = "flex";
                                     document.getElementById("{{ field.id }}").parentElement.style.marginTop = "0.5em"
                                     document.getElementById("{{ field.id }}").parentElement.style.marginBottom = "0.75em";
                                     document.getElementById("{{ field.id }}").style.cursor = "pointer";

@@ -71,6 +71,10 @@ class RouteForm(FlaskForm):
     def create_empty(cls, area_id: int) -> RouteForm:
         """
         Create the form and add choices to the select fields.
+
+        - All sectors are added to the sector field's datalist.
+        - All routes that have not been tried in this session are added to the name
+            field's datalist.
         """
         form = cls()
         form.height.unit = "m"
@@ -79,20 +83,26 @@ class RouteForm(FlaskForm):
             "sector,height,inclination,sit_start,latitude,longitude,comment,link"
         )
 
-        # get existing sectors and routes
-        sectors = Sector.query.filter_by(area_id=area_id).order_by(Sector.name).all()
-        sector_names = [sector.name for sector in sectors]
-        routes = list()
-        for sector in sectors:
-            routes += sector.routes
-        route_names = sorted([route.name for route in routes])
+        session_id = flask_session.get("session_id", None)
+        if session_id is not None:
+            session = Session.query.get(session_id)
 
-        form.sector.datalist = sector_names
-        form.name.datalist = route_names  # TODO: should change according to sector
+            # get existing sectors and routes that have already been tried in this session
+            sectors = (
+                Sector.query.filter_by(area_id=area_id).order_by(Sector.name).all()
+            )
+            sector_names = [sector.name for sector in sectors]
+            form.sector.datalist = sector_names
+            tried_route_ids = [climb.route.id for climb in session.climbs]
+            routes = list()
+            for sector in sectors:
+                routes += [
+                    route for route in sector.routes if route.id not in tried_route_ids
+                ]
+            route_names = sorted([route.name for route in routes])
+            form.name.datalist = route_names  # TODO: should change according to sector
 
-        # add the last sector of the current session if possible
-        if flask_session.get("session_id", False) > 0:
-            session = Session.query.get(flask_session["session_id"])
+            # add the last sector of the current session if possible
             sectors = [c.route.sector for c in session.climbs]
             if len(sectors) > 0:
                 form.sector.data = sectors[-1].name
