@@ -81,6 +81,7 @@ CRUXES = [
     "Coordination",
     "Dyno",
     "Endurance",
+    "Laybacking",
     "Lock-off",
     "Mantel",
     "Power",

@@ -60,9 +60,10 @@ def add_climbs(csv_file: str, db, climber_id: int):
         reader = csv.DictReader(f)
         for row in reader:
             if len(row["Area"]) > 0:
-                area = Area.query.filter_by(name=row["Area"]).first()
+                area_name = row["Area"].strip()
+                area = Area.query.filter_by(name=area_name).first()
                 if not area:
-                    area = Area(name=row["Area"], created_by=climber_id)
+                    area = Area(name=area_name, created_by=climber_id)
                     db.session.add(area)
                     db.session.commit()
 
