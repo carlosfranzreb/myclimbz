@@ -144,7 +144,7 @@ class RouteForm(FlaskForm):
             )
         return sector
 
-    def get_object(self, sector: Sector = None, route: Route = None) -> Route:
+    def get_object(self, sector: Sector, route: Route = None) -> Route:
         """
         This function is used when a new climb is added. It only checks the name field
         and returns a route object.
@@ -153,7 +153,7 @@ class RouteForm(FlaskForm):
         - If the route is new, create it and return it, without adding it to the DB.
         """
         route_name = self.name.data.strip().lower().title()
-        route = Route.query.filter_by(name=route_name).first()
+        route = Route.query.filter_by(name=route_name, sector_id=sector.id).first()
         if route is None:
             route = Route(name=route_name, sector=sector, created_by=current_user.id)
             for field in FIELDS:
