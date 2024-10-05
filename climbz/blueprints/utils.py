@@ -28,7 +28,6 @@ def render(*args, **kwargs) -> str:
     session_id = flask_session.get("session_id", None)
     if session_id is not None:
         if session_id == "project_search":
-            # create a fake session object with is_project_search and area.name as fields
             area = Area.query.get(flask_session["area_id"])
             session_obj = namedtuple("Session", ["is_project_search", "area"])(
                 True, namedtuple("Area", ["name"])(area.name)
