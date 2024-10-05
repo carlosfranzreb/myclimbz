@@ -47,7 +47,7 @@ def add_climb() -> str:
             return render("form.html", title=title, forms=forms)
 
         # create new sector and new route if necessary
-        sector = route_form.get_sector(session.area_id)
+        sector = route_form.get_sector(area_id)
         if sector.id is None:
             db.session.add(sector)
             db.session.commit()
