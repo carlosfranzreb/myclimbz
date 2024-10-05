@@ -104,7 +104,6 @@ class ClimbForm(FlaskForm):
         climb = Climb(
             **{
                 "route_id": route.id if route is not None else None,
-                "climber_id": current_user.id,
                 "session_id": flask_session["session_id"],
             }
         )
