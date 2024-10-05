@@ -103,7 +103,7 @@ class ClimbForm(FlaskForm):
         """Create a new climb object from the form data."""
         climb = Climb(
             **{
-                "route_id": route.id if route is not None else None,
+                "route_id": route.id,
                 "session_id": flask_session["session_id"],
             }
         )
