@@ -184,7 +184,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
             sector_id = random.choice(sector_ids)
             area_id = 1 if sector_id < 2 else 2
             route = models.Route(
-                name=name.strip(),
+                name=name.strip().lower().title(),
                 sit_start=bool(route_idx % 3),
                 sector_id=sector_id,
                 height=route_idx % 5 + 1,
