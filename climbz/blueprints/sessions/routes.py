@@ -31,8 +31,9 @@ def page_session(session_id: int) -> str:
 
 @sessions.route("/stop_session", methods=["GET", "POST"])
 def stop_session() -> str:
-    flask_session["session_id"] = -1
-    flask_session["project_ids"] = list()
+    if flask_session["session_id"] == "project_search":
+        del flask_session["area_id"]
+    del flask_session["session_id"]
     return redirect(flask_session.pop("call_from_url"))
 
 
@@ -55,15 +56,19 @@ def add_session() -> str:
 
         # if new_area, create new area; otherwise, get existing area
         area = session_form.get_area()
-        if area is not None and area.id is None:
+        if area.id is None:
             db.session.add(area)
             db.session.commit()
 
-        # create session
-        session = session_form.get_object(area.id)
-        db.session.add(session)
-        db.session.commit()
-        flask_session["session_id"] = session.id
+        # create session if this is not a project search; otherwise save the area
+        if session_form.is_project_search.data:
+            flask_session["session_id"] = "project_search"
+            flask_session["area_id"] = area.id
+        else:
+            session = session_form.get_object(area.id)
+            db.session.add(session)
+            db.session.commit()
+            flask_session["session_id"] = session.id
         return redirect("/")
 
     # GET: the user wants to start a session
@@ -83,7 +88,7 @@ def edit_session(session_id: int) -> str:
             return render("form.html", title=title, forms=[session_form])
 
         # edit session with the new data
-        session = session_form.get_object(session.area_id, session)
+        session = session_form.edit_object(session)
         db.session.commit()
         return redirect(flask_session.pop("call_from_url"))
 

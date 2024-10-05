@@ -74,38 +74,32 @@ class SessionForm(FlaskForm):
 
     def get_area(self) -> Area:
         """
-        - If the area field is empty, return None.
         - If the area is new, create it and return it, without adding it to the DB.
         - If the area exists, return it.
         """
         area = None
-        if len(self.area.data) > 0:
-            area_name = self.area.data.strip()
-            area = Area.query.filter_by(name=area_name).first()
-            if area is None:
-                if self.rock_type.data != "":
-                    rock_type = RockType.query.get(self.rock_type.data)
-                    area = Area(
-                        name=area_name, rock_type=rock_type, created_by=current_user.id
-                    )
-                else:
-                    area = Area(name=area_name, created_by=current_user.id)
+        area_name = self.area.data.strip().lower().title()
+        area = Area.query.filter_by(name=area_name).first()
+        if area is None:
+            area = Area(name=area_name, created_by=current_user.id)
+            if self.rock_type.data != "":
+                area.rock_type = RockType.query.get(self.rock_type.data)
+
         return area
 
-    def get_object(self, area_id: int, obj: Session = None) -> Session:
+    def get_object(self, area_id: int) -> Session:
         """
-        Return a Session object from the form data. If an object is passed, update it.
-        If not, create a new one.
+        Create an object out of the form data.
         """
-        new_obj = obj is None
-        if obj is None:
-            obj = Session()
+        obj = Session()
         obj.climber_id = current_user.id
         obj.area_id = area_id
+        return self.edit_object(obj)
 
+    def edit_object(self, obj: Session) -> Session:
+        """
+        Update the session object with the form fields that can be edited.
+        """
         for attr in ["date", "conditions", "comment"]:
             setattr(obj, attr, getattr(self, attr).data)
-        if new_obj:
-            obj.is_project_search = self.is_project_search.data
-
         return obj
