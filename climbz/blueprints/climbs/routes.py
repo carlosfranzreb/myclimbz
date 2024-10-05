@@ -47,7 +47,7 @@ def add_climb() -> str:
             db.session.commit()
 
         route = route_form.get_object(sector)
-        if route is not None and route.id is None:
+        if route.id is None:
             db.session.add(route)
             db.session.commit()
 

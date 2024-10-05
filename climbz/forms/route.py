@@ -149,14 +149,10 @@ class RouteForm(FlaskForm):
         This function is used when a new climb is added. It only checks the name field
         and returns a route object.
 
-        - If the route field is empty, return None.
-        - If the route is new, create it and return it, without adding it to the DB.
         - If the route exists, return it.
+        - If the route is new, create it and return it, without adding it to the DB.
         """
-        if len(self.name.data) == 0:
-            return None
-
-        route_name = self.name.data.strip().title()
+        route_name = self.name.data.strip().lower().title()
         route = Route.query.filter_by(name=route_name).first()
         if route is None:
             route = Route(name=route_name, sector=sector, created_by=current_user.id)
