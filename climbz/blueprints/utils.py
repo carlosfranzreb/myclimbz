@@ -1,8 +1,9 @@
+from collections import namedtuple
+
 from flask import render_template, session as flask_session, request
 from flask_login import current_user, login_required
 
-from climbz import db
-from climbz.models import Session
+from climbz.models import Session, Area
 
 
 @login_required
@@ -19,11 +20,23 @@ def render(*args, **kwargs) -> str:
     """
     kwargs["title"] = kwargs["title"]
     kwargs["error"] = flask_session.pop("error", None)
-    kwargs["open_session"] = Session.query.get(flask_session.get("session_id", -1))
     kwargs["username"] = current_user.name
     kwargs["user_id"] = current_user.id
     kwargs["user_role"] = current_user.role
     kwargs["user_grade_scale"] = current_user.grade_scale
+
+    session_id = flask_session.get("session_id", None)
+    if session_id is not None:
+        if session_id == "project_search":
+            # create a fake session object with is_project_search and area.name as fields
+            area = Area.query.get(flask_session["area_id"])
+            session_obj = namedtuple("Session", ["is_project_search", "area"])(
+                True, namedtuple("Area", ["name"])(area.name)
+            )
+            kwargs["open_session"] = session_obj
+        else:
+            kwargs["open_session"] = Session.query.get(session_id)
+
     path = request.path
     if not path.startswith("/edit_") and not path.startswith("/add_"):
         flask_session["call_from_url"] = path
