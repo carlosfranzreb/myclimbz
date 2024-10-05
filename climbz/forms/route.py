@@ -15,6 +15,7 @@ from wtforms.validators import Optional, DataRequired, NumberRange
 from wtforms.widgets import TextArea
 
 from climbz.models import Route, Sector, Session
+from climbz.forms.utils import format_name
 
 
 FIELDS = [
@@ -153,10 +154,12 @@ class RouteForm(FlaskForm):
         - If the route exists, return it.
         - If the route is new, create it and return it, without adding it to the DB.
         """
-        route_name = get_formatted_name(self.name.data)
-        route = Route.query.filter_by(name=route_name, sector_id=sector.id).first()
+        self.name.data = format_name(self.name.data)
+        route = Route.query.filter_by(name=self.name.data, sector_id=sector.id).first()
         if route is None:
-            route = Route(name=route_name, sector=sector, created_by=current_user.id)
+            route = Route(
+                name=self.name.data, sector=sector, created_by=current_user.id
+            )
             for field in FIELDS:
                 setattr(route, field, getattr(self, field).data)
 
@@ -168,8 +171,8 @@ class RouteForm(FlaskForm):
         a route object.
         """
         route = Route.query.get(route_id)
-        route.name = get_formatted_name(self.name.data)
-        sector_name = get_formatted_name(self.sector.data)
+        route.name = format_name(self.name.data)
+        sector_name = format_name(self.sector.data)
         sector = Sector.query.filter_by(name=sector_name).first()
         if sector is None:
             sector = Sector(name=sector_name, area_id=route.sector.area_id)
@@ -179,11 +182,3 @@ class RouteForm(FlaskForm):
             setattr(route, field, getattr(self, field).data)
 
         return route
-
-
-def get_formatted_name(name: str) -> str:
-    """
-    Return the name of the route in the correct format. It is stripped of whitespace
-    and capitalized.
-    """
-    return name.strip().lower().title()

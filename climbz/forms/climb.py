@@ -17,7 +17,7 @@ from wtforms.validators import Optional
 from wtforms.widgets import TextArea
 
 from climbz.models import Route, Climb, Session
-
+from climbz.forms.utils import format_name
 
 FIELDS = [
     "n_attempts",
@@ -97,6 +97,7 @@ class ClimbForm(FlaskForm):
         return is_valid
 
     def validate_from_name(self, route_name: str) -> bool:
+        route_name = format_name(route_name)
         return self.validate(Route.query.filter_by(name=route_name).first())
 
     def get_object(self, route: Route) -> Climb:
