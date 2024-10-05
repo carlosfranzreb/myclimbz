@@ -83,29 +83,30 @@ class RouteForm(FlaskForm):
             "sector,height,inclination,sit_start,latitude,longitude,comment,link"
         )
 
-        session_id = flask_session.get("session_id", None)
-        if session_id is not None:
+        session_id = flask_session["session_id"]
+        if session_id != "project_search":
             session = Session.query.get(session_id)
+            climbs = session.climbs
+        else:
+            climbs = list()
 
-            # get existing sectors and routes that have already been tried in this session
-            sectors = (
-                Sector.query.filter_by(area_id=area_id).order_by(Sector.name).all()
-            )
-            sector_names = [sector.name for sector in sectors]
-            form.sector.datalist = sector_names
-            tried_route_ids = [climb.route.id for climb in session.climbs]
-            routes = list()
-            for sector in sectors:
-                routes += [
-                    route for route in sector.routes if route.id not in tried_route_ids
-                ]
-            route_names = sorted([route.name for route in routes])
-            form.name.datalist = route_names  # TODO: should change according to sector
+        # get existing sectors and routes that have already been tried in this session
+        sectors = Sector.query.filter_by(area_id=area_id).order_by(Sector.name).all()
+        sector_names = [sector.name for sector in sectors]
+        form.sector.datalist = sector_names
+        tried_route_ids = [climb.route.id for climb in climbs]
+        routes = list()
+        for sector in sectors:
+            routes += [
+                route for route in sector.routes if route.id not in tried_route_ids
+            ]
+        route_names = sorted([route.name for route in routes])
+        form.name.datalist = route_names  # TODO: should change according to sector
 
-            # add the last sector of the current session if possible
-            sectors = [c.route.sector for c in session.climbs]
-            if len(sectors) > 0:
-                form.sector.data = sectors[-1].name
+        # add the last sector of the current session if possible
+        sectors = [c.route.sector for c in climbs]
+        if len(sectors) > 0:
+            form.sector.data = sectors[-1].name
 
         return form
 
@@ -152,7 +153,7 @@ class RouteForm(FlaskForm):
         - If the route exists, return it.
         - If the route is new, create it and return it, without adding it to the DB.
         """
-        route_name = self.name.data.strip().lower().title()
+        route_name = get_formatted_name(self.name.data)
         route = Route.query.filter_by(name=route_name, sector_id=sector.id).first()
         if route is None:
             route = Route(name=route_name, sector=sector, created_by=current_user.id)
@@ -167,11 +168,8 @@ class RouteForm(FlaskForm):
         a route object.
         """
         route = Route.query.get(route_id)
-        if len(self.name.data) > 0:
-            route_name = self.name.data.strip().title()
-            route.name = route_name
-
-        sector_name = self.sector.data.strip().title()
+        route.name = get_formatted_name(self.name.data)
+        sector_name = get_formatted_name(self.sector.data)
         sector = Sector.query.filter_by(name=sector_name).first()
         if sector is None:
             sector = Sector(name=sector_name, area_id=route.sector.area_id)
@@ -181,3 +179,11 @@ class RouteForm(FlaskForm):
             setattr(route, field, getattr(self, field).data)
 
         return route
+
+
+def get_formatted_name(name: str) -> str:
+    """
+    Return the name of the route in the correct format. It is stripped of whitespace
+    and capitalized.
+    """
+    return name.strip().lower().title()
