@@ -40,7 +40,7 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
                 os.environ["CLIMBZ_DB_URI"] == "sqlite:///test_100.db"
             ), "The DB URI is not set to the test DB"
             assert os.environ["PROD"] == "0", "PROD must be set to 0"
-            os.system("docker compose up -d")
+            os.system("docker compose up --build -d")
 
         driver_options = webdriver.ChromeOptions()
         driver_options.add_argument("--headless")
