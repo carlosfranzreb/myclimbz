@@ -4,12 +4,6 @@ docstring of the plot_data() function in `main.js`. Given that the x- and y-axes
 processed independently, we don't need to test all possible combinations of axes. We
 therefore test all possible y-axes for the x-axis "Area", and then all possible x-axes
 for the y-axis "# of climbs".
-
-Useful commands when implementing tests:
-
-- Command to run these tests: pytest -s tests/test_plots.py
-- Command to see open ports: lsof -i -P | grep -i "listen"
-- Command to kill process on port: kill $(lsof -t -i:5000)
 """
 
 import json
