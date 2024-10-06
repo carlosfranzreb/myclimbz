@@ -30,9 +30,7 @@ class SessionForm(FlaskForm):
     conditions = IntegerRangeField(
         "Conditions",
         validators=[
-            NumberRange(
-                min=1, max=5, message="Please enter a landing score between 1 and 5."
-            )
+            NumberRange(min=1, max=5, message="Rate the conditions from 1 to 5.")
         ],
         default=3,
     )
@@ -56,6 +54,8 @@ class SessionForm(FlaskForm):
         if session is not None:
             self.date.errors.append("You already have a session on that date and area.")
             return False
+
+        return True
 
     @classmethod
     def create_empty(cls, is_edit: bool = False) -> SessionForm:
