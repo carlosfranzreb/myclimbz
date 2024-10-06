@@ -1,6 +1,6 @@
 # myclimbz developer guide
 
-This guide is for developers: how to run and develop the app.
+This guide is for developers: how to run and develop the app. Information about deployment can be found in `./DEPLOY.md`.
 
 ## Index
 
