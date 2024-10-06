@@ -1,6 +1,5 @@
 import os
 from typing import Generator
-from time import sleep
 
 import pytest
 from selenium import webdriver
@@ -17,10 +16,7 @@ HOME_TITLE = "myclimbz - Home"
 
 @pytest.fixture(scope="session")
 def db_session() -> Session:
-    """Load the test database and create a session."""
-    engine = create_engine("sqlite:///instance/test_100.db")
-    session = Session(engine)
-    return session
+    return Session(create_engine("sqlite:///instance/test_100.db"))
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -53,6 +49,7 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
     finally:
         if not is_ci:
             os.system("docker compose down")
+            os.system("git checkout instance/test_100.db")
         driver.quit()
 
 
