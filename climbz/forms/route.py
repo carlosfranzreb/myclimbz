@@ -81,7 +81,7 @@ class RouteForm(FlaskForm):
         form.height.unit = "m"
         form.inclination.unit = "°"
         form.name.toggle_ids = (
-            "sector,height,inclination,sit_start,latitude,longitude,comment,link"
+            "height,inclination,sit_start,latitude,longitude,comment,link"
         )
 
         session_id = flask_session["session_id"]
@@ -93,16 +93,23 @@ class RouteForm(FlaskForm):
 
         # get existing sectors and routes that have already been tried in this session
         sectors = Sector.query.filter_by(area_id=area_id).order_by(Sector.name).all()
-        sector_names = [sector.name for sector in sectors]
-        form.sector.datalist = sector_names
+        form.sector.datalist = [sector.name for sector in sectors]
+
         tried_route_ids = [climb.route.id for climb in climbs]
         routes = list()
         for sector in sectors:
             routes += [
                 route for route in sector.routes if route.id not in tried_route_ids
             ]
-        route_names = sorted([route.name for route in routes])
-        form.name.datalist = route_names  # TODO: should change according to sector
+        form.name.datalist = sorted([route.name for route in routes])
+
+        form.name.relation_field = "sector"
+        form.name.relation_data = [0] * len(form.name.datalist)
+        for sector in sectors:
+            for route in sector.routes:
+                form.name.relation_data[form.name.datalist.index(route.name)] = (
+                    form.sector.datalist.index(sector.name)
+                )
 
         # add the last sector of the current session if possible
         sectors = [c.route.sector for c in climbs]
