@@ -208,10 +208,8 @@ def test_add_climb_of_existing_route(driver, db_session, started_session_id) -> 
     Add a climb of an existing route to a session. The session was started
     by the previous test.
 
-    Only the route name is required to add a climb.
-
-    TODO: this test is failing because instead of using the existing route,
-        a new one is created in sector "Unknown".
+    Only the route name is required to add a climb. The sector is inferred from
+    the route name, as it already exists in the database.
     """
 
     # get the current number of routes in the database and the route ID
@@ -240,4 +238,4 @@ def test_add_climb_of_existing_route(driver, db_session, started_session_id) -> 
     assert n_routes_after == n_routes_before
 
     # delete the created climb
-    db_session.execute(f"DELETE FROM climb WHERE id = {results[0][0]}")
+    db_session.execute(text(f"DELETE FROM climb WHERE id = {results[0][0]}"))
