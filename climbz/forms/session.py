@@ -38,6 +38,25 @@ class SessionForm(FlaskForm):
     )
     comment = StringField("Comment", validators=[Optional()], widget=TextArea())
 
+    def validate(self) -> bool:
+        """
+        Check if the form is valid. Besides the field validators, the session must be
+        unique, i.e. the climber-area-date combination must be unique.
+        """
+        if not super().validate():
+            return False
+
+        area = self.get_area()
+        if area.id is None:
+            return True
+
+        session = Session.query.filter_by(
+            climber_id=current_user.id, area_id=area.id, date=self.date.data
+        ).first()
+        if session is not None:
+            self.date.errors.append("You already have a session on that date and area.")
+            return False
+
     @classmethod
     def create_empty(cls, is_edit: bool = False) -> SessionForm:
         """
