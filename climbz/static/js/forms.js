@@ -52,7 +52,7 @@ function datalistToggle(input_id, element_ids, relation_field, relation_data) {
 		let related_datalist = document.getElementById(
 			relation_field + "-list"
 		);
-		relation_data_arr = relation_data
+		let relation_data_arr = relation_data
 			.replace(/[\[\]]/g, "")
 			.split(",")
 			.map((x) => parseInt(x));
