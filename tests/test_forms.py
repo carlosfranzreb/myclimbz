@@ -51,6 +51,8 @@ def started_session_id(driver, db_session) -> Generator:
     """
     Start a session on an existing area and return its ID. The session will be
     deleted after the test is done.
+
+    `test_create_session_on_existing_area` checks that the session was properly created.
     """
 
     # create the session
@@ -71,9 +73,7 @@ def started_session_id(driver, db_session) -> Generator:
     )
     results = db_session.execute(sql_query).fetchall()
     yield results[0][0]
-
-    # delete the created session
-    db_session.execute(f"DELETE FROM climbing_session WHERE id = {results[0][0]}")
+    stop_and_delete_session(driver, db_session, results[0][0])
 
 
 def start_session(
@@ -91,14 +91,25 @@ def start_session(
     Returns:
         bool: True if the form was accepted.
     """
-
     form_accepted = fill_form(
         driver,
         "start_session",
-        {"area": area, "date": date.strftime("%d.%m.%Y")},
+        {"area": area, "date": date.strftime("%d.%m.%Y") if date else ""},
         expect_success=expect_success,
     )
     return form_accepted
+
+
+def stop_and_delete_session(
+    driver: webdriver.Chrome, db_session, session_id: int
+) -> None:
+    """
+    Stop and delete the current session.
+    """
+    driver.find_element(By.ID, "stop_session").click()
+    WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
+    db_session.execute(text(f"DELETE FROM climbing_session WHERE id = {session_id}"))
+    db_session.commit()
 
 
 def fill_form(
@@ -156,7 +167,7 @@ def test_create_invalid_session(driver) -> None:
 
     for data in [
         {"area": "", "date": EXISTING_OBJECTS["session_date"]},
-        {"area": EXISTING_OBJECTS["area"], "date": ""},
+        {"area": EXISTING_OBJECTS["area"], "date": None},
         {
             "area": EXISTING_OBJECTS["area"],
             "date": EXISTING_OBJECTS["session_date"],
@@ -168,7 +179,9 @@ def test_create_invalid_session(driver) -> None:
         assert not form_accepted
 
 
-def test_create_session_on_existing_area(driver, db_session) -> None:
+def test_create_session_on_existing_area(
+    driver, db_session, started_session_id
+) -> None:
     """
     Start a session on an existing area.
     """
@@ -177,19 +190,13 @@ def test_create_session_on_existing_area(driver, db_session) -> None:
     n_areas_query = text("SELECT COUNT(*) FROM area")
     n_areas_before = db_session.execute(n_areas_query).fetchall()[0][0]
 
-    # fill the form to start a session on an existing area
-    area = EXISTING_OBJECTS["area"]
-    form_accepted = start_session(driver, area, EXISTING_OBJECTS["session_date"])
-    assert form_accepted
-    sleep(2)
-
     # check that the session was created
     sql_query = text(
         f"""
         SELECT id FROM climbing_session
         WHERE date = '{NEW_OBJECTS["session_date"].strftime("%Y-%m-%d")}'
         AND climber_id = {CLIMBER_ID}
-        AND area_id = (SELECT id FROM area WHERE name = '{area}');
+        AND area_id = (SELECT id FROM area WHERE name = '{EXISTING_OBJECTS["area"]}');
         """
     )
     results = db_session.execute(sql_query).fetchall()
@@ -198,9 +205,6 @@ def test_create_session_on_existing_area(driver, db_session) -> None:
     # check that the number of areas in the database did not change
     n_areas_after = db_session.execute(n_areas_query).fetchall()[0][0]
     assert n_areas_after == n_areas_before
-
-    # delete the created session
-    db_session.execute(f"DELETE FROM climbing_session WHERE id = {results[0][0]}")
 
 
 def test_add_climb_of_existing_route(driver, db_session, started_session_id) -> None:
@@ -239,3 +243,4 @@ def test_add_climb_of_existing_route(driver, db_session, started_session_id) -> 
 
     # delete the created climb
     db_session.execute(text(f"DELETE FROM climb WHERE id = {results[0][0]}"))
+    db_session.commit()

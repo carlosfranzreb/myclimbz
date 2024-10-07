@@ -43,7 +43,7 @@
                 {% if open_session %}
                 <li><a id="add_climb" class="nav-link" href="{{ url_for('climbs.add_climb') }}">Add climb</a></li>
                 <li>
-                    <a class="nav-link" href="{{ url_for('sessions.stop_session') }}">
+                    <a id="stop_session" class="nav-link" href="{{ url_for('sessions.stop_session') }}">
                         Stop
                         {% if open_session.is_project_search %}
                         project search

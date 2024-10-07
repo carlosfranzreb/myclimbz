@@ -31,6 +31,7 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
     is_ci = os.environ.get("CI", False)
     try:
         if not is_ci:
+            os.system("git checkout instance/test_100.db")
             assert os.environ["DISABLE_LOGIN"] == "1", "DISABLE_LOGIN must be set to 1"
             assert (
                 os.environ["CLIMBZ_DB_URI"] == "sqlite:///test_100.db"
