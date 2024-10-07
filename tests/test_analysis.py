@@ -6,7 +6,6 @@ therefore test all possible y-axes for the x-axis "Area", and then all possible 
 for the y-axis "# of climbs".
 """
 
-import json
 from time import sleep
 from collections import Counter
 from datetime import datetime

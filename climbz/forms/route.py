@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from flask import session as flask_session
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import (
@@ -14,7 +13,7 @@ from wtforms import (
 from wtforms.validators import Optional, DataRequired, NumberRange
 from wtforms.widgets import TextArea
 
-from climbz.models import Route, Sector, Session
+from climbz.models import Route, Sector
 from climbz.forms.utils import format_name
 
 
