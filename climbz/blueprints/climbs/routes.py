@@ -33,7 +33,9 @@ def add_climb() -> str:
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
         invalid_climb = (
-            not climb_form.validate_from_name(route_form.name.data)
+            not climb_form.validate_from_name(
+                route_form.name.data, route_form.sector.data
+            )
             if not is_project_search
             else False
         )

@@ -74,8 +74,8 @@ class RouteForm(FlaskForm):
         Create the form and add choices to the select fields.
 
         - All sectors are added to the sector field's datalist.
-        - All routes that have not been tried in this session are added to the name
-            field's datalist.
+        - All routes of this area are added to the name field's datalist.
+        - A relation is created between the name and sector fields.
         """
         form = cls()
         form.height.unit = "m"
@@ -84,37 +84,23 @@ class RouteForm(FlaskForm):
             "height,inclination,sit_start,latitude,longitude,comment,link"
         )
 
-        session_id = flask_session["session_id"]
-        if session_id != "project_search":
-            session = Session.query.get(session_id)
-            climbs = session.climbs
-        else:
-            climbs = list()
-
-        # get existing sectors and routes that have already been tried in this session
+        # get all sectors and routes of this area
         sectors = Sector.query.filter_by(area_id=area_id).order_by(Sector.name).all()
         form.sector.datalist = [sector.name for sector in sectors]
 
-        tried_route_ids = [climb.route.id for climb in climbs]
         routes = list()
         for sector in sectors:
-            routes += [
-                route for route in sector.routes if route.id not in tried_route_ids
-            ]
+            routes += [route for route in sector.routes]
         form.name.datalist = sorted([route.name for route in routes])
 
         form.name.relation_field = "sector"
         form.name.relation_data = [0] * len(form.name.datalist)
         for sector in sectors:
             for route in sector.routes:
-                form.name.relation_data[form.name.datalist.index(route.name)] = (
-                    form.sector.datalist.index(sector.name)
-                )
-
-        # add the last sector of the current session if possible
-        sectors = [c.route.sector for c in climbs]
-        if len(sectors) > 0:
-            form.sector.data = sectors[-1].name
+                if route.name in form.name.datalist:
+                    form.name.relation_data[form.name.datalist.index(route.name)] = (
+                        form.sector.datalist.index(sector.name)
+                    )
 
         return form
 
