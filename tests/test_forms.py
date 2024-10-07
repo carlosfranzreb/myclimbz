@@ -1,6 +1,9 @@
 """
 Tests the forms used to start a session and add climbs to it, while using either existing
 areas and routes or creating new ones.
+
+Running the tests together provides more thorough testing, because previous climbs affect
+how the form behaves.
 """
 
 from typing import Generator
@@ -12,20 +15,21 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException
 from sqlalchemy import text
 
-from .conftest import HOME_TITLE
+from .conftest import HOME_TITLE, HOME_URL
 
 
 CLIMBER_ID = 1
 EXISTING_OBJECTS = {
     "area": "A1",
-    "sector": "A1_S1",
+    "sector": "A1 S1",
     "session_date": datetime(2023, 1, 1),
 }
 NEW_OBJECTS = {
     "area": "A3",
-    "sector": "A3_S1",
+    "sector": "A3 S1",
     "route": "Terranova 2",
     "session_date": datetime(2023, 1, 2),
 }
@@ -56,6 +60,7 @@ def started_session_id(driver, db_session) -> Generator:
     """
 
     # create the session
+    stop_session(driver, db_session)
     date_obj = NEW_OBJECTS["session_date"]
     area = EXISTING_OBJECTS["area"]
     form_accepted = start_session(driver, area, date_obj)
@@ -73,7 +78,7 @@ def started_session_id(driver, db_session) -> Generator:
     )
     results = db_session.execute(sql_query).fetchall()
     yield results[0][0]
-    stop_and_delete_session(driver, db_session, results[0][0])
+    stop_session(driver, db_session)
 
 
 def start_session(
@@ -100,16 +105,15 @@ def start_session(
     return form_accepted
 
 
-def stop_and_delete_session(
-    driver: webdriver.Chrome, db_session, session_id: int
-) -> None:
+def stop_session(driver: webdriver.Chrome, db_session) -> None:
     """
     Stop and delete the current session.
     """
-    driver.find_element(By.ID, "stop_session").click()
+    try:
+        driver.find_element(By.ID, "stop_session").click()
+    except NoSuchElementException:
+        driver.get(HOME_URL)
     WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
-    db_session.execute(text(f"DELETE FROM climbing_session WHERE id = {session_id}"))
-    db_session.commit()
 
 
 def fill_form(
@@ -133,9 +137,8 @@ def fill_form(
     """
 
     # check that we are in the home page
-    home_url = "http://127.0.0.1:5000"
-    if driver.current_url not in [home_url, home_url + "/"]:
-        driver.get(home_url)
+    if driver.current_url not in [HOME_URL, HOME_URL + "/"]:
+        driver.get(HOME_URL)
         WebDriverWait(driver, 30).until(EC.title_is(HOME_TITLE))
 
     # open and fill the form
@@ -154,7 +157,7 @@ def fill_form(
     else:
         WebDriverWait(driver, 10).until_not(EC.title_is(HOME_TITLE))
 
-    return driver.current_url in [home_url, home_url + "/"]
+    return driver.current_url in [HOME_URL, HOME_URL + "/"]
 
 
 def test_create_invalid_session(driver) -> None:
@@ -179,9 +182,7 @@ def test_create_invalid_session(driver) -> None:
         assert not form_accepted
 
 
-def test_create_session_on_existing_area(
-    driver, db_session, started_session_id
-) -> None:
+def test_create_session_on_existing_area(db_session, started_session_id) -> None:
     """
     Start a session on an existing area.
     """
@@ -209,11 +210,9 @@ def test_create_session_on_existing_area(
 
 def test_add_climb_of_existing_route(driver, db_session, started_session_id) -> None:
     """
-    Add a climb of an existing route to a session. The session was started
-    by the previous test.
-
-    Only the route name is required to add a climb. The sector is inferred from
-    the route name, as it already exists in the database.
+    Add a climb of an existing route to a session. Only the route name is required to
+    add a climb. The sector is inferred from the route name, as it already exists in
+    the database.
     """
 
     # get the current number of routes in the database and the route ID
@@ -224,7 +223,6 @@ def test_add_climb_of_existing_route(driver, db_session, started_session_id) -> 
     # fill the form to add a climb of an existing route
     form_accepted = fill_form(driver, "add_climb", {"name": route_name})
     assert form_accepted
-    sleep(10)
 
     # check that the climb was created
     sql_query = text(
@@ -241,6 +239,157 @@ def test_add_climb_of_existing_route(driver, db_session, started_session_id) -> 
     n_routes_after = db_session.execute(n_routes_query).fetchall()[0][0]
     assert n_routes_after == n_routes_before
 
-    # delete the created climb
-    db_session.execute(text(f"DELETE FROM climb WHERE id = {results[0][0]}"))
-    db_session.commit()
+
+def test_add_climb_of_new_route_and_new_sector(
+    driver, db_session, started_session_id
+) -> None:
+    """
+    Add a climb of a new route to a session.
+    """
+
+    # get the current number of sectors, routes and climbs in the database
+    tables = ["sector", "route", "climb"]
+    n_before = dict()
+    for table in tables:
+        query = text(f"SELECT COUNT(*) FROM {table}")
+        n_before[table] = db_session.execute(query).fetchall()[0][0]
+
+    # fill the form to add a climb of a new route
+    sector = NEW_OBJECTS["sector"]
+    route = NEW_OBJECTS["route"]
+    form_accepted = fill_form(
+        driver,
+        "add_climb",
+        {"name": route, "sector": sector},
+    )
+    assert form_accepted
+
+    # check that the sector, route and climb were created
+    results = db_session.execute(
+        text(f"SELECT id FROM sector WHERE name = '{sector}';")
+    ).fetchall()
+    assert len(results) == 1
+    sector_id = results[0][0]
+
+    results = db_session.execute(
+        text(
+            f"SELECT id FROM route WHERE name = '{route}' AND sector_id = {sector_id};"
+        )
+    ).fetchall()
+    assert len(results) == 1
+    route_id = results[0][0]
+
+    results = db_session.execute(
+        text(
+            f"""
+            SELECT id FROM climb
+            WHERE session_id = {started_session_id} AND route_id = {route_id};
+            """
+        )
+    ).fetchall()
+    assert len(results) == 1
+
+    # check that the number of routes, sectors and climbs increased by 1
+    for table in tables:
+        query = text(f"SELECT COUNT(*) FROM {table}")
+        n_after = db_session.execute(query).fetchall()[0][0]
+        assert n_after == n_before[table] + 1
+
+
+def test_add_climb_of_new_route_and_existing_sector(
+    driver, db_session, started_session_id
+) -> None:
+    """
+    Add a climb of a new route to a session.
+    """
+
+    # get the current number of sectors, routes and climbs in the database
+    tables = ["sector", "route", "climb"]
+    n_before = dict()
+    for table in tables:
+        query = text(f"SELECT COUNT(*) FROM {table}")
+        n_before[table] = db_session.execute(query).fetchall()[0][0]
+
+    # fill the form to add a climb of a new route
+    sector = EXISTING_OBJECTS["sector"]
+    route = NEW_OBJECTS["route"] + "1"
+    form_accepted = fill_form(
+        driver,
+        "add_climb",
+        {"name": route, "sector": sector},
+    )
+    assert form_accepted
+
+    # check that the route and climb were created
+    sector_id = db_session.execute(
+        text(f"SELECT id FROM sector WHERE name = '{sector}';")
+    ).fetchall()[0][0]
+    results = db_session.execute(
+        text(
+            f"SELECT id FROM route WHERE name = '{route}' AND sector_id = {sector_id};"
+        )
+    ).fetchall()
+    assert len(results) == 1
+    route_id = results[0][0]
+
+    results = db_session.execute(
+        text(
+            f"""
+            SELECT id FROM climb
+            WHERE session_id = {started_session_id} AND route_id = {route_id};
+            """
+        )
+    ).fetchall()
+    assert len(results) == 1
+
+    # check that the number of routes, sectors and climbs increased by 1
+    for table in tables:
+        query = text(f"SELECT COUNT(*) FROM {table}")
+        n_after = db_session.execute(query).fetchall()[0][0]
+        if table == "sector":
+            assert n_after == n_before[table]
+        else:
+            assert n_after == n_before[table] + 1, table
+
+
+def test_create_session_on_new_area(driver, db_session) -> None:
+    """
+    Start a session on a new area.
+    """
+    stop_session(driver, db_session)
+
+    # get the current number of areas in the database
+    n_areas_query = text("SELECT COUNT(*) FROM area")
+    n_areas_before = db_session.execute(n_areas_query).fetchall()[0][0]
+
+    # start a session on a new area
+    date = EXISTING_OBJECTS["session_date"]
+    area = NEW_OBJECTS["area"]
+    form_accepted = start_session(driver, area, date)
+    assert form_accepted
+    sleep(2)
+
+    # check that the area and the session were created
+    sql_query = text(f"SELECT id FROM area WHERE name = '{area}'")
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 1
+    area_id = results[0][0]
+
+    sql_query = text(
+        f"""
+        SELECT id FROM climbing_session
+        WHERE date = '{date.strftime("%Y-%m-%d")}'
+        AND climber_id = {CLIMBER_ID}
+        AND area_id = {area_id};
+        """
+    )
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 1
+
+    # check that the number of areas in the database increased by 1
+    n_areas_after = db_session.execute(n_areas_query).fetchall()[0][0]
+    assert n_areas_after == n_areas_before + 1
+
+    # delete the created area and session
+    db_session.execute(text(f"DELETE FROM area WHERE id = {area_id}"))
+    stop_session(driver, db_session)

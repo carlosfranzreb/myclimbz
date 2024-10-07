@@ -1,5 +1,6 @@
 import os
 from typing import Generator
+import sys
 
 import pytest
 from selenium import webdriver
@@ -12,6 +13,7 @@ from climbz import create_app
 
 
 HOME_TITLE = "myclimbz - Home"
+HOME_URL = "http://127.0.0.1:5000"
 
 
 @pytest.fixture(scope="session")
@@ -40,8 +42,9 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
             os.system("docker compose up --build -d")
 
         driver_options = webdriver.ChromeOptions()
-        driver_options.add_argument("--headless")
         driver_options.add_argument("--window-size=2560,1440")
+        if "debugpy" not in sys.modules:
+            driver_options.add_argument("--headless")
         driver = webdriver.Chrome(options=driver_options)
         driver.get("http://127.0.0.1:5000")
         WebDriverWait(driver, 30).until(EC.title_is("myclimbz - Home"))
