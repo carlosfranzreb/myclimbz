@@ -148,9 +148,9 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
     db.session.add(models.Area(name="A1", rock_type_id=1, created_by=1))
     db.session.add(models.Area(name="A2", rock_type_id=2, created_by=2))
 
-    db.session.add(models.Sector(name="A1_S1", area_id=1, created_by=1))
-    db.session.add(models.Sector(name="A1_S2", area_id=1, created_by=2))
-    db.session.add(models.Sector(name="A2_S1", area_id=2, created_by=2))
+    db.session.add(models.Sector(name="A1 S1", area_id=1, created_by=1))
+    db.session.add(models.Sector(name="A1 S2", area_id=1, created_by=2))
+    db.session.add(models.Sector(name="A2 S1", area_id=2, created_by=2))
     sector_ids = [1, 2, 3]
 
     # create 4 sessions: 3 in A1, 1 in A2
