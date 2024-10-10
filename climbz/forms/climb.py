@@ -16,8 +16,8 @@ from wtforms import IntegerField, BooleanField, StringField
 from wtforms.validators import Optional
 from wtforms.widgets import TextArea
 
-from climbz.models import Route, Climb, Session
-
+from climbz.models import Route, Climb, Session, Sector
+from climbz.forms.utils import format_name
 
 FIELDS = [
     "n_attempts",
@@ -96,15 +96,22 @@ class ClimbForm(FlaskForm):
 
         return is_valid
 
-    def validate_from_name(self, route_name: str) -> bool:
-        return self.validate(Route.query.filter_by(name=route_name).first())
+    def validate_from_name(self, route_name: str, sector_name: str) -> bool:
+        route_name = format_name(route_name)
+        sector_name = format_name(sector_name)
+        sector = Sector.query.filter_by(name=sector_name).first()
+        route = (
+            Route.query.filter_by(name=route_name, sector_id=sector.id).first()
+            if sector is not None
+            else None
+        )
+        return self.validate(route)
 
     def get_object(self, route: Route) -> Climb:
         """Create a new climb object from the form data."""
         climb = Climb(
             **{
-                "route_id": route.id if route is not None else None,
-                "climber_id": current_user.id,
+                "route_id": route.id,
                 "session_id": flask_session["session_id"],
             }
         )

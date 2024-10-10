@@ -1,6 +1,6 @@
 # myclimbz developer guide
 
-This guide is for developers: how to run and develop the app.
+This guide is for developers: how to run and develop the app. Information about deployment can be found in `./DEPLOY.md`.
 
 ## Index
 
@@ -39,6 +39,25 @@ This is how it is done for the example mentioned above:
 ```python
 self.is_project_search.toggle_ids = "date,conditions"
 ```
+
+### Toggling defined by two fields
+
+The toggling functionlaity described above can also be applied to fields with datalists. When the value in the input field can be found in the datalist, the toggling will be performed.
+
+Toggling can also be decided in conjunction with a related field. This is currently only being used by route names and their sectors, as together they must be unique. When the route name is part of the datalist, what happens with the toggling depends on the value of the sector field:
+
+- If the sector field is empty, it is automatically filled with the value found in the mapping of route names to sectors. If the route name is present in multiple sectors, the last occurrence will be passed. Toggling will then take place, as the route-sector combination exists in the database.
+- If the sector field is not empty and its value differs from the existing route-sector combination, it is considered a new route and hence toggling will not happen.
+- If the given sector matches with the one expected by the route, toggling occurs.
+
+The relationship is defined with two attributes that are added to the input (in our case here, the route name field):
+
+```python
+form.name.relation_field = "sector"
+form.name.relation_data = [0] * len(form.name.datalist)
+```
+
+The `relation_data` list maps indices of the route name's datalist to indices of the sector's datalist. You can find this implementation in `climbz/forms/route.py`.
 
 ## Creating filters
 

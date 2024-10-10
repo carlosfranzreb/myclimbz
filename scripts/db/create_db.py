@@ -1,7 +1,5 @@
 """
 Script to create the database and populate it with testing data.
-TODO: add projects
-TODO: add climbs of both climbers to the same route
 """
 
 from argparse import ArgumentParser
@@ -150,9 +148,9 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
     db.session.add(models.Area(name="A1", rock_type_id=1, created_by=1))
     db.session.add(models.Area(name="A2", rock_type_id=2, created_by=2))
 
-    db.session.add(models.Sector(name="A1_S1", area_id=1, created_by=1))
-    db.session.add(models.Sector(name="A1_S2", area_id=1, created_by=2))
-    db.session.add(models.Sector(name="A2_S1", area_id=2, created_by=2))
+    db.session.add(models.Sector(name="A1 S1", area_id=1, created_by=1))
+    db.session.add(models.Sector(name="A1 S2", area_id=1, created_by=2))
+    db.session.add(models.Sector(name="A2 S1", area_id=2, created_by=2))
     sector_ids = [1, 2, 3]
 
     # create 4 sessions: 3 in A1, 1 in A2
@@ -184,7 +182,7 @@ def add_testing_data(db: SQLAlchemy, n_routes: int) -> None:
             sector_id = random.choice(sector_ids)
             area_id = 1 if sector_id < 2 else 2
             route = models.Route(
-                name=name.strip(),
+                name=name.strip().lower().title(),
                 sit_start=bool(route_idx % 3),
                 sector_id=sector_id,
                 height=route_idx % 5 + 1,

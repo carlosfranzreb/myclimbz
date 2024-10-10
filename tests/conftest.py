@@ -1,6 +1,6 @@
 import os
 from typing import Generator
-from time import sleep
+import sys
 
 import pytest
 from selenium import webdriver
@@ -13,14 +13,12 @@ from climbz import create_app
 
 
 HOME_TITLE = "myclimbz - Home"
+HOME_URL = "http://127.0.0.1:5000"
 
 
 @pytest.fixture(scope="session")
 def db_session() -> Session:
-    """Load the test database and create a session."""
-    engine = create_engine("sqlite:///instance/test_100.db")
-    session = Session(engine)
-    return session
+    return Session(create_engine("sqlite:///instance/test_100.db"))
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -35,16 +33,18 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
     is_ci = os.environ.get("CI", False)
     try:
         if not is_ci:
+            os.system("git checkout instance/test_100.db")
             assert os.environ["DISABLE_LOGIN"] == "1", "DISABLE_LOGIN must be set to 1"
             assert (
                 os.environ["CLIMBZ_DB_URI"] == "sqlite:///test_100.db"
             ), "The DB URI is not set to the test DB"
             assert os.environ["PROD"] == "0", "PROD must be set to 0"
-            os.system("docker compose up -d")
+            os.system("docker compose up --build -d")
 
         driver_options = webdriver.ChromeOptions()
-        driver_options.add_argument("--headless")
         driver_options.add_argument("--window-size=2560,1440")
+        if "debugpy" not in sys.modules:
+            driver_options.add_argument("--headless")
         driver = webdriver.Chrome(options=driver_options)
         driver.get("http://127.0.0.1:5000")
         WebDriverWait(driver, 30).until(EC.title_is("myclimbz - Home"))
@@ -53,6 +53,7 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
     finally:
         if not is_ci:
             os.system("docker compose down")
+            os.system("git checkout instance/test_100.db")
         driver.quit()
 
 

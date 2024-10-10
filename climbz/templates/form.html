@@ -53,6 +53,8 @@
                             <!-- Add a datalist if the field has a datalist attribute -->
                             {% elif field.datalist %}
                                 {% set datalist_name = field.name + '-list' %}
+                                {% set relation_field = field.relation_field if field.relation_field is defined else "" %}
+                                {% set relation_data = field.relation_data | tojson if field.relation_data is defined else "" %}
                                 <datalist id="{{ field.name }}-list">
                                     {% for item in field.datalist %}
                                     <option value="{{ item }}"></option>
@@ -64,7 +66,7 @@
                                         class='form-control',
                                         list=datalist_name,
                                         autocomplete='off',
-                                        onchange='datalistToggle("' + field.id + '", "' + datalist_name + '", "' + field.toggle_ids + '")'
+                                        onchange='datalistToggle("' + field.id + '", "' + field.toggle_ids + '", "' + relation_field + '", "' + relation_data + '")'
                                     ) }}
                                 {% else %}
                                     {{ field(id=field.id, class='form-control', list=datalist_name, autocomplete='off') }}
