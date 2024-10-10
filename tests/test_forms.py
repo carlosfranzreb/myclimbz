@@ -367,7 +367,7 @@ def test_create_session_on_new_area(driver, db_session) -> None:
     area = NEW_OBJECTS["area"]
     form_accepted = start_session(driver, area, date)
     assert form_accepted
-    sleep(5)
+    sleep(2)
 
     # check that the area and the session were created
     sql_query = text(f"SELECT id FROM area WHERE name = '{area}'")
