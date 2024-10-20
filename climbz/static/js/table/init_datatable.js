@@ -1,8 +1,5 @@
+// Initialize and sort the DataTable
 function init_datatable() {
-	// Check if the DataTable already exists
-	if (window.data_table !== null) return;
-
-	// Initialize the DataTable
 	window.data_table = new simpleDatatables.DataTable("#content_table", {
 		perPage: 100,
 		perPageSelect: false,
@@ -10,7 +7,6 @@ function init_datatable() {
 		nextPrev: false,
 	});
 
-	// Sort the DataTable
 	let table_element = document.getElementById("content_table");
 	let sort_column_idx = table_element.getAttribute("data-sort-col");
 	let sort_order = table_element.getAttribute("data-sort-order");
