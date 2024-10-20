@@ -39,12 +39,7 @@ class Route(db.Model):
 
     @property
     def sent(self) -> bool:
-        """Whether a climber has sent this route."""
-        return any(
-            climb.sent
-            for climb in self.climbs
-            if climb.session.climber_id == current_user.id
-        )
+        return self.sent_by(current_user.id)
 
     @property
     def tried(self) -> bool:
@@ -60,12 +55,13 @@ class Route(db.Model):
         """Whether the climber has marked this route as a project."""
         return self in current_user.projects
 
+    def opinion_from(self, climber_id: int) -> Opinion:
+        """Return the opinion of a climber about this route."""
+        return Opinion.query.filter_by(route_id=self.id, climber_id=climber_id).first()
+
     @property
     def opinion(self):
-        """The opinion of a climber about this route."""
-        return Opinion.query.filter_by(
-            route_id=self.id, climber_id=current_user.id
-        ).first()
+        return self.opinion_from(current_user.id)
 
     @property
     def n_sends(self) -> int:

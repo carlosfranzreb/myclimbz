@@ -87,14 +87,17 @@ class Climber(db.Model, UserMixin):
         """Return the highest grade sent by the climber."""
         if not self.climbs or len(self.climbs) == 0:
             return None
-        else:
-            max_grade = Grade.query.filter_by(level=0).first()
-            for climb in self.climbs:
-                opinion = climb.route.opinion
-                if opinion is not None and opinion.grade is not None:
-                    if opinion.grade.level > max_grade.level:
-                        max_grade = opinion.grade
-            return max_grade
+
+        max_grade = Grade.query.filter_by(level=0).first()
+        for climb in self.climbs:
+            if not climb.sent:
+                continue
+            opinion = climb.route.opinion_from(self.id)
+            if opinion is not None and opinion.grade is not None:
+                if opinion.grade.level > max_grade.level:
+                    max_grade = opinion.grade
+
+        return max_grade
 
     @property
     def n_sends(self) -> int:
