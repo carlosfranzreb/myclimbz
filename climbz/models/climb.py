@@ -14,3 +14,7 @@ class Climb(db.Model):
     session_id = db.Column(db.Integer, db.ForeignKey("climbing_session.id"))
 
     UniqueConstraint(route_id, session_id, name="unique_route_in_session")
+
+    @property
+    def climber_id(self):
+        return self.session.climber_id
