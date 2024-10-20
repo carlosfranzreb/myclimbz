@@ -51,7 +51,7 @@
             {% for climb in session.climbs %}
 
             <!-- Replace boolean "route.sent" with "yes or "no" -->
-            {% if climb.route.sent %}
+            {% if climb.sent %}
             {% set sent = "Yes" %}
             {% else %}
             {% set sent = "No" %}
