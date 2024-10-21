@@ -102,4 +102,8 @@ def delete_session(session_id: int) -> str:
     session = Session.query.get(session_id)
     db.session.delete(session)
     db.session.commit()
-    return redirect(flask_session.pop("call_from_url"))
+    last_url = flask_session.pop("call_from_url")
+    if last_url.endswith(f"/session/{session_id}"):
+        return redirect("/")
+    else:
+        return redirect(last_url)
