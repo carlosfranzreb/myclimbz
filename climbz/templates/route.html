@@ -79,7 +79,7 @@
                 <td onclick={{ onclick }}>{{ climb.session.date }}</td>
                 <td onclick={{ onclick }}>{{ climb.n_attempts }}</td>
                 <td onclick={{ onclick }}>{{ climb.session.conditions }}</td>
-                <td onclick={{ onclick }}>{{ climb.sent }}</td>
+                <td onclick={{ onclick }}>{{ "Yes" if climb.sent else "No" }}</td>
                 <td>
                     <a href="{{ url_for('climbs.edit_climb', climb_id=climb.id) }}">
                         {% include 'icons/edit.html' %}

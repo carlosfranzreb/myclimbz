@@ -50,15 +50,8 @@
         <tbody>
             {% for climb in session.climbs %}
 
-            <!-- Replace boolean "route.sent" with "yes or "no" -->
-            {% if climb.route.sent %}
-            {% set sent = "Yes" %}
-            {% else %}
-            {% set sent = "No" %}
-            {% endif %}
-
             {% set onclick = "window.location=\"" + url_for('routes.page_route', route_id=climb.route.id) + "\"" %}
-            {% if sent == "Yes" %}
+            {% if climb.sent %}
             <tr class="table-success">
                 {% else %}
             <tr>
@@ -66,7 +59,7 @@
                 <td onclick={{ onclick }}>{{ climb.route.name }}</td>
                 <td onclick={{ onclick }}>{{ climb.route.sector.name }}</td>
                 <td onclick={{ onclick }}>{{ climb.n_attempts }}</td>
-                <td onclick={{ onclick }}>{{ sent }}</td>
+                <td onclick={{ onclick }}>{{ "Yes" if climb.sent else "No" }}</td>
 
                 {% if session.climber_id == user_id %}
                     <td>

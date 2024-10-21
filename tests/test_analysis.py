@@ -63,7 +63,6 @@ def test_climbs_per_area(driver, db_session) -> None:
     """
     Ensures that the correct data is plotted for the 'Climbs sent/tried per Area' and
     'Success rate per Area' graphs. The areas are sorted alphabetically by name.
-    ! In DB, not in plot: Ghost Rider, Rámájama, Louis Je Master
     """
 
     sql_query = text(
