@@ -1,4 +1,4 @@
-const MOBILE_WIDTH = 800;
+const MOBILE_WIDTH = 900;
 
 // Initialize and sort the DataTable
 function init_datatable() {
