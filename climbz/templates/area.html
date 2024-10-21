@@ -75,7 +75,7 @@
                     <a href="{{ url_for('routes.edit_route', route_id=route.id) }}">
                         {% include 'icons/edit.html' %}
                     </a>
-                    <a href="{{ url_for('routes.delete_route', route_id=route.id) }}">
+                    <a href="{{ url_for('routes.delete_route', route_id=route.id) }}" onclick="return confirm('Are you sure you want to delete this route?');">
                         {% include 'icons/delete.html' %}
                     </a>
                     {% endif %}
