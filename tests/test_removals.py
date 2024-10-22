@@ -2,6 +2,13 @@
 Test that the deletion of objects works as expected. This means that the object is
 deleted from the database, as well as any orphaned objects that are no longer make
 sense to exist. Also, some objects cannot be deleted because other climbers use them.
+
+! TODO:
+
+1. fix test_delete_route
+2. add test_delete_opinion
+3. add test_delete_area
+4. add checks to test that only the owner can delete an object
 """
 
 from typing import Generator
@@ -72,7 +79,8 @@ def test_delete_climb(db_session, driver):
 def test_delete_shared_route(db_session, driver):
     """
     Test that deleting a shared route is not possible. A route is shared if another
-    climber has either climbed it or marked it as a project.
+    climber has either climbed it or marked it as a project. Here, we try to delete
+    a route that was created by the current climber but has been climbed by another.
     """
 
     # find a shared route
@@ -88,9 +96,32 @@ def test_delete_shared_route(db_session, driver):
     )
     results = db_session.execute(sql_query).fetchall()
     assert len(results) == 1
+    try_to_delete_route(db_session, driver, *results[0])
 
+
+def test_delete_shared_route_project(db_session, driver):
+    """
+    Same as above, but for a route that has been marked as a project by another climber.
+    """
+
+    # find a shared route
+    sql_query = text(
+        f"""
+        SELECT route.id, route.name
+        FROM route
+        JOIN climber_projects ON route.id = climber_projects.route_id
+        WHERE route.created_by = {CLIMBER_ID}
+        AND climber_projects.climber_id != {CLIMBER_ID}
+        LIMIT 1;
+        """
+    )
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 1
+    try_to_delete_route(db_session, driver, *results[0])
+
+
+def try_to_delete_route(db_session, driver, route_id: int, route_name: str):
     # go the route's page
-    route_id, route_name = results[0]
     driver.get(f"{HOME_URL}/route/{route_id}")
     WebDriverWait(driver, 10).until(EC.title_contains(route_name))
 
@@ -104,3 +135,106 @@ def test_delete_shared_route(db_session, driver):
     sleep(1)
     driver.refresh()
     WebDriverWait(driver, 10).until(EC.title_contains(route_name))
+
+    # check that the route was not deleted from the database
+    sql_query = text(f"SELECT * FROM route WHERE id = {route_id};")
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 1
+
+
+def test_delete_route(db_session, driver):
+    """
+    Deleting a route is possible if I am the creator and no one else is using it.
+    Climbs of that route should be deleted as well. And if any session is left empty,
+    it should be deleted too.
+    """
+    # find a route that it not shared
+    sql_query = text(
+        f"""
+        SELECT route.id, route.name
+        FROM route
+        WHERE route.created_by = {CLIMBER_ID}
+        AND route.id NOT IN (
+            SELECT route_id FROM climber_projects WHERE climber_id != {CLIMBER_ID}
+        )
+        AND route.id NOT IN (
+            SELECT climb.route_id
+            FROM climb
+            JOIN climbing_session ON climb.session_id = climbing_session.id
+            WHERE climbing_session.climber_id != {CLIMBER_ID}
+        )
+        LIMIT 1;
+        """
+    )
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 1
+    route_id, route_name = results[0]
+
+    # go the route's page
+    driver.get(f"{HOME_URL}/route/{route_id}")
+    WebDriverWait(driver, 10).until(EC.title_contains(route_name))
+
+    # try to delete the route
+    card = driver.find_elements(By.CLASS_NAME, "card")[0]
+    card.find_element(By.XPATH, "//a[contains(@href, 'delete')]").click()
+    WebDriverWait(driver, 10).until(EC.alert_is_present())
+    driver.switch_to.alert.accept()
+
+    # check that the route, climbs and empty sessions were deleted from the database
+    sql_query = text(f"SELECT * FROM route WHERE id = {route_id};")
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 0
+
+    sql_query = text(f"SELECT * FROM climb WHERE route_id = {route_id};")
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 0
+
+    sql_query = text(
+        """
+        SELECT climbing_session.id
+        FROM climbing_session
+        LEFT JOIN climb ON climbing_session.id = climb.session_id
+        WHERE climb.id IS NULL;
+        """
+    )
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 0
+
+
+def test_delete_session(db_session, driver):
+    """
+    Deleting my own session is always possible and cascades to all climbs in that session.
+    """
+
+    # find a shared session
+    sql_query = text(
+        f"""
+        SELECT climbing_session.id, climbing_session.date
+        FROM climbing_session
+        WHERE climbing_session.climber_id = {CLIMBER_ID}
+        LIMIT 1;
+        """
+    )
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 1
+
+    # go to the session's page
+    session_id, session_date = results[0]
+    driver.get(f"{HOME_URL}/session/{session_id}")
+    WebDriverWait(driver, 10).until(EC.title_contains("Session"))
+
+    # delete the session
+    card = driver.find_elements(By.CLASS_NAME, "card")[0]
+    card.find_element(By.XPATH, "//a[contains(@href, 'delete')]").click()
+    WebDriverWait(driver, 10).until(EC.alert_is_present())
+    driver.switch_to.alert.accept()
+
+    # check that the session and its climbs were deleted from the database
+    sleep(1)
+    sql_query = text(f"SELECT * FROM climbing_session WHERE id = {session_id};")
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 0
+
+    sql_query = text(f"SELECT * FROM climb WHERE session_id = {session_id};")
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 0
