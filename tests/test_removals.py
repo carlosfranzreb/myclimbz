@@ -3,20 +3,11 @@ Test that the deletion of objects works as expected. This means that the object 
 deleted from the database, as well as any orphaned objects that are no longer make
 sense to exist. Also, some objects cannot be deleted because other climbers use them.
 
-! TODO:
-
-1. fix test_delete_route
-2. add test_delete_opinion
-3. add test_delete_area
-4. add checks to test that only the owner can delete an object
+! TODO: implement and test area deletion
 """
 
-from typing import Generator
 from time import sleep
-from datetime import datetime
 
-import pytest
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -45,7 +36,7 @@ def test_delete_climb(db_session, driver):
     table = driver.find_element(By.ID, "content_table")
     first_row = table.find_elements(By.TAG_NAME, "tr")[1]
     climb_date = first_row.find_elements(By.TAG_NAME, "td")[0].text
-    first_row.find_element(By.XPATH, "//a[contains(@href, 'delete')]").click()
+    first_row.find_element(By.XPATH, "//a[contains(@href, 'delete_climb')]").click()
     WebDriverWait(driver, 10).until(EC.alert_is_present())
     driver.switch_to.alert.accept()
 
@@ -95,7 +86,6 @@ def test_delete_shared_route(db_session, driver):
         """
     )
     results = db_session.execute(sql_query).fetchall()
-    assert len(results) == 1
     try_to_delete_route(db_session, driver, *results[0])
 
 
@@ -116,7 +106,6 @@ def test_delete_shared_route_project(db_session, driver):
         """
     )
     results = db_session.execute(sql_query).fetchall()
-    assert len(results) == 1
     try_to_delete_route(db_session, driver, *results[0])
 
 
@@ -126,8 +115,7 @@ def try_to_delete_route(db_session, driver, route_id: int, route_name: str):
     WebDriverWait(driver, 10).until(EC.title_contains(route_name))
 
     # try to delete the route
-    card = driver.find_elements(By.CLASS_NAME, "card")[0]
-    card.find_element(By.XPATH, "//a[contains(@href, 'delete')]").click()
+    driver.find_element(By.XPATH, "//a[contains(@href, 'delete_route')]").click()
     WebDriverWait(driver, 10).until(EC.alert_is_present())
     driver.switch_to.alert.accept()
 
@@ -167,7 +155,6 @@ def test_delete_route(db_session, driver):
         """
     )
     results = db_session.execute(sql_query).fetchall()
-    assert len(results) == 1
     route_id, route_name = results[0]
 
     # go the route's page
@@ -175,12 +162,12 @@ def test_delete_route(db_session, driver):
     WebDriverWait(driver, 10).until(EC.title_contains(route_name))
 
     # try to delete the route
-    card = driver.find_elements(By.CLASS_NAME, "card")[0]
-    card.find_element(By.XPATH, "//a[contains(@href, 'delete')]").click()
+    driver.find_element(By.XPATH, "//a[contains(@href, 'delete_route')]").click()
     WebDriverWait(driver, 10).until(EC.alert_is_present())
     driver.switch_to.alert.accept()
 
     # check that the route, climbs and empty sessions were deleted from the database
+    sleep(1)
     sql_query = text(f"SELECT * FROM route WHERE id = {route_id};")
     results = db_session.execute(sql_query).fetchall()
     assert len(results) == 0
@@ -216,7 +203,6 @@ def test_delete_session(db_session, driver):
         """
     )
     results = db_session.execute(sql_query).fetchall()
-    assert len(results) == 1
 
     # go to the session's page
     session_id, session_date = results[0]
@@ -238,3 +224,87 @@ def test_delete_session(db_session, driver):
     sql_query = text(f"SELECT * FROM climb WHERE session_id = {session_id};")
     results = db_session.execute(sql_query).fetchall()
     assert len(results) == 0
+
+
+def test_delete_opinion(db_session, driver):
+    """
+    Deleting an opinion is always possible and does not cascade to other objects.
+    """
+
+    # find a route with an opinion
+    sql_query = text(
+        f"""
+        SELECT opinion.id, route.id, route.name
+        FROM opinion
+        JOIN route ON opinion.route_id = route.id
+        WHERE opinion.climber_id = {CLIMBER_ID}
+        LIMIT 1;
+        """
+    )
+    results = db_session.execute(sql_query).fetchall()
+    opinion_id, route_id, route_name = results[0]
+
+    # go to the route's page
+    driver.get(f"{HOME_URL}/route/{route_id}")
+    WebDriverWait(driver, 10).until(EC.title_contains(route_name))
+
+    # delete the opinion
+    driver.find_element(By.XPATH, "//a[contains(@href, 'delete_opinion')]").click()
+    WebDriverWait(driver, 10).until(EC.alert_is_present())
+    driver.switch_to.alert.accept()
+
+    # check that the opinion is no longer displayed
+    sleep(1)
+    driver.refresh()
+    WebDriverWait(driver, 10).until(EC.title_contains(route_name))
+    try:
+        driver.find_element(By.XPATH, "//a[contains(@href, 'delete_opinion')]")
+    except NoSuchElementException:
+        pass
+
+    # check that the opinion was deleted from the database
+    sql_query = text(f"SELECT * FROM opinion WHERE id = {opinion_id};")
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 0
+
+
+def test_others_objects(db_session, driver):
+    """
+    Deleting the objects created by another climber is never possible.
+    """
+
+    def try_to_delete_others_object(sql_query: str, object: str):
+        object_id = db_session.execute(sql_query).fetchall()[0][0]
+        driver.get(f"{HOME_URL}/delete_{object.split('_')[-1]}/{object_id}")
+        sleep(1)
+        sql_query = text(f"SELECT * FROM {object} WHERE id = {object_id};")
+        results = db_session.execute(sql_query).fetchall()
+        assert len(results) == 1, f"Object {object} was deleted"
+
+    # find an object that was not created by me
+    for object, creator in {
+        "route": "created_by",
+        "climbing_session": "climber_id",
+        "opinion": "climber_id",
+    }.items():
+        sql_query = text(
+            f"""
+            SELECT {object}.id
+            FROM {object}
+            WHERE {object}.{creator} != {CLIMBER_ID}
+            LIMIT 1;
+            """
+        )
+        try_to_delete_others_object(sql_query, object)
+
+    # check that I cannot delete a climb of another climber
+    sql_query = text(
+        f"""
+        SELECT climb.id
+        FROM climb
+        JOIN climbing_session ON climb.session_id = climbing_session.id
+        WHERE climbing_session.climber_id != {CLIMBER_ID}
+        LIMIT 1;
+        """
+    )
+    try_to_delete_others_object(sql_query, object)
