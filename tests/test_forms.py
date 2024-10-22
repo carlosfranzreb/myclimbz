@@ -18,10 +18,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from sqlalchemy import text
 
-from .conftest import HOME_TITLE, HOME_URL
+from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID
 
 
-CLIMBER_ID = 1
 EXISTING_OBJECTS = {
     "area": "A1",
     "sector": "A1 S1",
