@@ -50,10 +50,11 @@ class ClimbForm(FlaskForm):
             getattr(form, field).data = getattr(obj, field.replace("climb_", ""))
         return form
 
-    def validate(self, route: Route, session_id: int = None) -> bool:
+    def validate(self, route: Route, session_id: int = None, climb_id=None) -> bool:
         """
         - If the climb has already been tried before, `flashed` must be false.
-        - The route must not exist in the current session.
+        - The route must not exist in the current session, unless this is an edit
+            and the climb_id is passed to this function.
         """
         is_valid = True
         if not super().validate():
@@ -67,6 +68,8 @@ class ClimbForm(FlaskForm):
 
         # check whether the route has already been tried in this session
         climbs = Climb.query.filter_by(route_id=route.id, session_id=session_id).all()
+        if climb_id is not None:
+            climbs = [climb for climb in climbs if climb.id != climb_id]
         if len(climbs) > 0:
             flask_session["error"] = (
                 "This route has already been tried in this session."
