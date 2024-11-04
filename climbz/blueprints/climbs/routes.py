@@ -90,8 +90,9 @@ def edit_climb(climb_id: int) -> str:
     # POST: a climb form was submitted => edit climb or return error
     if request.method == "POST":
         climb_form = ClimbForm()
-        if not climb_form.validate(climb.route, climb.session_id):
-            flask_session["error"] = "An error occurred. Fix it and resubmit."
+        if not climb_form.validate(climb.route, climb.session_id, climb_id=climb_id):
+            if flask_session.get("error", None) is None:
+                flask_session["error"] = "An error occurred. Fix it and resubmit."
             return render("form.html", title=title, forms=[climb_form])
         climb = climb_form.get_edited_climb(climb_id)
         db.session.commit()
