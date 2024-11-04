@@ -2,8 +2,6 @@
 Test that the deletion of objects works as expected. This means that the object is
 deleted from the database, as well as any orphaned objects that are no longer make
 sense to exist. Also, some objects cannot be deleted because other climbers use them.
-
-! TODO: implement and test area deletion
 """
 
 from time import sleep
@@ -15,6 +13,9 @@ from selenium.common.exceptions import NoSuchElementException
 from sqlalchemy import text
 
 from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID
+
+
+SLEEP_TIME = 2
 
 
 def test_delete_climb(db_session, driver):
@@ -41,7 +42,7 @@ def test_delete_climb(db_session, driver):
     driver.switch_to.alert.accept()
 
     # check that the climb is not shown anymore
-    sleep(1)
+    sleep(SLEEP_TIME)
     driver.refresh()
     try:
         table = driver.find_element(By.ID, "content_table")
@@ -61,6 +62,68 @@ def test_delete_climb(db_session, driver):
         WHERE route.name = '{route_name}'
         AND climbing_session.date = '{climb_date}'
         AND climbing_session.climber_id = {CLIMBER_ID};
+        """
+    )
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 0
+
+
+def test_delete_route(db_session, driver):
+    """
+    Deleting a route is possible if I am the creator and no one else is using it.
+    Climbs of that route should be deleted as well. And if any session is left empty,
+    it should be deleted too.
+
+    TODO: this test passes when run alone or with the others in this file, but fails
+        when all tests are run together.
+    """
+    # find a route that it not shared
+    sleep(SLEEP_TIME)
+    sql_query = text(
+        f"""
+        SELECT route.id, route.name
+        FROM route
+        WHERE route.created_by = {CLIMBER_ID}
+        AND route.id NOT IN (
+            SELECT route_id FROM climber_projects WHERE climber_id != {CLIMBER_ID}
+        )
+        AND route.id NOT IN (
+            SELECT climb.route_id
+            FROM climb
+            JOIN climbing_session ON climb.session_id = climbing_session.id
+            WHERE climbing_session.climber_id != {CLIMBER_ID}
+        )
+        LIMIT 1;
+        """
+    )
+    results = db_session.execute(sql_query).fetchall()
+    route_id, route_name = results[0]
+
+    # go the route's page
+    driver.get(f"{HOME_URL}/route/{route_id}")
+    WebDriverWait(driver, 10).until(EC.title_contains(route_name))
+
+    # try to delete the route
+    driver.find_element(By.XPATH, "//a[contains(@href, 'delete_route')]").click()
+    WebDriverWait(driver, 10).until(EC.alert_is_present())
+    driver.switch_to.alert.accept()
+
+    # check that the route, climbs and empty sessions were deleted from the database
+    sleep(SLEEP_TIME)
+    sql_query = text(f"SELECT * FROM route WHERE id = {route_id};")
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 0
+
+    sql_query = text(f"SELECT * FROM climb WHERE route_id = {route_id};")
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 0
+
+    sql_query = text(
+        """
+        SELECT climbing_session.id
+        FROM climbing_session
+        LEFT JOIN climb ON climbing_session.id = climb.session_id
+        WHERE climb.id IS NULL;
         """
     )
     results = db_session.execute(sql_query).fetchall()
@@ -120,7 +183,7 @@ def try_to_delete_route(db_session, driver, route_id: int, route_name: str):
     driver.switch_to.alert.accept()
 
     # check that the route was not deleted
-    sleep(1)
+    sleep(SLEEP_TIME)
     driver.refresh()
     WebDriverWait(driver, 10).until(EC.title_contains(route_name))
 
@@ -128,64 +191,6 @@ def try_to_delete_route(db_session, driver, route_id: int, route_name: str):
     sql_query = text(f"SELECT * FROM route WHERE id = {route_id};")
     results = db_session.execute(sql_query).fetchall()
     assert len(results) == 1
-
-
-def test_delete_route(db_session, driver):
-    """
-    Deleting a route is possible if I am the creator and no one else is using it.
-    Climbs of that route should be deleted as well. And if any session is left empty,
-    it should be deleted too.
-    """
-    # find a route that it not shared
-    sql_query = text(
-        f"""
-        SELECT route.id, route.name
-        FROM route
-        WHERE route.created_by = {CLIMBER_ID}
-        AND route.id NOT IN (
-            SELECT route_id FROM climber_projects WHERE climber_id != {CLIMBER_ID}
-        )
-        AND route.id NOT IN (
-            SELECT climb.route_id
-            FROM climb
-            JOIN climbing_session ON climb.session_id = climbing_session.id
-            WHERE climbing_session.climber_id != {CLIMBER_ID}
-        )
-        LIMIT 1;
-        """
-    )
-    results = db_session.execute(sql_query).fetchall()
-    route_id, route_name = results[0]
-
-    # go the route's page
-    driver.get(f"{HOME_URL}/route/{route_id}")
-    WebDriverWait(driver, 10).until(EC.title_contains(route_name))
-
-    # try to delete the route
-    driver.find_element(By.XPATH, "//a[contains(@href, 'delete_route')]").click()
-    WebDriverWait(driver, 10).until(EC.alert_is_present())
-    driver.switch_to.alert.accept()
-
-    # check that the route, climbs and empty sessions were deleted from the database
-    sleep(1)
-    sql_query = text(f"SELECT * FROM route WHERE id = {route_id};")
-    results = db_session.execute(sql_query).fetchall()
-    assert len(results) == 0
-
-    sql_query = text(f"SELECT * FROM climb WHERE route_id = {route_id};")
-    results = db_session.execute(sql_query).fetchall()
-    assert len(results) == 0
-
-    sql_query = text(
-        """
-        SELECT climbing_session.id
-        FROM climbing_session
-        LEFT JOIN climb ON climbing_session.id = climb.session_id
-        WHERE climb.id IS NULL;
-        """
-    )
-    results = db_session.execute(sql_query).fetchall()
-    assert len(results) == 0
 
 
 def test_delete_session(db_session, driver):
@@ -216,7 +221,7 @@ def test_delete_session(db_session, driver):
     driver.switch_to.alert.accept()
 
     # check that the session and its climbs were deleted from the database
-    sleep(1)
+    sleep(SLEEP_TIME)
     sql_query = text(f"SELECT * FROM climbing_session WHERE id = {session_id};")
     results = db_session.execute(sql_query).fetchall()
     assert len(results) == 0
@@ -254,7 +259,7 @@ def test_delete_opinion(db_session, driver):
     driver.switch_to.alert.accept()
 
     # check that the opinion is no longer displayed
-    sleep(1)
+    sleep(SLEEP_TIME)
     driver.refresh()
     WebDriverWait(driver, 10).until(EC.title_contains(route_name))
     try:
@@ -276,7 +281,7 @@ def test_others_objects(db_session, driver):
     def try_to_delete_others_object(sql_query: str, object: str):
         object_id = db_session.execute(sql_query).fetchall()[0][0]
         driver.get(f"{HOME_URL}/delete_{object.split('_')[-1]}/{object_id}")
-        sleep(1)
+        sleep(SLEEP_TIME)
         sql_query = text(f"SELECT * FROM {object} WHERE id = {object_id};")
         results = db_session.execute(sql_query).fetchall()
         assert len(results) == 1, f"Object {object} was deleted"
@@ -307,4 +312,4 @@ def test_others_objects(db_session, driver):
         LIMIT 1;
         """
     )
-    try_to_delete_others_object(sql_query, object)
+    try_to_delete_others_object(sql_query, "climb")

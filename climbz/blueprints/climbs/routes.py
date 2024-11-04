@@ -105,6 +105,10 @@ def edit_climb(climb_id: int) -> str:
 
 @climbs.route("/delete_climb/<int:climb_id>")
 def delete_climb(climb_id: int) -> str:
+    """
+    Deleting a climb is only possible if the user is the owner of the climb, or an
+    admin. This is checked in check_request_validity (./climbz/__init__.py)
+    """
     climb = Climb.query.get(climb_id)
     db.session.delete(climb)
     db.session.commit()
