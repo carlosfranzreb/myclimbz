@@ -74,6 +74,7 @@ function display_data() {
 	// Display the data
 	if (DISPLAY_FORM == "table") {
 		show_table();
+		init_datatable();
 		hide_columns();
 	} else {
 		show_plot();

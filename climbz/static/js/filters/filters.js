@@ -209,7 +209,8 @@ var FilterWidget = function (id, left) {
 	});
 
 	document.addEventListener("click", function (event) {
-		// if the user clicks outside of the filter widget, and no widget inside it is in focus, close the filter widget
+		// if the user clicks outside of the filter widget, and no widget
+		// inside it is in focus, close the filter widget
 		if (
 			!wrapper.contains(event.target) &&
 			document.activeElement.tagName === "BODY"
