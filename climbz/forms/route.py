@@ -167,7 +167,11 @@ class RouteForm(FlaskForm):
         sector_name = format_name(self.sector.data)
         sector = Sector.query.filter_by(name=sector_name).first()
         if sector is None:
-            sector = Sector(name=sector_name, area_id=route.sector.area_id)
+            sector = Sector(
+                name=sector_name,
+                area_id=route.sector.area_id,
+                created_by=current_user.id,
+            )
         route.sector = sector
 
         for field in FIELDS:
