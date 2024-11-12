@@ -73,12 +73,8 @@ def test_delete_route(db_session, driver):
     Deleting a route is possible if I am the creator and no one else is using it.
     Climbs of that route should be deleted as well. And if any session is left empty,
     it should be deleted too.
-
-    TODO: this test passes when run alone or with the others in this file, but fails
-        when all tests are run together.
     """
     # find a route that it not shared
-    sleep(SLEEP_TIME)
     sql_query = text(
         f"""
         SELECT route.id, route.name
