@@ -62,6 +62,10 @@ def get_opinion_form(climber_id: int, route_id: int) -> str:
 
 @opinions.route("/delete_opinion/<int:opinion_id>", methods=["GET", "POST"])
 def delete_opinion(opinion_id: int) -> str:
+    """
+    Deleting an opinion is only possible if the user is the owner of the opinion, or an
+    admin. This is checked in check_request_validity (./climbz/__init__.py)
+    """
     opinion = Opinion.query.get(opinion_id)
     db.session.delete(opinion)
     db.session.commit()

@@ -14,14 +14,15 @@ from climbz import create_app
 
 HOME_TITLE = "myclimbz - Home"
 HOME_URL = "http://127.0.0.1:5000"
+CLIMBER_ID = 1
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def db_session() -> Session:
     return Session(create_engine("sqlite:///instance/test_100.db"))
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def driver() -> Generator[webdriver.Chrome, None, None]:
     """
     If env=dev:

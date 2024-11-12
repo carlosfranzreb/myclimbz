@@ -82,13 +82,12 @@ def delete_route(route_id: int) -> str:
                 )
                 break
 
-    if flask_session["error"] is None:
-        # db.session.delete(route)
-        # db.session.commit()
-        flask_session["error"] = "Route deleted."
-
     last_url = flask_session.pop("call_from_url")
-    if "route" in last_url:
-        return redirect(url_for("areas.page_area", area_id=route.sector.area_id))
-    else:
-        return redirect(last_url)
+    if flask_session["error"] is None:
+        db.session.delete(route)
+        db.session.commit()
+        flask_session["error"] = "Route deleted."
+        if "route" in last_url:
+            return redirect(url_for("areas.page_area", area_id=route.sector.area_id))
+
+    return redirect(last_url)

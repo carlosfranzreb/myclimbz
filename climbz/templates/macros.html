@@ -6,7 +6,11 @@
                 <h5 class="card-title" style="display: inline-block">{{ data['header']['title'] }}</h5>
                 {% if data['header']['title_actions'] %}
                 {% for action in data['header']['title_actions'] %}
+                {% if action['icon'] == 'delete' %}
+                <a href="{{ action['url'] }}"  onclick="return confirm('Are you sure you want to delete this?');">
+                {% else %}
                 <a href="{{ action['url'] }}">
+                {% endif %}
                     {% include 'icons/' ~ action['icon'] ~ '.html' %}
                 </a>
                 {% endfor %}
