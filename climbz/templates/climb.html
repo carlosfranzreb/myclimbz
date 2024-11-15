@@ -1,0 +1,69 @@
+{% import "macros.html" as macros %}
+
+{% extends "main.html" %}
+{% block content %}
+
+{% if climb.session.climber_id == user_id %}
+    {% set actions = [
+        { "icon": "edit", "url": url_for('climbs.edit_climb', climb_id=climb.id) },
+        { "icon": "delete", "url": url_for('climbs.delete_climb', climb_id=climb.id) }
+    ] %}
+{% else %}
+    {% set actions = [] %}
+{% endif %}
+
+{% if climb.route.opinion %}
+    {% set facts = [
+        { "icon": "grade", "value": climb.route.opinion.grade.user_grade, "unit": ""},
+        { "icon": "rating", "value": climb.route.opinion.rating, "unit": "/5" },
+        { "icon": "landing", "value": climb.route.opinion.landing, "unit": "/5" },
+    ] %}
+{% else %}
+    {% set facts = [] %}
+{% endif %}
+
+<div class="container px-0 px-md-5 py-0 py-md-4">
+
+    {{ macros.card({
+        "header": {
+            "title": username ~ " on " ~ climb.route.name,
+            "title_actions": actions,
+            "subtitle": climb.session.date,
+        },
+        "body": {
+            "facts": facts,
+            "list": [
+                {"prefix": "Conditions", "value": climb.session.conditions|string ~ "/5"},
+                {"prefix": "Tries", "value": climb.n_attempts|string},
+                {"prefix": "Sent", "value": "Yes" if climb.sent else "No"},
+                {"prefix": "Comment", "value": climb.comment if climb.comment else "N/A"},
+                {"prefix": "Link", "value": climb.link if climb.link else "N/A"},
+            ]
+        }
+    }) }}
+</div>
+
+{% if climb.session.climber_id == user_id %}
+<div class="container px-0 px-md-5 py-0 py-md-4">
+    <h2>Other Actions</h2>
+
+    {% if climb.route.created_by == user_id or user_role == 1 %}
+        <a href="{{ url_for('routes.edit_route', route_id=climb.route.id) }}"
+            class="btn btn-warning">Edit Route
+        </a>
+    {% endif %}
+
+    {% if climb.route.opinion %}
+        <a href="{{ url_for('opinions.edit_opinion', opinion_id=climb.route.opinion.id) }}"
+            class="btn btn-warning">Edit Opinion
+        </a>
+    {% else %}
+        <a href="{{ url_for('opinions.add_opinion', climber_id=user_id, route_id=climb.route.id) }}"
+            class="btn btn-success">Add Opinion
+        </a>
+    {% endif %}
+
+</div>
+{% endif %}
+
+{% endblock content %}
