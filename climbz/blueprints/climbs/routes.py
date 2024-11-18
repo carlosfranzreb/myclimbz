@@ -113,3 +113,9 @@ def delete_climb(climb_id: int) -> str:
     db.session.delete(climb)
     db.session.commit()
     return redirect(flask_session.pop("call_from_url"))
+
+
+@climbs.route("/climb/<int:climb_id>")
+def view_climb(climb_id: int) -> str:
+    climb = Climb.query.get(climb_id)
+    return render("climb.html", climb=climb, title=f"Climb on {climb.route.name}")

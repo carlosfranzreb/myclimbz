@@ -48,12 +48,19 @@
         {% for item in data['body']['list'] %}
             {% if 'prefix' in item or item['value']|length > 0 %}
                 <li class="list-group-item">
+
                     {% if item['prefix'] %}
-                    <b>{{ item['prefix'] }}:</b>
+                        <b>{{ item['prefix'] }}:</b>
                     {% endif %}
+
                     {% if item['value'] %}
-                    {{ item['value'] }}
+                        {% if item['prefix'] == "Link" or item['prefix'] == "Media" %}
+                            <a href="{{ item['value'] }}" target="_blank">{{ item['value'] }}</a>
+                        {% else %}
+                            {{ item['value'] }}
+                        {% endif %}
                     {% endif %}
+
                 </li>
             {% endif %}
         {% endfor %}

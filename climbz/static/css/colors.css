@@ -199,10 +199,6 @@ a:hover {
 }
 
 /* Form checkboxes */
-ul {
-    list-style-type: none;
-}
-
 input[type="checkbox"] {
     height: 1.25em;
     width: 1.25em;
