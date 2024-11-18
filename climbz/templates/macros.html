@@ -54,7 +54,7 @@
                     {% endif %}
 
                     {% if item['value'] %}
-                        {% if item['prefix'] == "Link" or item['prefix'] == "Media" %}
+                        {% if item['prefix'] == "Link" or item['prefix'] == "Media" and item['value'] != "N/A" %}
                             <a href="{{ item['value'] }}" target="_blank">{{ item['value'] }}</a>
                         {% else %}
                             {{ item['value'] }}
