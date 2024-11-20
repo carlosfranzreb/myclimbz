@@ -47,6 +47,11 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
 
+            - name: Restart app after checkout
+              uses: docker://docker
+              with:
+                  args: docker restart app
+
             - name: Update pip
               run: python -m pip install --upgrade pip
 
