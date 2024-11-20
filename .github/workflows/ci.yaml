@@ -47,6 +47,7 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
 
+            # See bconway's comment in https://github.com/orgs/community/discussions/42127
             - name: Restart app after checkout
               uses: docker://docker
               with:
@@ -77,7 +78,7 @@ jobs:
                 image: ghcr.io/carlosfranzreb/boulders/myclimbz:pr-${{ github.event.number }}
                 volumes:
                     - ${{ github.workspace }}/instance/test_100.db
-                options: --name mqtt
+                options: --name app
                 ports:
                     - 5000:5000
                 credentials:
