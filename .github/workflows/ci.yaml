@@ -71,7 +71,7 @@ jobs:
             app:
                 image: ghcr.io/carlosfranzreb/boulders/myclimbz:pr-${{ github.event.number }}
                 volumes:
-                    - ${{ github.workspace }}:/instance/test_100.db
+                    - ${{ github.workspace }}/instance/test_100.db
                 ports:
                     - 5000:5000
                 credentials:
