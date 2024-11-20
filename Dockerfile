@@ -17,7 +17,7 @@ ENV FLASK_APP=climbz
 
 # copy run.py, code and DB
 COPY ./climbz ./climbz
-COPY ./instance ./instance
+# COPY ./instance ./instance
 COPY ./entrypoint.sh ./entrypoint.sh
 COPY ./wsgi.py ./wsgi.py
 COPY ./gunicorn_config.py ./gunicorn_config.py
