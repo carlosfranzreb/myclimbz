@@ -77,8 +77,8 @@ jobs:
               uses: actions/upload-artifact@v4
               if: failure()
               with:
-                  name: screenshot
-                  path: ./screenshots
+                  name: screenshots
+                  path: *.png
 
         services:
             app:
