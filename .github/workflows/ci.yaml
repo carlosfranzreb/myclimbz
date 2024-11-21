@@ -73,6 +73,13 @@ jobs:
               env:
                   DISPLAY: :99
 
+            - name: Upload screenshots (if any)
+              uses: actions/upload-artifact@latest
+              if: failure()
+              with:
+                  name: screenshot
+                  path: ./screenshots
+
         services:
             app:
                 image: ghcr.io/carlosfranzreb/boulders/myclimbz:pr-${{ github.event.number }}
