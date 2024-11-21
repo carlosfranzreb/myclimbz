@@ -78,7 +78,7 @@ jobs:
               if: failure()
               with:
                   name: screenshots
-                  path: *.png
+                  path: ./*.png
 
         services:
             app:
