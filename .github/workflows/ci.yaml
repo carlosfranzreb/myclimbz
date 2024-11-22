@@ -41,7 +41,7 @@ jobs:
                   labels: ${{ steps.meta.outputs.labels }}
 
     test:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-16.04
         needs: build-push
         env:
             LC_TIME: en_US.UTF-8
