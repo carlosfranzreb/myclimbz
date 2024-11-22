@@ -61,6 +61,8 @@ def started_session_id(driver, db_session) -> Generator:
     # create the session
     stop_session(driver, db_session)
     date_obj = NEW_OBJECTS["session_date"]
+    print(f"Date (day): {date_obj.day}")
+    print(f"Date: {date_obj.strftime('%d.%m.%Y')}")
     area = EXISTING_OBJECTS["area"]
     form_accepted = start_session(driver, area, date_obj)
     assert form_accepted
@@ -101,7 +103,6 @@ def start_session(
     Returns:
         bool: True if the form was accepted.
     """
-    print(f"Date: {date.strftime('%d.%m.%Y')}")
     form_accepted = fill_form(
         driver,
         "start_session",
