@@ -43,18 +43,13 @@ jobs:
     test:
         runs-on: ubuntu-latest
         needs: build-push
+        env:
+            LC_TIME: en_US.UTF-8
+            LC_ALL: en_US.UTF-8
+            LANG: en_US.UTF-8
+            LANGUAGE: en_US.UTF-8
         steps:
             - name: Print locale
-              run: locale
-
-            - name: Change locale
-              run: |
-                  export LC_TIME=en_US.UTF-8
-                  export LC_ALL=en_US.UTF-8
-                  export LANG=en_US.UTF-8
-                  export LANGUAGE=en_US.UTF-8
-
-            - name: Print locale again
               run: locale
 
             - name: Checkout repository
