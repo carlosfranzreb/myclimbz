@@ -24,13 +24,13 @@ from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID, SLEEP_TIME
 EXISTING_OBJECTS = {
     "area": "A1",
     "sector": "A1 S1",
-    "session_date": datetime(year=2023, month=1, day=1),
+    "session_date": datetime(2023, 1, 1),
 }
 NEW_OBJECTS = {
     "area": "A3",
     "sector": "A3 S1",
     "route": "Terranova 2",
-    "session_date": datetime(year=2023, month=1, day=2),
+    "session_date": datetime(2023, 1, 2),
 }
 
 
@@ -61,8 +61,8 @@ def started_session_id(driver, db_session) -> Generator:
     # create the session
     stop_session(driver, db_session)
     date_obj = NEW_OBJECTS["session_date"]
-    print(f"Date (day): {date_obj.day}")
     print(f"Date: {date_obj.strftime('%d.%m.%Y')}")
+
     area = EXISTING_OBJECTS["area"]
     form_accepted = start_session(driver, area, date_obj)
     assert form_accepted
