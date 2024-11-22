@@ -15,6 +15,7 @@ from climbz import create_app
 HOME_TITLE = "myclimbz - Home"
 HOME_URL = "http://127.0.0.1:5000"
 CLIMBER_ID = 1
+SLEEP_TIME = 2
 
 
 @pytest.fixture(scope="module")

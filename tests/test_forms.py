@@ -18,7 +18,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from sqlalchemy import text
 
-from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID
+from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID, SLEEP_TIME
 
 
 EXISTING_OBJECTS = {
@@ -64,7 +64,7 @@ def started_session_id(driver, db_session) -> Generator:
     area = EXISTING_OBJECTS["area"]
     form_accepted = start_session(driver, area, date_obj)
     assert form_accepted
-    sleep(5)
+    sleep(SLEEP_TIME)
 
     # get and yield the ID of the created session
     sql_query = text(
@@ -371,7 +371,7 @@ def test_create_session_on_existing_area(db_session, started_session_id) -> None
 #     area = NEW_OBJECTS["area"]
 #     form_accepted = start_session(driver, area, date)
 #     assert form_accepted
-#     sleep(5)
+#     sleep(SLEEP_TIME)
 
 #     # check that the area and the session were created
 #     sql_query = text(f"SELECT id FROM area WHERE name = '{area}'")
