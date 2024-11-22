@@ -1,6 +1,5 @@
 import os
 from importlib import import_module
-import locale
 
 from flask import Flask, request, redirect, url_for, session as flask_session
 from flask_bcrypt import Bcrypt
@@ -19,10 +18,6 @@ login_manager.login_message_category = "info"
 
 
 def create_app():
-    # Set the locale to en_US to avoid issues with date formatting
-    locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
-    locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
-
     app = Flask(__name__)
     TESTING = os.environ.get("TESTING", "0") == "1"
     app.config["TESTING"] = TESTING
