@@ -1,6 +1,7 @@
 import os
 from typing import Generator
 import sys
+import locale
 
 import pytest
 from selenium import webdriver
@@ -9,13 +10,15 @@ from selenium.webdriver.support import expected_conditions as EC
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from climbz import create_app
-
 
 HOME_TITLE = "myclimbz - Home"
 HOME_URL = "http://127.0.0.1:5000"
 CLIMBER_ID = 1
 SLEEP_TIME = 2
+
+# Set the locale to en_US to avoid issues with date formatting
+locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
+locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 
 @pytest.fixture(scope="module")
@@ -57,8 +60,3 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
             os.system("docker compose down")
             os.system("git checkout instance/test_100.db")
         driver.quit()
-
-
-def run_app() -> None:
-    app = create_app()
-    app.run()
