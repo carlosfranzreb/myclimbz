@@ -150,6 +150,7 @@ def fill_form(
     # open and fill the form
     driver.find_element(By.ID, button_id).click()
     WebDriverWait(driver, 30).until_not(EC.title_is(HOME_TITLE))
+    driver.save_screenshot("empty_form.png")
     for field_id, value in field_data.items():
         field = driver.find_element(By.ID, field_id)
         field.clear()
