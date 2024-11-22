@@ -156,6 +156,8 @@ def fill_form(
         field.send_keys(value)
         driver.find_element(By.TAG_NAME, "h2").click()
 
+    driver.save_screenshot("filled_form.png")
+
     # submit the form and check if it was accepted
     driver.find_element(By.XPATH, "//input[@type='submit']").click()
     if expect_success:
