@@ -18,9 +18,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from sqlalchemy import text
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
-
 from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID
 
 
@@ -78,7 +75,6 @@ def started_session_id(driver, db_session) -> Generator:
         AND area_id = (SELECT id FROM area WHERE name = '{area}');
         """
     )
-    db_session = Session(create_engine("sqlite:///instance/test_100.db"))
     results = db_session.execute(sql_query).fetchall()
     yield results[0][0]
     stop_session(driver, db_session)
@@ -105,6 +101,7 @@ def start_session(
         {"area": area, "date": date.strftime("%d.%m.%Y") if date else ""},
         expect_success=expect_success,
     )
+    driver.save_screenshot("started_session.png")
     return form_accepted
 
 
