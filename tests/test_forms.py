@@ -58,7 +58,6 @@ def started_session_id(driver, db_session) -> Generator:
     `test_create_session_on_existing_area` checks that the session was properly created.
     """
 
-    # check that the session was created
     sql_query = text("SELECT id FROM climbing_session")
     results = db_session.execute(sql_query).fetchall()
     print(results)
@@ -71,6 +70,11 @@ def started_session_id(driver, db_session) -> Generator:
     form_accepted = start_session(driver, area, date_obj)
     assert form_accepted
     sleep(SLEEP_TIME)
+
+    sql_query = text("SELECT id FROM climbing_session")
+    results = db_session.execute(sql_query).fetchall()
+    print(results)
+    assert len(results) > 0
 
     # get and yield the ID of the created session
     sql_query = text(
@@ -108,7 +112,6 @@ def start_session(
         {"area": area, "date": date.strftime("%d.%m.%Y") if date else ""},
         expect_success=expect_success,
     )
-    driver.save_screenshot("started_session.png")
     return form_accepted
 
 
@@ -157,16 +160,12 @@ def fill_form(
         field.send_keys(value)
         driver.find_element(By.TAG_NAME, "h2").click()
 
-    driver.save_screenshot("filled_form.png")
-
     # submit the form and check if it was accepted
     driver.find_element(By.XPATH, "//input[@type='submit']").click()
     if expect_success:
         WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
     else:
         WebDriverWait(driver, 10).until_not(EC.title_is(HOME_TITLE))
-
-    driver.save_screenshot("submitted_form.png")
 
     return driver.current_url in [HOME_URL, HOME_URL + "/"]
 
