@@ -25,7 +25,7 @@ class SessionForm(FlaskForm):
     date = DateField(
         "Date",
         validators=[DataRequired("You must enter a date")],
-        default=datetime.today,
+        default=datetime.today.strftime("%d/%m/%Y"),
     )
     conditions = IntegerRangeField(
         "Conditions",
