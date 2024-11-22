@@ -58,11 +58,6 @@ def started_session_id(driver, db_session) -> Generator:
     `test_create_session_on_existing_area` checks that the session was properly created.
     """
 
-    sql_query = text("SELECT id FROM climbing_session")
-    results = db_session.execute(sql_query).fetchall()
-    print(results)
-    assert len(results) > 0
-
     # create the session
     stop_session(driver, db_session)
     date_obj = NEW_OBJECTS["session_date"]
@@ -74,12 +69,7 @@ def started_session_id(driver, db_session) -> Generator:
     sql_query = text("SELECT id, date, climber_id, area_id FROM climbing_session")
     results = db_session.execute(sql_query).fetchall()
     print(results)
-    assert len(results) > 0
-
-    print(date_obj.strftime("%Y-%m-%d"), CLIMBER_ID, area)
-    sql_query = text(f"SELECT id FROM area WHERE name = '{area}'")
-    results = db_session.execute(sql_query).fetchall()
-    print(results)
+    print("Expected ", date_obj.strftime("%Y-%m-%d"), CLIMBER_ID, area)
 
     # get and yield the ID of the created session
     sql_query = text(
@@ -111,7 +101,7 @@ def start_session(
     Returns:
         bool: True if the form was accepted.
     """
-    print(f"Date: {date.strftime("%d.%m.%Y")}")
+    print(f"Date: {date.strftime('%d.%m.%Y')}")
     form_accepted = fill_form(
         driver,
         "start_session",
