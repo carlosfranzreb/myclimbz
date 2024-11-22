@@ -66,6 +66,7 @@ def add_session() -> str:
             flask_session["area_id"] = area.id
         else:
             session = session_form.get_object(area.id)
+            print(session.date)
             db.session.add(session)
             db.session.commit()
             flask_session["session_id"] = session.id
