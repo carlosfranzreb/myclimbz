@@ -58,6 +58,12 @@ def started_session_id(driver, db_session) -> Generator:
     `test_create_session_on_existing_area` checks that the session was properly created.
     """
 
+    # check that the session was created
+    sql_query = text("SELECT id FROM climbing_session")
+    results = db_session.execute(sql_query).fetchall()
+    print(results)
+    assert len(results) > 0
+
     # create the session
     stop_session(driver, db_session)
     date_obj = NEW_OBJECTS["session_date"]
@@ -76,6 +82,7 @@ def started_session_id(driver, db_session) -> Generator:
         """
     )
     results = db_session.execute(sql_query).fetchall()
+    print(results)
     yield results[0][0]
     stop_session(driver, db_session)
 

@@ -111,11 +111,6 @@ def test_delete_route(db_session, driver):
     results = db_session.execute(sql_query).fetchall()
     assert len(results) == 0
 
-    # tmp. to check that the DB is not empty
-    sql_query = text("SELECT * FROM route;")
-    results = db_session.execute(sql_query).fetchall()
-    assert len(results) > 0
-
     sql_query = text(
         """
         SELECT climbing_session.id
