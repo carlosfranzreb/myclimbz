@@ -48,7 +48,7 @@ jobs:
               run: locale
 
             - name: Change locale
-              run: sudo locale-gen es_ES.UTF-8
+              run: sudo update-locale LC_TIME=en_US.UTF-8
 
             - name: Print locale again
               run: locale
