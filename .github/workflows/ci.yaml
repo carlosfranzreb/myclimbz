@@ -108,3 +108,7 @@ jobs:
                     RECAPTCHA_PRIVATE_KEY: test
                     MAIL_USERNAME: test@myclimbz.es
                     MAIL_PASSWORD: test
+                    LC_TIME: en_US.UTF-8
+                    LC_ALL: en_US.UTF-8
+                    LANG: en_US.UTF-8
+                    LANGUAGE: en_US.UTF-8
