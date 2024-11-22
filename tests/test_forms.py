@@ -71,10 +71,15 @@ def started_session_id(driver, db_session) -> Generator:
     assert form_accepted
     sleep(SLEEP_TIME)
 
-    sql_query = text("SELECT id FROM climbing_session")
+    sql_query = text("SELECT id, date, climber_id, area_id FROM climbing_session")
     results = db_session.execute(sql_query).fetchall()
     print(results)
     assert len(results) > 0
+
+    print(date_obj.strftime("%Y-%m-%d"), CLIMBER_ID, area)
+    sql_query = text(f"SELECT id FROM area WHERE name = '{area}'")
+    results = db_session.execute(sql_query).fetchall()
+    print(results)
 
     # get and yield the ID of the created session
     sql_query = text(
