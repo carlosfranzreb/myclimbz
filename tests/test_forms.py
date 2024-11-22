@@ -24,13 +24,13 @@ from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID, SLEEP_TIME
 EXISTING_OBJECTS = {
     "area": "A1",
     "sector": "A1 S1",
-    "session_date": datetime(2023, 1, 1),
+    "session_date": datetime(year=2023, month=1, day=1),
 }
 NEW_OBJECTS = {
     "area": "A3",
     "sector": "A3 S1",
     "route": "Terranova 2",
-    "session_date": datetime(2023, 1, 2),
+    "session_date": datetime(year=2023, month=1, day=2),
 }
 
 

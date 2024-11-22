@@ -25,7 +25,7 @@ class SessionForm(FlaskForm):
     date = DateField(
         "Date",
         validators=[DataRequired("You must enter a date")],
-        default=datetime.today.strftime("%d/%m/%Y"),
+        default=datetime.today,
     )
     conditions = IntegerRangeField(
         "Conditions",
@@ -119,8 +119,6 @@ class SessionForm(FlaskForm):
         """
         Update the session object with the form fields that can be edited.
         """
-        date_obj = datetime.strptime(self.date.data, "%d/%m/%Y")
-        obj.date = date_obj.strftime("%Y-%m-%d")
-        for attr in ["conditions", "comment"]:
+        for attr in ["date", "conditions", "comment"]:
             setattr(obj, attr, getattr(self, attr).data)
         return obj
