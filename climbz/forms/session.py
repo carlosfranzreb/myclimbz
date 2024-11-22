@@ -119,6 +119,8 @@ class SessionForm(FlaskForm):
         """
         Update the session object with the form fields that can be edited.
         """
-        for attr in ["date", "conditions", "comment"]:
+        date_obj = datetime.strptime(self.date.data, "%d/%m/%Y")
+        obj.date = date_obj.strftime("%Y-%m-%d")
+        for attr in ["conditions", "comment"]:
             setattr(obj, attr, getattr(self, attr).data)
         return obj
