@@ -111,6 +111,7 @@ def start_session(
     Returns:
         bool: True if the form was accepted.
     """
+    print(f"Date: {date.strftime("%d.%m.%Y")}")
     form_accepted = fill_form(
         driver,
         "start_session",
