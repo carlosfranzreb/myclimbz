@@ -65,8 +65,8 @@ jobs:
             - name: Install dependencies for testing
               run: pip install -r requirements-test.txt
 
-            # - name: Start XVFB
-            #   run: Xvfb :99 &
+            - name: Start XVFB
+              run: Xvfb :99 &
 
             - name: Run tests
               run: python -m pytest tests/
