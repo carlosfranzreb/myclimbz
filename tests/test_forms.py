@@ -164,7 +164,8 @@ def fill_form(
         field.send_keys(value)
         driver.find_element(By.TAG_NAME, "h2").click()
 
-    driver.save_screenshot(f"filled_form_{'-'.join(field_data.values())}.png")
+    test_key = "-".join(field_data.values())
+    driver.save_screenshot(f"filled_form_{test_key}.png")
 
     # submit the form and check if it was accepted
     driver.find_element(By.XPATH, "//input[@type='submit']").click()
@@ -172,6 +173,8 @@ def fill_form(
         WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
     else:
         WebDriverWait(driver, 10).until_not(EC.title_is(HOME_TITLE))
+
+    driver.save_screenshot(f"submitted_form_{test_key}.png")
 
     return driver.current_url in [HOME_URL, HOME_URL + "/"]
 
