@@ -15,6 +15,7 @@ HOME_TITLE = "myclimbz - Home"
 HOME_URL = "http://127.0.0.1:5000"
 CLIMBER_ID = 1
 SLEEP_TIME = 2
+IS_CI = os.environ.get("CI", False)
 
 # Set the locale to en_US to avoid issues with date formatting
 locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
@@ -35,9 +36,8 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
         GitHub Actions will run the web app as a service.
     """
 
-    is_ci = os.environ.get("CI", False)
     try:
-        if not is_ci:
+        if not IS_CI:
             os.system("git checkout instance/test_100.db")
             assert os.environ["DISABLE_LOGIN"] == "1", "DISABLE_LOGIN must be set to 1"
             assert (
@@ -56,7 +56,7 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
         yield driver
 
     finally:
-        if not is_ci:
+        if not IS_CI:
             os.system("docker compose down")
             os.system("git checkout instance/test_100.db")
         driver.quit()

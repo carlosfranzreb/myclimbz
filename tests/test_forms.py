@@ -18,7 +18,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from sqlalchemy import text
 
-from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID, SLEEP_TIME
+from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID, SLEEP_TIME, IS_CI
 
 
 EXISTING_OBJECTS = {
@@ -103,10 +103,16 @@ def start_session(
     Returns:
         bool: True if the form was accepted.
     """
+    if date is None:
+        date_str = ""
+    elif IS_CI:
+        date_str = date.strftime("%m.%d.%Y")
+    else:
+        date_str = date.strftime("%d.%m.%Y")
     form_accepted = fill_form(
         driver,
         "start_session",
-        {"area": area, "date": date.strftime("%d.%m.%Y") if date else ""},
+        {"area": area, "date": date_str},
         expect_success=expect_success,
     )
     return form_accepted
