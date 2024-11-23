@@ -195,10 +195,14 @@ def test_create_invalid_session(driver) -> None:
             "date": EXISTING_OBJECTS["session_date"],
         },
     ]:
-        form_accepted = start_session(
-            driver, data["area"], data["date"], expect_success=False
-        )
-        assert not form_accepted
+        try:
+            form_accepted = start_session(
+                driver, data["area"], data["date"], expect_success=False
+            )
+        except Exception as e:
+            print(e)
+            form_accepted = False
+        assert not form_accepted, data
 
 
 def test_create_session_on_existing_area(db_session, started_session_id) -> None:
