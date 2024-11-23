@@ -201,7 +201,7 @@ def test_create_invalid_session(driver) -> None:
             )
         except Exception as e:
             print(e)
-            form_accepted = False
+            form_accepted = True
         assert not form_accepted, data
 
 
