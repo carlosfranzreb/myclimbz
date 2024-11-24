@@ -9,20 +9,20 @@ from selenium.webdriver.support import expected_conditions as EC
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from climbz import create_app
-
 
 HOME_TITLE = "myclimbz - Home"
 HOME_URL = "http://127.0.0.1:5000"
 CLIMBER_ID = 1
+SLEEP_TIME = 2
+IS_CI = os.environ.get("CI", False)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def db_session() -> Session:
     return Session(create_engine("sqlite:///instance/test_100.db"))
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def driver() -> Generator[webdriver.Chrome, None, None]:
     """
     If env=dev:
@@ -31,9 +31,8 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
         GitHub Actions will run the web app as a service.
     """
 
-    is_ci = os.environ.get("CI", False)
     try:
-        if not is_ci:
+        if not IS_CI:
             os.system("git checkout instance/test_100.db")
             assert os.environ["DISABLE_LOGIN"] == "1", "DISABLE_LOGIN must be set to 1"
             assert (
@@ -52,12 +51,7 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
         yield driver
 
     finally:
-        if not is_ci:
+        if not IS_CI:
             os.system("docker compose down")
             os.system("git checkout instance/test_100.db")
         driver.quit()
-
-
-def run_app() -> None:
-    app = create_app()
-    app.run()

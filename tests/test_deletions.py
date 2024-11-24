@@ -12,10 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from sqlalchemy import text
 
-from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID
-
-
-SLEEP_TIME = 2
+from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID, SLEEP_TIME
 
 
 def test_delete_climb(db_session, driver):

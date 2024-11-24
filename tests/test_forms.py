@@ -18,13 +18,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from sqlalchemy import text
 
-from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID
+from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID, SLEEP_TIME, IS_CI
 
 
 EXISTING_OBJECTS = {
     "area": "A1",
     "sector": "A1 S1",
-    "session_date": datetime(2023, 1, 1),
+    "session_date": datetime(2023, 1, 13),
 }
 NEW_OBJECTS = {
     "area": "A3",
@@ -61,10 +61,17 @@ def started_session_id(driver, db_session) -> Generator:
     # create the session
     stop_session(driver, db_session)
     date_obj = NEW_OBJECTS["session_date"]
+    print(f"Date: {date_obj.strftime('%d.%m.%Y')}")
+
     area = EXISTING_OBJECTS["area"]
     form_accepted = start_session(driver, area, date_obj)
     assert form_accepted
-    sleep(2)
+    sleep(SLEEP_TIME)
+
+    sql_query = text("SELECT id, date, climber_id, area_id FROM climbing_session")
+    results = db_session.execute(sql_query).fetchall()
+    print(results)
+    print("Expected ", date_obj.strftime("%Y-%m-%d"), CLIMBER_ID, area)
 
     # get and yield the ID of the created session
     sql_query = text(
@@ -76,6 +83,7 @@ def started_session_id(driver, db_session) -> Generator:
         """
     )
     results = db_session.execute(sql_query).fetchall()
+    print(results)
     yield results[0][0]
     stop_session(driver, db_session)
 
@@ -95,10 +103,16 @@ def start_session(
     Returns:
         bool: True if the form was accepted.
     """
+    if date is None:
+        date_str = ""
+    elif IS_CI:
+        date_str = date.strftime("%m.%d.%Y")
+    else:
+        date_str = date.strftime("%d.%m.%Y")
     form_accepted = fill_form(
         driver,
         "start_session",
-        {"area": area, "date": date.strftime("%d.%m.%Y") if date else ""},
+        {"area": area, "date": date_str},
         expect_success=expect_success,
     )
     return form_accepted
@@ -175,10 +189,14 @@ def test_create_invalid_session(driver) -> None:
             "date": EXISTING_OBJECTS["session_date"],
         },
     ]:
-        form_accepted = start_session(
-            driver, data["area"], data["date"], expect_success=False
-        )
-        assert not form_accepted
+        try:
+            form_accepted = start_session(
+                driver, data["area"], data["date"], expect_success=False
+            )
+        except Exception as e:
+            print(e)
+            form_accepted = True
+        assert not form_accepted, data
 
 
 def test_create_session_on_existing_area(db_session, started_session_id) -> None:
@@ -366,7 +384,7 @@ def test_create_session_on_new_area(driver, db_session) -> None:
     area = NEW_OBJECTS["area"]
     form_accepted = start_session(driver, area, date)
     assert form_accepted
-    sleep(2)
+    sleep(SLEEP_TIME)
 
     # check that the area and the session were created
     sql_query = text(f"SELECT id FROM area WHERE name = '{area}'")
