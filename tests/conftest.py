@@ -1,7 +1,6 @@
 import os
 from typing import Generator
 import sys
-import locale
 
 import pytest
 from selenium import webdriver
@@ -16,10 +15,6 @@ HOME_URL = "http://127.0.0.1:5000"
 CLIMBER_ID = 1
 SLEEP_TIME = 2
 IS_CI = os.environ.get("CI", False)
-
-# Set the locale to en_US to avoid issues with date formatting
-locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
-locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 
 @pytest.fixture(scope="session")
