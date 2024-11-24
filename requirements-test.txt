@@ -2,3 +2,4 @@ pytest==7.4.3
 selenium==4.16.0
 beautifulsoup4==4.12.2
 SQLAlchemy==2.0.21
+requests==2.32.3
