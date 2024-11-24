@@ -24,7 +24,7 @@ from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID, SLEEP_TIME, IS_CI
 EXISTING_OBJECTS = {
     "area": "A1",
     "sector": "A1 S1",
-    "session_date": datetime(2023, 1, 1),
+    "session_date": datetime(2023, 1, 13),
 }
 NEW_OBJECTS = {
     "area": "A3",
@@ -157,15 +157,11 @@ def fill_form(
     # open and fill the form
     driver.find_element(By.ID, button_id).click()
     WebDriverWait(driver, 30).until_not(EC.title_is(HOME_TITLE))
-    driver.save_screenshot("empty_form.png")
     for field_id, value in field_data.items():
         field = driver.find_element(By.ID, field_id)
         field.clear()
         field.send_keys(value)
         driver.find_element(By.TAG_NAME, "h2").click()
-
-    test_key = "-".join(field_data.values())
-    driver.save_screenshot(f"filled_form_{test_key}.png")
 
     # submit the form and check if it was accepted
     driver.find_element(By.XPATH, "//input[@type='submit']").click()
@@ -173,8 +169,6 @@ def fill_form(
         WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
     else:
         WebDriverWait(driver, 10).until_not(EC.title_is(HOME_TITLE))
-
-    driver.save_screenshot(f"submitted_form_{test_key}.png")
 
     return driver.current_url in [HOME_URL, HOME_URL + "/"]
 

@@ -22,12 +22,12 @@ locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def db_session() -> Session:
     return Session(create_engine("sqlite:///instance/test_100.db"))
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def driver() -> Generator[webdriver.Chrome, None, None]:
     """
     If env=dev:
