@@ -47,7 +47,6 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
 
-            # See bconway's comment in https://github.com/orgs/community/discussions/42127
             - name: Restart app after checkout
               uses: docker://docker
               with:
