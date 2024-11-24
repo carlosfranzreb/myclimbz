@@ -2,6 +2,8 @@
 
 This guide is for developers: how to run and develop the app. Information about deployment can be found in `./DEPLOY.md`.
 
+If you are interested in contributing, please have a look at the issues. For big features, please write on the issue page first, before starting to work on them!
+
 ## Index
 
 1. [Run the app locally](#run-the-app-locally)
