@@ -42,3 +42,16 @@ def guide() -> str:
         next = url_for("home.page_home")
 
     return render_template("guide.html", title="myclimbz - User Guide", next=next)
+
+
+@home.route("/examples")
+def examples() -> str:
+    next = request.referrer
+    if not current_user.is_authenticated:
+        next = url_for("climbers.register")
+    elif not next or "guide" in next:
+        next = url_for("home.page_home")
+
+    return render_template(
+        "example_analysis.html", title="myclimbz - Examples", next=next
+    )

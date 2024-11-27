@@ -1,0 +1,139 @@
+<html>
+
+<head>
+    <title>Analysis example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="{{ url_for('static', filename='css/colors.css') }}" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+
+    <!-- Add a floating button to the bottom of the page. -->
+    <div>
+        {% if "register" in next %}
+        <a href="{{ next }}" class="btn btn-danger fixed-bottom">
+            Sign up
+        </a>
+        {% else %}
+        <a href="{{ next }}" class="btn btn-danger fixed-bottom">
+            Return
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="container mt-5 pt-4 w-25 px-md-5">
+        <img src="{{ url_for('static', filename='images/logo-green.png') }}" alt="myClimbz logo" class="img-fluid">
+    </div>
+
+    <div class="container mt-5">
+        <h2>Example of an analysis</h2>
+        <p>
+            In this page I share with you how I use the plots to analyse my climbs. You can use the index
+            below to navigate the page. If you have any questions, feel free to contact me via e-mail (myclimbz at outlook.de).
+            We have also created a subreddit (
+                <a class="text-link" href="https://www.reddit.com/r/myclimbz">r/myclimbz</a>
+            ) to discuss the app and your experience with it.
+        </p>
+
+        <h3>Index</h3>
+        <ul>
+            <li><a class="text-link" href="#time">My climbs over the years</a></li>
+        </ul>
+    </div>
+
+    <div class="container mt-5" id="privacy">
+        <h2 class="mb-md-4">My climbs over the years</h2>
+
+        <div class="row">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/tried_climbs_over_year.png') }}"
+                        class="figure-img img-fluid"
+                        alt="Climbs over years"
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Figure 1: The number of climbs I've tried over the years.
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                    I started climbing indoors in 2019. I had been wanting to try for a while, but the gym membership was too expensive.
+                    That year, the company I worked for offered a discount, so I decided to try it out. Needless to say, I got hooked.
+                    Almost two years later, I tried bouldering outside for the first time. It was in Chironico, Switzerland, and it was a blast.
+                </p>
+                <p>
+                    Figure 1 shows the number of climbs I've tried over the years. There is a big gap between 2022 and 2023, where I started
+                    climbing outside more regularly. Also, a couple of my earlier trips did not make it into the Google Sheet I initially used
+                    to log my climbs. Still, the trend is clear: I'm climbing more and more outside. I definitely prefer it to indoor climbing
+                    and, as I gain experience, my appreciation for it grows.
+                </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/attempts_over_year.png') }}"
+                        class="figure-img img-fluid"
+                        alt="Attempts over years"
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Figure 2: My amount of attempts over the years.
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                    Figure 2 shows how many attempts I made each year. Naturally, this plot is similar to the one above, as more climbs
+                    translates into more attempts. An interesting difference, however, is between the last two years, 2023 and 2024.
+                    The difference in attempts between these two years is much bigger than the number of climbs. This means that this
+                    year I'm trying more climbs more times. This matches my experience: I've spent more time projecting climbs this year than
+                    previously. I can also plot the avg. number of attempts I've spent on each climb. The avg. for 2023 is 4.6, while for 2024
+                    it is 5.4. I expect this difference to grow in the next years, as I focus more on projecting.
+                </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row my-2 mt-md-4">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/max_grade_sent_over_year.png') }}"
+                        class="figure-img img-fluid"
+                        alt="Max. grade over years"
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Figure 3: The max. grade I sent each year. Besides the shown axes, for this plot I also
+                        filtered out climbs I have not sent.
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                    Grades are a controversial topic. Most climbers take them too seriously, but they are still a good way to track progress.
+                    The point is that they are easily plotted. Figure 3 shows the max. grade I sent each year. As I only started climbing recently,
+                    there is not much to discuss here, but it will be interesting to see how this plot evolves over the years. I don't have a particular
+                    goal in mind; I just like climbing at my limit, and my limit will likely improve over time.
+                </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Add some empty space at the bottom of the page. -->
+    <div class="container mt-5 py-5"></div>
+
+</body>
+
+</html>
