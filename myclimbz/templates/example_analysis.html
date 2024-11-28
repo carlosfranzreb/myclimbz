@@ -40,10 +40,12 @@
         <h3>Index</h3>
         <ul>
             <li><a class="text-link" href="#time">My climbs over the years</a></li>
+            <li><a class="text-link" href="#areas">Climbing in different areas</a></li>
+            <li><a class="text-link" href="#grades">My experience with grades</a></li>
         </ul>
     </div>
 
-    <div class="container mt-5" id="privacy">
+    <div class="container mt-5" id="time">
         <h2 class="mb-md-4">My climbs over the years</h2>
 
         <div class="row">
@@ -123,12 +125,111 @@
                     Grades are a controversial topic. Most climbers take them too seriously, but they are still a good way to track progress.
                     The point is that they are easily plotted. Figure 3 shows the max. grade I sent each year. As I only started climbing recently,
                     there is not much to discuss here, but it will be interesting to see how this plot evolves over the years. I don't have a particular
-                    goal in mind; I just like climbing at my limit, and my limit will likely improve over time.
+                    goal in mind; I just like climbing at my limit, and my limit will likely improve over time. The question is how it improves, and how
+                    it relates to other variables, like the avg. amount of attempts per climb discussed above.
+                </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-5" id="areas">
+        <h2 class="mb-md-4">Climbing in different areas</h2>
+
+        <div class="row">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/attempts_over_area.png') }}"
+                        class="figure-img img-fluid"
+                        alt="Max. grade over areas"
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Figure 4: The number of attempts I've had in each area.
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                    Climbing trips are one of the best things about our sport. Especially nowadays where cultural tourism on big cities
+                    is saturated, visiting the small towns beside climbing areas are a great alternative. And, of course, being outside
+                    is always a plus. Different areas have different styles, mostly depending on the kind of the rock, but also on the
+                    developers. In this section we will explore some differences between them with the help of the plots.
+                </p>
+                <p>
+                    Figure 4 shows the number of attempts I've had in each area. I've visited several of the most popular crags in Europe,
+                    like Chironico, Albarracín and Fontainebleau. Bahratal is a sandstone area close to where I live, which I go to whenever
+                    the weather allows it. In the future I would also like to add some questionnaires about areas to myclimbz, as I'm curious
+                    about other climbers' experiences. Areas can differ so much, and be attractive for different reasons. For instance, Albarracín
+                    is my favorite in terms of climbing movement and rock quality, and Zillertal is the most beautiful area. There are many others
+                    worth mentioning in every aspect!
+                </p>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/max_sent_grade_over_area.png') }}"
+                        class="figure-img img-fluid"
+                        alt="Climbs over years"
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Figure 5: The max. grade I've sent in each area. For this plot, I have removed the
+                        climbs I have not sent with the filtering tool.
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                    Visiting different areas can teach us different movement styles, and also to appreciate how subjective grades can be.
+                    Figure 5 shows the max. grade I've sent in each area. In my case, Fontainebleau is a great example of how confusing grades
+                    can be. I've sent 7As in several countries, but in Font I find 6Bs already very challenging. I believe this is the case for
+                    two reasons: the style differs to what I'm used to, with the bulgy top outs and the polished foot holds, and the lower grades
+                    are renowned for being sandbagged. I had a similar experience in Uliveto, a limestone crag in Italy.
+                </p>
+                <p>
+                    Becoming well-rounded is a goal of most climbers. This plot can be helpful in that regard, but I feel it is often misleading
+                    because the grades differ so much from one area to another, especially in the lower grades, where the developers have a hard time
+                    grading climbs that are so far below their limit. In myclimbz, climbers can give their own opinion of the grades, and those are
+                    the ones shown in the plots. Therefore, if you learn how to grade consistently and according to your morphology (but not your strengths!)
+                    this plot can really help characterize your style.
                 </p>
                 </div>
             </div>
         </div>
 
+    </div>
+
+    <div class="container mt-5" id="grades">
+        <h2 class="mb-md-4">My experience with grades</h2>
+
+        <div class="row">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/min_attempts_over_grade.png') }}"
+                        class="figure-img img-fluid"
+                        alt="Min. attempts over grade"
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Figure 6: Min. attempts needed to send each grade.
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                TODO
+                </p>
+                </div>
+            </div>
+        </div>
+    
     </div>
 
     <!-- Add some empty space at the bottom of the page. -->
