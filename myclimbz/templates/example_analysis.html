@@ -3,6 +3,7 @@
 <head>
     <title>Analysis example</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="{{ url_for('static', filename='images/icon-green-small.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link href="{{ url_for('static', filename='css/colors.css') }}" rel="stylesheet" type="text/css">
@@ -35,6 +36,12 @@
             We have also created a subreddit (
                 <a class="text-link" href="https://www.reddit.com/r/myclimbz">r/myclimbz</a>
             ) to discuss the app and your experience with it.
+        </p>
+        <p>
+            Statistical analysis is a complicated topic and requires some thought. With this tool you can plot many things, but not
+            all are meaningful. Many factors play a role here: your progress throughout the years, the weather, etc. Still, assuming
+            you have carefully logged your climbs, and the sample size is large enough, you can validate your assumptions and learn
+            about your climbing style and tendencies.
         </p>
 
         <h3>Index</h3>
@@ -96,10 +103,10 @@
                 <p>
                     Figure 2 shows how many attempts I made each year. Naturally, this plot is similar to the one above, as more climbs
                     translates into more attempts. An interesting difference, however, is between the last two years, 2023 and 2024.
-                    The difference in attempts between these two years is much bigger than the number of climbs. This means that this
-                    year I'm trying more climbs more times. This matches my experience: I've spent more time projecting climbs this year than
-                    previously. I can also plot the avg. number of attempts I've spent on each climb. The avg. for 2023 is 4.6, while for 2024
-                    it is 5.4. I expect this difference to grow in the next years, as I focus more on projecting.
+                    The difference in attempts between these two years is much bigger than the number of climbs. This matches my
+                    experience: I've spent more time projecting climbs this year than previously. I can also plot the avg. number of attempts
+                    I've spent on each climb. The avg. for 2023 is 4.6, while for 2024 it is 5.4. I expect this difference to grow in the next
+                    years, as I focus more on projecting, something I only started doing this year.
                 </p>
                 </div>
             </div>
@@ -162,7 +169,7 @@
                     like Chironico, Albarracín and Fontainebleau. Bahratal is a sandstone area close to where I live, which I go to whenever
                     the weather allows it. In the future I would also like to add some questionnaires about areas to myclimbz, as I'm curious
                     about other climbers' experiences. Areas can differ so much, and be attractive for different reasons. For instance, Albarracín
-                    is my favorite in terms of climbing movement and rock quality, and Zillertal is the most beautiful area. There are many others
+                    is my favorite in terms of climbing movement and rock quality, and Zillertal the most beautiful. There are many others
                     worth mentioning in every aspect!
                 </p>
                 </div>
@@ -173,7 +180,7 @@
             <div class="col-md col-md-push-1">
                 <figure class="figure w-md-75 mx-auto d-block">
                     <img
-                        src="{{ url_for('static', filename='images/examples/max_sent_grade_over_area.png') }}"
+                        src="{{ url_for('static', filename='images/examples/max_grade_sent_over_area.png') }}"
                         class="figure-img img-fluid"
                         alt="Climbs over years"
                     >
@@ -188,7 +195,7 @@
                 <p>
                     Visiting different areas can teach us different movement styles, and also to appreciate how subjective grades can be.
                     Figure 5 shows the max. grade I've sent in each area. In my case, Fontainebleau is a great example of how confusing grades
-                    can be. I've sent 7As in several countries, but in Font I find 6Bs already very challenging. I believe this is the case for
+                    can be. I've sent 7A in several countries, but in Font I find 6Bs already very challenging. I believe this is the case for
                     two reasons: the style differs to what I'm used to, with the bulgy top outs and the polished foot holds, and the lower grades
                     are renowned for being sandbagged. I had a similar experience in Uliveto, a limestone crag in Italy.
                 </p>
@@ -197,7 +204,9 @@
                     because the grades differ so much from one area to another, especially in the lower grades, where the developers have a hard time
                     grading climbs that are so far below their limit. In myclimbz, climbers can give their own opinion of the grades, and those are
                     the ones shown in the plots. Therefore, if you learn how to grade consistently and according to your morphology (but not your strengths!)
-                    this plot can really help characterize your style.
+                    this plot can help characterize your style. Also, keep in mind that places where you haven't climbed often cannot be assessed properly
+                    here. Your evolution as a climber should also be considered when analysing these plots. Filtering out climbs you did a long time ago can
+                    help account for this.
                 </p>
                 </div>
             </div>
@@ -212,24 +221,149 @@
             <div class="col-md col-md-push-1">
                 <figure class="figure w-md-75 mx-auto d-block">
                     <img
-                        src="{{ url_for('static', filename='images/examples/min_attempts_over_grade.png') }}"
+                        src="{{ url_for('static', filename='images/examples/avg_attempts_over_sent_climb_spain.png') }}"
                         class="figure-img img-fluid"
-                        alt="Min. attempts over grade"
+                        alt="Avg. attempts over grade sent in Spain"
                     >
                     <figcaption class="figure-caption text-center">
-                        Figure 6: Min. attempts needed to send each grade.
+                        Figure 6: Avg. attempts needed to send each grade. For this plot, I've filtered out the
+                        climbs I have not sent, and selected only the spanish areas.
                     </figcaption>
                 </figure>
             </div>
             <div class="col-md d-flex align-items-center">
                 <div>
                 <p>
-                TODO
+                    Grading is challenging and requires a lot of experience. Plotting the avg. number of tries it takes you to
+                    send each grade could be helpful to assess the accuracy of your grades, as harder climbs should take you longer.
+                    Figure 6  shows the min. attempts needed to send each grade. I've only included areas in Spain,
+                    because I find their grades comparable. As I'm still a beginner, I often take the grade of the guide book, unless
+                    I find it way off. Assuming the sample size is large enough and the grades are accurate, the steepness of this curve
+                    also shows how well I climb at my limit, and may also say something about my tactics. The results for grades above 6C
+                    are not reliable, as I've only sent 4 climbs in that range. I can see that by plotting Grades against "Climbs: total sent".
                 </p>
                 </div>
             </div>
         </div>
-    
+
+        <div class="row">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/tried_climbs_over_grade_2024.png') }}"
+                        class="figure-img img-fluid"
+                        alt="Tried climbs over grade in 2024"
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Figure 7: Number of tried climbs per grade. For this plot, I've filtered out climbs prior to 2024.
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                    The grade pyramid is a useful tool to assess your balance between exploration and projecting, as they teach
+                    you different things. Figure 7 shows the number of climbs I've tried per grade in 2024. It is not as balanced
+                    as it should be: I've focused too much on my projects, although there are still many easier climbs around that
+                    I haven't tried. Changing the y-axis to "Attempts: total" shows an even greater imbalance. This is to be
+                    expected, as climbs well below my limit take me less attempts.
+                </p>
+                <p>
+                    Comparing this plot to that of other years also reveals interesting insights. This was the first year were I
+                    focused more on projecting. In my first years climbing outdoors I focused mostly on trying a lot of climbs. The
+                    plots resemble a pyramid much better than this year's plot. It makes sense, as I was still learning the basics.
+                    Projecting is something I have done less, and there's a lot for me to learn.
+                </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-5" id="preferences">
+        <h2 class="mb-md-4">My tendencies when choosing boulders</h2>
+
+        <div class="row">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/tried_climbs_over_inclination.png') }}"
+                        class="figure-img img-fluid"
+                        alt="Climbs over inclination"
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Figure 8: Number of climbs I've tried per inclination. Negative values mean slab.
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                    Logging climbs can also tell us about our preferences. Figure 8 shows the number of climbs I've tried per inclination.
+                    Clearly, during the last years I have favored vertical climbs. My explanation for this is, as a beginner, overhangs were
+                    usually too hard for me, and slabs are scary. Still, I would take an overhang over a slab any day. I've also had great
+                    experiences with slabs, and hope to balance this out in the future.
+                </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/tried_climbs_over_sessions.png') }}"
+                        class="figure-img img-fluid"
+                        alt="Number of tried climbs over number of sessions"
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Figure 9: Number of tried climbs over number of sessions. 
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                    Figure 9 shows the number of sessions I've spend on each boulder. As I mentioned before, projecting is something
+                    I started doing recently, and this plot confirms it. I've spent more than one session on very few boulders, and
+                    never more than three. In fact, I've only spent three sessions on three boulders, and I've sent them all. I have
+                    two projects which I've spent two days on, so this plot will change soon. Hopefully I keep my streak of sending
+                    on the third day!
+                </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/success_rate_over_cruxes.png') }}"
+                        class="figure-img img-fluid"
+                        alt="My success rate for each type of crux."
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Figure 10: My success rate for each type of crux.
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                    For each climb you've tried, you can select cruxes. These are the most difficult aspects of the boulder for you.
+                    Figure 10 shows my success rate for each crux, and it tells a lot about my style. I often send when confronted with
+                    dynos, compression and pinches. On the other hand, I find crimping, lock-offs and my mental game the most challenging.
+                    Crimps are also my most frequent crux, followed by power and tension. Power used to be a problem in the first years, but
+                    mostly because of my poor technique, which made me rely on it too much. Recently I started focusing more on my feet and hips,
+                    and identify tension as a crux more often. Its meaning is still something unclear to me, but I attribute it more to technique
+                    than physical strength. 
+                </p>
+                <p>
+                    This list of cruxes is my best attempt at categorizing boulders, but it's not perfect. If you have any suggestions, please
+                    let me know.
+                </p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Add some empty space at the bottom of the page. -->
