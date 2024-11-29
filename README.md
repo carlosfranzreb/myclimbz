@@ -1,6 +1,6 @@
 # myclimbz developer guide
 
-This guide is for developers: how to run and develop the app. If you are interested in contributing, please have a look at the issues. For big features, please write on the issue page first, before starting to work on them!
+This guide is for developers. It explains how to run and develop the app. If you are interested in contributing, please have a look at the issues. For big features, please write on the issue page first, before starting to work on them!
 
 If you want to host the app yourself, I described my deployment in `DEPLOY.md`.
 
