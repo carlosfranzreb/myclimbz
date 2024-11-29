@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 NAME = "myclimbz"
-DESCRIPTION = "Flask app to track sends and projects."
+DESCRIPTION = "App to track your climbing sessions and projects."
 URL = "https://github.com/carlosfranzreb/boulders"
 
 
@@ -26,8 +26,11 @@ setup(
     version=VERSION,
     description=DESCRIPTION,
     url=URL,
-    packages=["climbz"],
+    packages=["myclimbz"],
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,
+    author="Carlos Franzreb",
+    author_email="myclimbz@outlook.de",
+    license="MIT",
 )
