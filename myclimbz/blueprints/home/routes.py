@@ -41,7 +41,7 @@ def guide() -> str:
     elif not next or "guide" in next:
         next = url_for("home.page_home")
 
-    return render_template("guide.html", title="myclimbz - User Guide", next=next)
+    return render_template("docs/guide.html", title="myclimbz - User Guide", next=next)
 
 
 @home.route("/example_analysis")
@@ -53,5 +53,5 @@ def example_analysis() -> str:
         next = url_for("home.page_home")
 
     return render_template(
-        "example_analysis.html", title="myclimbz - Examples", next=next
+        "docs/example_analysis.html", title="myclimbz - Examples", next=next
     )
