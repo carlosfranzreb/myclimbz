@@ -13,15 +13,13 @@
 
     <!-- Add a floating button to the bottom of the page. -->
     <div>
-        {% if "register" in next %}
         <a href="{{ next }}" class="btn btn-danger fixed-bottom">
-            Sign up
+            {% if "register" in next %}
+                Sign up
+            {% else %}
+                Return
+            {% endif %}
         </a>
-        {% else %}
-        <a href="{{ next }}" class="btn btn-danger fixed-bottom">
-            Return
-        </a>
-        {% endif %}
     </div>
 
     <div class="container mt-5 pt-4 w-25 px-md-5">
@@ -59,7 +57,7 @@
             <div class="col-md col-md-push-1">
                 <figure class="figure w-md-75 mx-auto d-block">
                     <img
-                        src="{{ url_for('static', filename='images/examples/tried_climbs_over_year.png') }}"
+                        src="{{ url_for('static', filename='images/examples/analysis/tried_climbs_over_year.png') }}"
                         class="figure-img img-fluid"
                         alt="Climbs over years"
                     >
@@ -89,7 +87,7 @@
             <div class="col-md col-md-push-1">
                 <figure class="figure w-md-75 mx-auto d-block">
                     <img
-                        src="{{ url_for('static', filename='images/examples/attempts_over_year.png') }}"
+                        src="{{ url_for('static', filename='images/examples/analysis/attempts_over_year.png') }}"
                         class="figure-img img-fluid"
                         alt="Attempts over years"
                     >
@@ -116,7 +114,7 @@
             <div class="col-md col-md-push-1">
                 <figure class="figure w-md-75 mx-auto d-block">
                     <img
-                        src="{{ url_for('static', filename='images/examples/max_grade_sent_over_year.png') }}"
+                        src="{{ url_for('static', filename='images/examples/analysis/max_grade_sent_over_year.png') }}"
                         class="figure-img img-fluid"
                         alt="Max. grade over years"
                     >
@@ -147,7 +145,7 @@
             <div class="col-md col-md-push-1">
                 <figure class="figure w-md-75 mx-auto d-block">
                     <img
-                        src="{{ url_for('static', filename='images/examples/attempts_over_area.png') }}"
+                        src="{{ url_for('static', filename='images/examples/analysis/attempts_over_area.png') }}"
                         class="figure-img img-fluid"
                         alt="Max. grade over areas"
                     >
@@ -179,7 +177,7 @@
             <div class="col-md col-md-push-1">
                 <figure class="figure w-md-75 mx-auto d-block">
                     <img
-                        src="{{ url_for('static', filename='images/examples/max_grade_sent_over_area.png') }}"
+                        src="{{ url_for('static', filename='images/examples/analysis/max_grade_sent_over_area.png') }}"
                         class="figure-img img-fluid"
                         alt="Climbs over years"
                     >
@@ -220,7 +218,7 @@
             <div class="col-md col-md-push-1">
                 <figure class="figure w-md-75 mx-auto d-block">
                     <img
-                        src="{{ url_for('static', filename='images/examples/avg_attempts_over_sent_climb_spain.png') }}"
+                        src="{{ url_for('static', filename='images/examples/analysis/avg_attempts_over_sent_climb_spain.png') }}"
                         class="figure-img img-fluid"
                         alt="Avg. attempts over grade sent in Spain"
                     >
@@ -249,7 +247,7 @@
             <div class="col-md col-md-push-1">
                 <figure class="figure w-md-75 mx-auto d-block">
                     <img
-                        src="{{ url_for('static', filename='images/examples/tried_climbs_over_grade_2024.png') }}"
+                        src="{{ url_for('static', filename='images/examples/analysis/tried_climbs_over_grade_2024.png') }}"
                         class="figure-img img-fluid"
                         alt="Tried climbs over grade in 2024"
                     >
@@ -285,7 +283,7 @@
             <div class="col-md col-md-push-1">
                 <figure class="figure w-md-75 mx-auto d-block">
                     <img
-                        src="{{ url_for('static', filename='images/examples/tried_climbs_over_inclination.png') }}"
+                        src="{{ url_for('static', filename='images/examples/analysis/tried_climbs_over_inclination.png') }}"
                         class="figure-img img-fluid"
                         alt="Climbs over inclination"
                     >
@@ -316,7 +314,7 @@
             <div class="col-md col-md-push-1">
                 <figure class="figure w-md-75 mx-auto d-block">
                     <img
-                        src="{{ url_for('static', filename='images/examples/tried_climbs_over_sessions.png') }}"
+                        src="{{ url_for('static', filename='images/examples/analysis/tried_climbs_over_sessions.png') }}"
                         class="figure-img img-fluid"
                         alt="Number of tried climbs over number of sessions"
                     >
@@ -342,7 +340,7 @@
             <div class="col-md col-md-push-1">
                 <figure class="figure w-md-75 mx-auto d-block">
                     <img
-                        src="{{ url_for('static', filename='images/examples/success_rate_over_cruxes.png') }}"
+                        src="{{ url_for('static', filename='images/examples/analysis/success_rate_over_cruxes.png') }}"
                         class="figure-img img-fluid"
                         alt="My success rate for each type of crux."
                     >

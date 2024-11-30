@@ -55,3 +55,16 @@ def example_analysis() -> str:
     return render_template(
         "docs/example_analysis.html", title="myclimbz - Examples", next=next
     )
+
+
+@home.route("/example_logging")
+def example_logging() -> str:
+    next = request.referrer
+    if not current_user.is_authenticated:
+        next = url_for("climbers.register")
+    elif not next or "guide" in next:
+        next = url_for("home.page_home")
+
+    return render_template(
+        "docs/example_logging.html", title="myclimbz - Examples", next=next
+    )
