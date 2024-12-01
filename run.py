@@ -1,8 +1,8 @@
 from flask import request, redirect, url_for, session as flask_session
 from flask_login import current_user
 
-from climbz import create_app
-from climbz.models import *  # noqa
+from myclimbz import create_app
+from myclimbz.models import *  # noqa
 
 
 app = create_app()
