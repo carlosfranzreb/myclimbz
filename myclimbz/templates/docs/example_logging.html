@@ -1,0 +1,179 @@
+<html>
+
+<head>
+    <title>Logging example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="{{ url_for('static', filename='images/icon-green-small.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="{{ url_for('static', filename='css/colors.css') }}" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+
+    <!-- Add a floating button to the bottom of the page. -->
+    <div>
+        <a href="{{ next }}" class="btn btn-danger fixed-bottom">
+            {% if "register" in next %}
+                Sign up
+            {% else %}
+                Return
+            {% endif %}
+        </a>
+    </div>
+
+    <div class="container mt-5 pt-4 w-25 px-md-5">
+        <img src="{{ url_for('static', filename='images/logo-green.png') }}" alt="myClimbz logo" class="img-fluid">
+    </div>
+
+    <div class="container mt-5">
+        <h2>How to log climbs</h2>
+
+        <p>
+        This page explains how to log climbs with screenshots from the app. It is not as comprehensive as the guide, as the
+        goal here is to get you started with logging. For proper definitions of every aspect of the app, please
+        check the guide by clicking <a class="text-link" href="{{ url_for('home.guide') }}">here</a>
+        </p>
+
+        <h3>Index</h3>
+        <ul>
+            <li><a class="text-link" href="#session">Start a session</a></li>
+            <li><a class="text-link" href="#climb">Add a climb</a></li>
+        </ul>
+    </div>
+
+    <div class="container mt-5" id="session">
+        <h2 class="mb-md-4">Start a session</h2>
+
+        <div class="row">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block" style="max-width: 20em">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/logging/add_session.png') }}"
+                        class="figure-img img-fluid"
+                        alt="Click on 'start session'"
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Step 1: Click on "start session".
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                    Before adding climbs, we must first start a session, stating the date and area. In your laptop, you can find the button
+                    on the navigation bar. On your phone, you need to click on the burger icon first to open the menu.
+                </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block" style="max-width: 20em">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/logging/session_form.png') }}"
+                        class="figure-img img-fluid"
+                        alt="Form to start a session"
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Step 2: Fill the form to start a session.
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                    Input the area and the date where the session took place. Optionally, you
+                    can also rate the weather conditions from 1 to 5. If the area is new, a field to select
+                    the rock type will appear.
+                </p>
+                <p>
+                    If you only want to add new routes, e.g. because you are planning a future trip, check the
+                    box "Only adding projects". The date and conditions fields will be hidden then, as they are
+                    irrelevant for a project search. When clicking on "Submit", a project search will be started,
+                    which, in contrast to a session, is not stored in the database.
+                </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-5" id="climb">
+        <h2 class="mb-md-4">Add a climb</h2>
+
+        <div class="row">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block" style="max-width: 20em">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/logging/add_climb.png') }}"
+                        class="figure-img img-fluid"
+                        alt="Click on 'add climb'"
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Step 1: Click on "Add climb".
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                    Once a session is open, the button to start a session is replaced
+                    with a button to add a climb (called "Add climb"). Also, a second
+                    button is added to stop the started session. If you click on "Stop session"
+                    erroneously, don't worry. Just go to the page of the session and click on
+                    "Reopen session".
+                </p>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row">
+            <div class="col-md col-md-push-1">
+                <figure class="figure w-md-75 mx-auto d-block" style="max-width: 20em">
+                    <img
+                        src="{{ url_for('static', filename='images/examples/logging/climb_form.png') }}"
+                        class="figure-img img-fluid"
+                        alt="Form to add a climb"
+                    >
+                    <figcaption class="figure-caption text-center">
+                        Step 2: Fill the form to add a climb
+                    </figcaption>
+                </figure>
+            </div>
+            <div class="col-md d-flex align-items-center">
+                <div>
+                <p>
+                    As with the area, if the route you enter does not exist in the
+                    database for the given sector, the fields to enter information
+                    about the route will stay there. You can read more about them
+                    in the guide. When the form is submitted, the route will be stored
+                    in the database.
+                </p>
+                <p>
+                    At the end of the route form, there is a checkbox called
+                    "Add opinion after submitting this form". If you check it, after submitting
+                    the climb form you will be sent to the opinion form, where you can enter your
+                    subjective opinion about the route, including the grade, rating and cruxes.
+                </p>
+                <p>
+                    Below the fields for the route, you will find the fields for entering
+                    information about your session on the route, mainly the number of
+                    attempts and whether you sent.
+                </p>
+                <p>
+                    Finally, if you are in the middle of a session and come across a boulder you
+                    want to mark as a project, just check the checkbox "Project (not tried yet)".
+                </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Add some empty space at the bottom of the page. -->
+    <div class="container mt-5 py-5"></div>
+
+</body>
+
+</html>

@@ -1,12 +1,69 @@
 # myclimbz developer guide
 
-This guide is for developers: how to run and develop the app. Information about deployment can be found in `./DEPLOY.md`.
+This guide is for developers. It explains how to run and develop the app. If you are interested in contributing, please have a look at the issues. For big features, please write on the issue page first, before starting to work on them!
+
+If you want to host the app yourself, I described my deployment in `DEPLOY.md`.
 
 ## Index
 
-1. [Creating forms](#creating-forms)
-2. [Creating filters](#creating-filters)
-3. [Updating the prod DB](#update-the-prod-database)
+1. [Run the app locally](#run-the-app-locally)
+2. [Creating forms](#creating-forms)
+3. [Creating filters](#creating-filters)
+4. [Updating the prod DB](#update-the-prod-database)
+
+## Run the app locally
+
+### Clone the repository
+
+```bash
+git clone git@github.com:carlosfranzreb/myclimbz.git
+```
+
+### Create the .env file
+
+The `.env` file stores the environment variables required by docker compose:
+
+```bash
+FLASK_DEBUG=1  # set to 1 for hot reloading, 0 for attaching the debugger
+CLIMBZ_DB_URI=sqlite:///test_100.db
+DISABLE_LOGIN=1
+PROD=0
+
+RECAPTCHA_PUBLIC_KEY=1234
+RECAPTCHA_PRIVATE_KEY=abcd
+
+MAIL_USERNAME=random@mail.com
+MAIL_PASSWORD=mypassword1
+```
+
+- `FLASK_DEBUG` can be set to 0 or 1, depending on whether you want to allowa hot reloading or debugging:
+  - `FLASK_DEBUG=1`: changes made to the code will be loaded onto the container immediately. Attaching a debugger is not possible.
+  - `FLASK_DEBUG=0`: hot reloading is disabled, but you can attach a debugger to the container. This can be done in VS Code with the launch config named `Python: Remote Attach` defined in `.vscode/launch.json`.
+- `CLIMBZ_DB_URI` defines the path to the database file. The test file shown above is already part of the repository, and is the one used in the tests. You can create a new one with `scripts/db/create_db.py`. Add the flag `--test` to add mock data to the created database.
+- `DISABLE_LOGIN` can be set to 0 or 1. When it's set to 1, the climber with ID 1 is automatically logged in when the app starts. This is useful for development to skip the login page.
+- `PROD` can be set to 0 or 1. When it's set to 1, the app is run with gunicorn (as done in production). For local development, this variable should be set to 0.
+- To get RECAPTCHA v3 keys see [the official documentation](https://developers.google.com/recaptcha/docs/v3).
+- The e-mail credentials are used for password recovery. When a user clicks on "Forgot password", they are sent an e-mail with a new password from this account.
+
+### Build and run the app
+
+This can be done easily with docker compose: run `docker compose up --build` from the root directory of the repository.
+
+To install Docker, visit [their installation guide](https://docs.docker.com/engine/install/)
+
+### Run the tests
+
+Once the app runs, all tests should pass. You can check this by running `pytest` from the root directory of the repository.
+
+Before running the tests, you need to install the requirements for the test environment. They are written in the file `requirements-test.txt`. I usually install them in a local conda environment, like this:
+
+```bash
+conda create -p ./venv python=3.10
+conda activate ./venv
+pip install -r requirements-test.txt
+```
+
+Once the test environment is ready, you can run the tests with the command `pytest`.
 
 ## Creating forms
 

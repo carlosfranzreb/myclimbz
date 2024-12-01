@@ -54,7 +54,7 @@ def get_urls(links: list[WebElement]) -> list[str]:
         except Exception:
             continue
         if url:
-            if "reddit" in url:
+            if "reddit" in url or "github" in url:
                 continue
             url = clean_url(url)
 

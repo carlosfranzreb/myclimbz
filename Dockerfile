@@ -13,10 +13,10 @@ RUN pip install --upgrade pip
 COPY ./requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
 
-ENV FLASK_APP=climbz
+ENV FLASK_APP=myclimbz
 
 # copy code
-COPY ./climbz ./climbz
+COPY ./myclimbz ./myclimbz
 COPY ./entrypoint.sh ./entrypoint.sh
 COPY ./wsgi.py ./wsgi.py
 COPY ./gunicorn_config.py ./gunicorn_config.py
