@@ -127,6 +127,6 @@ You can find the currently implemented filters in the folder `filters/widgets`. 
 If you change the scheme of the database, you need to create a new production database and add the old data. This can be done from the sqlite CLI with `ATTACH`, which allows you to insert data from one database to another. Here is an example:
 
 ```sql
-ATTACH DATABASE "instance/prod_hetzner.db" AS "OLD";
+ATTACH DATABASE "instance/prod_copy.db" AS "OLD";
 INSERT INTO climber SELECT * from OLD.climber;
 ```
