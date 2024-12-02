@@ -86,6 +86,8 @@ def create_app():
             or request.endpoint == "climbers.register"
             or request.endpoint == "climbers.forgot_password"
             or request.endpoint == "home.guide"
+            or request.endpoint == "home.example_logging"
+            or request.endpoint == "home.example_analysis"
             or "static" in request.endpoint
         ):
             return
