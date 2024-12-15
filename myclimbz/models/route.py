@@ -139,13 +139,15 @@ class Route(db.Model):
         climbs = [
             climb for climb in self.climbs if climb.session.climber_id == climber_id
         ]
-        sorted_climbs = sorted(climbs, key=lambda climb: climb.session.date)
+        sorted_climbs = sorted(
+            climbs, key=lambda climb: climb.session.date, reverse=True
+        )
         if not sorted_climbs:
             return "N/A"
-        elif not sorted_climbs[-1].link:
-            return "N/A"
-        else:
-            sorted_climbs[-1].link
+        for climb in sorted_climbs:
+            if climb.link:
+                return climb.link
+        return "N/A"
 
     def as_dict(self, climber_id: int) -> dict:
         """
