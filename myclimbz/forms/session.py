@@ -39,13 +39,14 @@ class SessionForm(FlaskForm):
     def validate(self) -> bool:
         """
         Check if the form is valid. Besides the field validators, the session must be
-        unique, i.e. the climber-area-date combination must be unique.
+        unique, i.e. the climber-area-date combination must be unique. If this form
+        is to edit a session, area will be null, which is fine.
         """
         if not super().validate():
             return False
 
         area = self.get_area()
-        if area.id is None:
+        if area is None or area.id is None:
             return True
 
         session = Session.query.filter_by(
@@ -93,10 +94,13 @@ class SessionForm(FlaskForm):
 
     def get_area(self) -> Area:
         """
+        - If there is no area (happens when a session is edited), return null.
         - If the area is new, create it and return it, without adding it to the DB.
         - If the area exists, return it.
         """
-        area = None
+        if self.area is None:
+            return None
+
         area_name = self.area.data.strip().lower().title()
         area = Area.query.filter_by(name=area_name).first()
         if area is None:
