@@ -122,10 +122,21 @@ def stop_session(driver: webdriver.Chrome, db_session) -> None:
     """
     Stop and delete the current session.
     """
+
+    # if a form is open, cancel it
+    try:
+        driver.find_element(By.LINK_TEXT, "Cancel").click()
+    except NoSuchElementException:
+        pass
+
+    # stop the session if one is open
     try:
         driver.find_element(By.ID, "stop_session").click()
     except NoSuchElementException:
-        driver.get(HOME_URL)
+        pass
+
+    # go to the home page
+    driver.get(HOME_URL)
     WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
 
 
