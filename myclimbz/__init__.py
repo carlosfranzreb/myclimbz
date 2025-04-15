@@ -44,6 +44,10 @@ def create_app():
     app.config["MAIL_SUPPRESS_SEND"] = False
     mail.init_app(app)
 
+    # TODO: this envvar is currently displayed in the compose file. Is that ok?
+    app.config["UPLOAD_FOLDER"] = os.environ["UPLOAD_FOLDER"]
+    os.makedirs(os.environ["UPLOAD_FOLDER"], exist_ok=True)
+
     from myclimbz.blueprints.areas.routes import areas
     from myclimbz.blueprints.home.routes import home
     from myclimbz.blueprints.sessions.routes import sessions
