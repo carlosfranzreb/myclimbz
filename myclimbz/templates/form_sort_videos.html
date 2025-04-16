@@ -16,7 +16,7 @@
         {% endfor %}
     </div>
 
-    <form id="sort-form" method="POST" action="{{ url_for('climbs.sort_videos', user_id=user_id, session_id=open_session.id, timestamp=timestamp) }}">
+    <form id="sort-form" method="POST" action="{{ url_for('climbs.sort_videos') }}">
         {{ form.hidden_tag() }}
         <div style="display:none;"> {{ form.videos_sorted() }} </div>
         <input type="submit" class="btn btn-success" name="btn" value="Continue">

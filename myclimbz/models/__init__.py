@@ -13,3 +13,4 @@ from .sector import Sector  # noqa
 from .area import Area  # noqa
 from .session import Session  # noqa
 from .climber import Climber  # noqa
+from .video import Video, VideoAttempt  # noqa

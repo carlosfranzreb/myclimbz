@@ -12,9 +12,16 @@ from flask import (
 )
 from flask_login import current_user
 from werkzeug.utils import secure_filename
+import cv2
 
-from myclimbz.models import Climb, Session, Climber
-from myclimbz.forms import ClimbForm, RouteForm, VideosForm, VideosSortingForm
+from myclimbz.models import Climb, Session, Climber, Video, VideoAttempt
+from myclimbz.forms import (
+    ClimbForm,
+    RouteForm,
+    VideosForm,
+    VideosSortingForm,
+    VideoAnnotationForm,
+)
 from myclimbz import db
 from myclimbz.blueprints.utils import render
 
@@ -22,11 +29,19 @@ from myclimbz.blueprints.utils import render
 climbs = Blueprint("climbs", __name__)
 
 
+@climbs.route(
+    "/add_climb_from_video/<int:n_videos>/<int:video_idx>",
+    methods=["GET", "POST"],
+)
 @climbs.route("/add_climb", methods=["GET", "POST"])
-def add_climb() -> str:
+def add_climb(n_videos: int = None, video_idx: int = None) -> str:
+
+    # create title
+    title = "Add climb"
+    if video_idx:
+        title += f" from video ({video_idx+1}/{n_videos})"
 
     # create forms and add choices
-    title = "Add climb"
     is_project_search = flask_session["session_id"] == "project_search"
     if is_project_search:
         area_id = flask_session["area_id"]
@@ -36,6 +51,13 @@ def add_climb() -> str:
         area_id = session.area_id
         climb_form = ClimbForm.create_empty()
     route_form = RouteForm.create_empty(area_id)
+
+    # get video object if there is one
+    video_obj = flask_session.get("video_obj", None)
+    if video_idx and not video_obj:
+        abort(500)
+    if video_obj:
+        climb_form.n_attempts = len(video_obj.attempts)
 
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
@@ -65,18 +87,25 @@ def add_climb() -> str:
             db.session.add(route)
             db.session.commit()
 
-        # add as project or create climb
+        # add as project or create climb, and add it to video object if appropriate
         climber = Climber.query.get(current_user.id)
         if is_project_search or climb_form.is_project.data:
             climber.projects.append(route)
         else:
             climb = climb_form.get_object(route)
             db.session.add(climb)
+            if video_obj:
+                video_obj.climb = climb
         db.session.commit()
 
         # if the user wants to add an opinion, redirect to the opinion form
         if route_form.add_opinion.data is True:
-            return redirect(f"/get_opinion_form/{climber.id}/{route.id}")
+            if video_obj:
+                return redirect(f"/get_opinion_form/{climber.id}/{route.id}")
+            else:
+                return redirect(
+                    f"/get_opinion_form_from_video/{climber.id}/{route.id}/{n_videos}/{video_idx}"
+                )
         else:
             return redirect(flask_session.pop("call_from_url"))
 
@@ -140,55 +169,47 @@ def add_videos() -> str:
     form = VideosForm()
     session_id = flask_session["session_id"]
 
-    # POST: a climb form was submitted => create climb or return error
+    # POST: form was submitted => add videos or return error
     if request.method == "POST":
         if not form.validate():
             if flask_session.get("error", None) is None:
                 flask_session["error"] = "An error occurred. Fix it and resubmit."
-            return render(
-                "form.html", title=title, forms=[form], enctype="multipart/form-data"
-            )
 
         # upload videos
-        fnames = list()
-        timestamp = int(time())
-        for f_idx, f in enumerate(form.videos.data):
-            f_ext = os.path.splitext(f.filename)[1]
-            fnames.append(
-                secure_filename(
-                    f"{current_user.id}_{session_id}_{timestamp}_added-{f_idx}{f_ext}"
+        else:
+            fnames = list()
+            timestamp = int(time())
+            for f_idx, f in enumerate(form.videos.data):
+                f_ext = os.path.splitext(f.filename)[1]
+                fnames.append(
+                    secure_filename(
+                        f"{current_user.id}_{session_id}_{timestamp}_added-{f_idx}{f_ext}"
+                    )
                 )
-            )
-            f.save(os.path.join(current_app.config["UPLOAD_FOLDER"], fnames[-1]))
+                f.save(os.path.join(current_app.config["UPLOAD_FOLDER"], fnames[-1]))
 
-        return redirect(f"/sort_videos/{current_user.id}/{session_id}/{timestamp}")
+            flask_session["video_fnames"] = fnames
+            return redirect(f"/sort_videos")
 
     # GET: the user wants to upload videos
     return render("form.html", title=title, forms=[form], enctype="multipart/form-data")
 
 
-@climbs.route(
-    "/sort_videos/<int:user_id>/<int:session_id>/<int:timestamp>",
-    methods=["GET", "POST"],
-)
-def sort_videos(user_id: int, session_id: int, timestamp: int) -> str:
+@climbs.route("/sort_videos", methods=["GET", "POST"])
+def sort_videos() -> str:
     """
     The user can sort the videos chronologically and is then sent to `process_videos`.
     """
 
+    videos = sorted(flask_session["video_fnames"])
+    user_id, session_id = videos[0].lsplit("_", 2)[:2]
     check_access_to_videos(user_id, session_id)
-
-    # get the video filenames
-    upload_folder = current_app.config["UPLOAD_FOLDER"]
-    video_prefix = f"{user_id}_{session_id}_{timestamp}"
-    videos = list()
-    videos = sorted(
-        [fname for fname in os.listdir(upload_folder) if fname.startswith(video_prefix)]
-    )
 
     # if there is only one video, skip this and go to process_videos
     if len(videos) == 1:
-        return redirect(f"/process_videos/{user_id}/{timestamp}")
+        videos[0] = videos[0].replace("added", "sorted")
+        flask_session["video_fnames"] = videos
+        return redirect(f"/annotate_video/1/0")
 
     # create the form for sorting the videos
     title = "Sort videos"
@@ -215,38 +236,59 @@ def sort_videos(user_id: int, session_id: int, timestamp: int) -> str:
                 )
                 videos[f_idx] = f_new
 
-            return redirect(f"/process_videos/{user_id}/{session_id}/{timestamp}")
+            flask_session["video_fnames"] = videos
+            return redirect(f"/annotate_video/{len(videos)}/0")
 
-    return render(
-        "form_sort_videos.html",
-        title=title,
-        form=form,
-        videos=videos,
-        timestamp=timestamp,
-    )
+    return render("form_sort_videos.html", title=title, form=form, videos=videos)
 
 
 @climbs.route(
-    "/process_videos/<int:user_id>/<int:session_id>/<int:timestamp>",
+    "/annotate_video/<int:n_videos>/<int:video_idx>",
     methods=["GET", "POST"],
 )
-def process_videos(user_id: int, session_id: int, timestamp: int) -> str:
+def annotate_video(n_videos: int, video_idx: int) -> str:
     """
-    The user can perform here the following actions:
+    The user is shown a video and is asked to mark the portions of each video where
+    there is climbing. Only the marked will be saved. The number of attempts is inferred
+    from the marked portions.
 
-    1. Sort the videos chronologically.
-    2. Mark the portions of each video where there is climbing.
-        - Only the marked will be saved.
-        - The number of attempts is inferred from the marked portions
-    3. Fill in the remaining route and climb info for each video:
-        - Route information.
-        - Whether the route was sent or flashed.
-        - Add or edit an opinion.
+    Afterwards, the user is sent to `add_climb` to fill in route information. And after
+    that, if there are more videos, the user is sent back here to annotate the next video.
     """
 
+    # create title, frames and form
+    video_fname = sorted(flask_session["video_fnames"])[video_idx]
+    user_id, session_id = video_fname.lsplit("_", 2)[:2]
     check_access_to_videos(user_id, session_id)
 
-    pass
+    frames, fps_video, fps_taken = get_video_frames(
+        os.path.join(current_app.config["UPLOAD_FOLDER"], video_fname)
+    )
+    title = f"Annotate video ({video_idx+1}/{n_videos})"
+    form = VideoAnnotationForm()
+
+    # POST: user submitted annotations
+    if request.method == "POST":
+        if not form.validate():
+            if flask_session.get("error", None) is None:
+                flask_session["error"] = "An error occurred. Fix it and resubmit."
+
+        else:
+            # store video annotations
+            video_obj = Video(
+                fname=video_fname, fps_video=fps_video, fps_taken=fps_taken
+            )
+            for section in form.sections.data:
+                video_obj.attempts.append(
+                    VideoAttempt(start_frame=section.start, end_frame=section.end)
+                )
+
+            # go to "Add climb" form
+            flask_session["video"] = video_obj
+            return redirect(f"/add_climb_from_video/{n_videos}/{video_idx}")
+
+    # GET: the user wants to upload videos
+    return render("form_annotate_video.html", title=title, forms=[form], video=frames)
 
 
 @climbs.route("/videos/<filename>")
@@ -279,3 +321,27 @@ def check_access_to_videos(user_id: int, session_id: int = None):
             "The session is closed. Redirecting to the session's page"
         )
         return redirect(f"/session/{session_id}")
+
+
+def get_video_frames(
+    video_path: str, fps: int = 2
+) -> tuple[list[cv2.typing.MatLike], int, int]:
+    """
+    Extract and return `fps` frames per second from the video.
+    """
+    cap = cv2.VideoCapture(video_path)
+    video_fps = cap.get(cv2.CAP_PROP_FPS)
+    frame_interval = int(video_fps / fps)
+    frames = list()
+
+    frame_count = 0
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        if frame_count % frame_interval == 0:
+            frames.append(frame)
+        frame_count += 1
+
+    cap.release()
+    return frames, video_fps, fps

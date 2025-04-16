@@ -1,0 +1,201 @@
+{% extends "main.html" %}
+{% block content %}
+
+<div class="container px-2 px-md-5">
+    <h2 class="mt-2">{{ title }}</h2>
+    <p>Use 'A' (previous) and 'D' (next) keys to navigate frames. Mark the start and end frame numbers for each climbing section.</p>
+
+    <div class="text-center mb-3">
+        <img id="frame-image" src="{{ frame_urls[0] if frame_urls else '' }}" alt="Video Frame" style="max-width: 100%; height: auto; max-height: 60vh; border: 1px solid #ccc;">
+        <div>
+            Frame: <span id="current-frame-num">1</span> / <span id="total-frames">{{ num_frames }}</span>
+        </div>
+    </div>
+
+    <div class="mb-3 text-center">
+        <button type="button" id="mark-start-btn" class="btn btn-success me-2">Mark Start</button>
+        <button type="button" id="mark-end-btn" class="btn btn-info">Mark End</button>
+    </div>
+
+    <form method="POST"> {# Add action=url_for(...) if needed #}
+        {{ form.hidden_tag() }} {# CSRF Token #}
+
+        <h4>Climbing Sections</h4>
+        <div id="sections-container">
+            {# Render existing form fields (at least one based on min_entries=1) #}
+            {% for section_field in form.sections %}
+            <div class="section-entry row align-items-center mb-2 border p-2 rounded" data-index="{{ loop.index0 }}">
+                 <div class="col-md-5">
+                    {{ section_field.start.label(class="form-label") }}
+                    {{ section_field.start(class="form-control form-control-sm start-input") }}
+                    {% if section_field.start.errors %}
+                        <div class="invalid-feedback d-block"> {{ section_field.start.errors|join(', ') }}</div>
+                    {% endif %}
+                 </div>
+                 <div class="col-md-5">
+                    {{ section_field.end.label(class="form-label") }}
+                    {{ section_field.end(class="form-control form-control-sm end-input") }}
+                     {% if section_field.end.errors %}
+                        <div class="invalid-feedback d-block"> {{ section_field.end.errors|join(', ') }}</div>
+                    {% endif %}
+                 </div>
+                 <div class="col-md-2 text-end">
+                     <button type="button" class="btn btn-danger btn-sm remove-section-btn" {% if loop.index0 == 0 and form.sections.min_entries >= 1 %}disabled{% endif %}>Remove</button>
+                 </div>
+                  {% if section_field.errors and 'start' not in section_field.errors and 'end' not in section_field.errors %} {# Catch form-level errors #}
+                    <div class="col-12">
+                        {% for error in section_field.errors.values()|sum(start=[]) %}
+                         <div class="invalid-feedback d-block">{{error}}</div>
+                        {% endfor %}
+                    </div>
+                  {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" id="add-section-btn" class="btn btn-secondary mt-2">Add Section</button>
+
+        <hr>
+        <input type="submit" class="btn btn-primary" value="Save Sections">
+         <a href="{{ url_for('home.cancel_form') }}" class="btn btn-danger ms-2">Cancel</a> {# Adjust cancel URL if needed #}
+
+    </form>
+
+    <div id="section-template" style="display: none;">
+        <div class="section-entry row align-items-center mb-2 border p-2 rounded" data-index="__prefix__">
+            <div class="col-md-5">
+                <label class="form-label" for="sections-__prefix__-start">Start</label>
+                <input class="form-control form-control-sm start-input" id="sections-__prefix__-start" name="sections-__prefix__-start" type="number" value="">
+            </div>
+            <div class="col-md-5">
+                <label class="form-label" for="sections-__prefix__-end">End</label>
+                <input class="form-control form-control-sm end-input" id="sections-__prefix__-end" name="sections-__prefix__-end" type="number" value="">
+            </div>
+            <div class="col-md-2 text-end">
+                <button type="button" class="btn btn-danger btn-sm remove-section-btn">Remove</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- Frame Data (Passed from Flask/Jinja) ---
+    const frameUrls = {{ frame_urls | tojson }};
+    const numFrames = {{ num_frames }};
+    let currentFrameIndex = 0; // 0-based index
+
+    // --- DOM Elements ---
+    const frameImage = document.getElementById('frame-image');
+    const currentFrameNumSpan = document.getElementById('current-frame-num');
+    const totalFramesSpan = document.getElementById('total-frames');
+    const markStartBtn = document.getElementById('mark-start-btn');
+    const markEndBtn = document.getElementById('mark-end-btn');
+    const addSectionBtn = document.getElementById('add-section-btn');
+    const sectionsContainer = document.getElementById('sections-container');
+    const sectionTemplate = document.getElementById('section-template');
+
+    // --- Initial Setup ---
+    function updateFrameDisplay() {
+        if (frameUrls.length > 0) {
+            frameImage.src = frameUrls[currentFrameIndex];
+        }
+        currentFrameNumSpan.textContent = currentFrameIndex + 1; // Display 1-based index
+        totalFramesSpan.textContent = numFrames;
+    }
+    updateFrameDisplay(); // Initial display
+
+    // --- Event Listener: Frame Navigation ---
+    document.addEventListener('keydown', (event) => {
+        // Ignore if typing in an input field
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+             return;
+        }
+
+        if (event.key === 'a' || event.key === 'A') {
+            if (currentFrameIndex > 0) {
+                currentFrameIndex--;
+                updateFrameDisplay();
+            }
+        } else if (event.key === 'd' || event.key === 'D') {
+            if (currentFrameIndex < numFrames - 1) {
+                currentFrameIndex++;
+                updateFrameDisplay();
+            }
+        }
+    });
+
+    // --- Event Listener: Mark Start/End ---
+    function markFrame(type) { // type is 'start' or 'end'
+        const sectionEntries = sectionsContainer.querySelectorAll('.section-entry');
+        if (sectionEntries.length > 0) {
+            // Target the last section entry
+            const lastSection = sectionEntries[sectionEntries.length - 1];
+            const input = lastSection.querySelector(`.${type}-input`); // Find input by class ('start-input' or 'end-input')
+            if (input) {
+                 // Set value to 1-based index for user display, backend expects frame number
+                input.value = currentFrameIndex + 1;
+            }
+        } else {
+            alert("Please add a section first.");
+        }
+    }
+
+    markStartBtn.addEventListener('click', () => markFrame('start'));
+    markEndBtn.addEventListener('click', () => markFrame('end'));
+
+    // --- Event Listener: Add Section ---
+    addSectionBtn.addEventListener('click', () => {
+        const currentSectionCount = sectionsContainer.querySelectorAll('.section-entry').length;
+        const newIndex = currentSectionCount; // Next index is the current count
+
+        // Clone the template
+        const templateHtml = sectionTemplate.innerHTML.replace(/__prefix__/g, newIndex);
+        const newSectionDiv = document.createElement('div');
+        newSectionDiv.innerHTML = templateHtml;
+        // The actual section element is the first child of the newDiv
+        const newSectionElement = newSectionDiv.firstElementChild;
+
+        sectionsContainer.appendChild(newSectionElement);
+
+        // Add remove functionality to the new button
+        const newRemoveBtn = newSectionElement.querySelector('.remove-section-btn');
+        if (newRemoveBtn) {
+             // Enable the remove button (it might be disabled in the template if it was copied from the first entry)
+            newRemoveBtn.disabled = false;
+            newRemoveBtn.addEventListener('click', handleRemoveClick);
+        }
+    });
+
+    // --- Event Listener: Remove Section ---
+    function handleRemoveClick(event) {
+        const sectionToRemove = event.target.closest('.section-entry');
+        if (sectionToRemove) {
+            // Simple removal - just removes from DOM.
+            // WTForms backend might need more sophisticated handling
+            // if field indices need to be contiguous on submission.
+            sectionToRemove.remove();
+            // Note: Re-indexing remaining fields would be complex here.
+            // Consider backend logic to handle gaps or cleared fields.
+        }
+    }
+
+    // Add initial remove listeners
+    sectionsContainer.querySelectorAll('.remove-section-btn').forEach(btn => {
+        btn.addEventListener('click', handleRemoveClick);
+    });
+
+</script>
+
+<style>
+    /* Optional: Add some visual feedback for the active section */
+    .section-entry:focus-within {
+        background-color: #e9f5ff; /* Light blue background when focused */
+    }
+    .invalid-feedback.d-block { /* Make WTForms errors visible */
+         margin-top: -0.75rem; /* Adjust spacing */
+         margin-bottom: 0.5rem;
+    }
+</style>
+
+{% endblock content %}

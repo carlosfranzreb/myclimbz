@@ -8,11 +8,20 @@ from myclimbz.blueprints.utils import render
 opinions = Blueprint("opinions", __name__)
 
 
+@opinions.route(
+    "/add_opinion_from_video/<int:climber_id>/<int:route_id>/<int:n_videos>/<int:video_idx>",
+    methods=["GET", "POST"],
+)
 @opinions.route("/add_opinion/<int:climber_id>/<int:route_id>", methods=["GET", "POST"])
-def add_opinion(climber_id: int, route_id: int) -> str:
+def add_opinion(
+    climber_id: int, route_id: int, n_videos: int = None, video_idx: int = None
+) -> str:
     route_name = Route.query.get(route_id).name
     opinion_form = OpinionForm.create_empty()
+
     title = f"Add opinion for {route_name}"
+    if video_idx:
+        title += f" from video ({video_idx+1}/{n_videos})"
 
     # POST: an opinion form was submitted => create opinion or return error
     if request.method == "POST":
@@ -22,7 +31,12 @@ def add_opinion(climber_id: int, route_id: int) -> str:
         opinion = opinion_form.get_object(climber_id, route_id)
         db.session.add(opinion)
         db.session.commit()
-        return redirect(flask_session.pop("call_from_url"))
+
+        # if annotating videos, continue annotating. Otherwise done with forms.
+        if video_idx and video_idx + 1 < n_videos:
+            return redirect(f"/annotate_video/{n_videos}/{video_idx}")
+        else:
+            return redirect(flask_session.pop("call_from_url"))
 
     # GET: return the add opinion page
     return render("form.html", title=title, forms=[opinion_form])
