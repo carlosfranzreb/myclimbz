@@ -9,6 +9,7 @@ from flask import (
     current_app,
     send_from_directory,
     abort,
+    url_for,
 )
 from flask_login import current_user
 from werkzeug.utils import secure_filename
@@ -29,17 +30,8 @@ from myclimbz.blueprints.utils import render
 climbs = Blueprint("climbs", __name__)
 
 
-@climbs.route(
-    "/add_climb_from_video/<int:n_videos>/<int:video_idx>",
-    methods=["GET", "POST"],
-)
 @climbs.route("/add_climb", methods=["GET", "POST"])
-def add_climb(n_videos: int = None, video_idx: int = None) -> str:
-
-    # create title
-    title = "Add climb"
-    if video_idx:
-        title += f" from video ({video_idx+1}/{n_videos})"
+def add_climb() -> str:
 
     # create forms and add choices
     is_project_search = flask_session["session_id"] == "project_search"
@@ -53,11 +45,16 @@ def add_climb(n_videos: int = None, video_idx: int = None) -> str:
     route_form = RouteForm.create_empty(area_id)
 
     # get video object if there is one
-    video_obj = flask_session.get("video_obj", None)
-    if video_idx and not video_obj:
-        abort(500)
-    if video_obj:
-        climb_form.n_attempts = len(video_obj.attempts)
+    video_id = flask_session.get("video_id", None)
+    if video_id:
+        video_idx, n_videos = flask_session["video_upload_status"]
+        video_obj = Video.query.get(video_id)
+        climb_form.n_attempts.data = len(video_obj.attempts)
+
+    # create title
+    title = "Add climb"
+    if video_id:
+        title += f" from video ({video_idx+1}/{n_videos})"
 
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
@@ -100,12 +97,15 @@ def add_climb(n_videos: int = None, video_idx: int = None) -> str:
 
         # if the user wants to add an opinion, redirect to the opinion form
         if route_form.add_opinion.data is True:
-            if video_obj:
-                return redirect(f"/get_opinion_form/{climber.id}/{route.id}")
-            else:
-                return redirect(
-                    f"/get_opinion_form_from_video/{climber.id}/{route.id}/{n_videos}/{video_idx}"
+            return redirect(f"/get_opinion_form/{climber.id}/{route.id}")
+
+        # otherwise, return or go to the next video if any
+        elif video_idx + 1 < n_videos:
+            return redirect(
+                url_for(
+                    "climbs.annotate_video", n_videos=n_videos, video_idx=video_idx + 1
                 )
+            )
         else:
             return redirect(flask_session.pop("call_from_url"))
 
@@ -186,10 +186,10 @@ def add_videos() -> str:
                         f"{current_user.id}_{session_id}_{timestamp}_added-{f_idx}{f_ext}"
                     )
                 )
-                f.save(os.path.join(current_app.config["UPLOAD_FOLDER"], fnames[-1]))
+                f.save(os.path.join(current_app.config["VIDEOS_FOLDER"], fnames[-1]))
 
             flask_session["video_fnames"] = fnames
-            return redirect(f"/sort_videos")
+            return redirect("/sort_videos")
 
     # GET: the user wants to upload videos
     return render("form.html", title=title, forms=[form], enctype="multipart/form-data")
@@ -202,8 +202,7 @@ def sort_videos() -> str:
     """
 
     videos = sorted(flask_session["video_fnames"])
-    user_id, session_id = videos[0].lsplit("_", 2)[:2]
-    check_access_to_videos(user_id, session_id)
+    check_access_to_videos(videos[0])
 
     # if there is only one video, skip this and go to process_videos
     if len(videos) == 1:
@@ -231,8 +230,8 @@ def sort_videos() -> str:
                     f"{fname.rsplit('_', 1)[0]}_sorted-{f_sort_idx}{ext}"
                 )
                 os.rename(
-                    os.path.join(current_app.config["UPLOAD_FOLDER"], f),
-                    os.path.join(current_app.config["UPLOAD_FOLDER"], f_new),
+                    os.path.join(current_app.config["VIDEOS_FOLDER"], f),
+                    os.path.join(current_app.config["VIDEOS_FOLDER"], f_new),
                 )
                 videos[f_idx] = f_new
 
@@ -258,11 +257,10 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
 
     # create title, frames and form
     video_fname = sorted(flask_session["video_fnames"])[video_idx]
-    user_id, session_id = video_fname.lsplit("_", 2)[:2]
-    check_access_to_videos(user_id, session_id)
+    check_access_to_videos(video_fname)
 
-    frames, fps_video, fps_taken = get_video_frames(
-        os.path.join(current_app.config["UPLOAD_FOLDER"], video_fname)
+    frames_fname_prefix, n_frames, fps_video, fps_taken = get_video_frames(
+        os.path.join(current_app.config["VIDEOS_FOLDER"], video_fname)
     )
     title = f"Annotate video ({video_idx+1}/{n_videos})"
     form = VideoAnnotationForm()
@@ -280,60 +278,97 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
             )
             for section in form.sections.data:
                 video_obj.attempts.append(
-                    VideoAttempt(start_frame=section.start, end_frame=section.end)
+                    VideoAttempt(start_frame=section["start"], end_frame=section["end"])
                 )
+            db.session.add(video_obj)
+            db.session.commit()
 
             # go to "Add climb" form
-            flask_session["video"] = video_obj
-            return redirect(f"/add_climb_from_video/{n_videos}/{video_idx}")
+            flask_session["video_id"] = video_obj.id
+            flask_session["video_upload_status"] = [video_idx, n_videos]
+
+            return redirect(url_for("climbs.add_climb"))
 
     # GET: the user wants to upload videos
-    return render("form_annotate_video.html", title=title, forms=[form], video=frames)
+    return render(
+        "form_annotate_video.html",
+        title=title,
+        form=form,
+        frames_fname_prefix=frames_fname_prefix,
+        n_frames=n_frames,
+    )
 
 
-@climbs.route("/videos/<filename>")
-def uploaded_video(filename):
+@climbs.route("/files/<filetype>/<filename>")
+def serve_file(filetype: str, filename: str):
     """
     Serves files from the UPLOAD_FOLDER.
     TODO: protect access to videos in __init__.py, where all access rights are handled.
     """
-    file_user_id = int(filename.split("_")[0])
-    check_access_to_videos(file_user_id)
+    check_access_to_videos(filename)
+
+    if filetype == "videos":
+        folder = current_app.config["VIDEOS_FOLDER"]
+    elif filetype == "frames":
+        folder = current_app.config["FRAMES_FOLDER"]
+    else:
+        abort(404)
 
     try:
-        return send_from_directory(current_app.config["UPLOAD_FOLDER"], filename)
+        return send_from_directory(folder, filename)
     except FileNotFoundError:
         abort(404)
 
 
-def check_access_to_videos(user_id: int, session_id: int = None):
+def check_access_to_videos(filename: str, ignore_session: bool = False):
     """
     Check that the user is the owner of the videos, and that the session of the videos
     is currently open.
     TODO: this may belong in __init__.py, where all access rights are handled.
+
+    Args:
+        filename as a string. It is expected to define the user id and the session id
+        as the first two elements of the name, separated by underscores.
     """
+    user_id, session_id = [int(n) for n in filename.split("_", 2)[:2]]
+
     if current_user.id != user_id:
         flask_session["error"] = "You are not allowed to access this page."
         return redirect(flask_session.pop("call_from_url"))
 
-    if session_id and session_id != flask_session["session_id"]:
+    if not ignore_session and session_id != flask_session["session_id"]:
         flask_session["error"] = (
             "The session is closed. Redirecting to the session's page"
         )
         return redirect(f"/session/{session_id}")
 
 
-def get_video_frames(
-    video_path: str, fps: int = 2
-) -> tuple[list[cv2.typing.MatLike], int, int]:
+def get_video_frames(video_path: str, fps: int = 2) -> tuple[str, int, int, int]:
     """
-    Extract and return `fps` frames per second from the video.
+    - Extract and dump `fps` frames per second from the video.
+    - Return the prefix of the frames filenames, the number of frames and the FPS of the
+    video and the number of frames extracted per second of video.
+    - The frames are not extracted again if the filenames exist.
+    TODO: some images are rotated
     """
+
     cap = cv2.VideoCapture(video_path)
     video_fps = cap.get(cv2.CAP_PROP_FPS)
     frame_interval = int(video_fps / fps)
     frames = list()
 
+    # if the frames were extracted previously, return the path to them
+    video_fname = os.path.splitext(os.path.basename(video_path))[0]
+    frames_fname_prefix = f"{video_fname}_fps{fps}_frame"
+    n_frames = [
+        None
+        for fname in os.listdir(current_app.config["FRAMES_FOLDER"])
+        if fname.startswith(frames_fname_prefix)
+    ]
+    if len(n_frames) > 0:
+        return frames_fname_prefix, len(n_frames), video_fps, fps
+
+    # extract frames
     frame_count = 0
     while cap.isOpened():
         ret, frame = cap.read()
@@ -344,4 +379,15 @@ def get_video_frames(
         frame_count += 1
 
     cap.release()
-    return frames, video_fps, fps
+
+    # dump frames
+    for idx, frame in enumerate(frames):
+        cv2.imwrite(
+            os.path.join(
+                current_app.config["FRAMES_FOLDER"],
+                f"{frames_fname_prefix}{idx}.jpg",
+            ),
+            frame,
+        )
+
+    return frames_fname_prefix, len(frames), video_fps, fps

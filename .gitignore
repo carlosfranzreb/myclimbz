@@ -4,7 +4,7 @@ __pycache__
 .DS_Store
 prod.db
 audios
-videos
+files
 *.ckpt
 .env
 gunicorn_socket

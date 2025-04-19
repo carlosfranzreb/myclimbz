@@ -45,10 +45,8 @@ def create_app():
     mail.init_app(app)
 
     # TODO: this envvar is currently displayed in the compose file. Is that ok?
-    app.config["VIDEOS_FOLDER"] = os.path.join(os.environ["UPLOAD_FOLDER"], "videos")
-    app.config["FRAMES_FOLDER"] = os.path.join(os.environ["UPLOAD_FOLDER"], "frames")
-    os.makedirs(app.config["VIDEOS_FOLDER"], exist_ok=True)
-    os.makedirs(app.config["FRAMES_FOLDER"], exist_ok=True)
+    app.config["UPLOAD_FOLDER"] = os.environ["UPLOAD_FOLDER"]
+    os.makedirs(os.environ["UPLOAD_FOLDER"], exist_ok=True)
 
     from myclimbz.blueprints.areas.routes import areas
     from myclimbz.blueprints.home.routes import home

@@ -9,12 +9,12 @@ opinions = Blueprint("opinions", __name__)
 
 
 @opinions.route(
-    "/add_opinion_from_video/<int:climber_id>/<int:route_id>/<int:n_videos>/<int:video_idx>",
+    "/add_opinion_from_video/<int:climber_id>/<int:route_id>/video<int:video_idx>from<int:n_videos>",
     methods=["GET", "POST"],
 )
 @opinions.route("/add_opinion/<int:climber_id>/<int:route_id>", methods=["GET", "POST"])
 def add_opinion(
-    climber_id: int, route_id: int, n_videos: int = None, video_idx: int = None
+    climber_id: int, route_id: int, video_idx: int = None, n_videos: int = None
 ) -> str:
     route_name = Route.query.get(route_id).name
     opinion_form = OpinionForm.create_empty()
@@ -67,6 +67,10 @@ def edit_opinion(opinion_id: int) -> str:
     "/get_opinion_form/<int:climber_id>/<int:route_id>", methods=["GET", "POST"]
 )
 def get_opinion_form(climber_id: int, route_id: int) -> str:
+    """
+    TODO: handle videos and re-route to next video when done, if videos are being
+    uploaded.
+    """
     opinion = Opinion.query.filter_by(climber_id=climber_id, route_id=route_id).first()
     if opinion is not None:
         return redirect(f"/edit_opinion/{opinion.id}")

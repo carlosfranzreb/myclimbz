@@ -5,10 +5,12 @@
     <h2 class="mt-2">{{ title }}</h2>
     <p>Use 'A' (previous) and 'D' (next) keys to navigate frames. Mark the start and end frame numbers for each climbing section.</p>
 
+    <script>console.log("{{frames_fname_prefix}}");</script>
+
     <div class="text-center mb-3">
-        <img id="frame-image" src="{{ frame_urls[0] if frame_urls else '' }}" alt="Video Frame" style="max-width: 100%; height: auto; max-height: 60vh; border: 1px solid #ccc;">
+        <img id="frame-image" src="{{ url_for('climbs.serve_file', filetype='frames', filename=frames_fname_prefix + '0.jpg') }}" alt="Video Frame" style="max-width: 100%; height: auto; max-height: 60vh; border: 1px solid #ccc;">
         <div>
-            Frame: <span id="current-frame-num">1</span> / <span id="total-frames">{{ num_frames }}</span>
+            Frame: <span id="current-frame-num">1</span> / <span id="total-frames">{{ n_frames }}</span>
         </div>
     </div>
 
@@ -81,9 +83,9 @@
 
 <script>
     // --- Frame Data (Passed from Flask/Jinja) ---
-    const frameUrls = {{ frame_urls | tojson }};
-    const numFrames = {{ num_frames }};
-    let currentFrameIndex = 0; // 0-based index
+    const frames_fname_prefix = "{{ frames_fname_prefix }}";
+    const n_frames = {{ n_frames }};
+    let currentFrameIndex = 0;
 
     // --- DOM Elements ---
     const frameImage = document.getElementById('frame-image');
@@ -97,13 +99,10 @@
 
     // --- Initial Setup ---
     function updateFrameDisplay() {
-        if (frameUrls.length > 0) {
-            frameImage.src = frameUrls[currentFrameIndex];
-        }
-        currentFrameNumSpan.textContent = currentFrameIndex + 1; // Display 1-based index
-        totalFramesSpan.textContent = numFrames;
+        frameImage.src = "{{ url_for('climbs.serve_file', filetype='frames', filename='') }}" + frames_fname_prefix + currentFrameIndex + ".jpg";
+        currentFrameNumSpan.textContent = currentFrameIndex + 1;
+        totalFramesSpan.textContent = n_frames;
     }
-    updateFrameDisplay(); // Initial display
 
     // --- Event Listener: Frame Navigation ---
     document.addEventListener('keydown', (event) => {
@@ -112,13 +111,13 @@
              return;
         }
 
-        if (event.key === 'a' || event.key === 'A') {
+        if (event.key === 'a') {
             if (currentFrameIndex > 0) {
                 currentFrameIndex--;
                 updateFrameDisplay();
             }
-        } else if (event.key === 'd' || event.key === 'D') {
-            if (currentFrameIndex < numFrames - 1) {
+        } else if (event.key === 'd') {
+            if (currentFrameIndex < n_frames - 1) {
                 currentFrameIndex++;
                 updateFrameDisplay();
             }

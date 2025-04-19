@@ -2,11 +2,16 @@ from myclimbz import db
 
 
 class VideoAttempt(db.Model):
-    db.Column("video_id", db.Integer, db.ForeignKey("video.id"))
-    db.Column("start_frame_pred", db.Integer)
-    db.Column("end_frame_pred", db.Integer)
-    db.Column("start_frame", db.Integer)
-    db.Column("end_frame", db.Integer)
+    """
+    Stores an attempt that has been annotated for a video.
+    """
+
+    id = db.Column(db.Integer, primary_key=True)
+    video_id = db.Column(db.Integer, db.ForeignKey("video.id"))
+    start_frame_pred = db.Column(db.Integer)
+    end_frame_pred = db.Column(db.Integer)
+    start_frame = db.Column(db.Integer)
+    end_frame = db.Column(db.Integer)
 
 
 class Video(db.Model):
