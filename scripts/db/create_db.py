@@ -1,5 +1,7 @@
 """
 Script to create the database and populate it with testing data.
+
+! Must be run as a module: python -m scripts.db.create_db
 """
 
 from argparse import ArgumentParser
@@ -10,7 +12,8 @@ import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import generate_password_hash
 
-from climbz import db, create_app, models
+from myclimbz.models import Area
+from myclimbz import db, create_app, models
 
 
 ROCKS = [

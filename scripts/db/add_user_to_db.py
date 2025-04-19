@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 import os
 
 from flask_bcrypt import generate_password_hash
-from climbz import models, db, create_app
+from myclimbz import models, db, create_app
 
 
 def add_user(email: str, name: str, pw: str) -> None:
