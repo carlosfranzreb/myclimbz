@@ -1,6 +1,13 @@
 from collections import namedtuple
 
-from flask import render_template, session as flask_session, request
+from flask import (
+    render_template,
+    session as flask_session,
+    request,
+    redirect,
+    url_for,
+    abort,
+)
 from flask_login import current_user, login_required
 
 from myclimbz.models import Session, Area
@@ -18,12 +25,34 @@ def render(*args, **kwargs) -> str:
     - Add the current user's name and ID to the kwargs.
     - Save the URL in the session, unless it starts with "edit_".
     """
-    kwargs["title"] = kwargs["title"]
+
+    # ensure title exists and add video info if neededs
+    if "title" not in kwargs:
+        abort(500)
+
+    if "video_upload_status" in flask_session:
+        video_idx, n_videos = flask_session["video_upload_status"]
+        kwargs["title"] += f" (video {video_idx+1}/{n_videos})"
+
+    # add other kwargs
     kwargs["error"] = flask_session.pop("error", None)
     kwargs["username"] = current_user.name
     kwargs["user_id"] = current_user.id
     kwargs["user_role"] = current_user.role
     kwargs["user_grade_scale"] = current_user.grade_scale
+
+    # discern form pages from the rest
+    path = request.path
+    if (
+        path.startswith("/edit_")
+        or path.startswith("/add_")
+        or path.startswith("/sort_")
+        or path.startswith("/annotate_")
+    ):
+        kwargs["is_form"] = True
+    else:
+        kwargs["is_form"] = False
+        flask_session["call_from_url"] = path
 
     session_id = flask_session.get("session_id", None)
     if session_id is not None:
@@ -36,10 +65,42 @@ def render(*args, **kwargs) -> str:
         else:
             kwargs["open_session"] = Session.query.get(session_id)
 
-    path = request.path
-    if not path.startswith("/edit_") and not path.startswith("/add_"):
-        flask_session["call_from_url"] = path
     return render_template(
         *args,
         **kwargs,
     )
+
+
+def redirect_after_form_submission(*args, **kwargs) -> str:
+    """
+    - If the user is currently annotating videos and there are videos
+        that remain to be annotated, the user is redirected to the next
+        video.
+    - Otherwise, the user is is redirected to "call_from_url" page.
+    """
+    video_id = flask_session.get("video_id", None)
+    if video_id:
+        video_idx, n_videos = flask_session["video_upload_status"]
+        if video_idx + 1 < n_videos:
+            print(video_idx, n_videos)
+            print("CALLING")
+            url = url_for(
+                "climbs.annotate_video", n_videos=n_videos, video_idx=video_idx + 1
+            )
+            print(url)
+            return redirect(
+                url_for(
+                    "climbs.annotate_video", n_videos=n_videos, video_idx=video_idx + 1
+                )
+            )
+        else:
+            delete_video_info()
+
+    return redirect(flask_session.pop("call_from_url"))
+
+
+def delete_video_info():
+    """Delete video info from flask_session"""
+    for session_key in ["video_id", "video_upload_status", "video_fnames"]:
+        if session_key in flask_session:
+            del flask_session[session_key]

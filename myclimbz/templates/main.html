@@ -29,10 +29,10 @@
     </style>
 
     <nav class="navbar navbar-expand-lg">
+        {% if not is_form %}
         <a class="navbar-brand" href="{{ url_for('home.page_home') }}" style="padding-left: 10px;">
             <img src="{{ url_for('static', filename='images/logo-transparent.svg') }}" width="60" height="40" class="d-inline-block align-top" alt="">
         </a>
-        {% if not "Add" in title and not "Edit" in title %}
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon" style="color: white; border: null;"></span>
@@ -97,6 +97,10 @@
                 </li>
             </ul>
         </div>
+        {% else %}
+        <a class="navbar-brand" href="{{ url_for('home.cancel_form') }}" style="padding-left: 10px;">
+            <img src="{{ url_for('static', filename='images/logo-transparent.svg') }}" width="60" height="40" class="d-inline-block align-top" alt="">
+        </a>
         {% endif %}
     </nav>
 

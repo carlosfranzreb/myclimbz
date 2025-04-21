@@ -9,7 +9,7 @@ from flask import (
 from flask_login import current_user
 
 from myclimbz.models import Grade, Climber
-from myclimbz.blueprints.utils import render
+from myclimbz.blueprints.utils import render, delete_video_info
 
 
 home = Blueprint("home", __name__)
@@ -27,9 +27,8 @@ def page_home() -> str:
 
 @home.route("/cancel_form")
 def cancel_form() -> str:
-    """Cancel the addition of a session."""
-    flask_session.pop("entities", None)
-    flask_session.pop("predictions", None)
+    """Cancelling function for all forms."""
+    delete_video_info()
     return redirect(flask_session.pop("call_from_url"))
 
 

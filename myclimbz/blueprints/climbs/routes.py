@@ -24,7 +24,7 @@ from myclimbz.forms import (
     VideoAnnotationForm,
 )
 from myclimbz import db
-from myclimbz.blueprints.utils import render
+from myclimbz.blueprints.utils import render, redirect_after_form_submission
 
 
 climbs = Blueprint("climbs", __name__)
@@ -32,8 +32,12 @@ climbs = Blueprint("climbs", __name__)
 
 @climbs.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
+    """
+    TODO: the same route can be added more than once in a session.
+    """
 
     # create forms and add choices
+    title = "Add climb"
     is_project_search = flask_session["session_id"] == "project_search"
     if is_project_search:
         area_id = flask_session["area_id"]
@@ -47,14 +51,8 @@ def add_climb() -> str:
     # get video object if there is one
     video_id = flask_session.get("video_id", None)
     if video_id:
-        video_idx, n_videos = flask_session["video_upload_status"]
         video_obj = Video.query.get(video_id)
         climb_form.n_attempts.data = len(video_obj.attempts)
-
-    # create title
-    title = "Add climb"
-    if video_id:
-        title += f" from video ({video_idx+1}/{n_videos})"
 
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
@@ -98,16 +96,8 @@ def add_climb() -> str:
         # if the user wants to add an opinion, redirect to the opinion form
         if route_form.add_opinion.data is True:
             return redirect(f"/get_opinion_form/{climber.id}/{route.id}")
-
-        # otherwise, return or go to the next video if any
-        elif video_idx + 1 < n_videos:
-            return redirect(
-                url_for(
-                    "climbs.annotate_video", n_videos=n_videos, video_idx=video_idx + 1
-                )
-            )
         else:
-            return redirect(flask_session.pop("call_from_url"))
+            return redirect_after_form_submission()
 
     # GET: the climber wants to add a route (+ climb if not in a project search)
     route_form.title = "Route"
@@ -262,8 +252,9 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
     frames_fname_prefix, n_frames, fps_video, fps_taken = get_video_frames(
         os.path.join(current_app.config["VIDEOS_FOLDER"], video_fname)
     )
-    title = f"Annotate video ({video_idx+1}/{n_videos})"
+    title = "Annotate"
     form = VideoAnnotationForm()
+    flask_session["video_upload_status"] = [video_idx, n_videos]
 
     # POST: user submitted annotations
     if request.method == "POST":
@@ -285,8 +276,6 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
 
             # go to "Add climb" form
             flask_session["video_id"] = video_obj.id
-            flask_session["video_upload_status"] = [video_idx, n_videos]
-
             return redirect(url_for("climbs.add_climb"))
 
     # GET: the user wants to upload videos

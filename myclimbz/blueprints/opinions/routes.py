@@ -3,25 +3,17 @@ from flask import Blueprint, request, redirect, session as flask_session
 from myclimbz.models import Opinion, Route
 from myclimbz.forms import OpinionForm
 from myclimbz import db
-from myclimbz.blueprints.utils import render
+from myclimbz.blueprints.utils import render, redirect_after_form_submission
 
 opinions = Blueprint("opinions", __name__)
 
 
-@opinions.route(
-    "/add_opinion_from_video/<int:climber_id>/<int:route_id>/video<int:video_idx>from<int:n_videos>",
-    methods=["GET", "POST"],
-)
 @opinions.route("/add_opinion/<int:climber_id>/<int:route_id>", methods=["GET", "POST"])
-def add_opinion(
-    climber_id: int, route_id: int, video_idx: int = None, n_videos: int = None
-) -> str:
+def add_opinion(climber_id: int, route_id: int) -> str:
+
     route_name = Route.query.get(route_id).name
     opinion_form = OpinionForm.create_empty()
-
     title = f"Add opinion for {route_name}"
-    if video_idx:
-        title += f" from video ({video_idx+1}/{n_videos})"
 
     # POST: an opinion form was submitted => create opinion or return error
     if request.method == "POST":
@@ -31,12 +23,7 @@ def add_opinion(
         opinion = opinion_form.get_object(climber_id, route_id)
         db.session.add(opinion)
         db.session.commit()
-
-        # if annotating videos, continue annotating. Otherwise done with forms.
-        if video_idx and video_idx + 1 < n_videos:
-            return redirect(f"/annotate_video/{n_videos}/{video_idx}")
-        else:
-            return redirect(flask_session.pop("call_from_url"))
+        return redirect_after_form_submission()
 
     # GET: return the add opinion page
     return render("form.html", title=title, forms=[opinion_form])
@@ -56,7 +43,7 @@ def edit_opinion(opinion_id: int) -> str:
         opinion = opinion_form.get_edited_opinion(opinion_id)
         db.session.add(opinion)
         db.session.commit()
-        return redirect(flask_session.pop("call_from_url"))
+        return redirect_after_form_submission()
 
     # GET: return the edit opinion page
     opinion_form = OpinionForm.create_from_obj(opinion)
@@ -68,8 +55,9 @@ def edit_opinion(opinion_id: int) -> str:
 )
 def get_opinion_form(climber_id: int, route_id: int) -> str:
     """
-    TODO: handle videos and re-route to next video when done, if videos are being
-    uploaded.
+    Redirect the user to the `edit_opinion` page if the user already has an opinion of
+    this route. If there is none, redirect the user to the `add_opinion` page, where a
+    new opinion can be submitted.
     """
     opinion = Opinion.query.filter_by(climber_id=climber_id, route_id=route_id).first()
     if opinion is not None:
