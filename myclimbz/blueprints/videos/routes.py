@@ -73,7 +73,6 @@ def sort_videos() -> str:
 
     # if there is only one video, skip this and go to process_videos
     if len(videos) == 1:
-        videos[0] = videos[0].replace("added", "sorted")
         flask_session["video_fnames"] = videos
         return redirect(url_for("videos.annotate_video", n_videos=1, video_idx=0))
 
@@ -220,6 +219,7 @@ def get_video_frames(video_path: str, fps: int = 2) -> tuple[str, int, int, int]
     TODO: some images are rotated
     """
 
+    print("CAP_PROP_ORIENTATION_AUTO", cv2.CAP_PROP_ORIENTATION_AUTO)
     cap = cv2.VideoCapture(video_path)
     video_fps = cap.get(cv2.CAP_PROP_FPS)
     frame_interval = int(video_fps / fps)
