@@ -8,7 +8,7 @@
     <script>console.log("{{frames_fname_prefix}}");</script>
 
     <div class="text-center mb-3">
-        <img id="frame-image" src="{{ url_for('climbs.serve_file', filetype='frames', filename=frames_fname_prefix + '0.jpg') }}" alt="Video Frame" style="max-width: 100%; height: auto; max-height: 60vh; border: 1px solid #ccc;">
+        <img id="frame-image" src="{{ url_for('videos.serve_file', filetype='frames', filename=frames_fname_prefix + '0.jpg') }}" alt="Video Frame" style="max-width: 100%; height: auto; max-height: 60vh; border: 1px solid #ccc;">
         <div>
             Frame: <span id="current-frame-num">1</span> / <span id="total-frames">{{ n_frames }}</span>
         </div>
@@ -99,7 +99,7 @@
 
     // --- Initial Setup ---
     function updateFrameDisplay() {
-        frameImage.src = "{{ url_for('climbs.serve_file', filetype='frames', filename='') }}" + frames_fname_prefix + currentFrameIndex + ".jpg";
+        frameImage.src = "{{ url_for('videos.serve_file', filetype='frames', filename='') }}" + frames_fname_prefix + currentFrameIndex + ".jpg";
         currentFrameNumSpan.textContent = currentFrameIndex + 1;
         totalFramesSpan.textContent = n_frames;
     }
