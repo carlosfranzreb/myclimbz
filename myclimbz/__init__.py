@@ -58,6 +58,7 @@ def create_app():
     from myclimbz.blueprints.climbers.routes import climbers
     from myclimbz.blueprints.opinions.routes import opinions
     from myclimbz.blueprints.errors.handlers import errors
+    from myclimbz.blueprints.videos.routes import videos
 
     app.register_blueprint(areas)
     app.register_blueprint(home)
@@ -67,6 +68,7 @@ def create_app():
     app.register_blueprint(climbers)
     app.register_blueprint(opinions)
     app.register_blueprint(errors)
+    app.register_blueprint(videos)
 
     # automatically login the user if defined in the environment
     disable_login = os.environ.get("DISABLE_LOGIN", "0") == "1"
