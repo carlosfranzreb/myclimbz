@@ -11,8 +11,8 @@ import os
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import generate_password_hash
+from sqlalchemy import inspect
 
-from myclimbz.models import Area
 from myclimbz import db, create_app, models
 
 
@@ -270,10 +270,15 @@ if __name__ == "__main__":
 
     os.environ["CLIMBZ_DB_URI"] = f"sqlite:///{db_name}.db"
     os.environ["CLIMBZ_SECRET_KEY"] = os.urandom(24).hex()
+    os.environ["UPLOAD_FOLDER"] = "./files"
     app = create_app()
 
     with app.app_context():
         db.create_all()
+
+        inspector = inspect(db.engine)
+        print("Tables in database:", inspector.get_table_names())
+
         for rock_type in ROCKS:
             db.session.add(models.RockType(name=rock_type))
         for crux_type in CRUXES:

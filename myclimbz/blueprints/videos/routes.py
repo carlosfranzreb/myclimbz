@@ -219,7 +219,6 @@ def get_video_frames(video_path: str, fps: int = 2) -> tuple[str, int, int, int]
     TODO: some images are rotated
     """
 
-    print("CAP_PROP_ORIENTATION_AUTO", cv2.CAP_PROP_ORIENTATION_AUTO)
     cap = cv2.VideoCapture(video_path)
     video_fps = cap.get(cv2.CAP_PROP_FPS)
     frame_interval = int(video_fps / fps)
