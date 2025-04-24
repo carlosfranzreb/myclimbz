@@ -1,10 +1,11 @@
 from collections import Counter
+import os
 
 from flask_login import current_user
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, text
 
 from myclimbz import db
-from myclimbz.models import Grade, Opinion
+from myclimbz.models import Grade, Opinion, Video
 from myclimbz.models.columns import ConstrainedInteger
 
 
@@ -149,6 +150,30 @@ class Route(db.Model):
                 return climb.link
         return "N/A"
 
+    @property
+    def my_videos(self) -> list[str]:
+        """
+        Returns a list of video filenames of this route climbed by the current user.
+        """
+        climb_ids = [
+            climb.id
+            for climb in self.climbs
+            if climb.session.climber_id == current_user.id
+        ]
+        return get_video_fnames_for_climb_ids(climb_ids)
+
+    @property
+    def other_videos(self) -> list[str]:
+        """
+        Returns a list of video filenames of this route climbed by other users.
+        """
+        climb_ids = [
+            climb.id
+            for climb in self.climbs
+            if climb.session.climber_id != current_user.id
+        ]
+        return get_video_fnames_for_climb_ids(climb_ids)
+
     def as_dict(self, climber_id: int) -> dict:
         """
         Return the relevant attributes of this route for a climber as a dictionary,
@@ -203,4 +228,23 @@ class Route(db.Model):
             "dates": dates,
             # level to be displayed
             "level": self.grade.level if self.grade else None,
+            # videos
+            "my_videos": self.my_videos,
+            "other_videos": self.other_videos,
         }
+
+
+def get_video_fnames_for_climb_ids(climb_ids: list[int]) -> list[str]:
+    """
+    Given a list of climb IDs, returns the videos corresponding to those climbs.
+    """
+    videos = Video.query.filter(Video.climb_id.in_(climb_ids)).all()
+    video_fnames = list()
+    for video in videos:
+        base, ext = os.path.splitext(video.fname)
+        for attempt in video.attempts:
+            video_fnames.append(
+                f"{base}_trim{attempt.start_frame}-{attempt.end_frame}{ext}"
+            )
+
+    return video_fnames
