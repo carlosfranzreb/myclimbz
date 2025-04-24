@@ -1,8 +1,11 @@
 import os
+import subprocess
 
 from flask import session as flask_session, current_app, abort, url_for, redirect
 from flask_login import current_user
 import cv2
+
+from myclimbz.models import Video
 
 
 def check_access_to_file(filename: str, ignore_session: bool = False):
@@ -59,7 +62,7 @@ def get_video_frames(video_path: str, fps: int = 2) -> tuple[str, int, int, int]
         if not ret:
             break
         if frame_count % frame_interval == 0:
-            frames.append(frame)
+            frames.append(reduce_frame(frame))
         frame_count += 1
 
     cap.release()
@@ -75,3 +78,47 @@ def get_video_frames(video_path: str, fps: int = 2) -> tuple[str, int, int, int]
         )
 
     return frames_fname_prefix, len(frames), video_fps, fps
+
+
+def trim_video(video: Video, start: int, end: int):
+    """
+    Extract and store from the video starting at frame `start` and ending
+    at frame `end`. The clip is stored with the same name as the original video,
+    with a suffix stating the start and end frames of the clip.
+
+    TODO: the trimmed video is a bit longer than it should.
+    """
+
+    # build input and output paths
+    input_path = os.path.join(current_app.config["VIDEOS_FOLDER"], video.fname)
+    base, ext = os.path.splitext(input_path)
+    output_path = f"{base}_trim{start}-{end}{ext}"
+    if os.path.exists(output_path):
+        return
+
+    # trim the video
+    start_seconds = start / video.fps_taken
+    duration = (end - start) / video.fps_taken
+    command = [
+        "ffmpeg",
+        "-i",
+        input_path,
+        "-ss",
+        str(start_seconds),
+        "-t",
+        str(duration),
+        output_path,
+    ]
+    subprocess.run(command, check=True)
+
+
+def reduce_frame(frame: cv2.typing.MatLike, max_size: int = 512) -> cv2.typing.MatLike:
+    """
+    Reduce the resolution of the frames to a max height/width of 512 pixels,
+    without altering the shape.
+    """
+    height, width = frame.shape[:2]
+    scale = min(512 / float(height), 512 / float(width))
+    if scale < 1:
+        new_dims = (int(width * scale), int(height * scale))
+        return cv2.resize(frame, new_dims, interpolation=cv2.INTER_AREA)

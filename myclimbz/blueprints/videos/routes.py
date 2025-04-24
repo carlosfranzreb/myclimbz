@@ -18,7 +18,11 @@ from myclimbz.models import Video, VideoAttempt
 from myclimbz.forms import VideosForm, VideosSortingForm, VideoAnnotationForm
 from myclimbz import db
 from myclimbz.blueprints.utils import render
-from myclimbz.blueprints.videos.utils import check_access_to_file, get_video_frames
+from myclimbz.blueprints.videos.utils import (
+    check_access_to_file,
+    get_video_frames,
+    trim_video,
+)
 
 videos = Blueprint("videos", __name__)
 
@@ -126,9 +130,8 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
     video_fname = sorted(flask_session["video_fnames"])[video_idx]
     check_access_to_file(video_fname)
 
-    frames_fname_prefix, n_frames, fps_video, fps_taken = get_video_frames(
-        os.path.join(current_app.config["VIDEOS_FOLDER"], video_fname)
-    )
+    video_path = os.path.join(current_app.config["VIDEOS_FOLDER"], video_fname)
+    frames_fname_prefix, n_frames, fps_video, fps_taken = get_video_frames(video_path)
     title = "Annotate"
     form = VideoAnnotationForm()
     flask_session["video_upload_status"] = [video_idx, n_videos]
@@ -140,7 +143,7 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
                 flask_session["error"] = "An error occurred. Fix it and resubmit."
 
         else:
-            # store video annotations
+            # store video annotations and trim video
             video_obj = Video(
                 fname=video_fname, fps_video=fps_video, fps_taken=fps_taken
             )
@@ -148,8 +151,11 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
                 video_obj.attempts.append(
                     VideoAttempt(start_frame=section["start"], end_frame=section["end"])
                 )
+                trim_video(video_obj, section["start"], section["end"])
+
             db.session.add(video_obj)
             db.session.commit()
+            os.remove(video_path)
 
             # go to "Add climb" form
             flask_session["video_id"] = video_obj.id
