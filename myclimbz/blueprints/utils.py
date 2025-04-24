@@ -100,7 +100,9 @@ def redirect_after_form_submission(*args, **kwargs) -> str:
 
 
 def delete_video_info():
-    """Delete video info from flask_session"""
+    """
+    Delete video info from flask_session. The files are not deleted.
+    """
     for session_key in ["video_id", "video_upload_status", "video_fnames"]:
         if session_key in flask_session:
             del flask_session[session_key]

@@ -13,13 +13,12 @@ from flask import (
 )
 from flask_login import current_user
 from werkzeug.utils import secure_filename
-import cv2
 
 from myclimbz.models import Video, VideoAttempt
 from myclimbz.forms import VideosForm, VideosSortingForm, VideoAnnotationForm
 from myclimbz import db
 from myclimbz.blueprints.utils import render
-
+from myclimbz.blueprints.videos.utils import check_access_to_file, get_video_frames
 
 videos = Blueprint("videos", __name__)
 
@@ -185,76 +184,3 @@ def serve_file(filetype: str, filename: str):
         return send_from_directory(folder, filename)
     except FileNotFoundError:
         abort(404)
-
-
-def check_access_to_file(filename: str, ignore_session: bool = False):
-    """
-    Check that the user is the owner of the videos, and that the session of the videos
-    is currently open.
-    TODO: this may belong in __init__.py, where all access rights are handled.
-
-    Args:
-        filename as a string. It is expected to define the user id and the session id
-        as the first two elements of the name, separated by underscores.
-    """
-    user_id, session_id = [int(n) for n in filename.split("_", 2)[:2]]
-
-    if current_user.id != user_id:
-        flask_session["error"] = "You are not the owner of this file."
-        abort(403)
-
-    if not ignore_session and session_id != flask_session["session_id"]:
-        flask_session["error"] = (
-            "The session is closed. Redirecting to the session's page."
-        )
-        return redirect(url_for("sessions.page_session", session_id=session_id))
-
-
-def get_video_frames(video_path: str, fps: int = 2) -> tuple[str, int, int, int]:
-    """
-    - Extract and dump `fps` frames per second from the video.
-    - Return the prefix of the frames filenames, the number of frames and the FPS of the
-    video and the number of frames extracted per second of video.
-    - The frames are not extracted again if the filenames exist.
-    TODO: some images are rotated
-    """
-
-    cap = cv2.VideoCapture(video_path)
-    video_fps = cap.get(cv2.CAP_PROP_FPS)
-    frame_interval = int(video_fps / fps)
-    frames = list()
-
-    # if the frames were extracted previously, return the path to them
-    video_fname = os.path.splitext(os.path.basename(video_path))[0]
-    frames_fname_prefix = f"{video_fname}_fps{fps}_frame"
-    n_frames = [
-        None
-        for fname in os.listdir(current_app.config["FRAMES_FOLDER"])
-        if fname.startswith(frames_fname_prefix)
-    ]
-    if len(n_frames) > 0:
-        return frames_fname_prefix, len(n_frames), video_fps, fps
-
-    # extract frames
-    frame_count = 0
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-        if frame_count % frame_interval == 0:
-            frames.append(frame)
-        frame_count += 1
-
-    cap.release()
-
-    # dump frames
-    for idx, frame in enumerate(frames):
-        cv2.imwrite(
-            os.path.join(
-                current_app.config["FRAMES_FOLDER"],
-                f"{frames_fname_prefix}{idx}.jpg",
-            ),
-            frame,
-        )
-
-    return frames_fname_prefix, len(frames), video_fps, fps
