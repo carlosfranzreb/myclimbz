@@ -3,12 +3,17 @@
 
 <div class="container px-2 px-md-5">
     <h2 class="mt-2">{{ title }}</h2>
-    <p>Use 'A' (previous) and 'D' (next) keys to navigate frames. Mark the start and end frame numbers for each climbing section.</p>
+    <p>Use keys A and D to navigate frames, or click on the left or right of the image.</p>
 
     <script>console.log("{{frames_fname_prefix}}");</script>
 
     <div class="text-center mb-3">
-        <img id="frame-image" src="{{ url_for('videos.serve_file', filetype='frames', filename=frames_fname_prefix + '0.jpg') }}" alt="Video Frame" style="max-width: 100%; height: auto; max-height: 60vh; border: 1px solid #ccc;">
+        <img 
+            id="frame-image"
+            src="{{ url_for('videos.serve_file', filetype='frames', filename=frames_fname_prefix + '0.jpg') }}"
+            alt="Video Frame" style="max-width: 100%; height: auto; max-height: 60vh; border: 1px solid #ccc;"
+            onclick="document.dispatchEvent(new KeyboardEvent('keydown', {key: event.offsetX > event.currentTarget.clientWidth / 2 ? 'd' : 'a'}))"
+        >
         <div>
             Frame: <span id="current-frame-num">1</span> / <span id="total-frames">{{ n_frames }}</span>
         </div>
@@ -19,12 +24,11 @@
         <button type="button" id="mark-end-btn" class="btn btn-info">Mark End</button>
     </div>
 
-    <form method="POST"> {# Add action=url_for(...) if needed #}
-        {{ form.hidden_tag() }} {# CSRF Token #}
+    <form method="POST">
+        {{ form.hidden_tag() }}
 
         <h4>Climbing Sections</h4>
         <div id="sections-container">
-            {# Render existing form fields (at least one based on min_entries=1) #}
             {% for section_field in form.sections %}
             <div class="section-entry row align-items-center mb-2 border p-2 rounded" data-index="{{ loop.index0 }}">
                  <div class="col-md-5">
@@ -82,12 +86,10 @@
 </div>
 
 <script>
-    // --- Frame Data (Passed from Flask/Jinja) ---
     const frames_fname_prefix = "{{ frames_fname_prefix }}";
     const n_frames = {{ n_frames }};
     let currentFrameIndex = 0;
 
-    // --- DOM Elements ---
     const frameImage = document.getElementById('frame-image');
     const currentFrameNumSpan = document.getElementById('current-frame-num');
     const totalFramesSpan = document.getElementById('total-frames');
@@ -97,14 +99,12 @@
     const sectionsContainer = document.getElementById('sections-container');
     const sectionTemplate = document.getElementById('section-template');
 
-    // --- Initial Setup ---
     function updateFrameDisplay() {
         frameImage.src = "{{ url_for('videos.serve_file', filetype='frames', filename='') }}" + frames_fname_prefix + currentFrameIndex + ".jpg";
         currentFrameNumSpan.textContent = currentFrameIndex + 1;
         totalFramesSpan.textContent = n_frames;
     }
 
-    // --- Event Listener: Frame Navigation ---
     document.addEventListener('keydown', (event) => {
         // Ignore if typing in an input field
         if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
@@ -183,7 +183,6 @@
     sectionsContainer.querySelectorAll('.remove-section-btn').forEach(btn => {
         btn.addEventListener('click', handleRemoveClick);
     });
-
 </script>
 
 <style>
