@@ -12,6 +12,7 @@ class Climb(db.Model):
     link = db.Column(db.String(300))
     route_id = db.Column(db.Integer, db.ForeignKey("route.id"))
     session_id = db.Column(db.Integer, db.ForeignKey("climbing_session.id"))
+    videos = db.relationship("Video", backref="climb", cascade="all, delete")
 
     UniqueConstraint(route_id, session_id, name="unique_route_in_session")
 
