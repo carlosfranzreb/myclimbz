@@ -85,12 +85,12 @@ def redirect_after_form_submission(*args, **kwargs) -> str:
             print(video_idx, n_videos)
             print("CALLING")
             url = url_for(
-                "climbs.annotate_video", n_videos=n_videos, video_idx=video_idx + 1
+                "videos.annotate_video", n_videos=n_videos, video_idx=video_idx + 1
             )
             print(url)
             return redirect(
                 url_for(
-                    "climbs.annotate_video", n_videos=n_videos, video_idx=video_idx + 1
+                    "videos.annotate_video", n_videos=n_videos, video_idx=video_idx + 1
                 )
             )
         else:

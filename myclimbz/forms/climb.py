@@ -9,7 +9,7 @@ RouteForm object.
 
 from __future__ import annotations
 
-from flask import session as flask_session
+from flask import session as flask_session, abort
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, BooleanField, StringField
@@ -50,11 +50,9 @@ class ClimbForm(FlaskForm):
             getattr(form, field).data = getattr(obj, field.replace("climb_", ""))
         return form
 
-    def validate(self, route: Route, session_id: int = None, climb_id=None) -> bool:
+    def validate(self, route: Route, session_id: int = None) -> bool:
         """
         - If the climb has already been tried before, `flashed` must be false.
-        - The route must not exist in the current session, unless this is an edit
-            and the climb_id is passed to this function.
         """
         is_valid = True
         if not super().validate():
@@ -65,16 +63,6 @@ class ClimbForm(FlaskForm):
 
         if session_id is None:
             session_id = flask_session["session_id"]
-
-        # check whether the route has already been tried in this session
-        climbs = Climb.query.filter_by(route_id=route.id, session_id=session_id).all()
-        if climb_id is not None:
-            climbs = [climb for climb in climbs if climb.id != climb_id]
-        if len(climbs) > 0:
-            flask_session["error"] = (
-                "This route has already been tried in this session."
-            )
-            is_valid = False
 
         # check whether a flash is valid
         if self.flashed.data is True:
@@ -111,14 +99,43 @@ class ClimbForm(FlaskForm):
         return self.validate(route)
 
     def get_object(self, route: Route) -> Climb:
-        """Create a new climb object from the form data."""
-        climb = Climb(
-            **{
-                "route_id": route.id,
-                "session_id": flask_session["session_id"],
-            }
-        )
-        return self.add_form_data_to_object(climb)
+        """
+        - If this route has already been climbed in this session, update the
+            corresponding climb and return it.
+        - Otherwise, create a new climb object from the form data.
+        """
+
+        # check whether the route has already been tried in this session
+        climbs = Climb.query.filter_by(
+            route_id=route.id, session_id=flask_session["session_id"]
+        ).all()
+        if len(climbs) > 1:
+            abort(500)  # there shouldn't be more than one climb per route per session
+        elif len(climbs) == 1:
+            climb = climbs[0]
+
+            # update the existing values with the new ones
+            climb.sent = climb.sent or self.sent.data
+            climb.flashed = climb.flashed or self.flashed.data
+            climb.n_attempts += self.n_attempts.data
+            if len(self.climb_comment.data) > 0:
+                if climb.comment:
+                    climb.comment += "\n" + self.climb_comment.data
+                else:
+                    climb.comment = self.climb_comment.data
+            if len(self.climb_link.data) > 0 and not len(climb.link):
+                climb.link = self.climb_link.data
+
+        else:
+            climb = Climb(
+                **{
+                    "route_id": route.id,
+                    "session_id": flask_session["session_id"],
+                }
+            )
+            climb = self.add_form_data_to_object(climb)
+
+        return climb
 
     def get_edited_climb(self, climb_id: int) -> Climb:
         """Fetch the object, update it and return it."""

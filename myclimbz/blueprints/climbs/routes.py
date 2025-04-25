@@ -68,9 +68,9 @@ def add_climb() -> str:
             climber.projects.append(route)
         else:
             climb = climb_form.get_object(route)
-            db.session.add(climb)
             if video_obj:
-                video_obj.climb = climb
+                climb.videos.append(video_obj)
+            db.session.add(climb)
         db.session.commit()
 
         # if the user wants to add an opinion, redirect to the opinion form

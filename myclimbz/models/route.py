@@ -2,7 +2,7 @@ from collections import Counter
 import os
 
 from flask_login import current_user
-from sqlalchemy import UniqueConstraint, text
+from sqlalchemy import UniqueConstraint
 
 from myclimbz import db
 from myclimbz.models import Grade, Opinion, Video
@@ -155,24 +155,24 @@ class Route(db.Model):
         """
         Returns a list of video filenames of this route climbed by the current user.
         """
-        climb_ids = [
-            climb.id
-            for climb in self.climbs
-            if climb.session.climber_id == current_user.id
-        ]
-        return get_video_fnames_for_climb_ids(climb_ids)
+        videos = list()
+        for climb in self.climbs:
+            if climb.session.climber_id == current_user.id:
+                videos.extend(climb.videos)
+
+        return get_video_fnames_for_climb_ids(videos)
 
     @property
     def other_videos(self) -> list[str]:
         """
         Returns a list of video filenames of this route climbed by other users.
         """
-        climb_ids = [
-            climb.id
-            for climb in self.climbs
-            if climb.session.climber_id != current_user.id
-        ]
-        return get_video_fnames_for_climb_ids(climb_ids)
+        videos = list()
+        for climb in self.climbs:
+            if climb.session.climber_id != current_user.id:
+                videos.extend(climb.videos)
+
+        return get_video_fnames_for_climb_ids(videos)
 
     def as_dict(self, climber_id: int) -> dict:
         """
@@ -234,11 +234,10 @@ class Route(db.Model):
         }
 
 
-def get_video_fnames_for_climb_ids(climb_ids: list[int]) -> list[str]:
+def get_video_fnames_for_climb_ids(videos: list[Video]) -> list[str]:
     """
-    Given a list of climb IDs, returns the videos corresponding to those climbs.
+    Given a list of videos, returns the trimmed video filenames for each attempt.
     """
-    videos = Video.query.filter(Video.climb_id.in_(climb_ids)).all()
     video_fnames = list()
     for video in videos:
         base, ext = os.path.splitext(video.fname)

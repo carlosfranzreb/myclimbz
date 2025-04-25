@@ -12,7 +12,15 @@
             id="frame-image"
             src="{{ url_for('videos.serve_file', filetype='frames', filename=frames_fname_prefix + '0.jpg') }}"
             alt="Video Frame" style="max-width: 100%; height: auto; max-height: 60vh; border: 1px solid #ccc;"
-            onclick="document.dispatchEvent(new KeyboardEvent('keydown', {key: event.offsetX > event.currentTarget.clientWidth / 2 ? 'd' : 'a'}))"
+            onmousedown="(function(evt){
+                var key = evt.offsetX > evt.currentTarget.clientWidth / 2 ? 'd' : 'a';
+                document.dispatchEvent(new KeyboardEvent('keydown', {key: key}));
+                evt.currentTarget.dispatchInterval = setInterval(function(){
+                    document.dispatchEvent(new KeyboardEvent('keydown', {key: key}));
+                }, 100);
+            })(event)"
+            onmouseup="clearInterval(event.currentTarget.dispatchInterval);"
+            onmouseleave="clearInterval(event.currentTarget.dispatchInterval);"
         >
         <div>
             Frame: <span id="current-frame-num">1</span> / <span id="total-frames">{{ n_frames }}</span>
@@ -45,9 +53,11 @@
                         <div class="invalid-feedback d-block"> {{ section_field.end.errors|join(', ') }}</div>
                     {% endif %}
                  </div>
-                 <div class="col-md-2 text-end">
-                     <button type="button" class="btn btn-danger btn-sm remove-section-btn" {% if loop.index0 == 0 and form.sections.min_entries >= 1 %}disabled{% endif %}>Remove</button>
+                 {% if loop.index0 > 0 %}
+                 <div class="col-md-2 text-end"></div>
+                     <button type="button" class="btn btn-danger btn-sm remove-section-btn mt-2">Remove</button>
                  </div>
+                 {% endif %}
                   {% if section_field.errors and 'start' not in section_field.errors and 'end' not in section_field.errors %} {# Catch form-level errors #}
                     <div class="col-12">
                         {% for error in section_field.errors.values()|sum(start=[]) %}
@@ -169,30 +179,34 @@
     // --- Event Listener: Remove Section ---
     function handleRemoveClick(event) {
         const sectionToRemove = event.target.closest('.section-entry');
-        if (sectionToRemove) {
-            // Simple removal - just removes from DOM.
-            // WTForms backend might need more sophisticated handling
-            // if field indices need to be contiguous on submission.
+        if (sectionToRemove)
             sectionToRemove.remove();
-            // Note: Re-indexing remaining fields would be complex here.
-            // Consider backend logic to handle gaps or cleared fields.
-        }
     }
 
     // Add initial remove listeners
     sectionsContainer.querySelectorAll('.remove-section-btn').forEach(btn => {
         btn.addEventListener('click', handleRemoveClick);
     });
+
+    // --- If the user clicks on a non-empty input field, display its frame ---dd
+    sectionsContainer.addEventListener('click', (event) => {
+        if (event.target.matches('.start-input, .end-input')) {
+            const value = event.target.value.trim();
+            if (value !== '') {
+                const frameNumber = parseInt(value, 10);
+                if (!isNaN(frameNumber) && frameNumber >= 1 && frameNumber <= n_frames) {
+                    currentFrameIndex = frameNumber - 1;
+                    updateFrameDisplay();
+                }
+            }
+        }
+    });
 </script>
 
 <style>
-    /* Optional: Add some visual feedback for the active section */
+    /* Visual feedback for the active section */
     .section-entry:focus-within {
-        background-color: #e9f5ff; /* Light blue background when focused */
-    }
-    .invalid-feedback.d-block { /* Make WTForms errors visible */
-         margin-top: -0.75rem; /* Adjust spacing */
-         margin-bottom: 0.5rem;
+        background-color: var(--color-green-300);
     }
 </style>
 

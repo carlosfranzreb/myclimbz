@@ -69,6 +69,7 @@ def add_videos() -> str:
 def sort_videos() -> str:
     """
     The user can sort the videos chronologically and is then sent to `process_videos`.
+    TODO: display frames instead of videos, and allow user to navigate them.
     """
 
     videos = sorted(flask_session["video_fnames"])
@@ -177,7 +178,7 @@ def serve_file(filetype: str, filename: str):
     Serves files from the UPLOAD_FOLDER.
     TODO: protect access to videos in __init__.py, where all access rights are handled.
     """
-    check_access_to_file(filename)
+    check_access_to_file(filename, ignore_session=True)
 
     if filetype == "videos":
         folder = current_app.config["VIDEOS_FOLDER"]
