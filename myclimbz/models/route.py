@@ -191,6 +191,10 @@ class Route(db.Model):
         The dict contains the video filename, session number and date and attempt number.
         """
 
+        # return empty if empty
+        if len(videos) == 0:
+            return list()
+
         # get a list of climbs on this route, ordered by date
         user_id = videos[0].climb.session.climber_id
         sorted_climbs = self.get_sorted_climbs(user_id)
