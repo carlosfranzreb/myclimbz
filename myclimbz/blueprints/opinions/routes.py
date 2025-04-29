@@ -1,4 +1,5 @@
-from flask import Blueprint, request, redirect, session as flask_session
+from flask import Blueprint, request, redirect, session as flask_session, jsonify, abort
+from flask_login import current_user
 
 from myclimbz.models import Opinion, Route
 from myclimbz.forms import OpinionForm
@@ -76,3 +77,33 @@ def delete_opinion(opinion_id: int) -> str:
     db.session.delete(opinion)
     db.session.commit()
     return redirect(flask_session.pop("call_from_url"))
+
+
+@opinions.route("/get_opinion_from_route_name/<route_name>")
+def get_opinion_from_route_name(route_name: str) -> str:
+    """
+    Given a route name by the frontend, return the opinion info required to populate
+    the form, if there is an opinion. We assume that the user is the current user.
+    """
+    route = Route.query.filter_by(name=route_name).first()
+    if route is None:
+        abort(404)
+
+    opinion = Opinion.query.filter_by(
+        route_id=route.id, climber_id=current_user.id
+    ).first()
+
+    # return empty dict if there is no opinion
+    if opinion is None:
+        return jsonify({})
+
+    # return opinion information
+    return jsonify(
+        {
+            "grade": str(opinion.grade.id),
+            "rating": opinion.rating,
+            "landing": opinion.landing,
+            "cruxes": "TODO",
+            "comment": "TODO",
+        }
+    )

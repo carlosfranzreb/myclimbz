@@ -29,7 +29,7 @@
                             <!-- Add a range input if the field has a type of IntegerRangeField or DecimalRangeField -->
                             {% if field.type == 'IntegerRangeField' or field.type == 'DecimalRangeField' %}
                                 <span>= </span>
-                                <output>{{ field.default }}</output>
+                                <output id="{{ field.id }}-output">{{ field.default }}</output>
                                 <span>{{ field.unit }}</span>
                                 {{ field(id=field.id, class='form-range',
                                 oninput="this.previousElementSibling.previousElementSibling.value
@@ -109,5 +109,49 @@
         </div>
     </form>
 </div>
+
+<script>
+// Script to update opinion form when route name is changed
+document.addEventListener("DOMContentLoaded", function() {
+    // Find the input field for the route name that belongs to the "Opinion" form.
+    // Adjust the selector if the element id/class differs in your markup.
+    var routeNameInput = document.getElementById("name");
+    var opinionFormExists = Array.from(document.getElementsByTagName("h4")).some(el => el.textContent.trim() === "Opinion");
+
+    if (routeNameInput && opinionFormExists) {
+        routeNameInput.addEventListener("change", function() {
+            var routeName = this.value;
+
+            // Exit if route name is not present
+            var ExistingrouteNames = document.getElementById("name-list").options;
+            var exists = false;
+            exists = Array.from(ExistingrouteNames).some(option => option.value === routeName);
+            if (!exists)
+                return; 
+
+            fetch("/get_opinion_from_route_name/" + encodeURIComponent(routeName))
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.grade)
+                        document.getElementById("grade").value = data.grade;
+
+                    ["rating", "landing"].forEach(function(field) {
+                        if (data[field]) {
+                            document.getElementById(field).value = data[field];
+                            document.getElementById(field + "-output").value = data[field];
+                        }
+                    });
+                    console.log(data);
+                    // TODO: update cruxes and comment
+                })
+                .catch(function(error) {
+                    console.error("Error fetching opinion data:", error);
+                });
+        });
+    }
+});
+</script>
 
 {% endblock content %}

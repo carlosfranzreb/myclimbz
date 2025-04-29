@@ -2,7 +2,7 @@ from flask import Blueprint, redirect, request, session as flask_session
 from flask_login import current_user
 
 from myclimbz.models import Climb, Session, Climber, Video
-from myclimbz.forms import ClimbForm, RouteForm
+from myclimbz.forms import RouteForm, ClimbForm, OpinionForm
 from myclimbz import db
 from myclimbz.blueprints.utils import render, redirect_after_form_submission
 
@@ -12,9 +12,6 @@ climbs = Blueprint("climbs", __name__)
 
 @climbs.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
-    """
-    TODO: the same route can be added more than once in a session.
-    """
 
     # create forms and add choices
     title = "Add climb"
@@ -26,7 +23,9 @@ def add_climb() -> str:
         session = Session.query.get(flask_session["session_id"])
         area_id = session.area_id
         climb_form = ClimbForm.create_empty()
+
     route_form = RouteForm.create_empty(area_id)
+    opinion_form = OpinionForm.create_empty()
 
     # get video object if there is one
     video_id = flask_session.get("video_id", None)
@@ -53,14 +52,11 @@ def add_climb() -> str:
 
         # create new sector and new route if necessary
         sector = route_form.get_sector(area_id)
-        if sector.id is None:
-            db.session.add(sector)
-            db.session.commit()
-
         route = route_form.get_object(sector)
-        if route.id is None:
-            db.session.add(route)
-            db.session.commit()
+        for obj in [sector, route]:
+            if obj.id is None:
+                db.session.add(obj)
+        db.session.commit()
 
         # add as project or create climb, and add it to video object if appropriate
         climber = Climber.query.get(current_user.id)
@@ -85,6 +81,11 @@ def add_climb() -> str:
     if not is_project_search:
         climb_form.title = "Climb"
         forms.append(climb_form)
+
+    # the opinion form should appear last
+    opinion_form.title = "Opinion"
+    forms.append(opinion_form)
+
     return render("form.html", title=title, forms=forms)
 
 
