@@ -100,10 +100,10 @@ def get_opinion_from_route_name(route_name: str) -> str:
     # return opinion information
     return jsonify(
         {
-            "grade": str(opinion.grade.id),
+            "grade": str(opinion.grade.id) if opinion.grade else None,
             "rating": opinion.rating,
             "landing": opinion.landing,
-            "cruxes": "TODO",
-            "comment": "TODO",
+            "cruxes": [crux.name for crux in opinion.cruxes],
+            "comment": opinion.comment,
         }
     )
