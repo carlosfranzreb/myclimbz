@@ -1,7 +1,7 @@
-from flask import Blueprint, redirect, request, session as flask_session
+from flask import Blueprint, redirect, request, session as flask_session, abort, jsonify
 from flask_login import current_user
 
-from myclimbz.models import Climb, Session, Climber, Video
+from myclimbz.models import Climb, Session, Climber, Video, Route
 from myclimbz.forms import RouteForm, ClimbForm, OpinionForm
 from myclimbz import db
 from myclimbz.blueprints.utils import render, redirect_after_form_submission
@@ -64,7 +64,7 @@ def add_climb() -> str:
             climber.projects.append(route)
         else:
             climb = climb_form.get_object(route)
-            if video_obj:
+            if video_id:
                 climb.videos.append(video_obj)
             db.session.add(climb)
         db.session.commit()
@@ -126,3 +126,31 @@ def delete_climb(climb_id: int) -> str:
 def view_climb(climb_id: int) -> str:
     climb = Climb.query.get(climb_id)
     return render("climb.html", climb=climb, title=f"Climb on {climb.route.name}")
+
+
+@climbs.route("/get_climb_from_route_name/<route_name>")
+def get_climb_from_route_name(route_name: str) -> str:
+    """
+    Given a route name by the frontend, return the opinion info required to populate
+    the form, if there is an opinion. We assume that the user is the current user.
+    """
+    route = Route.query.filter_by(name=route_name).first()
+    if route is None:
+        abort(404)
+
+    climb = Climb.query.filter_by(
+        route_id=route.id, session_id=flask_session["session_id"]
+    ).first()
+    if climb is None:
+        return jsonify({})
+
+    # return opinion information
+    return jsonify(
+        {
+            "n_attempts": climb.n_attempts,
+            "sent": climb.sent,
+            "flashed": climb.flashed,
+            "climb_comment": climb.comment,
+            "climb_link": climb.link,
+        }
+    )

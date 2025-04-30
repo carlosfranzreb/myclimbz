@@ -111,31 +111,35 @@
 </div>
 
 <script>
-// Script to update opinion form when route name is changed
+
 document.addEventListener("DOMContentLoaded", function() {
-    // Find the input field for the route name that belongs to the "Opinion" form.
-    // Adjust the selector if the element id/class differs in your markup.
-    var routeNameInput = document.getElementById("name");
-    var opinionFormExists = Array.from(document.getElementsByTagName("h4")).some(el => el.textContent.trim() === "Opinion");
 
-    if (routeNameInput && opinionFormExists) {
-        routeNameInput.addEventListener("change", function() {
-            var routeName = this.value;
+    // Exit if there is no route form
+    let routeNameInput = document.getElementById("name");
+    if (!routeNameInput)
+        return;
 
-            // Exit if route name is not present
-            var ExistingrouteNames = document.getElementById("name-list").options;
-            var exists = false;
-            exists = Array.from(ExistingrouteNames).some(option => option.value === routeName);
-            if (!exists)
-                return; 
+    let existingRoutes = document.getElementById("name-list").options;
+    let opinionFormExists = Array.from(document.getElementsByTagName("h4")).some(el => el.textContent.trim() === "Opinion");
+    let climbFormExists = Array.from(document.getElementsByTagName("h4")).some(el => el.textContent.trim() === "Climb");
 
-            fetch("/get_opinion_from_route_name/" + encodeURIComponent(routeName))
+    // Script to update opinion form when route name is changed
+    routeNameInput.addEventListener("change", function() {
+        let routeName = this.value;
+        let routeExists = Array.from(existingRoutes).some(option => option.value === routeName);
+        if (!routeExists)
+            return; 
+
+        // Script to update opinion form when route name is changed
+        let routeNameEncoded = encodeURIComponent(routeName)
+        if (opinionFormExists) {
+            fetch("/get_opinion_from_route_name/" + routeNameEncoded)
                 .then(function(response) {
                     return response.json();
                 })
                 .then(function(data) {
                     // Update grade and comment; both could be null (TODO: comment QA)
-                    ["grade", "comment"].forEach(function(field) {
+                    ["grade", "opinion_comment"].forEach(function(field) {
                         if (data[field])
                             document.getElementById(field).value = data[field];
                     });
@@ -158,8 +162,30 @@ document.addEventListener("DOMContentLoaded", function() {
                 .catch(function(error) {
                     console.error("Error fetching opinion data:", error);
                 });
-        });
-    }
+        }
+
+        // Script to update climb form when route name is changed
+        if (climbFormExists) {
+            fetch("/get_climb_from_route_name/" + routeNameEncoded)
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    ["n_attempts", "climb_comment", "climb_link"].forEach(function(field) {
+                        if (data[field])
+                            document.getElementById(field).value = data[field];
+                    });
+
+                    // Update the checkboxes for "sent" and "flashed"
+                    ["sent", "flashed"].forEach(function(field) {
+                        document.getElementById(field).checked = data[field];
+                    });
+                })
+                .catch(function(error) {
+                    console.error("Error fetching climb data:", error);
+                });
+        }
+    });
 });
 </script>
 

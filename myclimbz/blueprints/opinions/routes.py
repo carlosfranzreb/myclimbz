@@ -92,8 +92,6 @@ def get_opinion_from_route_name(route_name: str) -> str:
     opinion = Opinion.query.filter_by(
         route_id=route.id, climber_id=current_user.id
     ).first()
-
-    # return empty dict if there is no opinion
     if opinion is None:
         return jsonify({})
 
@@ -104,6 +102,6 @@ def get_opinion_from_route_name(route_name: str) -> str:
             "rating": opinion.rating,
             "landing": opinion.landing,
             "cruxes": [crux.name for crux in opinion.cruxes],
-            "comment": opinion.comment,
+            "opinion_comment": opinion.comment,
         }
     )

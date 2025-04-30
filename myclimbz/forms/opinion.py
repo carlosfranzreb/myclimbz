@@ -41,7 +41,7 @@ class OpinionForm(FlaskForm):
         widget=widgets.ListWidget(prefix_label=False),
         option_widget=widgets.CheckboxInput(),
     )
-    comment = StringField("Comment", validators=[Optional()], widget=TextArea())
+    opinion_comment = StringField("Comment", validators=[Optional()], widget=TextArea())
     submit = SubmitField("Submit")
 
     @classmethod
@@ -69,7 +69,8 @@ class OpinionForm(FlaskForm):
         form = cls.create_empty()
         form.rating.default = obj.rating
         form.landing.default = obj.landing
-        for field in ["landing", "rating", "comment"]:
+        form.opinion_comment.data = obj.comment
+        for field in ["landing", "rating"]:
             getattr(form, field).data = getattr(obj, field)
 
         if obj.grade is not None:
@@ -106,8 +107,9 @@ class OpinionForm(FlaskForm):
     def _add_fields_to_object(self, opinion: Opinion) -> Opinion:
         opinion.grade = Grade.query.get(int(self.grade.data))
         opinion.cruxes = [Crux.query.get(crux_id) for crux_id in self.cruxes.data]
+        opinion.comment = self.opinion_comment.data
 
-        for field in ["landing", "rating", "comment"]:
+        for field in ["landing", "rating"]:
             setattr(opinion, field, getattr(self, field).data)
 
         return opinion

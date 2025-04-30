@@ -40,7 +40,7 @@ class ClimbForm(FlaskForm):
     @classmethod
     def create_empty(cls) -> ClimbForm:
         form = cls()
-        form.is_project.toggle_ids = "n_attempts,climb_comment,climb_link,sent,flashed"
+        form.is_project.toggle_ids = ",".join(FIELDS)
         return form
 
     @classmethod
@@ -101,41 +101,22 @@ class ClimbForm(FlaskForm):
     def get_object(self, route: Route) -> Climb:
         """
         - If this route has already been climbed in this session, update the
-            corresponding climb and return it.
-        - Otherwise, create a new climb object from the form data.
+            corresponding climb with the form data and return it.
+        - Otherwise, create a new climb object from the form data and return it.
         """
 
         # check whether the route has already been tried in this session
-        climbs = Climb.query.filter_by(
+        climb = Climb.query.filter_by(
             route_id=route.id, session_id=flask_session["session_id"]
-        ).all()
-        if len(climbs) > 1:
-            abort(500)  # there shouldn't be more than one climb per route per session
-        elif len(climbs) == 1:
-            climb = climbs[0]
+        ).first()
 
-            # update the existing values with the new ones
-            climb.sent = climb.sent or self.sent.data
-            climb.flashed = climb.flashed or self.flashed.data
-            climb.n_attempts += self.n_attempts.data
-            if len(self.climb_comment.data) > 0:
-                if climb.comment:
-                    climb.comment += "\n" + self.climb_comment.data
-                else:
-                    climb.comment = self.climb_comment.data
-            if len(self.climb_link.data) > 0 and not len(climb.link):
-                climb.link = self.climb_link.data
-
-        else:
+        # create a new climb if one does not exist
+        if not climb:
             climb = Climb(
-                **{
-                    "route_id": route.id,
-                    "session_id": flask_session["session_id"],
-                }
+                **{"route_id": route.id, "session_id": flask_session["session_id"]}
             )
-            climb = self.add_form_data_to_object(climb)
 
-        return climb
+        return self.add_form_data_to_object(climb)
 
     def get_edited_climb(self, climb_id: int) -> Climb:
         """Fetch the object, update it and return it."""
