@@ -123,68 +123,70 @@ document.addEventListener("DOMContentLoaded", function() {
     let opinionFormExists = Array.from(document.getElementsByTagName("h4")).some(el => el.textContent.trim() === "Opinion");
     let climbFormExists = Array.from(document.getElementsByTagName("h4")).some(el => el.textContent.trim() === "Climb");
 
-    // Script to update opinion form when route name is changed
+    function fetchDataAndUpdateForm(url, func) {
+        fetch(url)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+
+                if (!data || Object.keys(data).length === 0) {
+                    return;
+                }
+                func(data);
+            })
+            .catch(function(error) {
+                console.error("Error fetching data:", error);
+            });
+    }
+
+    function updateOpinionForm(data) {
+        // Update grade and comment; both could be null (TODO: comment QA)
+        ["grade", "opinion_comment"].forEach(function(field) {
+            if (data[field])
+                document.getElementById(field).value = data[field];
+        });
+
+        // Update rating and landing slider values and their labels
+        ["rating", "landing"].forEach(function(field) {
+            document.getElementById(field).value = data[field];
+            document.getElementById(field + "-output").value = data[field];
+        });
+
+        // Update cruxes
+        var cruxesList = document.getElementById("cruxes");
+        var checkboxes = cruxesList.querySelectorAll("input[type='checkbox']");
+        checkboxes.forEach(function(checkbox) {
+            var label = checkbox.nextElementSibling;
+            var cruxName = label ? label.textContent.trim() : "";
+            checkbox.checked = data.cruxes.includes(cruxName);
+        });
+    }
+
+    function updateClimbForm(data) {
+        ["n_attempts", "climb_comment", "climb_link"].forEach(function(field) {
+            if (data[field])
+                document.getElementById(field).value = data[field];
+        });
+
+        // Update the checkboxes for "sent" and "flashed"
+        ["sent", "flashed"].forEach(function(field) {
+            document.getElementById(field).checked = data[field];
+        });
+    }
+
+    // Event listeners to update forms when route name is changed
     routeNameInput.addEventListener("change", function() {
         let routeName = this.value;
         let routeExists = Array.from(existingRoutes).some(option => option.value === routeName);
         if (!routeExists)
             return; 
 
-        // Script to update opinion form when route name is changed
         let routeNameEncoded = encodeURIComponent(routeName)
-        if (opinionFormExists) {
-            fetch("/get_opinion_from_route_name/" + routeNameEncoded)
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(data) {
-                    // Update grade and comment; both could be null (TODO: comment QA)
-                    ["grade", "opinion_comment"].forEach(function(field) {
-                        if (data[field])
-                            document.getElementById(field).value = data[field];
-                    });
-
-                    // Update rating and landing slider values and their labels
-                    ["rating", "landing"].forEach(function(field) {
-                        document.getElementById(field).value = data[field];
-                        document.getElementById(field + "-output").value = data[field];
-                    });
-
-                    // Update cruxes
-                    var cruxesList = document.getElementById("cruxes");
-                    var checkboxes = cruxesList.querySelectorAll("input[type='checkbox']");
-                    checkboxes.forEach(function(checkbox) {
-                        var label = checkbox.nextElementSibling;
-                        var cruxName = label ? label.textContent.trim() : "";
-                        checkbox.checked = data.cruxes.includes(cruxName);
-                    });
-                })
-                .catch(function(error) {
-                    console.error("Error fetching opinion data:", error);
-                });
-        }
-
-        // Script to update climb form when route name is changed
-        if (climbFormExists) {
-            fetch("/get_climb_from_route_name/" + routeNameEncoded)
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(data) {
-                    ["n_attempts", "climb_comment", "climb_link"].forEach(function(field) {
-                        if (data[field])
-                            document.getElementById(field).value = data[field];
-                    });
-
-                    // Update the checkboxes for "sent" and "flashed"
-                    ["sent", "flashed"].forEach(function(field) {
-                        document.getElementById(field).checked = data[field];
-                    });
-                })
-                .catch(function(error) {
-                    console.error("Error fetching climb data:", error);
-                });
-        }
+        if (opinionFormExists)
+            fetchDataAndUpdateForm("/get_opinion_from_route_name/" + routeNameEncoded, updateOpinionForm);
+        if (climbFormExists)
+            fetchDataAndUpdateForm("/get_climb_from_route_name/" + routeNameEncoded, updateClimbForm);
     });
 });
 </script>
