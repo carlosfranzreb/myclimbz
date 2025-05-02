@@ -12,13 +12,7 @@ from datetime import datetime
 from sqlalchemy import text
 
 from .conftest import CLIMBER_ID, SLEEP_TIME
-from .form_utils import (
-    get_existing_route,
-    start_session,
-    stop_session,
-    fill_form,
-    started_session_id,
-)
+from .form_utils import start_session, stop_session, started_session_id
 
 
 EXISTING_OBJECTS = {
