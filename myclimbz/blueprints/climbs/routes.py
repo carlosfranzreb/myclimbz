@@ -1,10 +1,10 @@
 from flask import Blueprint, redirect, request, session as flask_session, abort, jsonify
 from flask_login import current_user
 
-from myclimbz.models import Climb, Session, Climber, Video, Route
+from myclimbz.models import Climb, Session, Climber, Route
 from myclimbz.forms import RouteForm, ClimbForm, OpinionForm
 from myclimbz import db
-from myclimbz.blueprints.utils import render, redirect_after_form_submission
+from myclimbz.blueprints.utils import render
 
 
 climbs = Blueprint("climbs", __name__)
@@ -12,9 +12,6 @@ climbs = Blueprint("climbs", __name__)
 
 @climbs.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
-    """
-    TODO: remove code from videos, as that is now handled separately.
-    """
 
     # create forms and add choices
     title = "Add climb"
@@ -29,12 +26,6 @@ def add_climb() -> str:
 
     route_form = RouteForm.create_empty(area_id)
     opinion_form = OpinionForm.create_empty()
-
-    # get video object if there is one
-    video_id = flask_session.get("video_id", None)
-    if video_id:
-        video_obj = Video.query.get(video_id)
-        climb_form.n_attempts.data = len(video_obj.attempts)
 
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
@@ -64,14 +55,12 @@ def add_climb() -> str:
             db.session.add(opinion)
         db.session.commit()
 
-        # add as project or create climb, and add it to video object if appropriate
+        # add as project or create climb
         climber = Climber.query.get(current_user.id)
         if is_project_search or climb_form.is_project.data:
             climber.projects.append(route)
         else:
             climb = climb_form.get_object(route)
-            if video_id:
-                climb.videos.append(video_obj)
             db.session.add(climb)
         db.session.commit()
 
@@ -79,7 +68,7 @@ def add_climb() -> str:
         if route_form.add_opinion.data is True:
             return redirect(f"/get_opinion_form/{climber.id}/{route.id}")
         else:
-            return redirect_after_form_submission()
+            return redirect(flask_session.pop("call_from_url"))
 
     # GET: the climber wants to add a route (+ climb if not in a project search)
     route_form.title = "Route"

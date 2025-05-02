@@ -4,7 +4,7 @@ from flask_login import current_user
 from myclimbz.models import Opinion, Route
 from myclimbz.forms import OpinionForm
 from myclimbz import db
-from myclimbz.blueprints.utils import render, redirect_after_form_submission
+from myclimbz.blueprints.utils import render
 
 opinions = Blueprint("opinions", __name__)
 
@@ -24,7 +24,7 @@ def add_opinion(climber_id: int, route_id: int) -> str:
         opinion = opinion_form.get_object(climber_id, route_id)
         db.session.add(opinion)
         db.session.commit()
-        return redirect_after_form_submission()
+        return redirect(flask_session.pop("call_from_url"))
 
     # GET: return the add opinion page
     return render("form.html", title=title, forms=[opinion_form])
@@ -44,7 +44,7 @@ def edit_opinion(opinion_id: int) -> str:
         opinion = opinion_form.get_edited_opinion(opinion_id)
         db.session.add(opinion)
         db.session.commit()
-        return redirect_after_form_submission()
+        return redirect(flask_session.pop("call_from_url"))
 
     # GET: return the edit opinion page
     opinion_form = OpinionForm.create_from_obj(opinion)
