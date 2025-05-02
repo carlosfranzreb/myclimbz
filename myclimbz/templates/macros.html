@@ -197,6 +197,15 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function updateOpinionForm(data) {
+
+        // Add a paragraph below the title warning the user that this info was fetched from the DB
+        let opinionTitleElement = Array.from(document.getElementsByTagName("h4")).find(function(el) {
+            return el.textContent.trim() === "Opinion";
+        });
+        if (opinionTitleElement) {
+            opinionTitleElement.insertAdjacentHTML("afterend", '<p class="text-muted">Existing opinion was fetched from the database.</p>');
+        }
+
         // Update grade and comment; both could be null (TODO: comment QA)
         ["grade", "opinion_comment"].forEach(function(field) {
             if (data[field])
@@ -220,7 +229,17 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function updateClimbForm(data) {
-        ["n_attempts", "climb_comment", "climb_link"].forEach(function(field) {
+        
+        // Add a paragraph below the title warning the user that this info was fetched from the DB
+        let opinionTitleElement = Array.from(document.getElementsByTagName("h4")).find(function(el) {
+            return el.textContent.trim() === "Climb";
+        });
+        if (opinionTitleElement) {
+            opinionTitleElement.insertAdjacentHTML("afterend", '<p class="text-muted">Existing climb was fetched from the database.</p>');
+        }
+
+        // Update texts
+        ["climb_comment", "climb_link"].forEach(function(field) {
             if (data[field])
                 document.getElementById(field).value = data[field];
         });
@@ -229,6 +248,26 @@ document.addEventListener("DOMContentLoaded", function() {
         ["sent", "flashed"].forEach(function(field) {
             document.getElementById(field).checked = data[field];
         });
+
+        // Update the number of attempts
+        let nAttemptsField = document.getElementById("n_attempts");
+        if (nAttemptsField) {
+            let currentValue = parseInt(nAttemptsField.value, 10) || 0;
+            let fetchedAttempts = parseInt(data.n_attempts, 10) || 0;
+            nAttemptsField.value = currentValue + fetchedAttempts;
+            let infoText = "No. of attempts in database: " + fetchedAttempts
+            let dbInfoId = "n_attempts-db-info";
+            let dbInfoParagraph = document.getElementById(dbInfoId);
+            if (dbInfoParagraph) {
+                dbInfoParagraph.textContent = infoText;
+            } else {
+                dbInfoParagraph = document.createElement("p");
+                dbInfoParagraph.id = dbInfoId;
+                dbInfoParagraph.className = "text-muted";
+                dbInfoParagraph.textContent = infoText;
+                nAttemptsField.parentElement.appendChild(dbInfoParagraph);
+            }
+        }
     }
 
     // Event listeners to update forms when route name is changed
