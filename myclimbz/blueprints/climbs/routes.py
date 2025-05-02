@@ -50,12 +50,15 @@ def add_climb() -> str:
                 forms.append(climb_form)
             return render("form.html", title=title, forms=forms)
 
-        # create new sector and new route if necessary
+        # create opinion, sector and route if necessary
         sector = route_form.get_sector(area_id)
         route = route_form.get_object(sector)
         for obj in [sector, route]:
             if obj.id is None:
                 db.session.add(obj)
+        opinion = opinion_form.get_object(current_user.id, route.id)
+        if opinion.id is None:
+            db.session.add(opinion)
         db.session.commit()
 
         # add as project or create climb, and add it to video object if appropriate
