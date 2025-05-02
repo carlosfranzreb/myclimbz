@@ -14,10 +14,17 @@ from flask import (
 from flask_login import current_user
 from werkzeug.utils import secure_filename
 
-from myclimbz.models import Video, VideoAttempt
-from myclimbz.forms import VideosForm, VideosSortingForm, VideoAnnotationForm
+from myclimbz.models import Video, VideoAttempt, Session
+from myclimbz.forms import (
+    VideosForm,
+    VideosSortingForm,
+    VideoAnnotationForm,
+    RouteForm,
+    ClimbForm,
+    OpinionForm,
+)
 from myclimbz import db
-from myclimbz.blueprints.utils import render
+from myclimbz.blueprints.utils import render, delete_video_info
 from myclimbz.blueprints.videos.utils import (
     check_access_to_file,
     get_video_frames,
@@ -131,24 +138,44 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
     video_fname = sorted(flask_session["video_fnames"])[video_idx]
     check_access_to_file(video_fname)
 
+    # create video annotation form
+    title = "Annotate"
     video_path = os.path.join(current_app.config["VIDEOS_FOLDER"], video_fname)
     frames_fname_prefix, n_frames, fps_video, fps_taken = get_video_frames(video_path)
-    title = "Annotate"
-    form = VideoAnnotationForm()
+    video_form = VideoAnnotationForm()
     flask_session["video_upload_status"] = [video_idx, n_videos]
 
-    # POST: user submitted annotations
+    # create other forms
+    area_id = Session.query.get(flask_session["session_id"]).area_id
+    route_form = RouteForm.create_empty(area_id)
+    climb_form = ClimbForm.create_empty()
+    opinion_form = OpinionForm.create_empty()
+
+    # POST: user submitted forms
     if request.method == "POST":
-        if not form.validate():
-            if flask_session.get("error", None) is None:
+
+        # validate forms
+        flask_session["error"] = None
+        for form in [video_form, route_form, opinion_form]:
+            if not form.validate():
+                if not flask_session[
+                    "error"
+                ]:  # TODO: can't this be added automatically somewhere else?
+                    flask_session["error"] = "An error occurred. Fix it and resubmit."
+
+        if not climb_form.validate_from_name(
+            route_form.name.data, route_form.sector.data
+        ):
+            if not flask_session["error"]:
                 flask_session["error"] = "An error occurred. Fix it and resubmit."
 
-        else:
+        # store info if forms are valid
+        if not flask_session["error"]:
             # store video annotations and trim video
             video_obj = Video(
                 fname=video_fname, fps_video=fps_video, fps_taken=fps_taken
             )
-            for section in form.sections.data:
+            for section in video_form.sections.data:
                 video_obj.attempts.append(
                     VideoAttempt(start_frame=section["start"], end_frame=section["end"])
                 )
@@ -158,15 +185,45 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
             db.session.commit()
             os.remove(video_path)
 
-            # go to "Add climb" form
-            flask_session["video_id"] = video_obj.id
-            return redirect(url_for("climbs.add_climb"))
+            # store route, climb and opinion (TODO: use code from climbs.add_climb?)
+            sector = route_form.get_sector(area_id)
+            route = route_form.get_object(sector)
+            for obj in [sector, route]:
+                if obj.id is None:
+                    db.session.add(obj)
+            opinion = opinion_form.get_object(current_user.id, route.id)
+            if opinion.id is None:
+                db.session.add(opinion)
+            db.session.commit()
 
-    # GET: the user wants to upload videos
+            climb = climb_form.get_object(route)
+            climb.videos.append(video_obj)
+            db.session.add(climb)
+            db.session.commit()
+
+            # go to next video or back to previous page if all videos were annotated
+            video_idx, n_videos = flask_session["video_upload_status"]
+            if video_idx + 1 < n_videos:
+                return redirect(
+                    url_for(
+                        "videos.annotate_video",
+                        n_videos=n_videos,
+                        video_idx=video_idx + 1,
+                    )
+                )
+            else:
+                delete_video_info()
+                return redirect(flask_session.pop("call_from_url"))
+
+    # GET: the user is asked to annotate a video
+    route_form.title = "Route"  # TODO: should I define the titles somewhere else?
+    climb_form.title = "Climb"
+    opinion_form.title = "Opinion"
     return render(
         "form_annotate_video.html",
         title=title,
-        form=form,
+        video_form=video_form,
+        other_forms=[route_form, climb_form, opinion_form],
         frames_fname_prefix=frames_fname_prefix,
         n_frames=n_frames,
     )

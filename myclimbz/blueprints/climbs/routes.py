@@ -12,6 +12,9 @@ climbs = Blueprint("climbs", __name__)
 
 @climbs.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
+    """
+    TODO: remove code from videos, as that is now handled separately.
+    """
 
     # create forms and add choices
     title = "Add climb"
@@ -42,7 +45,7 @@ def add_climb() -> str:
             if not is_project_search
             else False
         )
-        if not route_form.validate() or invalid_climb:
+        if not route_form.validate() or not opinion_form.validate() or invalid_climb:
             if flask_session.get("error", None) is None:
                 flask_session["error"] = "An error occurred. Fix it and resubmit."
             forms = [route_form]

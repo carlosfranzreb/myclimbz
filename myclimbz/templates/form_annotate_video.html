@@ -1,3 +1,5 @@
+{% import "macros.html" as macros %}
+
 {% extends "main.html" %}
 {% block content %}
 
@@ -33,11 +35,11 @@
     </div>
 
     <form method="POST">
-        {{ form.hidden_tag() }}
+        {{ video_form.hidden_tag() }}
 
         <h4>Climbing Sections</h4>
         <div id="sections-container">
-            {% for section_field in form.sections %}
+            {% for section_field in video_form.sections %}
             <div class="section-entry row align-items-center mb-2 border p-2 rounded" data-index="{{ loop.index0 }}">
                  <div class="col-md-5">
                     {{ section_field.start.label(class="form-label") }}
@@ -69,11 +71,13 @@
             {% endfor %}
         </div>
 
-        <button type="button" id="add-section-btn" class="btn btn-secondary mt-2">Add Section</button>
+        <button type="button" id="add-section-btn" class="btn btn-secondary my-2">Add Section</button>
 
         <hr>
-        <input type="submit" class="btn btn-primary" value="Save Sections">
-         <a href="{{ url_for('home.cancel_form') }}" class="btn btn-danger ms-2">Cancel</a> {# Adjust cancel URL if needed #}
+        {{ macros.three_forms(other_forms) }}
+
+        <input type="submit" class="btn btn-primary" value="Submit">
+        <a href="{{ url_for('home.cancel_form') }}" class="btn btn-danger ms-2">Cancel</a>
 
     </form>
 

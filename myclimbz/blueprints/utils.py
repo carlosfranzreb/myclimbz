@@ -73,6 +73,7 @@ def render(*args, **kwargs) -> str:
 
 def redirect_after_form_submission(*args, **kwargs) -> str:
     """
+    TODO: maybe this can be deleted
     - If the user is currently annotating videos and there are videos
         that remain to be annotated, the user is redirected to the next
         video.
@@ -82,12 +83,6 @@ def redirect_after_form_submission(*args, **kwargs) -> str:
     if video_id:
         video_idx, n_videos = flask_session["video_upload_status"]
         if video_idx + 1 < n_videos:
-            print(video_idx, n_videos)
-            print("CALLING")
-            url = url_for(
-                "videos.annotate_video", n_videos=n_videos, video_idx=video_idx + 1
-            )
-            print(url)
             return redirect(
                 url_for(
                     "videos.annotate_video", n_videos=n_videos, video_idx=video_idx + 1

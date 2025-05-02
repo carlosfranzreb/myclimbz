@@ -1,3 +1,4 @@
+{# Macro to display a card with a header and facts of a route, opinion, etc. #}
 {% macro card(data) %}
 <div class="card mb-3">
     <div class="card-header">
@@ -67,4 +68,183 @@
     </ul>
     {% endif %}
 </div>
+{% endmacro %}
+
+
+{# Macro to display the three forms (route, climb and opinion) #}
+{% macro three_forms(forms) %}
+
+{% for form in forms %}
+    <div class="mb-4">
+        {{ form.hidden_tag() }}
+
+        <!-- Form titles are used for multi-forms -->
+        {% if form.title %}
+            <h4>{{ form.title }}</h4>
+        {% endif %}
+
+        {% for field in form %}
+            {% if field.name != 'csrf_token' and field.name != "submit" and field != form.existing_route %}
+                <div class="form-group">
+
+                    <!-- Add the field label -->
+                    {{ field.label(id=field.id + "-label") }}
+                    
+                    <!-- Add a range input if the field has a type of IntegerRangeField or DecimalRangeField -->
+                    {% if field.type == 'IntegerRangeField' or field.type == 'DecimalRangeField' %}
+                        <span>= </span>
+                        <output id="{{ field.id }}-output">{{ field.default }}</output>
+                        <span>{{ field.unit }}</span>
+                        {{ field(id=field.id, class='form-range',
+                        oninput="this.previousElementSibling.previousElementSibling.value
+                        = this.value") }}
+
+                    <!-- Add a checkbox if the field has a type of BooleanField and place the label beside it -->
+                    {% elif field.type == 'BooleanField' %}
+                        {% if field.toggle_ids %}
+                            {{ field(
+                                id=field.id,
+                                class='form-check',
+                                onchange='checkboxToggle("' + field.id + '", "' + field.toggle_ids + '")'
+                            ) }}
+                        {% else %}
+                            {{ field(id=field.id, class='form-check') }}
+                        {% endif %}
+                        <script>
+                            document.getElementById("{{ field.id }}").parentElement.style.display = "flex";
+                            document.getElementById("{{ field.id }}").parentElement.style.marginTop = "0.5em"
+                            document.getElementById("{{ field.id }}").parentElement.style.marginBottom = "0.75em";
+                            document.getElementById("{{ field.id }}").style.cursor = "pointer";
+                            document.getElementById("{{ field.id }}-label").style.cursor = "pointer";
+                            document.getElementById("{{ field.id }}-label").classList.add("label-checkbox");
+                        </script>
+
+                    <!-- Add a datalist if the field has a datalist attribute -->
+                    {% elif field.datalist %}
+                        {% set datalist_name = field.name + '-list' %}
+                        {% set relation_field = field.relation_field if field.relation_field is defined else "" %}
+                        {% set relation_data = field.relation_data | tojson if field.relation_data is defined else "" %}
+                        <datalist id="{{ field.name }}-list">
+                            {% for item in field.datalist %}
+                            <option value="{{ item }}"></option>
+                            {% endfor %}
+                        </datalist>
+                        {% if field.toggle_ids %}
+                            {{ field(
+                                id=field.id,
+                                class='form-control',
+                                list=datalist_name,
+                                autocomplete='off',
+                                onchange='datalistToggle("' + field.id + '", "' + field.toggle_ids + '", "' + relation_field + '", "' + relation_data + '")'
+                            ) }}
+                        {% else %}
+                            {{ field(id=field.id, class='form-control', list=datalist_name, autocomplete='off') }}
+                        {% endif %}
+
+                    <!-- Otherwise, we assume the field is a text input -->
+                    {% else %}
+                        {{ field(id=field.id, class='form-control') }}
+                    {% endif %}
+
+                    <!-- Add error messages if there are any -->
+                    {% if field.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in field.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <script>
+                            document.getElementById("{{ field.id }}").classList.add("is-invalid");
+                            document.getElementById("{{ field.id }}-label").style.color = "red";
+                        </script>
+                    {% endif %}
+
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <hr>
+{% endfor %}
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    // Exit if there is no route form
+    let routeNameInput = document.getElementById("name");
+    if (!routeNameInput)
+        return;
+
+    let existingRoutes = document.getElementById("name-list").options;
+    let opinionFormExists = Array.from(document.getElementsByTagName("h4")).some(el => el.textContent.trim() === "Opinion");
+    let climbFormExists = Array.from(document.getElementsByTagName("h4")).some(el => el.textContent.trim() === "Climb");
+
+    function fetchDataAndUpdateForm(url, func) {
+        fetch(url)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+
+                if (!data || Object.keys(data).length === 0) {
+                    return;
+                }
+                func(data);
+            })
+            .catch(function(error) {
+                console.error("Error fetching data:", error);
+            });
+    }
+
+    function updateOpinionForm(data) {
+        // Update grade and comment; both could be null (TODO: comment QA)
+        ["grade", "opinion_comment"].forEach(function(field) {
+            if (data[field])
+                document.getElementById(field).value = data[field];
+        });
+
+        // Update rating and landing slider values and their labels
+        ["rating", "landing"].forEach(function(field) {
+            document.getElementById(field).value = data[field];
+            document.getElementById(field + "-output").value = data[field];
+        });
+
+        // Update cruxes
+        var cruxesList = document.getElementById("cruxes");
+        var checkboxes = cruxesList.querySelectorAll("input[type='checkbox']");
+        checkboxes.forEach(function(checkbox) {
+            var label = checkbox.nextElementSibling;
+            var cruxName = label ? label.textContent.trim() : "";
+            checkbox.checked = data.cruxes.includes(cruxName);
+        });
+    }
+
+    function updateClimbForm(data) {
+        ["n_attempts", "climb_comment", "climb_link"].forEach(function(field) {
+            if (data[field])
+                document.getElementById(field).value = data[field];
+        });
+
+        // Update the checkboxes for "sent" and "flashed"
+        ["sent", "flashed"].forEach(function(field) {
+            document.getElementById(field).checked = data[field];
+        });
+    }
+
+    // Event listeners to update forms when route name is changed
+    routeNameInput.addEventListener("change", function() {
+        let routeName = this.value;
+        let routeExists = Array.from(existingRoutes).some(option => option.value === routeName);
+        if (!routeExists)
+            return; 
+
+        let routeNameEncoded = encodeURIComponent(routeName)
+        if (opinionFormExists)
+            fetchDataAndUpdateForm("/get_opinion_from_route_name/" + routeNameEncoded, updateOpinionForm);
+        if (climbFormExists)
+            fetchDataAndUpdateForm("/get_climb_from_route_name/" + routeNameEncoded, updateClimbForm);
+    });
+});
+</script>
+
 {% endmacro %}
