@@ -197,7 +197,8 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
             db.session.commit()
 
             climb = climb_form.get_object(route)
-            climb.videos.append(video_obj)
+            if video_obj not in climb.videos:
+                climb.videos.append(video_obj)
             db.session.add(climb)
             db.session.commit()
 
