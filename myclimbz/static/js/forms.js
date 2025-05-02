@@ -127,8 +127,10 @@ function resetForm(formTitle) {
 			let fetchedAttempts = parseInt(matches[0], 10);
 			let nAttemptsField = formContainer.querySelector("#n_attempts");
 			if (nAttemptsField)
-				nAttemptsField.value =
-					parseInt(nAttemptsField.value, 10) - fetchedAttempts;
+				nAttemptsField.value = Math.max(
+					1,
+					nAttemptsField.value - fetchedAttempts
+				);
 		}
 		nAttemptsDbInfo.remove();
 	}
@@ -138,8 +140,8 @@ function resetForm(formTitle) {
 		"input[type=text], input[type=number], input[type=checkbox], input[type=range], select, textarea"
 	);
 	fields.forEach(function (field) {
-		// Skip n_attempts, which was updated above
-		if (field.id === "n_attempts") return;
+		// Skip n_attempts, which was updated above or "is_project", as it toggles field displays
+		if (field.id === "n_attempts" || field.id == "is_project") return;
 
 		switch (field.type) {
 			// Reset range sliders to 3 and update their output

@@ -9,11 +9,11 @@ RouteForm object.
 
 from __future__ import annotations
 
-from flask import session as flask_session, abort
+from flask import session as flask_session
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, BooleanField, StringField
-from wtforms.validators import Optional
+from wtforms.validators import Optional, DataRequired, NumberRange
 from wtforms.widgets import TextArea
 
 from myclimbz.models import Route, Climb, Session, Sector
@@ -31,7 +31,14 @@ FIELDS = [
 class ClimbForm(FlaskForm):
     # the route is determined in the route form
     is_project = BooleanField("Project (not tried yet)", validators=[Optional()])
-    n_attempts = IntegerField("Number of attempts", validators=[Optional()])
+    n_attempts = IntegerField(
+        "Number of attempts",
+        validators=[
+            DataRequired(message="Number of attempts is required"),
+            NumberRange(min=1, message="Must be a positive number"),
+        ],
+        default=1,
+    )
     climb_comment = StringField("Comment", validators=[Optional()], widget=TextArea())
     climb_link = StringField("Link", validators=[Optional()])
     sent = BooleanField("Sent", validators=[Optional()])
@@ -52,6 +59,7 @@ class ClimbForm(FlaskForm):
 
     def validate(self, route: Route, session_id: int = None) -> bool:
         """
+        - The number of attempts cannot be empty and must be non-negative.
         - If the climb has already been tried before, `flashed` must be false.
         """
         is_valid = True
