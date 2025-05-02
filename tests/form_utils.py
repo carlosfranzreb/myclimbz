@@ -170,8 +170,16 @@ def fill_form(
         field.send_keys(value)
         driver.find_element(By.TAG_NAME, "h2").click()
 
-    # submit the form and check if it was accepted
-    driver.find_element(By.XPATH, "//input[@type='submit']").click()
+    # submit the form
+    element = driver.find_element(By.XPATH, "//input[@type='submit']")
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(element))
+    try:
+        element.click()
+    except Exception:
+        driver.execute_script("arguments[0].scrollIntoView(true);", element)
+        driver.execute_script("arguments[0].click();", element)
+
+    # check if it the outcome matches the expectation
     if expect_success:
         WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
     else:
