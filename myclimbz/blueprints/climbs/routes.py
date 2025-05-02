@@ -57,18 +57,18 @@ def add_climb() -> str:
 
         # add as project or create climb
         climber = Climber.query.get(current_user.id)
-        if is_project_search or climb_form.is_project.data:
+        if (
+            (is_project_search or climb_form.is_project.data)
+            and not route.tried
+            and not route.is_project
+        ):
             climber.projects.append(route)
         else:
             climb = climb_form.get_object(route)
             db.session.add(climb)
         db.session.commit()
 
-        # if the user wants to add an opinion, redirect to the opinion form
-        if route_form.add_opinion.data is True:
-            return redirect(f"/get_opinion_form/{climber.id}/{route.id}")
-        else:
-            return redirect(flask_session.pop("call_from_url"))
+        return redirect(flask_session.pop("call_from_url"))
 
     # GET: the climber wants to add a route (+ climb if not in a project search)
     route_form.title = "Route"
