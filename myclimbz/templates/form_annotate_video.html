@@ -7,8 +7,6 @@
     <h2 class="mt-2">{{ title }}</h2>
     <p>Use keys A and D to navigate frames, or click on the left or right of the image.</p>
 
-    <script>console.log("{{frames_fname_prefix}}");</script>
-
     <div class="text-center mb-3">
         <img 
             id="frame-image"
@@ -113,6 +111,17 @@
     const sectionsContainer = document.getElementById('sections-container');
     const sectionTemplate = document.getElementById('section-template');
 
+    // Add info text about the number of attempts that are annotated
+    let annotatedInfoParagraph = document.createElement("p");
+    annotatedInfoParagraph.id = "n_attempts-annotated-info";
+    annotatedInfoParagraph.className = "text-muted";
+    annotatedInfoParagraph.innerHTML = "No. of attempts annotated: <span id='n_attempts-annotated-span'>1</span>";
+
+    let nAttemptsField = document.getElementById("n_attempts");
+    nAttemptsField.value = 1;
+    nAttemptsField.parentElement.appendChild(annotatedInfoParagraph);
+    let annotatedAttemptsSpan = document.getElementById("n_attempts-annotated-span");
+
     function updateFrameDisplay() {
         frameImage.src = "{{ url_for('videos.serve_file', filetype='frames', filename='') }}" + frames_fname_prefix + currentFrameIndex + ".jpg";
         currentFrameNumSpan.textContent = currentFrameIndex + 1;
@@ -178,6 +187,10 @@
             newRemoveBtn.disabled = false;
             newRemoveBtn.addEventListener('click', handleRemoveClick);
         }
+
+        // Update the number of attempts and the info text
+        nAttemptsField.value++;
+        annotatedAttemptsSpan.textContent = (parseInt(annotatedAttemptsSpan.textContent, 10) + 1).toString();
     });
 
     // --- Event Listener: Remove Section ---
@@ -185,6 +198,10 @@
         const sectionToRemove = event.target.closest('.section-entry');
         if (sectionToRemove)
             sectionToRemove.remove();
+        
+        // Update the number of attempts and the info text
+        nAttemptsField.value--;
+        annotatedAttemptsSpan.textContent = (parseInt(annotatedAttemptsSpan.textContent, 10) - 1).toString();
     }
 
     // Add initial remove listeners

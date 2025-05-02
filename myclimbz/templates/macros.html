@@ -191,14 +191,29 @@ document.addEventListener("DOMContentLoaded", function() {
         if (fetchedMsg && fetchedMsg.tagName === 'P' && fetchedMsg.classList.contains('text-muted') && fetchedMsg.textContent.includes("fetched from the database")) {
             fetchedMsg.remove();
         }
+
+        // Update the number of attempts and remove the message if needed
         let nAttemptsDbInfo = formContainer.querySelector("#n_attempts-db-info");
         if (nAttemptsDbInfo) {
+            let infoText = nAttemptsDbInfo.textContent;
+            let matches = infoText.match(/\d+/);
+            if (matches) {
+                let fetchedAttempts = parseInt(matches[0], 10);
+                let nAttemptsField = formContainer.querySelector("#n_attempts");
+                if (nAttemptsField)
+                    nAttemptsField.value = parseInt(nAttemptsField.value, 10) - fetchedAttempts;
+            }
             nAttemptsDbInfo.remove();
         }
 
         // Reset form fields
         let fields = formContainer.querySelectorAll('input[type=text], input[type=number], input[type=checkbox], input[type=range], select, textarea');
         fields.forEach(function(field) {
+
+            // Skip n_attempts, which was updated above
+            if (field.id === "n_attempts")
+                return;
+
             switch (field.type) {
 
                 // Reset range sliders to 3 and update their output
