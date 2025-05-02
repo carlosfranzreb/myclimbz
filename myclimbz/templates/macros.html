@@ -179,17 +179,67 @@ document.addEventListener("DOMContentLoaded", function() {
     let opinionFormExists = Array.from(document.getElementsByTagName("h4")).some(el => el.textContent.trim() === "Opinion");
     let climbFormExists = Array.from(document.getElementsByTagName("h4")).some(el => el.textContent.trim() === "Climb");
 
-    function fetchDataAndUpdateForm(url, func) {
+    function resetForm(formTitle) {
+        // Find the H4 element with the matching title to get the form container
+        let titleElement = Array.from(document.getElementsByTagName("h4")).find(function(el) {
+            return el.textContent.trim() === formTitle;
+        });
+        let formContainer = titleElement.parentElement;
+
+        // Remove the 'fetched from database' messages
+        let fetchedMsg = titleElement.nextElementSibling;
+        if (fetchedMsg && fetchedMsg.tagName === 'P' && fetchedMsg.classList.contains('text-muted') && fetchedMsg.textContent.includes("fetched from the database")) {
+            fetchedMsg.remove();
+        }
+        let nAttemptsDbInfo = formContainer.querySelector("#n_attempts-db-info");
+        if (nAttemptsDbInfo) {
+            nAttemptsDbInfo.remove();
+        }
+
+        // Reset form fields
+        let fields = formContainer.querySelectorAll('input[type=text], input[type=number], input[type=checkbox], input[type=range], select, textarea');
+        fields.forEach(function(field) {
+            switch (field.type) {
+
+                // Reset range sliders to 3 and update their output
+                case 'range':
+                    field.value = '3';
+                    let output = document.getElementById(field.id + "-output"); 
+                    output.value = '3';
+                    break;
+
+                // Uncheck checkboxes
+                case 'checkbox':
+                    field.checked = false;
+                    break;
+                
+                // Clear text-based inputs, textareas and number-based inputs
+                case 'textarea':
+                case 'text':
+                case 'number':
+                    field.value = '';
+                    break;
+                
+                // Select first option of select field (should be an empty string)
+                case 'select-one':
+                    field.selectedIndex = 0;
+                    break;
+
+            }
+        }); 
+    }
+
+    function fetchDataAndUpdateForm(url, func, formTitle) {
         fetch(url)
             .then(function(response) {
                 return response.json();
             })
             .then(function(data) {
 
-                if (!data || Object.keys(data).length === 0) {
-                    return;
-                }
-                func(data);
+                if (!data || Object.keys(data).length === 0)
+                    return resetForm(formTitle);
+                else
+                    return func(data);
             })
             .catch(function(error) {
                 console.error("Error fetching data:", error);
@@ -274,14 +324,16 @@ document.addEventListener("DOMContentLoaded", function() {
     routeNameInput.addEventListener("change", function() {
         let routeName = this.value;
         let routeExists = Array.from(existingRoutes).some(option => option.value === routeName);
-        if (!routeExists)
-            return; 
+        if (!routeExists) {
+            resetForm("Climb");
+            resetForm("Opinion"); 
+        }
 
         let routeNameEncoded = encodeURIComponent(routeName)
         if (opinionFormExists)
-            fetchDataAndUpdateForm("/get_opinion_from_route_name/" + routeNameEncoded, updateOpinionForm);
+            fetchDataAndUpdateForm("/get_opinion_from_route_name/" + routeNameEncoded, updateOpinionForm, "Opinion");
         if (climbFormExists)
-            fetchDataAndUpdateForm("/get_climb_from_route_name/" + routeNameEncoded, updateClimbForm);
+            fetchDataAndUpdateForm("/get_climb_from_route_name/" + routeNameEncoded, updateClimbForm, "Climb");
     });
 });
 </script>
