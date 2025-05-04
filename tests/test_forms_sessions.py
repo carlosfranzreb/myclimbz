@@ -1,9 +1,5 @@
 """
-Tests the forms used to start a session and add climbs to it, while using either existing
-areas and routes or creating new ones.
-
-Running the tests together provides more thorough testing, because previous climbs affect
-how the form behaves.
+Tests the forms used to create sessions, in either existing areas or creating new ones.
 """
 
 from time import sleep

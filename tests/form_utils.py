@@ -15,6 +15,7 @@ from selenium.common.exceptions import NoSuchElementException
 from sqlalchemy import text
 
 from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID, SLEEP_TIME, IS_CI
+from selenium.webdriver.support.ui import Select
 
 
 EXISTING_OBJECTS = {
@@ -145,6 +146,10 @@ def fill_form(
     """
     Fill the form with the given data and submit it.
 
+    - Inputs of type checkbox expect a boolean value: if true, the checkbox is clicked,
+    regardles of its state. This script also tries to click the label first, and tries
+    clicking the actual checkbox if there is no label.
+
     Args:
         driver: The browser driver.
         button_id: The ID of the button to open the form.
@@ -163,21 +168,38 @@ def fill_form(
 
     # open and fill the form
     driver.find_element(By.ID, button_id).click()
+    title = driver.find_element(By.TAG_NAME, "h2")
     WebDriverWait(driver, 30).until_not(EC.title_is(HOME_TITLE))
     for field_id, value in field_data.items():
         field = driver.find_element(By.ID, field_id)
-        field.clear()
-        field.send_keys(value)
-        driver.find_element(By.TAG_NAME, "h2").click()
+        field_type = field.get_attribute("type")
+        view_element(driver, field)
+
+        if field_type == "checkbox" and value:
+            try:
+                label = driver.find_element(By.CSS_SELECTOR, f"label[for='{field_id}']")
+                driver.execute_script("arguments[0].click();", label)
+            except NoSuchElementException:
+                driver.execute_script("arguments[0].click();", field)
+        elif field_type == "range":
+            driver.execute_script(
+                "arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input'))",
+                field,
+                value,
+            )
+        elif field_type == "select-one":
+            select_elem = Select(field)
+            select_elem.select_by_value(value)
+        else:
+            field.clear()
+            field.send_keys(value)
+            view_element(driver, title)
+            driver.execute_script("arguments[0].click();", title)
 
     # submit the form
     element = driver.find_element(By.XPATH, "//input[@type='submit']")
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(element))
-    try:
-        element.click()
-    except Exception:
-        driver.execute_script("arguments[0].scrollIntoView(true);", element)
-        driver.execute_script("arguments[0].click();", element)
+    view_element(driver, element)
+    driver.execute_script("arguments[0].click();", element)
 
     # check if it the outcome matches the expectation
     if expect_success:
@@ -186,3 +208,12 @@ def fill_form(
         WebDriverWait(driver, 10).until_not(EC.title_is(HOME_TITLE))
 
     return driver.current_url in [HOME_URL, HOME_URL + "/"]
+
+
+def view_element(driver: webdriver.Chrome, element):
+    """Scrolls the element into view."""
+    driver.execute_script("arguments[0].scrollIntoView(true);", element)
+    WebDriverWait(driver, 10).until(
+        lambda d: d.execute_script("return document.readyState") == "complete"
+    )
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(element))

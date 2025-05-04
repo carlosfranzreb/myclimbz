@@ -9,6 +9,7 @@ from wtforms import (
     SelectMultipleField,
     widgets,
     IntegerRangeField,
+    BooleanField,
 )
 from wtforms.validators import NumberRange, Optional
 from wtforms.widgets import TextArea
@@ -18,6 +19,7 @@ from myclimbz.models import Grade, Crux, Opinion
 
 class OpinionForm(FlaskForm):
     # the route is determined in the route form
+    skip_opinion = BooleanField("Don't add an opinion", validators=[Optional()])
     grade = SelectField("Grade", validators=[Optional()])
     rating = IntegerRangeField(
         "Rating",
@@ -107,7 +109,8 @@ class OpinionForm(FlaskForm):
     def _add_fields_to_object(self, opinion: Opinion) -> Opinion:
         opinion.grade = Grade.query.get(int(self.grade.data))
         opinion.cruxes = [Crux.query.get(crux_id) for crux_id in self.cruxes.data]
-        opinion.comment = self.opinion_comment.data
+        comment = self.opinion_comment.data
+        opinion.comment = comment if len(comment) > 0 else None
 
         for field in ["landing", "rating"]:
             setattr(opinion, field, getattr(self, field).data)

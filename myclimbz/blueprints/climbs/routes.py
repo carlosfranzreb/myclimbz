@@ -51,7 +51,7 @@ def add_climb() -> str:
             if obj.id is None:
                 db.session.add(obj)
         opinion = opinion_form.get_object(current_user.id, route.id)
-        if opinion.id is None:
+        if opinion.id is None and not opinion_form.skip_opinion.data:
             db.session.add(opinion)
         db.session.commit()
 
