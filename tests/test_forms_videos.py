@@ -10,10 +10,6 @@ If the user uploads multiple videos, the user must first sort them before going 
 annotation page.
 """
 
-from typing import Generator
-from time import sleep
-from datetime import datetime
-
 import pytest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -22,14 +18,25 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from sqlalchemy import text
 
-from .conftest import HOME_TITLE, HOME_URL, CLIMBER_ID, SLEEP_TIME, IS_CI
-from .test_forms import fill_form, started_session_id
+from .conftest import (
+    HOME_TITLE,
+    HOME_URL,
+    CLIMBER_ID,
+    SLEEP_TIME,
+    IS_CI,
+    NEW_OBJECTS,
+    EXISTING_OBJECTS,
+)
+from .form_utils import get_existing_route, fill_form, started_session_id
 import subprocess
 
 
 def test_add_video(driver, db_session, started_session_id) -> None:
     """
     Tests that the user can upload and annotate a single video.
+    TODO: the error is that (video 1/1) is still appended to the title. It shouldn't
+    as it is deleted with delete_video_info before redirecting the user to the home
+    page (see the end of videos.annotate_video)
     """
     # go to the home page
     if driver.current_url not in [HOME_URL, HOME_URL + "/"]:
@@ -49,7 +56,7 @@ def test_add_video(driver, db_session, started_session_id) -> None:
         "-f",
         "lavfi",
         "-i",
-        "color=c=black:s=160x120:d=2",
+        "color=c=black:s=640x480:d=2",
         "-pix_fmt",
         "yuv420p",
         video_path,
@@ -71,13 +78,19 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     )
     assert total_frames_element.text.strip() == "5"
 
-    # mark a climbing section from 1 to 5 and submit
-    driver.find_element(By.ID, "sections-0-start").send_keys("1")
-    driver.find_element(By.ID, "sections-0-end").send_keys("5")
-    driver.find_element(By.XPATH, "//input[@type='submit']").click()
-
-    # check that the user is sent to the "Add climb" form
-    WebDriverWait(driver, 30).until(lambda d: d.current_url == HOME_URL + "/add_climb")
+    # fill the form with a climbing section from 1 to 5 and submit
+    route_name, route_id = get_existing_route(db_session, EXISTING_OBJECTS["sector"])
+    form_accepted = fill_form(
+        driver,
+        "add_climb",
+        {
+            "name": route_name,
+            "sections-0-start": 1,
+            "sections-0-end": 5,
+            "skip_opinion": True,
+        },
+    )
+    assert form_accepted
 
     # check that the video was added to the database
     for table in ["video", "video_attempt"]:
@@ -86,10 +99,23 @@ def test_add_video(driver, db_session, started_session_id) -> None:
         assert n_rows == 1, table
 
     video_id = db_session.execute(text("SELECT id FROM video")).fetchall()[0][0]
-
     attempt = db_session.execute(
         text("SELECT video_id, start_frame, end_frame FROM video_attempt")
     ).fetchall()[0]
     assert attempt[0] == video_id
     assert attempt[1] == 1
     assert attempt[2] == 5
+
+    # check that the climb was added with one attempt
+    sql_query = text(
+        f"""
+        SELECT n_attempts,sent FROM climb
+        WHERE session_id = {started_session_id}
+        AND route_id = {route_id};
+        """
+    )
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 1
+    n_attempts, sent = results[0]
+    assert n_attempts == 1
+    assert not sent

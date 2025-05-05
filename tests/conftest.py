@@ -1,6 +1,7 @@
 import os
 from typing import Generator
 import sys
+from datetime import datetime
 
 import pytest
 from selenium import webdriver
@@ -15,6 +16,17 @@ HOME_URL = "http://127.0.0.1:5000"
 CLIMBER_ID = 1
 SLEEP_TIME = 2
 IS_CI = os.environ.get("CI", False)
+EXISTING_OBJECTS = {
+    "area": "A1",
+    "sector": "A1 S1",
+    "session_date": datetime(2023, 1, 13),
+}
+NEW_OBJECTS = {
+    "area": "A3",
+    "sector": "A3 S1",
+    "route": "Terranova 2",
+    "session_date": datetime(2023, 1, 2),
+}
 
 
 @pytest.fixture(scope="session")

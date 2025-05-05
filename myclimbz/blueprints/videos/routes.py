@@ -149,6 +149,7 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
     area_id = Session.query.get(flask_session["session_id"]).area_id
     route_form = RouteForm.create_empty(area_id)
     climb_form = ClimbForm.create_empty()
+    del climb_form.is_project
     opinion_form = OpinionForm.create_empty()
 
     # POST: user submitted forms
