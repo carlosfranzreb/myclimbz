@@ -43,7 +43,7 @@ def get_existing_route(db_session, sector: str) -> tuple[str, int]:
         """
     )
     results = db_session.execute(sql_query).fetchall()
-    return results[0][0], results[0][1]
+    return results[0]
 
 
 @pytest.fixture(scope="module")
@@ -193,8 +193,10 @@ def fill_form(
         else:
             field.clear()
             field.send_keys(value)
-            view_element(driver, title)
-            driver.execute_script("arguments[0].click();", title)
+
+        # trigger the field's onchange attribute if it has one
+        if field.get_attribute("onchange"):
+            driver.execute_script("arguments[0].onchange();", field)
 
     # submit the form
     element = driver.find_element(By.XPATH, "//input[@type='submit']")

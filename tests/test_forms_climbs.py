@@ -11,14 +11,8 @@ from datetime import datetime
 
 from sqlalchemy import text
 
-from .conftest import CLIMBER_ID, SLEEP_TIME
-from .form_utils import (
-    get_existing_route,
-    start_session,
-    stop_session,
-    fill_form,
-    started_session_id,
-)
+from .conftest import CLIMBER_ID
+from .form_utils import get_existing_route, fill_form, started_session_id
 
 
 EXISTING_OBJECTS = {
@@ -39,7 +33,7 @@ def test_add_climb_of_existing_route(driver, db_session, started_session_id) -> 
     Add a climb of an existing route to a session. Only the route name is required to
     add a climb.
     - The sector is inferred from the route name, as it already exists in the database.
-    - The number of attempts is 1 by default.
+    - The number of attempts is 1 by default, so the climb is created.
     - The opinion should be added with grade and comment null and the sliders in their
         default position because the user did not click on "skip opinion".
     """
@@ -253,7 +247,7 @@ def test_add_climb_of_new_route_and_existing_sector(
         )
     ).fetchall()
     assert len(results) == 1
-    assert results[0][0] == 2
+    assert results[0][0] == 23  # ID of crux "Coordination"
 
     # check that the number of rows in the tables are correct
     for table in tables:

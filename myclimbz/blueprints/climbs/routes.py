@@ -50,19 +50,19 @@ def add_climb() -> str:
         for obj in [sector, route]:
             if obj.id is None:
                 db.session.add(obj)
-        opinion = opinion_form.get_object(current_user.id, route.id)
-        if opinion.id is None and not opinion_form.skip_opinion.data:
-            db.session.add(opinion)
-        db.session.commit()
+                db.session.commit()
+
+        if not opinion_form.skip_opinion.data:
+            opinion = opinion_form.get_object(current_user.id, route.id)
+            if opinion.id is None:
+                db.session.add(opinion)
+                db.session.commit()
 
         # add as project or create climb
         climber = Climber.query.get(current_user.id)
-        if (
-            (is_project_search or climb_form.is_project.data)
-            and not route.tried
-            and not route.is_project
-        ):
-            climber.projects.append(route)
+        if is_project_search or climb_form.is_project.data:
+            if not route.tried and not route.is_project:
+                climber.projects.append(route)
         else:
             climb = climb_form.get_object(route)
             db.session.add(climb)
