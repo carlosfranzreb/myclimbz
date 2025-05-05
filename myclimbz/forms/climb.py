@@ -134,5 +134,8 @@ class ClimbForm(FlaskForm):
     def add_form_data_to_object(self, obj: Climb) -> Climb:
         """Add the form data to the object."""
         for field in FIELDS:
-            setattr(obj, field.replace("climb_", ""), getattr(self, field).data)
+            form_data = getattr(self, field).data
+            if isinstance(form_data, str) and len(form_data) == 0:
+                form_data = None
+            setattr(obj, field.replace("climb_", ""), form_data)
         return obj
