@@ -161,15 +161,15 @@ def fill_form(
         bool: True if the form was accepted.
     """
 
-    # check that we are in the home page
-    if driver.current_url not in [HOME_URL, HOME_URL + "/"]:
-        driver.get(HOME_URL)
-        WebDriverWait(driver, 30).until(EC.title_is(HOME_TITLE))
+    # check that we are in the home page and click the button
+    if button_id:
+        if driver.current_url not in [HOME_URL, HOME_URL + "/"]:
+            driver.get(HOME_URL)
+            WebDriverWait(driver, 30).until(EC.title_is(HOME_TITLE))
+        driver.find_element(By.ID, button_id).click()
+        WebDriverWait(driver, 30).until_not(EC.title_is(HOME_TITLE))
 
-    # open and fill the form
-    driver.find_element(By.ID, button_id).click()
-    title = driver.find_element(By.TAG_NAME, "h2")
-    WebDriverWait(driver, 30).until_not(EC.title_is(HOME_TITLE))
+    # fill the form
     for field_id, value in field_data.items():
         field = driver.find_element(By.ID, field_id)
         field_type = field.get_attribute("type")
@@ -203,7 +203,7 @@ def fill_form(
     view_element(driver, element)
     driver.execute_script("arguments[0].click();", element)
 
-    # check if it the outcome matches the expectation
+    # check if the outcome matches the expectation
     if expect_success:
         WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
     else:

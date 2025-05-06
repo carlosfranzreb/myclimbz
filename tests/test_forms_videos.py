@@ -10,23 +10,12 @@ If the user uploads multiple videos, the user must first sort them before going 
 annotation page.
 """
 
-import pytest
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
 from sqlalchemy import text
 
-from .conftest import (
-    HOME_TITLE,
-    HOME_URL,
-    CLIMBER_ID,
-    SLEEP_TIME,
-    IS_CI,
-    NEW_OBJECTS,
-    EXISTING_OBJECTS,
-)
+from .conftest import HOME_TITLE, HOME_URL, EXISTING_OBJECTS
 from .form_utils import get_existing_route, fill_form, started_session_id
 import subprocess
 
@@ -34,7 +23,6 @@ import subprocess
 def test_add_video(driver, db_session, started_session_id) -> None:
     """
     Tests that the user can upload and annotate a single video.
-    TODO: the error is that (video 1/1) is still appended to the title. It shouldn't
     as it is deleted with delete_video_info before redirecting the user to the home
     page (see the end of videos.annotate_video)
     """
@@ -82,7 +70,7 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     route_name, route_id = get_existing_route(db_session, EXISTING_OBJECTS["sector"])
     form_accepted = fill_form(
         driver,
-        "add_climb",
+        None,
         {
             "name": route_name,
             "sections-0-start": 1,
