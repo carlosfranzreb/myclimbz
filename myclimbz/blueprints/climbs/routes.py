@@ -29,13 +29,9 @@ def add_climb() -> str:
 
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
-        flask_session["all_forms_valid"] = (
-            not climb_form.validate_from_name(
-                route_form.name.data, route_form.sector.data
-            )
-            if not is_project_search
-            else False
-        )
+        flask_session["all_forms_valid"] = True
+        if not is_project_search:
+            climb_form.validate_from_name(route_form.name.data, route_form.sector.data)
 
         for form in [route_form, opinion_form]:
             flask_session["all_forms_valid"] &= form.validate()

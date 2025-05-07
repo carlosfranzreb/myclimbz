@@ -33,8 +33,11 @@ def render(*args, **kwargs) -> str:
         abort(500)
 
     # Add a standard error if there aren't any but forms are not valid
-    if not flask_session.pop("all_forms_valid", True) and not flask_session["error"]:
-        flask_session["error"] = "An error occurred. Fix it and resubmit."
+    if not flask_session.pop("all_forms_valid", True):
+        if "error" in flask_session and flask_session["error"] is not None:
+            kwargs["error"] = flask_session.pop("error")
+        else:
+            flask_session["error"] = "An error occurred. Fix it and resubmit."
 
     # check if videos are being annotated and show it in the title if yes
     if "video_upload_status" in flask_session:

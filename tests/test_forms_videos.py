@@ -80,7 +80,7 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     )
     assert form_accepted
 
-    # check that the video was added to the database
+    # check that the video and the attempt were added to the database
     for table in ["video", "video_attempt"]:
         query = text(f"SELECT COUNT(*) FROM {table}")
         n_rows = db_session.execute(query).fetchall()[0][0]

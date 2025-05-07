@@ -259,7 +259,7 @@ def test_add_climb_of_new_route_and_existing_sector(
         {
             "name": route,
             "n_attempts": 7,
-            "cruxes-14": True,
+            "cruxes-16": True,
         },
     )
     assert form_accepted
