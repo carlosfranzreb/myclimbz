@@ -44,7 +44,6 @@ def create_app():
     app.config["MAIL_SUPPRESS_SEND"] = False
     mail.init_app(app)
 
-    # TODO: this envvar is currently displayed in the compose file. Is that ok?
     app.config["VIDEOS_FOLDER"] = os.path.join(os.environ["UPLOAD_FOLDER"], "videos")
     app.config["FRAMES_FOLDER"] = os.path.join(os.environ["UPLOAD_FOLDER"], "frames")
     os.makedirs(app.config["VIDEOS_FOLDER"], exist_ok=True)

@@ -5,7 +5,8 @@
     <h2 class="mt-2">{{ title }}</h2>
     <p>Drag and drop the videos below to sort them chronologically (earliest at the top).</p>
 
-    <!-- TODO: allow the user to change the size of the videos -->
+    {# TODO: allow the user to change the size of the videos #}
+    {# TODO: use frames instead of videos for faster loading #}
     <div id="sortable-videos" class="list-group mb-3 mx-5">
         {% for video in videos %}
         <div class="list-group-item list-group-item-action d-flex justify-content-center" data-fname="{{ video }}">
