@@ -1,4 +1,6 @@
+import os
 from datetime import datetime
+
 from sqlalchemy import event, UniqueConstraint
 
 from myclimbz import db
@@ -17,6 +19,19 @@ class Session(db.Model):
     climber_id = db.Column(db.Integer, db.ForeignKey("climber.id"))
 
     UniqueConstraint(date, area_id, climber_id, name="unique_session")
+
+    @property
+    def climb_videos(self) -> list[dict[str]]:
+        """
+        Returns this session's videos, as expected by the `video_manager` macro.
+        """
+        out = list()
+        for climb in self.climbs:
+            for video_info in climb.climb_videos:
+                video_info["route_name"] = climb.route.name
+                out.append(video_info)
+
+        return out
 
 
 @event.listens_for(Sector, "after_delete")

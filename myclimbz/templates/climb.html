@@ -43,6 +43,10 @@
     }) }}
 </div>
 
+{% if climb.climb_videos|list|length > 0 %}
+{{ macros.video_manager(climb.climb_videos, "Videos") }}
+{% endif %}
+
 {% if climb.session.climber_id == user_id %}
 <div class="container px-0 px-md-5 py-0 py-md-4">
     <h2>Other Actions</h2>
