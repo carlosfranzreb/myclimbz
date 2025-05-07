@@ -29,12 +29,12 @@ NEW_OBJECTS = {
 }
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def db_session() -> Session:
     return Session(create_engine("sqlite:///instance/test_100.db"))
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def driver() -> Generator[webdriver.Chrome, None, None]:
     """
     If env=dev:

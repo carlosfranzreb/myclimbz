@@ -55,10 +55,6 @@ def test_create_session_on_existing_area(db_session, started_session_id) -> None
     Start a session on an existing area.
     """
 
-    # get the current number of areas in the database
-    n_areas_query = text("SELECT COUNT(*) FROM area")
-    n_areas_before = db_session.execute(n_areas_query).fetchall()[0][0]
-
     # check that the session was created
     sql_query = text(
         f"""
@@ -72,8 +68,10 @@ def test_create_session_on_existing_area(db_session, started_session_id) -> None
     assert len(results) == 1
 
     # check that the number of areas in the database did not change
-    n_areas_after = db_session.execute(n_areas_query).fetchall()[0][0]
-    assert n_areas_after == n_areas_before
+    n_areas_after = db_session.execute(text("SELECT COUNT(*) FROM area")).fetchall()[0][
+        0
+    ]
+    assert n_areas_after == 2
 
 
 def test_create_session_on_new_area(driver, db_session) -> None:

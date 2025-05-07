@@ -209,7 +209,7 @@ def fill_form(
     else:
         WebDriverWait(driver, 10).until_not(EC.title_is(HOME_TITLE))
 
-    return EC.title_is(HOME_TITLE)
+    return expect_success
 
 
 def view_element(driver: webdriver.Chrome, element):
