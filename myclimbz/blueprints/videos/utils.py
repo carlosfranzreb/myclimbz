@@ -12,7 +12,6 @@ def check_access_to_file(filename: str):
     """
     Check that the user is the owner of the videos, and that the session of the videos
     is currently open.
-    TODO: this may belong in __init__.py, where all access rights are handled.
 
     Args:
         filename as a string. It is expected to define the user id and the session id
