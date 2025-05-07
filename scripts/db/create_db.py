@@ -61,14 +61,14 @@ ROCKS = [
 
 CRUXES = [
     # Hands
-    "Crimp",
-    "Drag",
+    "Edge - incut",  # previously crimp
+    "Edge - slopey",  # previously drag
     "Pinch",
     "Pocket",
     "Sloper",
     # Legs
     "Drop knee",
-    "Feet",
+    "Footholds",  # previously feet
     "Heel hook",
     "Knee bar",
     "Toe hook",
@@ -85,11 +85,15 @@ CRUXES = [
     "Power",
     "Scary",
     "Tension",
-    # new in 1.8.0
+    # new in 1.8
     "Balance",
     "Coordination",
     "Laybacking",
     "Rockover",
+    # new in 2.0
+    "Edge - flat",
+    "Hip mobility",
+    "Smear",
 ]
 
 GRADES = [
