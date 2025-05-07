@@ -65,7 +65,7 @@ class RouteForm(FlaskForm):
     link = URLField("Link", validators=[Optional()])
 
     @classmethod
-    def create_empty(cls, area_id: int) -> RouteForm:
+    def create_empty(cls, area_id: int, remove_title: bool = False) -> RouteForm:
         """
         Create the form and add choices to the select fields.
 
@@ -79,6 +79,8 @@ class RouteForm(FlaskForm):
         form.name.toggle_ids = (
             "height,inclination,sit_start,latitude,longitude,comment,link"
         )
+        if not remove_title:
+            form.title = "Route"
 
         # get all sectors and routes of this area
         sectors = Sector.query.filter_by(area_id=area_id).order_by(Sector.name).all()
@@ -101,11 +103,11 @@ class RouteForm(FlaskForm):
         return form
 
     @classmethod
-    def create_from_obj(cls, obj: Route) -> RouteForm:
+    def create_from_obj(cls, obj: Route, remove_title: bool = False) -> RouteForm:
         """
         Create the form with data from the route object.
         """
-        form = cls.create_empty(obj.sector.area_id)
+        form = cls.create_empty(obj.sector.area_id, remove_title)
         form.height.default = obj.height
         form.inclination.default = obj.inclination
         delattr(form.name, "toggle_ids")

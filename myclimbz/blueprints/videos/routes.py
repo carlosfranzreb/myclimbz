@@ -218,9 +218,6 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
                 return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user is asked to annotate a video
-    route_form.title = "Route"  # TODO: should I define the titles somewhere else?
-    climb_form.title = "Climb"
-    opinion_form.title = "Opinion"
     return render(
         "form_annotate_video.html",
         title=title,

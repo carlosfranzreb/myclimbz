@@ -45,14 +45,16 @@ class ClimbForm(FlaskForm):
     flashed = BooleanField("Flashed", validators=[Optional()])
 
     @classmethod
-    def create_empty(cls) -> ClimbForm:
+    def create_empty(cls, remove_title: bool = False) -> ClimbForm:
         form = cls()
         form.is_project.toggle_ids = ",".join(FIELDS)
+        if not remove_title:
+            form.title = "Climb"
         return form
 
     @classmethod
-    def create_from_object(cls, obj: Climb) -> ClimbForm:
-        form = cls.create_empty()
+    def create_from_object(cls, obj: Climb, remove_title: bool = False) -> ClimbForm:
+        form = cls.create_empty(remove_title)
         for field in FIELDS:
             getattr(form, field).data = getattr(obj, field.replace("climb_", ""))
         return form

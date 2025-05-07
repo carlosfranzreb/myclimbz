@@ -47,7 +47,7 @@ class OpinionForm(FlaskForm):
     submit = SubmitField("Submit")
 
     @classmethod
-    def create_empty(cls) -> OpinionForm:
+    def create_empty(cls, remove_title: bool = False) -> OpinionForm:
         """
         Create the form and add choices to the select fields.
         """
@@ -62,13 +62,15 @@ class OpinionForm(FlaskForm):
 
         form.rating.unit = "/ 5"
         form.landing.unit = "/ 5"
+        if not remove_title:
+            form.title = "Opinion"
 
         return form
 
     @classmethod
-    def create_from_obj(cls, obj: Opinion) -> OpinionForm:
+    def create_from_obj(cls, obj: Opinion, remove_title: bool = False) -> OpinionForm:
         """Create the form with data from the Opinion object."""
-        form = cls.create_empty()
+        form = cls.create_empty(remove_title)
         form.rating.default = obj.rating
         form.landing.default = obj.landing
         form.opinion_comment.data = obj.comment

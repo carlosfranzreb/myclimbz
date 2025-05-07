@@ -45,7 +45,7 @@ def edit_route(route_id: int) -> str:
         return redirect(flask_session.pop("call_from_url"))
 
     # GET: return the edit route page
-    route_form = RouteForm.create_from_obj(route)
+    route_form = RouteForm.create_from_obj(route, remove_title=True)
     return render("form.html", title=title, forms=[route_form])
 
 

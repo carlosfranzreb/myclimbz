@@ -13,7 +13,7 @@ opinions = Blueprint("opinions", __name__)
 def add_opinion(climber_id: int, route_id: int) -> str:
 
     route_name = Route.query.get(route_id).name
-    opinion_form = OpinionForm.create_empty()
+    opinion_form = OpinionForm.create_empty(remove_title=True)
     title = f"Add opinion for {route_name}"
 
     # POST: an opinion form was submitted => create opinion or return error
@@ -47,7 +47,7 @@ def edit_opinion(opinion_id: int) -> str:
         return redirect(flask_session.pop("call_from_url"))
 
     # GET: return the edit opinion page
-    opinion_form = OpinionForm.create_from_obj(opinion)
+    opinion_form = OpinionForm.create_from_obj(opinion, remove_title=True)
     return render("form.html", title=title, forms=[opinion_form])
 
 

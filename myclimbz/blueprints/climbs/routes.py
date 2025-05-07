@@ -71,14 +71,11 @@ def add_climb() -> str:
         return redirect(flask_session.pop("call_from_url"))
 
     # GET: the climber wants to add a route (+ climb if not in a project search)
-    route_form.title = "Route"
     forms = [route_form]
     if not is_project_search:
-        climb_form.title = "Climb"
         forms.append(climb_form)
 
     # the opinion form should appear last
-    opinion_form.title = "Opinion"
     forms.append(opinion_form)
 
     return render("form.html", title=title, forms=forms)
@@ -101,7 +98,7 @@ def edit_climb(climb_id: int) -> str:
         return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit a climb
-    climb_form = ClimbForm.create_from_object(climb)
+    climb_form = ClimbForm.create_from_object(climb, remove_title=True)
     return render("form.html", title=title, forms=[climb_form])
 
 
