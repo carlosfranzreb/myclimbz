@@ -99,6 +99,7 @@ def edit_climb(climb_id: int) -> str:
 
     # GET: the user wants to edit a climb
     climb_form = ClimbForm.create_from_object(climb, remove_title=True)
+    del climb_form.is_project
     return render("form.html", title=title, forms=[climb_form])
 
 
