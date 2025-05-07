@@ -8,8 +8,13 @@ how the form behaves.
 
 from sqlalchemy import text
 
-from .conftest import CLIMBER_ID, NEW_OBJECTS, EXISTING_OBJECTS
-from .form_utils import get_existing_route, fill_form, started_session_id
+from .conftest import (
+    CLIMBER_ID,
+    NEW_OBJECTS,
+    EXISTING_OBJECTS,
+    get_existing_route,
+    fill_form,
+)
 
 
 def test_add_climb_of_existing_route(driver, db_session, started_session_id):
