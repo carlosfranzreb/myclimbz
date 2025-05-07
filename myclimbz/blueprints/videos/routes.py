@@ -49,8 +49,7 @@ def add_videos() -> str:
     # POST: form was submitted => add videos or return error
     if request.method == "POST":
         if not form.validate():
-            if flask_session.get("error", None) is None:
-                flask_session["error"] = "An error occurred. Fix it and resubmit."
+            flask_session["all_forms_valid"] = False
 
         # upload videos
         else:
@@ -76,7 +75,6 @@ def add_videos() -> str:
 def sort_videos() -> str:
     """
     The user can sort the videos chronologically and is then sent to `process_videos`.
-    TODO: display frames instead of videos, and allow user to navigate them.
     """
 
     videos = sorted(flask_session["video_fnames"])
@@ -157,21 +155,17 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
 
         # validate forms
         flask_session["error"] = None
+        flask_session["all_forms_valid"] = True
         for form in [video_form, route_form, opinion_form]:
-            if not form.validate():
-                if not flask_session[
-                    "error"
-                ]:  # TODO: can't this be added automatically somewhere else?
-                    flask_session["error"] = "An error occurred. Fix it and resubmit."
+            flask_session["all_forms_valid"] &= form.validate()
 
         if not climb_form.validate_from_name(
             route_form.name.data, route_form.sector.data
         ):
-            if not flask_session["error"]:
-                flask_session["error"] = "An error occurred. Fix it and resubmit."
+            flask_session["all_forms_valid"] &= climb_form.validate()
 
         # store info if forms are valid
-        if not flask_session["error"]:
+        if flask_session["all_forms_valid"]:
             # store video annotations and trim video
             video_obj = Video(
                 fname=video_fname, fps_video=fps_video, fps_taken=fps_taken

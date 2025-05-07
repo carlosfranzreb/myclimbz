@@ -51,27 +51,27 @@ def add_session() -> str:
     # POST: a session form was submitted => create session or return error
     if request.method == "POST":
         if not session_form.validate():
-            flask_session["error"] = "An error occurred. Fix it and resubmit."
-            return render("form.html", title=title, forms=[session_form])
+            flask_session["all_forms_valid"] = False
 
-        # if new_area, create new area; otherwise, get existing area
-        area = session_form.get_area()
-        if area.id is None:
-            db.session.add(area)
-            db.session.commit()
-
-        # create session if this is not a project search; otherwise save the area
-        if session_form.is_project_search.data:
-            flask_session["session_id"] = "project_search"
-            flask_session["area_id"] = area.id
         else:
-            session = session_form.get_object(area.id)
-            db.session.add(session)
-            db.session.commit()
-            flask_session["session_id"] = session.id
-        return redirect("/")
+            # if new_area, create new area; otherwise, get existing area
+            area = session_form.get_area()
+            if area.id is None:
+                db.session.add(area)
+                db.session.commit()
 
-    # GET: the user wants to start a session
+            # create session if this is not a project search; otherwise save the area
+            if session_form.is_project_search.data:
+                flask_session["session_id"] = "project_search"
+                flask_session["area_id"] = area.id
+            else:
+                session = session_form.get_object(area.id)
+                db.session.add(session)
+                db.session.commit()
+                flask_session["session_id"] = session.id
+
+            return redirect("/")
+
     return render("form.html", title=title, forms=[session_form])
 
 
@@ -84,16 +84,18 @@ def edit_session(session_id: int) -> str:
     if request.method == "POST":
         session_form = SessionForm.create_empty(is_edit=True)
         if not session_form.validate():
-            flask_session["error"] = "An error occurred. Fix it and resubmit."
-            return render("form.html", title=title, forms=[session_form])
+            flask_session["all_forms_valid"] = False
 
-        # edit session with the new data
-        session = session_form.edit_object(session)
-        db.session.commit()
-        return redirect(flask_session.pop("call_from_url"))
+        else:
+            # edit session with the new data
+            session = session_form.edit_object(session)
+            db.session.commit()
+            return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit the session
-    session_form = SessionForm.create_from_object(session)
+    elif request.method == "GET":
+        session_form = SessionForm.create_from_object(session)
+
     return render("form.html", title=title, forms=[session_form])
 
 

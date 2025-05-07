@@ -21,6 +21,8 @@ def render(*args, **kwargs) -> str:
 
     - A title is required.
     - If an error is defined in the session, it is popped and added to the kwargs.
+    - If there is no error but flask_session["all_forms_valid"] is false, a default
+        error message is added.
     - If an open session is defined in the session, it is added to the kwargs.
     - Add the current user's name and ID to the kwargs.
     - Save the URL in the session, unless it starts with "edit_".
@@ -30,6 +32,11 @@ def render(*args, **kwargs) -> str:
     if "title" not in kwargs:
         abort(500)
 
+    # Add a standard error if there aren't any but forms are not valid
+    if not flask_session.pop("all_forms_valid", True) and not flask_session["error"]:
+        flask_session["error"] = "An error occurred. Fix it and resubmit."
+
+    # check if videos are being annotated and show it in the title if yes
     if "video_upload_status" in flask_session:
         video_idx, n_videos = flask_session["video_upload_status"]
         kwargs["title"] += f" (video {video_idx+1}/{n_videos})"

@@ -25,26 +25,28 @@ def page_route(route_id: int) -> str:
 def edit_route(route_id: int) -> str:
     route = Route.query.get(route_id)
     title = "Edit route"
-    # POST: a route form was submitted => edit route or return error
     route_form = RouteForm.create_empty(route.sector.area_id)
+
     if request.method == "POST":
         if not route_form.validate():
-            return render("form.html", title=title, forms=[route_form])
+            flask_session["all_forms_valid"] = False
 
-        # if the name has changed, check if it already exists
-        if route_form.name.data != route.name:
-            if Route.query.filter_by(name=route_form.name.data).first() is not None:
-                route_form.name.errors.append("A route with that name already exists.")
-                flask_session["error"] = "An error occurred. Fix it and resubmit."
-                return render("form.html", title=title, forms=[route_form])
+        # if the name has changed, the new name cannot exist in the DB
+        elif (
+            route_form.name.data != route.name
+            and Route.query.filter_by(name=route_form.name.data).first() is not None
+        ):
+            route_form.name.errors.append("A route with that name already exists.")
+            flask_session["all_forms_valid"] = False
 
-        route = route_form.get_edited_route(route_id)
-        db.session.add(route)
-        db.session.commit()
+        # otherwise everything is correct; update the route and redirect
+        else:
+            route = route_form.get_edited_route(route_id)
+            db.session.add(route)
+            db.session.commit()
+            return redirect(flask_session.pop("call_from_url"))
 
-        return redirect(flask_session.pop("call_from_url"))
-
-    # GET: return the edit route page
+    # return the edit route page
     route_form = RouteForm.create_from_obj(route, remove_title=True)
     return render("form.html", title=title, forms=[route_form])
 
