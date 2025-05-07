@@ -8,7 +8,7 @@ import cv2
 from myclimbz.models import Video
 
 
-def check_access_to_file(filename: str, ignore_session: bool = False):
+def check_access_to_file(filename: str):
     """
     Check that the user is the owner of the videos, and that the session of the videos
     is currently open.
@@ -24,7 +24,7 @@ def check_access_to_file(filename: str, ignore_session: bool = False):
         flask_session["error"] = "You are not the owner of this file."
         abort(403)
 
-    if not ignore_session and session_id != flask_session["session_id"]:
+    if session_id != flask_session["session_id"]:
         flask_session["error"] = (
             "The session is closed. Redirecting to the session's page."
         )
