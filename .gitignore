@@ -9,3 +9,4 @@ files
 .env
 gunicorn_socket
 myclimbz.egg-info
+build
