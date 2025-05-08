@@ -6,6 +6,7 @@ from time import sleep
 from datetime import datetime
 
 from sqlalchemy import text
+from selenium.webdriver.common.by import By
 
 from .conftest import CLIMBER_ID, SLEEP_TIME, start_session, stop_session
 
@@ -47,6 +48,9 @@ def test_create_invalid_session(driver) -> None:
             print(e)
             form_accepted = True
         assert not form_accepted, data
+
+    # cancel form
+    driver.find_element(By.LINK_TEXT, "Cancel").click()
 
 
 def test_create_session_on_new_area(driver, db_session) -> None:

@@ -160,22 +160,24 @@ def stop_session(driver: webdriver.Chrome) -> None:
 
     # go to the home page
     driver.get(HOME_URL)
-    WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
+    WebDriverWait(driver, 5).until(EC.title_is(HOME_TITLE))
 
 
-def get_existing_route(db_session, sector: str) -> tuple[str, int]:
+def get_existing_route(db_session, sector: str, idx: int = 0) -> tuple[str, int]:
     """
     Get the name and ID of a route in the given sector.
+    The `idx` parameter can be used to ensure that different routes are used for
+    different tests.
     """
     sql_query = text(
         f"""
         SELECT name, id FROM route
         WHERE sector_id = (SELECT id FROM sector WHERE name = '{sector}')
-        LIMIT 1;
+        LIMIT {idx + 1};
         """
     )
     results = db_session.execute(sql_query).fetchall()
-    return results[0]
+    return results[idx]
 
 
 def fill_form(
@@ -206,9 +208,9 @@ def fill_form(
     if button_id:
         if driver.current_url not in [HOME_URL, HOME_URL + "/"]:
             driver.get(HOME_URL)
-            WebDriverWait(driver, 30).until(EC.title_is(HOME_TITLE))
+            WebDriverWait(driver, 5).until(EC.title_is(HOME_TITLE))
         driver.find_element(By.ID, button_id).click()
-        WebDriverWait(driver, 30).until_not(EC.title_is(HOME_TITLE))
+        WebDriverWait(driver, 5).until_not(EC.title_is(HOME_TITLE))
 
     # fill the form
     for field_id, value in field_data.items():
@@ -246,9 +248,9 @@ def fill_form(
 
     # check if the outcome matches the expectation
     if expect_success:
-        WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
+        WebDriverWait(driver, 3).until(EC.title_is(HOME_TITLE))
     else:
-        WebDriverWait(driver, 10).until_not(EC.title_is(HOME_TITLE))
+        WebDriverWait(driver, 3).until_not(EC.title_is(HOME_TITLE))
 
     return expect_success
 
@@ -256,7 +258,7 @@ def fill_form(
 def view_element(driver: webdriver.Chrome, element):
     """Scrolls the element into view."""
     driver.execute_script("arguments[0].scrollIntoView(true);", element)
-    WebDriverWait(driver, 10).until(
+    WebDriverWait(driver, 3).until(
         lambda d: d.execute_script("return document.readyState") == "complete"
     )
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(element))
+    WebDriverWait(driver, 3).until(EC.element_to_be_clickable(element))

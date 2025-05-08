@@ -72,7 +72,9 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     assert total_frames_element.text.strip() == "5"
 
     # fill the form with a climbing section from 1 to 5 and submit
-    route_name, route_id = get_existing_route(db_session, EXISTING_OBJECTS["sector"])
+    route_name, route_id = get_existing_route(
+        db_session, EXISTING_OBJECTS["sector"], idx=1
+    )
     form_accepted = fill_form(
         driver,
         None,
