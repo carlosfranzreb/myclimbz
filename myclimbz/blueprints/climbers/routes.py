@@ -1,4 +1,4 @@
-""" Pages related to the administration of users. """
+"""Pages related to the administration of users."""
 
 import os
 import secrets
@@ -81,7 +81,7 @@ def edit_climber(climber_id: int):
     if request.method == "POST":
         if not form.validate(climber_id):
             flask_session["error"] = form.errors
-            return render("form.html", title="Edit profile", forms=[form])
+
         # form is valid; commit changes and return to profile page
         obj = form.get_edited_obj(climber)
         db.session.add(obj)
@@ -89,7 +89,9 @@ def edit_climber(climber_id: int):
         return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit their profile
-    form = ClimberForm.create_from_obj(climber)
+    if request.method == "GET":
+        form = ClimberForm.create_from_obj(climber)
+
     return render("form.html", title="Edit profile", forms=[form])
 
 

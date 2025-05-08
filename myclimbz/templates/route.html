@@ -130,6 +130,10 @@
     </div>
 {% endif %}
 
+{% if route.my_videos|list|length > 0 %}
+{{ macros.video_manager(route.my_videos, "My videos") }}
+{% endif %}
+
 {% endblock content %}
 
 {% macro opinion_card(opinion) %}

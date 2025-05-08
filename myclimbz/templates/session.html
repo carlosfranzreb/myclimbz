@@ -79,4 +79,8 @@
     </table>
 </div>
 
+{% if session.climb_videos|list|length > 0 %}
+{{ macros.video_manager(session.climb_videos, "Videos") }}
+{% endif %}
+
 {% endblock content %}

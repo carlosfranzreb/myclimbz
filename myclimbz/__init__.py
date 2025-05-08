@@ -44,6 +44,11 @@ def create_app():
     app.config["MAIL_SUPPRESS_SEND"] = False
     mail.init_app(app)
 
+    app.config["VIDEOS_FOLDER"] = os.path.join(os.environ["UPLOAD_FOLDER"], "videos")
+    app.config["FRAMES_FOLDER"] = os.path.join(os.environ["UPLOAD_FOLDER"], "frames")
+    os.makedirs(app.config["VIDEOS_FOLDER"], exist_ok=True)
+    os.makedirs(app.config["FRAMES_FOLDER"], exist_ok=True)
+
     from myclimbz.blueprints.areas.routes import areas
     from myclimbz.blueprints.home.routes import home
     from myclimbz.blueprints.sessions.routes import sessions
@@ -52,6 +57,7 @@ def create_app():
     from myclimbz.blueprints.climbers.routes import climbers
     from myclimbz.blueprints.opinions.routes import opinions
     from myclimbz.blueprints.errors.handlers import errors
+    from myclimbz.blueprints.videos.routes import videos
 
     app.register_blueprint(areas)
     app.register_blueprint(home)
@@ -61,6 +67,7 @@ def create_app():
     app.register_blueprint(climbers)
     app.register_blueprint(opinions)
     app.register_blueprint(errors)
+    app.register_blueprint(videos)
 
     # automatically login the user if defined in the environment
     disable_login = os.environ.get("DISABLE_LOGIN", "0") == "1"

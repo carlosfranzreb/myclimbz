@@ -2,9 +2,11 @@ venv
 .ipynb_checkpoints
 __pycache__
 .DS_Store
-prod.db
+prod*.db
 audios
+files
 *.ckpt
 .env
 gunicorn_socket
 myclimbz.egg-info
+build

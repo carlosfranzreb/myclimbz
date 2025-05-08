@@ -5,7 +5,7 @@ The CSV sheet can have the following columns:
 - Area: the name of the area.
 - Sector: the name of the sector. Must be unique within the area.
 - Boulder: the name of the boulder. Must be unique within the sector.
-- Line: the name of the line. Must be unique within the boulder. In the DB, 
+- Line: the name of the line. Must be unique within the boulder. In the DB,
     line and boulder are merged into a single entity.
 - Sit start: whether the line has a sit start ("yes" or "no").
 - Grade: the grade of the line, in Font scale.
@@ -36,8 +36,8 @@ from argparse import ArgumentParser
 from datetime import datetime
 import csv
 
-from climbz import db, create_app
-from climbz.models import (
+from myclimbz import db, create_app
+from myclimbz.models import (
     Area,
     Route,
     Climb,

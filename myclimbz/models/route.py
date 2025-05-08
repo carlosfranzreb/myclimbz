@@ -1,10 +1,11 @@
 from collections import Counter
+import os
 
 from flask_login import current_user
 from sqlalchemy import UniqueConstraint
 
 from myclimbz import db
-from myclimbz.models import Grade, Opinion
+from myclimbz.models import Grade, Opinion, Video, Climb
 from myclimbz.models.columns import ConstrainedInteger
 
 
@@ -149,6 +150,91 @@ class Route(db.Model):
                 return climb.link
         return "N/A"
 
+    def get_sorted_climbs(self, user_id: int) -> list[Climb]:
+        """
+        Return the climbs of the given user on this route, sorted by session date
+        (oldest first).
+        """
+        return [
+            climb
+            for climb in sorted(self.climbs, key=lambda climb: climb.session.date)
+            if climb.session.climber_id == user_id
+        ]
+
+    @property
+    def my_videos(self) -> list[dict[str]]:
+        """
+        Returns info about of videos of this route climbed by the current user.
+        """
+        videos = list()
+        for climb in self.climbs:
+            if climb.session.climber_id == current_user.id:
+                videos.extend(climb.videos)
+
+        return self.get_video_fnames_for_climb_ids(videos)
+
+    @property
+    def other_videos(self) -> list[dict[str]]:
+        """
+        Returns info about of videos of this route climbed by other users.
+        """
+        videos = list()
+        for climb in self.climbs:
+            if climb.session.climber_id != current_user.id:
+                videos.extend(climb.videos)
+
+        return self.get_video_fnames_for_climb_ids(videos)
+
+    def get_video_fnames_for_climb_ids(self, videos: list[Video]) -> list[dict[str]]:
+        """
+        Given a list of videos, returns a dictionary for each recorded attempt.
+        The dict contains the video filename, session number and date and attempt number.
+        """
+
+        # return empty if empty
+        if len(videos) == 0:
+            return list()
+
+        # get a list of climbs on this route, ordered by date
+        user_id = videos[0].climb.session.climber_id
+        sorted_climbs = self.get_sorted_climbs(user_id)
+        sorted_session_ids = [climb.session.id for climb in sorted_climbs]
+
+        out = list()
+        session_attempts = 0
+        last_session_id = None
+        for video in videos:
+
+            # get the session ID and its chronological order
+            base, ext = os.path.splitext(video.fname)
+            session_id = int(base.split("_", maxsplit=2)[1])
+            climb_idx = sorted_session_ids.index(session_id)
+            session = sorted_climbs[climb_idx].session
+
+            # restart the attempt counter if the session changed
+            if session_id != last_session_id:
+                session_attempts = 0
+
+            # iterate over attempts and store video information
+            for attempt_idx, attempt in enumerate(video.attempts):
+                attempt_video = (
+                    f"{base}_trim{attempt.start_frame}-{attempt.end_frame}{ext}"
+                )
+                out.append(
+                    {
+                        "session_number": climb_idx + 1,
+                        "session_date": session.date,
+                        "attempt_number": session_attempts + attempt_idx + 1,
+                        "attempt_video": attempt_video,
+                    }
+                )
+
+            # update attempt counter and last session ID
+            last_session_id = session_id
+            session_attempts += len(video.attempts)
+
+        return out[::-1]
+
     def as_dict(self, climber_id: int) -> dict:
         """
         Return the relevant attributes of this route for a climber as a dictionary,
@@ -157,10 +243,8 @@ class Route(db.Model):
         n_sessions, n_attempts_all, n_attempts_send = 0, 0, 0
         conditions, dates = list(), list()
         first_send = False
-        sorted_climbs = sorted(self.climbs, key=lambda climb: climb.session.date)
+        sorted_climbs = self.get_sorted_climbs(climber_id)
         for climb in sorted_climbs:
-            if climb.session.climber_id != climber_id:
-                continue
             n_attempts = climb.n_attempts if climb.n_attempts is not None else 0
             n_attempts_all += n_attempts
             if not first_send:
@@ -203,4 +287,7 @@ class Route(db.Model):
             "dates": dates,
             # level to be displayed
             "level": self.grade.level if self.grade else None,
+            # videos
+            "my_videos": self.my_videos,
+            "other_videos": self.other_videos,
         }

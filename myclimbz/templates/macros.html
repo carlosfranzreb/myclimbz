@@ -1,3 +1,4 @@
+{# Macro to display a card with a header and facts of a route, opinion, etc. #}
 {% macro card(data) %}
 <div class="card mb-3">
     <div class="card-header">
@@ -67,4 +68,204 @@
     </ul>
     {% endif %}
 </div>
+{% endmacro %}
+
+
+{# Macro to display the three forms (route, climb and opinion) #}
+{% macro three_forms(forms) %}
+
+{% for form in forms %}
+    <div class="mb-4">
+        {{ form.hidden_tag() }}
+
+        <!-- Form titles are used for multi-forms -->
+        {% if form.title %}
+            <h4>{{ form.title }}</h4>
+        {% endif %}
+
+        {% for field in form %}
+            {% if field.name != 'csrf_token' and field.name != "submit" and field != form.existing_route %}
+                <div class="form-group">
+
+                    <!-- Add the field label -->
+                    {{ field.label(id=field.id + "-label") }}
+                    
+                    <!-- Add a range input if the field has a type of IntegerRangeField or DecimalRangeField -->
+                    {% if field.type == 'IntegerRangeField' or field.type == 'DecimalRangeField' %}
+                        <span>= </span>
+                        <output id="{{ field.id }}-output">{{ field.default }}</output>
+                        <span>{{ field.unit }}</span>
+                        {{ field(id=field.id, class='form-range',
+                        oninput="this.previousElementSibling.previousElementSibling.value
+                        = this.value") }}
+
+                    <!-- Add a checkbox if the field has a type of BooleanField and place the label beside it -->
+                    {% elif field.type == 'BooleanField' %}
+                        {% if field.toggle_ids %}
+                            {{ field(
+                                id=field.id,
+                                class='form-check',
+                                onchange='checkboxToggle("' + field.id + '", "' + field.toggle_ids + '")'
+                            ) }}
+                        {% else %}
+                            {{ field(id=field.id, class='form-check') }}
+                        {% endif %}
+                        <script>
+                            document.getElementById("{{ field.id }}").parentElement.style.display = "flex";
+                            document.getElementById("{{ field.id }}").parentElement.style.marginTop = "0.5em"
+                            document.getElementById("{{ field.id }}").parentElement.style.marginBottom = "0.75em";
+                            document.getElementById("{{ field.id }}").style.cursor = "pointer";
+                            document.getElementById("{{ field.id }}-label").style.cursor = "pointer";
+                            document.getElementById("{{ field.id }}-label").classList.add("label-checkbox");
+                        </script>
+
+                    <!-- Add a datalist if the field has a datalist attribute -->
+                    {% elif field.datalist %}
+                        {% set datalist_name = field.name + '-list' %}
+                        {% set relation_field = field.relation_field if field.relation_field is defined else "" %}
+                        {% set relation_data = field.relation_data | tojson if field.relation_data is defined else "" %}
+                        <datalist id="{{ field.name }}-list">
+                            {% for item in field.datalist %}
+                            <option value="{{ item }}"></option>
+                            {% endfor %}
+                        </datalist>
+                        {% if field.toggle_ids %}
+                            {{ field(
+                                id=field.id,
+                                class='form-control',
+                                list=datalist_name,
+                                autocomplete='off',
+                                onchange='datalistToggle("' + field.id + '", "' + field.toggle_ids + '", "' + relation_field + '", "' + relation_data + '")'
+                            ) }}
+                        {% else %}
+                            {{ field(id=field.id, class='form-control', list=datalist_name, autocomplete='off') }}
+                        {% endif %}
+
+                    <!-- Otherwise, we assume the field is a text input -->
+                    {% else %}
+                        {{ field(id=field.id, class='form-control') }}
+                    {% endif %}
+
+                    <!-- Add error messages if there are any -->
+                    {% if field.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in field.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <script>
+                            document.getElementById("{{ field.id }}").classList.add("is-invalid");
+                            document.getElementById("{{ field.id }}-label").style.color = "red";
+                        </script>
+                    {% endif %}
+
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <hr>
+{% endfor %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    // Exit if there is no route form
+    let routeNameInput = document.getElementById("name");
+    if (!routeNameInput)
+        return;
+
+    let existingRoutes = document.getElementById("name-list").options;
+    let opinionFormExists = Array.from(document.getElementsByTagName("h4")).some(el => el.textContent.trim() === "Opinion");
+    let climbFormExists = Array.from(document.getElementsByTagName("h4")).some(el => el.textContent.trim() === "Climb");
+
+    // Event listeners to update forms when route name is changed
+    routeNameInput.addEventListener("change", function() {
+        let routeName = this.value;
+        let routeExists = Array.from(existingRoutes).some(option => option.value === routeName);
+        if (!routeExists) {
+            resetForm("Climb");
+            resetForm("Opinion"); 
+        }
+
+        let routeNameEncoded = encodeURIComponent(routeName)
+        if (opinionFormExists)
+            fetchDataAndUpdateForm("/get_opinion_from_route_name/" + routeNameEncoded, updateOpinionForm, "Opinion");
+        if (climbFormExists)
+            fetchDataAndUpdateForm("/get_climb_from_route_name/" + routeNameEncoded, updateClimbForm, "Climb");
+    });
+});
+</script>
+{% endmacro %}
+
+{# 
+Macro to display videos, with the option of adding more videos to the list of displayed videos.
+! This implementation does not allow for more than one instance per template.
+#}
+{% macro video_manager(videos, title) %}
+{% set video = videos[0] %}
+{# TODO: show frame at first and video on click #}
+<div class="container px-0 px-md-5 py-2 my-3">
+    <h3 class="ms-3" style="display: inline-block">{{ title }}</h3>
+    <div id="videos-container" class="row">
+        {% for video_dict in videos %}
+        <div class="col-lg-4 col-md-6 col-12 mb-4 {% if loop.index > 1 %}d-none video-item-hidden{% else %}video-item{% endif %}">
+            {# Removed list-group classes, added border for separation #}
+            <div class="border rounded p-2 h-100" data-fname="{{ video_dict['attempt_video'] }}">
+                {% if "route_name" in video_dict %}
+                    <p><b>{{ video_dict["route_name"] }}</b></p>
+                {% endif %}
+                {% if "session_number" in video_dict %}
+                    <p>Session #{{ video_dict["session_number"] }}, attempt #{{ video_dict["attempt_number"] }}</p>
+                {% else %}
+                    <p>Attempt #{{ video_dict["attempt_number"] }}</p>
+                {% endif %}
+                <div class="text-center">
+                    {# Make video responsive #}
+                    <video style="max-width: 100%; height: auto;" preload="metadata" class="me-2" controls>
+                        <source src="{{ url_for('videos.serve_file', filetype='videos', filename=video_dict['attempt_video']) }}" alt="{{ video_dict['attempt_video'] }}" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% if videos|length > 1 %}
+    <div class="text-center my-3">
+        <button id="load-more-btn" class="btn btn-primary">Load more videos</button>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() { // Wrap in DOMContentLoaded
+    const loadMoreBtn = document.getElementById('load-more-btn');
+
+    if (loadMoreBtn) { // Check if the button exists
+        loadMoreBtn.addEventListener('click', function() {
+            // Select hidden items using the new class
+            const hiddenItems = document.querySelectorAll('.video-item-hidden');
+            let count = 0;
+
+            hiddenItems.forEach(function(item) {
+                if (count < 5) { // Load up to 5 items
+                    item.classList.remove('d-none');
+                    item.classList.remove('video-item-hidden'); // Remove the marker class
+                    item.classList.add('video-item'); // Add the original class if needed elsewhere
+                    count++;
+                }
+            });
+
+            // Check if any hidden items remain using the new class
+            if (document.querySelectorAll('.video-item-hidden').length === 0) {
+                this.style.display = 'none'; // Hide the button
+            }
+        });
+
+        // Initial check to hide button if no items are hidden initially
+        if (document.querySelectorAll('.video-item-hidden').length === 0) {
+            loadMoreBtn.style.display = 'none';
+        }
+    }
+});
+</script>
 {% endmacro %}

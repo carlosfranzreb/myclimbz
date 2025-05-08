@@ -66,6 +66,12 @@ jobs:
 
             - name: Start XVFB
               run: Xvfb :99 &
+            
+            - name: Install FFMPEG
+              uses: FedericoCarboni/setup-ffmpeg@v3
+              id: setup-ffmpeg
+              with:
+                ffmpeg-version: release
 
             - name: Run tests
               run: python -m pytest tests/
@@ -99,3 +105,4 @@ jobs:
                     RECAPTCHA_PRIVATE_KEY: test
                     MAIL_USERNAME: test@myclimbz.es
                     MAIL_PASSWORD: test
+                    UPLOAD_FOLDER: /usr/src/files

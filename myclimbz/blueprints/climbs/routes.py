@@ -1,13 +1,8 @@
-from flask import (
-    Blueprint,
-    redirect,
-    request,
-    session as flask_session,
-)
+from flask import Blueprint, redirect, request, session as flask_session, abort, jsonify
 from flask_login import current_user
 
-from myclimbz.models import Climb, Session, Climber
-from myclimbz.forms import ClimbForm, RouteForm
+from myclimbz.models import Climb, Session, Climber, Route
+from myclimbz.forms import RouteForm, ClimbForm, OpinionForm
 from myclimbz import db
 from myclimbz.blueprints.utils import render
 
@@ -28,57 +23,51 @@ def add_climb() -> str:
         session = Session.query.get(flask_session["session_id"])
         area_id = session.area_id
         climb_form = ClimbForm.create_empty()
+
     route_form = RouteForm.create_empty(area_id)
+    opinion_form = OpinionForm.create_empty()
 
     # POST: a climb form was submitted => create climb or return error
     if request.method == "POST":
-        invalid_climb = (
-            not climb_form.validate_from_name(
-                route_form.name.data, route_form.sector.data
-            )
-            if not is_project_search
-            else False
-        )
-        if not route_form.validate() or invalid_climb:
-            if flask_session.get("error", None) is None:
-                flask_session["error"] = "An error occurred. Fix it and resubmit."
-            forms = [route_form]
-            if not is_project_search:
-                forms.append(climb_form)
-            return render("form.html", title=title, forms=forms)
+        flask_session["all_forms_valid"] = True
+        if not is_project_search:
+            climb_form.validate_from_name(route_form.name.data, route_form.sector.data)
 
-        # create new sector and new route if necessary
-        sector = route_form.get_sector(area_id)
-        if sector.id is None:
-            db.session.add(sector)
+        for form in [route_form, opinion_form]:
+            flask_session["all_forms_valid"] &= form.validate()
+
+        if flask_session["all_forms_valid"]:
+            # create opinion, sector and route if necessary
+            sector = route_form.get_sector(area_id)
+            route = route_form.get_object(sector)
+            for obj in [sector, route]:
+                if obj.id is None:
+                    db.session.add(obj)
+                    db.session.commit()
+
+            if not opinion_form.skip_opinion.data:
+                opinion = opinion_form.get_object(current_user.id, route.id)
+                if opinion.id is None:
+                    db.session.add(opinion)
+                    db.session.commit()
+
+            # add as project or create climb
+            climber = Climber.query.get(current_user.id)
+            if is_project_search or climb_form.is_project.data:
+                if not route.tried and not route.is_project:
+                    climber.projects.append(route)
+            else:
+                climb = climb_form.get_object(route)
+                db.session.add(climb)
             db.session.commit()
 
-        route = route_form.get_object(sector)
-        if route.id is None:
-            db.session.add(route)
-            db.session.commit()
-
-        # add as project or create climb
-        climber = Climber.query.get(current_user.id)
-        if is_project_search or climb_form.is_project.data:
-            climber.projects.append(route)
-        else:
-            climb = climb_form.get_object(route)
-            db.session.add(climb)
-        db.session.commit()
-
-        # if the user wants to add an opinion, redirect to the opinion form
-        if route_form.add_opinion.data is True:
-            return redirect(f"/get_opinion_form/{climber.id}/{route.id}")
-        else:
             return redirect(flask_session.pop("call_from_url"))
 
-    # GET: the climber wants to add a route (+ climb if not in a project search)
-    route_form.title = "Route"
+    # serve the page
     forms = [route_form]
     if not is_project_search:
-        climb_form.title = "Climb"
         forms.append(climb_form)
+    forms.append(opinion_form)  # the opinion form should appear last
     return render("form.html", title=title, forms=forms)
 
 
@@ -91,15 +80,18 @@ def edit_climb(climb_id: int) -> str:
     if request.method == "POST":
         climb_form = ClimbForm()
         if not climb_form.validate(climb.route, climb.session_id, climb_id=climb_id):
-            if flask_session.get("error", None) is None:
-                flask_session["error"] = "An error occurred. Fix it and resubmit."
-            return render("form.html", title=title, forms=[climb_form])
-        climb = climb_form.get_edited_climb(climb_id)
-        db.session.commit()
-        return redirect(flask_session.pop("call_from_url"))
+            flask_session["all_forms_valid"] = False
+
+        else:
+            climb = climb_form.get_edited_climb(climb_id)
+            db.session.commit()
+            return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user wants to edit a climb
-    climb_form = ClimbForm.create_from_object(climb)
+    elif request.method == "GET":
+        climb_form = ClimbForm.create_from_object(climb, remove_title=True)
+        del climb_form.is_project
+
     return render("form.html", title=title, forms=[climb_form])
 
 
@@ -119,3 +111,31 @@ def delete_climb(climb_id: int) -> str:
 def view_climb(climb_id: int) -> str:
     climb = Climb.query.get(climb_id)
     return render("climb.html", climb=climb, title=f"Climb on {climb.route.name}")
+
+
+@climbs.route("/get_climb_from_route_name/<route_name>")
+def get_climb_from_route_name(route_name: str) -> str:
+    """
+    Given a route name by the frontend, return the opinion info required to populate
+    the form, if there is an opinion. We assume that the user is the current user.
+    """
+    route = Route.query.filter_by(name=route_name).first()
+    if route is None:
+        abort(404)
+
+    climb = Climb.query.filter_by(
+        route_id=route.id, session_id=flask_session["session_id"]
+    ).first()
+    if climb is None:
+        return jsonify({})
+
+    # return opinion information
+    return jsonify(
+        {
+            "n_attempts": climb.n_attempts,
+            "sent": climb.sent,
+            "flashed": climb.flashed,
+            "climb_comment": climb.comment,
+            "climb_link": climb.link,
+        }
+    )

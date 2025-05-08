@@ -13,7 +13,7 @@ from flask import session as flask_session
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, BooleanField, StringField
-from wtforms.validators import Optional
+from wtforms.validators import Optional, DataRequired, NumberRange
 from wtforms.widgets import TextArea
 
 from myclimbz.models import Route, Climb, Session, Sector
@@ -31,30 +31,38 @@ FIELDS = [
 class ClimbForm(FlaskForm):
     # the route is determined in the route form
     is_project = BooleanField("Project (not tried yet)", validators=[Optional()])
-    n_attempts = IntegerField("Number of attempts", validators=[Optional()])
+    n_attempts = IntegerField(
+        "Number of attempts",
+        validators=[
+            DataRequired(message="Number of attempts is required"),
+            NumberRange(min=1, message="Must be a positive number"),
+        ],
+        default=1,
+    )
     climb_comment = StringField("Comment", validators=[Optional()], widget=TextArea())
     climb_link = StringField("Link", validators=[Optional()])
     sent = BooleanField("Sent", validators=[Optional()])
     flashed = BooleanField("Flashed", validators=[Optional()])
 
     @classmethod
-    def create_empty(cls) -> ClimbForm:
+    def create_empty(cls, remove_title: bool = False) -> ClimbForm:
         form = cls()
-        form.is_project.toggle_ids = "n_attempts,climb_comment,climb_link,sent,flashed"
+        form.is_project.toggle_ids = ",".join(FIELDS)
+        if not remove_title:
+            form.title = "Climb"
         return form
 
     @classmethod
-    def create_from_object(cls, obj: Climb) -> ClimbForm:
-        form = cls.create_empty()
+    def create_from_object(cls, obj: Climb, remove_title: bool = False) -> ClimbForm:
+        form = cls.create_empty(remove_title)
         for field in FIELDS:
             getattr(form, field).data = getattr(obj, field.replace("climb_", ""))
         return form
 
-    def validate(self, route: Route, session_id: int = None, climb_id=None) -> bool:
+    def validate(self, route: Route, session_id: int = None) -> bool:
         """
+        - The number of attempts cannot be empty and must be non-negative.
         - If the climb has already been tried before, `flashed` must be false.
-        - The route must not exist in the current session, unless this is an edit
-            and the climb_id is passed to this function.
         """
         is_valid = True
         if not super().validate():
@@ -65,16 +73,6 @@ class ClimbForm(FlaskForm):
 
         if session_id is None:
             session_id = flask_session["session_id"]
-
-        # check whether the route has already been tried in this session
-        climbs = Climb.query.filter_by(route_id=route.id, session_id=session_id).all()
-        if climb_id is not None:
-            climbs = [climb for climb in climbs if climb.id != climb_id]
-        if len(climbs) > 0:
-            flask_session["error"] = (
-                "This route has already been tried in this session."
-            )
-            is_valid = False
 
         # check whether a flash is valid
         if self.flashed.data is True:
@@ -111,13 +109,23 @@ class ClimbForm(FlaskForm):
         return self.validate(route)
 
     def get_object(self, route: Route) -> Climb:
-        """Create a new climb object from the form data."""
-        climb = Climb(
-            **{
-                "route_id": route.id,
-                "session_id": flask_session["session_id"],
-            }
-        )
+        """
+        - If this route has already been climbed in this session, update the
+            corresponding climb with the form data and return it.
+        - Otherwise, create a new climb object from the form data and return it.
+        """
+
+        # check whether the route has already been tried in this session
+        climb = Climb.query.filter_by(
+            route_id=route.id, session_id=flask_session["session_id"]
+        ).first()
+
+        # create a new climb if one does not exist
+        if not climb:
+            climb = Climb(
+                **{"route_id": route.id, "session_id": flask_session["session_id"]}
+            )
+
         return self.add_form_data_to_object(climb)
 
     def get_edited_climb(self, climb_id: int) -> Climb:
@@ -128,5 +136,8 @@ class ClimbForm(FlaskForm):
     def add_form_data_to_object(self, obj: Climb) -> Climb:
         """Add the form data to the object."""
         for field in FIELDS:
-            setattr(obj, field.replace("climb_", ""), getattr(self, field).data)
+            form_data = getattr(self, field).data
+            if isinstance(form_data, str) and len(form_data) == 0:
+                form_data = None
+            setattr(obj, field.replace("climb_", ""), form_data)
         return obj

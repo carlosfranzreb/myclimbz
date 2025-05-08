@@ -1,5 +1,7 @@
 """
 Script to create the database and populate it with testing data.
+
+! Must be run as a module: python -m scripts.db.create_db
 """
 
 from argparse import ArgumentParser
@@ -9,8 +11,9 @@ import os
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import generate_password_hash
+from sqlalchemy import inspect
 
-from climbz import db, create_app, models
+from myclimbz import db, create_app, models
 
 
 ROCKS = [
@@ -58,14 +61,14 @@ ROCKS = [
 
 CRUXES = [
     # Hands
-    "Crimp",
-    "Drag",
+    "Edge - incut",  # previously crimp
+    "Edge - slopey",  # previously drag
     "Pinch",
     "Pocket",
     "Sloper",
     # Legs
     "Drop knee",
-    "Feet",
+    "Footholds",  # previously feet
     "Heel hook",
     "Knee bar",
     "Toe hook",
@@ -82,11 +85,15 @@ CRUXES = [
     "Power",
     "Scary",
     "Tension",
-    # new in 1.8.0
+    # new in 1.8
     "Balance",
     "Coordination",
     "Laybacking",
     "Rockover",
+    # new in 2.0
+    "Edge - flat",
+    "Hip mobility",
+    "Smear",
 ]
 
 GRADES = [
@@ -267,10 +274,15 @@ if __name__ == "__main__":
 
     os.environ["CLIMBZ_DB_URI"] = f"sqlite:///{db_name}.db"
     os.environ["CLIMBZ_SECRET_KEY"] = os.urandom(24).hex()
+    os.environ["UPLOAD_FOLDER"] = "./files"
     app = create_app()
 
     with app.app_context():
         db.create_all()
+
+        inspector = inspect(db.engine)
+        print("Tables in database:", inspector.get_table_names())
+
         for rock_type in ROCKS:
             db.session.add(models.RockType(name=rock_type))
         for crux_type in CRUXES:

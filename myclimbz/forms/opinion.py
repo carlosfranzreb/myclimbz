@@ -9,6 +9,7 @@ from wtforms import (
     SelectMultipleField,
     widgets,
     IntegerRangeField,
+    BooleanField,
 )
 from wtforms.validators import NumberRange, Optional
 from wtforms.widgets import TextArea
@@ -18,6 +19,7 @@ from myclimbz.models import Grade, Crux, Opinion
 
 class OpinionForm(FlaskForm):
     # the route is determined in the route form
+    skip_opinion = BooleanField("Don't add an opinion", validators=[Optional()])
     grade = SelectField("Grade", validators=[Optional()])
     rating = IntegerRangeField(
         "Rating",
@@ -41,11 +43,11 @@ class OpinionForm(FlaskForm):
         widget=widgets.ListWidget(prefix_label=False),
         option_widget=widgets.CheckboxInput(),
     )
-    comment = StringField("Comment", validators=[Optional()], widget=TextArea())
+    opinion_comment = StringField("Comment", validators=[Optional()], widget=TextArea())
     submit = SubmitField("Submit")
 
     @classmethod
-    def create_empty(cls) -> OpinionForm:
+    def create_empty(cls, remove_title: bool = False) -> OpinionForm:
         """
         Create the form and add choices to the select fields.
         """
@@ -60,16 +62,19 @@ class OpinionForm(FlaskForm):
 
         form.rating.unit = "/ 5"
         form.landing.unit = "/ 5"
+        if not remove_title:
+            form.title = "Opinion"
 
         return form
 
     @classmethod
-    def create_from_obj(cls, obj: Opinion) -> OpinionForm:
+    def create_from_obj(cls, obj: Opinion, remove_title: bool = False) -> OpinionForm:
         """Create the form with data from the Opinion object."""
-        form = cls.create_empty()
+        form = cls.create_empty(remove_title)
         form.rating.default = obj.rating
         form.landing.default = obj.landing
-        for field in ["landing", "rating", "comment"]:
+        form.opinion_comment.data = obj.comment
+        for field in ["landing", "rating"]:
             getattr(form, field).data = getattr(obj, field)
 
         if obj.grade is not None:
@@ -106,8 +111,10 @@ class OpinionForm(FlaskForm):
     def _add_fields_to_object(self, opinion: Opinion) -> Opinion:
         opinion.grade = Grade.query.get(int(self.grade.data))
         opinion.cruxes = [Crux.query.get(crux_id) for crux_id in self.cruxes.data]
+        comment = self.opinion_comment.data
+        opinion.comment = comment if len(comment) > 0 else None
 
-        for field in ["landing", "rating", "comment"]:
+        for field in ["landing", "rating"]:
             setattr(opinion, field, getattr(self, field).data)
 
         return opinion

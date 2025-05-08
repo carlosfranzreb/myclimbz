@@ -6,9 +6,9 @@ conventions defined by the `format_name` function in the `climbz/forms/utils.py`
 import os
 from argparse import ArgumentParser
 
-from climbz import db, create_app
-from climbz.models import Area, Route, Sector
-from climbz.forms.utils import format_name
+from myclimbz import db, create_app
+from myclimbz.models import Area, Route, Sector
+from myclimbz.forms.utils import format_name
 
 
 def format_names(db) -> None:

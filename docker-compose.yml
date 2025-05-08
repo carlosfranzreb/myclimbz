@@ -6,6 +6,7 @@ services:
       - ./myclimbz/:/usr/src/myclimbz
       - ./instance:/usr/src/instance
       - ./gunicorn_socket:/usr/src/gunicorn_socket
+      - ./files/:/usr/src/files
     env_file:
       - .env
     ports:
