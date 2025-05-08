@@ -66,6 +66,12 @@ jobs:
 
             - name: Start XVFB
               run: Xvfb :99 &
+            
+            - name: Install FFMPEG
+              uses: FedericoCarboni/setup-ffmpeg@v3
+              id: setup-ffmpeg
+              with:
+                ffmpeg-version: 7.1.1
 
             - name: Run tests
               run: python -m pytest tests/
