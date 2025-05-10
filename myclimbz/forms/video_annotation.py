@@ -12,7 +12,7 @@ class VideoSectionForm(FlaskForm):
         if not super(VideoSectionForm, self).validate():
             return False
         if self.start.data > self.end.data:
-            error_msg = "Start must be equal to or less than End."
+            error_msg = "'Start' must be smaller than 'End'."
             self.start.errors.append(error_msg)
             flask_session["error"] = error_msg
             return False
