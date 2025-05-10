@@ -43,6 +43,11 @@ addSectionBtn.addEventListener("click", () => {
 			.setAttribute("for", `sections-${newIndex}-${field}`);
 	});
 
+	// Remove error messages, if any
+	newSection.querySelectorAll(".invalid-feedback").forEach((element) => {
+		element.remove();
+	});
+
 	// Add remove button
 	const removeContainer = document.createElement("div");
 	removeContainer.classList.add("col-md-2", "text-end");
