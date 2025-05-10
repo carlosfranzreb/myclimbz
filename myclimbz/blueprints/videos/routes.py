@@ -159,16 +159,16 @@ def annotate_video() -> str:
 
         # store info if forms are valid
         if flask_session["all_forms_valid"]:
-            # store video annotations and trim video
-            video_obj = Video(fname="video.mp4")
+            # store video annotations
+
+            video_obj = Video(
+                fname=f"{current_user.id}_{flask_session['session_id']}_{int(time())}.mp4"
+            )
             for section in video_form.sections.data:
                 video_obj.attempts.append(
                     VideoAttempt(start_frame=section["start"], end_frame=section["end"])
                 )
-                trim_video(video_obj, section["start"], section["end"])
-
             db.session.add(video_obj)
-            db.session.commit()
 
             # store route, climb and opinion (TODO: use code from climbs.add_climb?)
             sector = route_form.get_sector(area_id)
@@ -179,7 +179,7 @@ def annotate_video() -> str:
             opinion = opinion_form.get_object(current_user.id, route.id)
             if opinion.id is None:
                 db.session.add(opinion)
-            db.session.commit()
+            db.session.flush()
 
             climb = climb_form.get_object(route)
             if video_obj not in climb.videos:
