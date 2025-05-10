@@ -1,0 +1,29 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div class="container px-2 px-md-5">
+    <h2 class="mt-2">Minimal Video Upload and Display Test</h2>
+
+    <div id="video-selection-step" class="my-3">
+        <form id="initial-video-form">
+            <div class="form-group mb-3">
+                <label for="videoFileMinimal" class="form-label">Select a single video file:</label>
+                <input type="file" class="form-control" accept="video/*" id="videoFileMinimal">
+            </div>
+            {# No submit button needed for this immediate display test #}
+        </form>
+    </div>
+
+    <div id="video-display-step" style="display: none;" class="my-3">
+        <h4>Video Preview:</h4>
+        <video id="videoPlayer" controls width="600" style="max-width: 100%; border: 1px solid #ccc;">
+            Your browser does not support the video tag.
+        </video>
+        <p id="videoFileInfo" class="mt-2"></p>
+    </div>
+
+</div>
+
+<script src="{{url_for('static', filename='js/form_videos.js')}}"></script>
+
+{% endblock content %}
