@@ -1,8 +1,10 @@
+{% import "macros.html" as macros %}
 {% extends "main.html" %}
-
 {% block content %}
+
+{# div for uploading, displaying and navigating the video #}
 <div class="container px-2 px-md-5">
-    <h2 class="mt-2">Minimal Video Upload and Display Test</h2>
+    <h2 class="mt-2">{{ title }}</h2>
 
     <div id="video-selection-step" class="my-3">
         <form id="initial-video-form">
@@ -21,17 +23,61 @@
         <p id="videoFileInfo" class="mt-2"></p>
     </div>
 
-    <div class="mt-3 mb-3">
-        <label for="seekTimeInput" class="form-label">Seek to second:</label>
-        <div class="input-group" style="max-width: 200px;">
-            <input type="number" class="form-control" id="seekTimeInput" placeholder="e.g., 10" min="0">
-            <button class="btn btn-outline-secondary" type="button" id="seekButton">Go</button>
-        </div>
-        <div id="videoCurrentTime" class="mt-1" style="font-size: 0.9em;">Current time: 0.00s</div>
-    </div>
+</div>
 
+{# div with the forms #}
+<div class="container px-2 px-md-5">
+    <hr>
+    <form method="POST">
+        {{ video_form.hidden_tag() }}
+
+        <h4>Climbing sections</h4>
+        <div id="sections-container">
+            {% for section_field in video_form.sections %}
+            <div class="section-entry row align-items-center mb-2 border p-2 rounded" data-index="{{ loop.index0 }}">
+                
+                {# Create start and end inputs for the section #}
+                {% for field_name in ['start', 'end'] %}
+                <div class="col-md-5">
+                    {{ section_field[field_name].label(class="form-label") }}
+                    {{ section_field[field_name](onchange="navigateVideo(event)", onclick="navigateVideo(event)", class="form-control form-control-sm " ~ field_name ~ "-input") }}
+                    {% if section_field[field_name].errors %}
+                        <div class="invalid-feedback d-block">{{ section_field[field_name].errors|join(', ') }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                {# If this section is not the first, it can be removed #}
+                {% if loop.index0 > 0 %}
+                <div class="col-md-2 text-end">
+                    <button type="button" class="btn btn-danger btn-sm remove-section-btn mt-2">Remove</button>
+                </div>
+                {% endif %}
+
+                {# Display errors, if any #}
+                {% if section_field.errors and 'start' not in section_field.errors and 'end' not in section_field.errors %} {# Catch form-level errors #}
+                <div class="col-12">
+                    {% for error in section_field.errors.values()|sum(start=[]) %}
+                        <div class="invalid-feedback d-block">{{error}}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" id="add-section-btn" class="btn btn-secondary my-2">Add Section</button>
+
+        <hr>
+        {{ macros.three_forms(other_forms) }}
+
+        <input type="submit" class="btn btn-primary" value="Submit">
+        <a href="{{ url_for('home.cancel_form') }}" class="btn btn-danger ms-2">Cancel</a>
+
+    </form>
 </div>
 
 <script src="{{url_for('static', filename='js/form_videos.js')}}"></script>
+<script src="{{url_for('static', filename='js/form_videos_annotation.js')}}"></script>
 
 {% endblock content %}

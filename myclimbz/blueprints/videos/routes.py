@@ -119,10 +119,10 @@ def sort_videos() -> str:
 
 
 @videos.route(
-    "/annotate_video/<int:n_videos>/<int:video_idx>",
+    "/annotate_video",
     methods=["GET", "POST"],
 )
-def annotate_video(n_videos: int, video_idx: int) -> str:
+def annotate_video() -> str:
     """
     The user is shown a video and is asked to mark the portions of each video where
     there is climbing. Only the marked will be saved. The number of attempts is inferred
@@ -132,16 +132,9 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
     that, if there are more videos, the user is sent back here to annotate the next video.
     """
 
-    # create title, frames and form
-    video_fname = sorted(flask_session["video_fnames"])[video_idx]
-    check_access_to_file(video_fname)
-
     # create video annotation form
     title = "Annotate"
-    video_path = os.path.join(current_app.config["VIDEOS_FOLDER"], video_fname)
-    frames_fname_prefix, n_frames, fps_video, fps_taken = get_video_frames(video_path)
     video_form = VideoAnnotationForm()
-    flask_session["video_upload_status"] = [video_idx, n_videos]
 
     # create other forms
     area_id = Session.query.get(flask_session["session_id"]).area_id
@@ -167,9 +160,7 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
         # store info if forms are valid
         if flask_session["all_forms_valid"]:
             # store video annotations and trim video
-            video_obj = Video(
-                fname=video_fname, fps_video=fps_video, fps_taken=fps_taken
-            )
+            video_obj = Video(fname="video.mp4")
             for section in video_form.sections.data:
                 video_obj.attempts.append(
                     VideoAttempt(start_frame=section["start"], end_frame=section["end"])
@@ -178,7 +169,6 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
 
             db.session.add(video_obj)
             db.session.commit()
-            os.remove(video_path)
 
             # store route, climb and opinion (TODO: use code from climbs.add_climb?)
             sector = route_form.get_sector(area_id)
@@ -197,28 +187,15 @@ def annotate_video(n_videos: int, video_idx: int) -> str:
             db.session.add(climb)
             db.session.commit()
 
-            # go to next video or back to previous page if all videos were annotated
-            video_idx, n_videos = flask_session["video_upload_status"]
-            if video_idx + 1 < n_videos:
-                return redirect(
-                    url_for(
-                        "videos.annotate_video",
-                        n_videos=n_videos,
-                        video_idx=video_idx + 1,
-                    )
-                )
-            else:
-                delete_video_info()
-                return redirect(flask_session.pop("call_from_url"))
+            # go back to previous page
+            return redirect(flask_session.pop("call_from_url"))
 
     # GET: the user is asked to annotate a video
     return render(
-        "form_annotate_video.html",
+        "form_videos.html",
         title=title,
         video_form=video_form,
         other_forms=[route_form, climb_form, opinion_form],
-        frames_fname_prefix=frames_fname_prefix,
-        n_frames=n_frames,
     )
 
 
