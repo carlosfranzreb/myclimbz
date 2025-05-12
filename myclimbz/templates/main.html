@@ -42,7 +42,7 @@
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
                 {% if open_session %}
                 {% if not open_session.is_project_search %}
-                <li><a id="add_videos" class="nav-link" href="{{ url_for('videos.add_videos') }}">Add videos</a></li>
+                <li><a id="add_videos" class="nav-link" href="{{ url_for('videos.annotate_video') }}">Add videos</a></li>
                 {% endif %}
                 <li><a id="add_climb" class="nav-link" href="{{ url_for('climbs.add_climb') }}">Add climb</a></li>
                 <li>

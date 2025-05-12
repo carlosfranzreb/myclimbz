@@ -20,5 +20,4 @@ class VideoSectionForm(FlaskForm):
 
 
 class VideoAnnotationForm(FlaskForm):
-    video_url = StringField("Video URL", validators=[DataRequired()])
     sections = FieldList(FormField(VideoSectionForm), min_entries=1)

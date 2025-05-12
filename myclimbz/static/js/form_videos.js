@@ -1,5 +1,5 @@
 // Variables related to video display
-const videoFileInput = document.getElementById("videoFileMinimal");
+const videoFileInput = document.getElementById("videoFile");
 const videoDisplayStep = document.getElementById("video-display-step");
 const videoPlayer = document.getElementById("videoPlayer");
 const videoFileInfo = document.getElementById("videoFileInfo");

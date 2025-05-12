@@ -36,7 +36,9 @@ addSectionBtn.addEventListener("click", () => {
 	// Change the IDs of the input fields and their labels, and empty them
 	["start", "end"].forEach((field) => {
 		const inputField = newSection.querySelector(`#sections-0-${field}`);
-		inputField.id = `sections-${newIndex}-${field}`;
+		let newId = `sections-${newIndex}-${field}`;
+		inputField.id = newId;
+		inputField.name = newId;
 		inputField.value = "";
 		newSection
 			.querySelector(`label[for="sections-0-${field}"]`)
