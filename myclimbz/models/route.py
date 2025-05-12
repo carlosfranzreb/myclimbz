@@ -206,10 +206,16 @@ class Route(db.Model):
         for video in videos:
 
             # get the session ID and its chronological order
-            base, ext = os.path.splitext(video.fname)
-            session_id = int(base.split("_", maxsplit=2)[1])
-            climb_idx = sorted_session_ids.index(session_id)
-            session = sorted_climbs[climb_idx].session
+            try:
+                base, ext = os.path.splitext(video.fname)
+                session_id = int(base.split("_", maxsplit=2)[1])
+                climb_idx = sorted_session_ids.index(session_id)
+                session = sorted_climbs[climb_idx].session
+
+            # this won't work if the video's fname is an URL, which means
+            # that the video is still being uploaded
+            except Exception:
+                continue
 
             # restart the attempt counter if the session changed
             if session_id != last_session_id:

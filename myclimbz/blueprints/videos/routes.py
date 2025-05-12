@@ -10,14 +10,16 @@ from flask import (
     send_from_directory,
     abort,
     url_for,
+    jsonify,
+    make_response,
 )
 from flask_login import current_user
 from werkzeug.utils import secure_filename
 
 from myclimbz.models import Video, VideoAttempt, Session
 from myclimbz.forms import (
-    VideosForm,
-    VideosSortingForm,
+    VideosUploadForm,
+    VideoAttemptForm,
     VideoAnnotationForm,
     RouteForm,
     ClimbForm,
@@ -34,90 +36,6 @@ from myclimbz.blueprints.videos.utils import (
 videos = Blueprint("videos", __name__)
 
 
-@videos.route("/add_videos", methods=["GET", "POST"])
-def add_videos() -> str:
-    """
-    Provides a form for the user to upload one or multiple videos.
-    When the user clicks "Save", the user is sent to the page where videos are sorted
-    (see `sort_videos`).
-    """
-    # create forms and add choices
-    title = "Add videos"
-    form = VideosForm()
-    session_id = flask_session["session_id"]
-
-    # POST: form was submitted => add videos or return error
-    if request.method == "POST":
-        if not form.validate():
-            flask_session["all_forms_valid"] = False
-
-        # upload videos
-        else:
-            fnames = list()
-            timestamp = int(time())
-            for f_idx, f in enumerate(form.videos.data):
-                f_ext = os.path.splitext(f.filename)[1]
-                fnames.append(
-                    secure_filename(
-                        f"{current_user.id}_{session_id}_{timestamp}_added-{f_idx}{f_ext}"
-                    )
-                )
-                f.save(os.path.join(current_app.config["VIDEOS_FOLDER"], fnames[-1]))
-
-            flask_session["video_fnames"] = fnames
-            return redirect("/sort_videos")
-
-    # GET: the user wants to upload videos
-    return render("form.html", title=title, forms=[form], enctype="multipart/form-data")
-
-
-@videos.route("/sort_videos", methods=["GET", "POST"])
-def sort_videos() -> str:
-    """
-    The user can sort the videos chronologically and is then sent to `process_videos`.
-    """
-
-    videos = sorted(flask_session["video_fnames"])
-    check_access_to_file(videos[0])
-
-    # if there is only one video, skip this and go to process_videos
-    if len(videos) == 1:
-        flask_session["video_fnames"] = videos
-        return redirect(url_for("videos.annotate_video", n_videos=1, video_idx=0))
-
-    # create the form for sorting the videos
-    title = "Sort videos"
-    form = VideosSortingForm(n_videos=len(videos))
-
-    # POST: the form was submitted => sort videos or return error
-    if request.method == "POST":
-        if not form.validate():
-            if flask_session.get("error", None) is None:
-                flask_session["error"] = form.videos_sorted.errors[0]
-
-        # rename the videos according to the given order
-        else:
-            for f_idx in range(len(videos)):
-                f = videos[f_idx]
-                fname, ext = os.path.splitext(videos[f_idx])
-                f_sort_idx = form.videos_sorted.data.index(f)
-                f_new = secure_filename(
-                    f"{fname.rsplit('_', 1)[0]}_sorted-{f_sort_idx}{ext}"
-                )
-                os.rename(
-                    os.path.join(current_app.config["VIDEOS_FOLDER"], f),
-                    os.path.join(current_app.config["VIDEOS_FOLDER"], f_new),
-                )
-                videos[f_idx] = f_new
-
-            flask_session["video_fnames"] = videos
-            return redirect(
-                url_for("videos.annotate_video", n_videos=len(videos), video_idx=0)
-            )
-
-    return render("form_sort_videos.html", title=title, form=form, videos=videos)
-
-
 @videos.route(
     "/annotate_video",
     methods=["GET", "POST"],
@@ -130,6 +48,9 @@ def annotate_video() -> str:
 
     Afterwards, the user is sent to `add_climb` to fill in route information. And after
     that, if there are more videos, the user is sent back here to annotate the next video.
+
+    TODO: section values cannot exceed video duration
+    TODO: add "sent" field to each section
     """
 
     # create video annotation form
@@ -137,7 +58,8 @@ def annotate_video() -> str:
     video_form = VideoAnnotationForm()
 
     # create other forms
-    area_id = Session.query.get(flask_session["session_id"]).area_id
+    session_id = flask_session["session_id"]
+    area_id = Session.query.get(session_id).area_id
     route_form = RouteForm.create_empty(area_id)
     climb_form = ClimbForm.create_empty()
     del climb_form.is_project
@@ -159,16 +81,19 @@ def annotate_video() -> str:
 
         # store info if forms are valid
         if flask_session["all_forms_valid"]:
-            # store video annotations
 
-            video_obj = Video(
-                fname=f"{current_user.id}_{flask_session['session_id']}_{int(time())}.mp4"
-            )
-            for section in video_form.sections.data:
-                video_obj.attempts.append(
-                    VideoAttempt(start_frame=section["start"], end_frame=section["end"])
+            # store video annotations
+            video = Video(base_fname=f"{current_user.id}_{session_id}_{int(time())}")
+            for section_idx, section in enumerate(video_form.sections.data):
+                video.attempts.append(
+                    VideoAttempt(
+                        start=section["start"],
+                        end=section["end"],
+                        attempt_number=section_idx,
+                        sent=False,
+                    )
                 )
-            db.session.add(video_obj)
+            db.session.add(video)
 
             # store route, climb and opinion (TODO: use code from climbs.add_climb?)
             sector = route_form.get_sector(area_id)
@@ -181,22 +106,74 @@ def annotate_video() -> str:
                 db.session.add(opinion)
             db.session.flush()
 
+            # add video to climb
             climb = climb_form.get_object(route)
-            if video_obj not in climb.videos:
-                climb.videos.append(video_obj)
+            climb.videos.append(video)
             db.session.add(climb)
             db.session.commit()
 
-            # go back to previous page
-            return redirect(flask_session.pop("call_from_url"))
+            # go to video upload page
+            return redirect(url_for("videos.upload_videos", video_id=video.id))
 
-    # GET: the user is asked to annotate a video
     return render(
         "form_videos.html",
         title=title,
         video_form=video_form,
         other_forms=[route_form, climb_form, opinion_form],
     )
+
+
+@videos.route("/upload_videos/<int:video_id>", methods=["GET", "POST"])
+def upload_videos(video_id: int) -> str:
+    """
+    Endpoint for uploading video files
+    """
+    title = "Upload videos"
+    video = Video.query.get(video_id)
+    form = VideosUploadForm()
+
+    # populate the start and end fields of the video attempts
+    sorted_video_attempts = sorted(
+        video.attempts, key=lambda attempt: attempt.attempt_number
+    )
+    for attempt_number, video_attempt in enumerate(sorted_video_attempts):
+        if len(form.videos.data) <= attempt_number:
+            form.videos.append_entry()
+
+        form.videos[-1].start.data = video_attempt.start
+        form.videos[-1].end.data = video_attempt.end
+
+    if request.method == "POST":
+        if not form.validate():
+            flask_session["all_forms_valid"] = False
+        elif len(form.videos) != len(video.attempts):
+            flask_session["all_forms_valid"] = False
+            flask_session["error"] = "The number of attempts is incorrect"
+
+        else:
+            for attempt_number, form_attempt in enumerate(form.videos):
+
+                # check that the start and end were not changed
+                for field in ["start", "end"]:
+                    if getattr(form_attempt, field).data != getattr(
+                        sorted_video_attempts[attempt_number], field
+                    ):
+                        abort(500)
+
+                # save the file
+                file = form_attempt.file
+                f_ext = os.path.splitext(file.filename)[1]
+                attempt_number = form_attempt.attempt_number.data
+                file.save(
+                    os.path.join(
+                        current_app.config["VIDEOS_FOLDER"],
+                        f"{video.base_fname}_{attempt_number}{f_ext}",
+                    )
+                )
+
+            return redirect(flask_session["call_from_url"])
+
+    return render("form.html", title=title, forms=[form], enctype="multipart/form-data")
 
 
 @videos.route("/files/<filetype>/<filename>")

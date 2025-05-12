@@ -1,6 +1,6 @@
 from flask import session as flask_session
 from flask_wtf import FlaskForm
-from wtforms import FieldList, FormField, IntegerField
+from wtforms import FieldList, FormField, IntegerField, StringField
 from wtforms.validators import DataRequired
 
 
@@ -20,4 +20,5 @@ class VideoSectionForm(FlaskForm):
 
 
 class VideoAnnotationForm(FlaskForm):
+    video_url = StringField("Video URL", validators=[DataRequired()])
     sections = FieldList(FormField(VideoSectionForm), min_entries=1)

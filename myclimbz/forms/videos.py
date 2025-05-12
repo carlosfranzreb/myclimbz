@@ -1,13 +1,17 @@
-from flask import session as flask_session
 from flask_wtf import FlaskForm
-from flask_wtf.file import MultipleFileField, FileRequired, FileAllowed
+from flask_wtf.file import FileRequired, FileAllowed, FileField
+from wtforms import IntegerField, FieldList, FormField
+from wtforms.validators import DataRequired
 
 
 ALLOWED_EXTS = ["mp4", "mov", "webm", "avi"]
 
 
-class VideosForm(FlaskForm):
-    videos = MultipleFileField(
+class VideoAttemptForm(FlaskForm):
+    start = IntegerField("Start", validators=[DataRequired()])
+    end = IntegerField("End", validators=[DataRequired()])
+    file = FileField(
+        "File",
         validators=[
             FileRequired(),
             FileAllowed(
@@ -16,10 +20,6 @@ class VideosForm(FlaskForm):
         ],
     )
 
-    def validate(self) -> bool:
-        is_valid = True
-        if not super().validate():
-            flask_session["error"] = self.videos.errors[0]
-            is_valid = False
 
-        return is_valid
+class VideosUploadForm(FlaskForm):
+    videos = FieldList(FormField(VideoAttemptForm), min_entries=1)
