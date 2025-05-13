@@ -34,15 +34,18 @@ addSectionBtn.addEventListener("click", () => {
 		.cloneNode(true);
 
 	// Change the IDs of the input fields and their labels, and empty them
-	["start", "end"].forEach((field) => {
+	["start", "end", "file"].forEach((field) => {
 		const inputField = newSection.querySelector(`#sections-0-${field}`);
 		let newId = `sections-${newIndex}-${field}`;
 		inputField.id = newId;
 		inputField.name = newId;
 		inputField.value = "";
-		newSection
-			.querySelector(`label[for="sections-0-${field}"]`)
-			.setAttribute("for", `sections-${newIndex}-${field}`);
+
+		// Change the label
+		const label = newSection.querySelector(
+			`label[for="sections-0-${field}"]`
+		);
+		if (label) label.setAttribute("for", `sections-${newIndex}-${field}`);
 	});
 
 	// Remove error messages, if any

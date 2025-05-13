@@ -20,7 +20,6 @@
         <video id="videoPlayer" controls width="600" style="max-width: 100%; border: 1px solid #ccc;">
             Your browser does not support the video tag.
         </video>
-        <p id="videoFileInfo" class="mt-2"></p>
     </div>
 
 </div>
@@ -28,7 +27,7 @@
 {# div with the forms #}
 <div class="container px-2 px-md-5">
     <hr>
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         {{ video_form.hidden_tag() }}
 
         <h4>Climbing sections</h4>
@@ -36,6 +35,9 @@
             {% for section_field in video_form.sections %}
             <div class="section-entry row align-items-center mb-2 border p-2 rounded" data-index="{{ loop.index0 }}">
                 
+                {# Display the file field, hidden #}
+                {{ section_field.file(class="d-none") }}
+
                 {# Create start and end inputs for the section #}
                 {% for field_name in ['start', 'end'] %}
                 <div class="col-md-5">
@@ -71,7 +73,7 @@
         <hr>
         {{ macros.three_forms(other_forms) }}
 
-        <input type="submit" class="btn btn-primary" value="Submit">
+        <input class="btn btn-primary" value="Submit" onclick="addVideos()">
         <a href="{{ url_for('home.cancel_form') }}" class="btn btn-danger ms-2">Cancel</a>
 
     </form>
