@@ -239,10 +239,16 @@ def fill_form(
 
         # trigger the field's onchange attribute if it has one
         if field.get_attribute("onchange"):
-            driver.execute_script("arguments[0].onchange();", field)
+            try:
+                driver.execute_script("arguments[0].onchange();", field)
+            except Exception as exc:
+                print(f"Exception for field with ID {field_id}: {exc}")
 
     # submit the form
-    element = driver.find_element(By.XPATH, "//input[@type='submit']")
+    try:
+        element = driver.find_element(By.XPATH, "//input[@type='submit']")
+    except NoSuchElementException:
+        element = driver.find_element(By.XPATH, "//input[@value='Submit']")
     view_element(driver, element)
     driver.execute_script("arguments[0].click();", element)
 
