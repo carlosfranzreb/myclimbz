@@ -56,52 +56,51 @@ async function addVideos() {
 	await ffmpeg.writeFile("input.mp4", await fetchFile(videoPlayer.src));
 
 	// Add the video to the form fields
-	document
-		.querySelectorAll("#sections-container>div")
-		.forEach(async (div) => {
-			let start = div.querySelector("input[id*='start']");
-			let sectionId = start.id.split("-")[1];
-			let startValue = start.value;
-			let endValue = div.querySelector("input[id*='end']").value;
-			let fileInput = div.querySelector("input[type=file]");
+	const sectionPromises = Array.from(
+		document.querySelectorAll("#sections-container>div")
+	).map(async (div) => {
+		let start = div.querySelector("input[id*='start']");
+		let sectionId = start.id.split("-")[1];
+		let startValue = start.value;
+		let endValue = div.querySelector("input[id*='end']").value;
+		let fileInput = div.querySelector("input[type=file]");
+		let duration = String(parseInt(endValue) - parseInt(startValue));
 
-			// Run the clip command
-			// -ss before -i is faster but less accurate
-			const outName = `section_${sectionId}.mp4`;
-			await ffmpeg.exec(
-				"-i",
-				"input.mp4",
-				"-ss",
-				startValue,
-				"-c",
-				"copy",
-				"-to",
-				endValue,
-				outName
-			);
+		// Run the clip command
+		const outName = `section_${sectionId}.mp4`;
+		await ffmpeg.exec([
+			"-ss",
+			startValue,
+			"-i",
+			"input.mp4",
+			"-t",
+			duration,
+			"-c",
+			"copy",
+			outName,
+		]);
 
-			// Read the clipped file back out
-			const data = ffmpeg.readFile(outName);
-			const clipBlob = new Blob([data.buffer], { type: "video/mp4" });
-			const clipFile = new File([clipBlob], outName, {
-				type: "video/mp4",
-			});
-
-			// Stick it into the file input
-			const dt = new DataTransfer();
-			dt.items.add(clipFile);
-			fileInput.files = dt.files;
+		// Read the clipped file back out
+		const data = await ffmpeg.readFile(outName);
+		const clipBlob = new Blob([data.buffer], { type: "video/mp4" });
+		const clipFile = new File([clipBlob], outName, {
+			type: "video/mp4",
 		});
 
-	// validate the form
+		// Stick it into the file input
+		const dt = new DataTransfer();
+		dt.items.add(clipFile);
+		fileInput.files = dt.files;
+	});
+
+	// validate and submit the form
+	await Promise.all(sectionPromises);
 	let form = document.querySelector("#sections-0-file").form;
 	if (!form.checkValidity()) {
 		form.reportValidity();
 		return;
 	}
-
-	// Submit the form
-	// form.submit();
+	form.submit();
 }
 
 const toBlobURLPatched = async (url, mimeType, patcher) => {
@@ -112,6 +111,7 @@ const toBlobURLPatched = async (url, mimeType, patcher) => {
 	return URL.createObjectURL(blob);
 };
 
+// TODO: merge this with `toBlobURLPatched`
 const toBlobURL = async (url, mimeType) => {
 	var resp = await fetch(url);
 	var body = await resp.blob();
@@ -127,6 +127,7 @@ const fetchFile = async (url) => {
 
 // Load FFMPEG
 // From <https://github.com/ffmpegwasm/ffmpeg.wasm/issues/548#issuecomment-1707248897>
+// TODO: check if all the modules are really needed
 async function loadFfmpeg() {
 	const baseURLFFMPEG = "https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/umd";
 	const ffmpegBlobURL = await toBlobURLPatched(
@@ -153,9 +154,7 @@ async function loadFfmpeg() {
 	};
 	await import(ffmpegBlobURL);
 	ffmpeg = new FFmpegWASM.FFmpeg();
-	ffmpeg.on("log", ({ message }) => {
-		console.log(message);
-	});
+	ffmpeg.on("log", (log) => console.log(log));
 	await ffmpeg.load(config);
 	ffmpegLoaded = true;
 }
