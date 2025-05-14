@@ -46,60 +46,52 @@ function navigateVideo(event) {
 // Add video clips before the form is submitted
 async function addVideos() {
 	// Return if there is no video
-	const videoFile = videoFileInput.files[0];
-	if (!videoFile) return alert("There is no video");
+	if (videoFileInput.files.length == 0) return alert("There is no video");
 
 	// Ensure FFmpeg is loaded
 	while (!ffmpegLoaded)
 		await new Promise((resolve) => setTimeout(resolve, 50));
 
-	// Write the original file into FFmpeg’s in-MEM filesystem once
-	ffmpeg.writeFile("input.mp4", videoFile);
+	// Write the original file into FFmpeg’s filesystem
+	await ffmpeg.writeFile("input.mp4", await fetchFile(videoPlayer.src));
 
 	// Add the video to the form fields
-	const dt = new DataTransfer();
-	dt.items.add(videoFile);
-	document.querySelectorAll("#sections-container>div").forEach((div) => {
-		let start = div.querySelector("input[id*='start']");
-		let sectionId = start.id.split("-")[1];
-		let startValue = start.value;
-		let endValue = div.querySelector("input[id*='end']").value;
-		let fileInput = div.querySelector("input[type=file]");
+	document
+		.querySelectorAll("#sections-container>div")
+		.forEach(async (div) => {
+			let start = div.querySelector("input[id*='start']");
+			let sectionId = start.id.split("-")[1];
+			let startValue = start.value;
+			let endValue = div.querySelector("input[id*='end']").value;
+			let fileInput = div.querySelector("input[type=file]");
 
-		// Build a unique output filename
-		const outName = `section_${sectionId}.mp4`;
+			// Run the clip command
+			// -ss before -i is faster but less accurate
+			const outName = `section_${sectionId}.mp4`;
+			await ffmpeg.exec(
+				"-i",
+				"input.mp4",
+				"-ss",
+				startValue,
+				"-c",
+				"copy",
+				"-to",
+				endValue,
+				outName
+			);
 
-		// Run the clip command
-		// -ss before -i is faster but less accurate; here we do it after for frame-accurate cutting
-		ffmpeg.exec(
-			"-i",
-			"input.mp4",
-			"-ss",
-			startValue,
-			"-to",
-			endValue,
-			"-c",
-			"copy",
-			outName
-		);
+			// Read the clipped file back out
+			const data = ffmpeg.readFile(outName);
+			const clipBlob = new Blob([data.buffer], { type: "video/mp4" });
+			const clipFile = new File([clipBlob], outName, {
+				type: "video/mp4",
+			});
 
-		// Read the clipped file back out
-		const data = ffmpeg.readFile(outName);
-		const clipBlob = new Blob([data.buffer], { type: "video/mp4" });
-
-		// Create a new File so it can be attached to the <input type="file">
-		const clipFile = new File(
-			[clipBlob],
-			// you can keep the original name or generate your own:
-			`${videoFile.name.replace(/\.[^.]+$/, "")}_clip${sectionId}.mp4`,
-			{ type: "video/mp4" }
-		);
-
-		// Stick it into the file input
-		const dt = new DataTransfer();
-		dt.items.add(clipFile);
-		fileInput.files = dt.files;
-	});
+			// Stick it into the file input
+			const dt = new DataTransfer();
+			dt.items.add(clipFile);
+			fileInput.files = dt.files;
+		});
 
 	// validate the form
 	let form = document.querySelector("#sections-0-file").form;
@@ -109,7 +101,7 @@ async function addVideos() {
 	}
 
 	// Submit the form
-	form.submit();
+	// form.submit();
 }
 
 const toBlobURLPatched = async (url, mimeType, patcher) => {
