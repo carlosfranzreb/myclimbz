@@ -37,10 +37,17 @@ videoFileInput.addEventListener("change", function (event) {
 });
 
 // Seek the video's timestamp (in seconds) that matches the caller's value
-// TODO: If the input value is a start, its corresponding end must be at least the same value
+// If the input value is a start, its corresponding end is updated if empty
 function navigateVideo(event) {
 	const timeInSeconds = parseFloat(event.target.value);
-	if (!isNaN(timeInSeconds)) videoPlayer.currentTime = timeInSeconds;
+	if (isNaN(timeInSeconds)) return;
+
+	videoPlayer.currentTime = timeInSeconds;
+	if (event.target.id.includes("start")) {
+		const endID = event.target.id.replace("start", "end");
+		const endInput = document.getElementById(endID);
+		if (!endInput.value.trim()) endInput.value = timeInSeconds + 1;
+	}
 }
 
 // Add video clips before the form is submitted
