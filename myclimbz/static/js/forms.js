@@ -209,7 +209,7 @@ function updateOpinionForm(data) {
 		);
 	}
 
-	// Update grade and comment; both could be null (TODO: comment QA)
+	// Update grade and comment; both could be null
 	["grade", "opinion_comment"].forEach(function (field) {
 		if (data[field]) document.getElementById(field).value = data[field];
 	});
