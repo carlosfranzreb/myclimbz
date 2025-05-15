@@ -71,7 +71,7 @@ def test_delete_route(db_session, driver):
     Climbs of that route should be deleted as well. And if any session is left empty,
     it should be deleted too.
     """
-    # find a route that it not shared
+    # find a route that is not shared
     sql_query = text(
         f"""
         SELECT route.id, route.name

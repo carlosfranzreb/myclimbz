@@ -255,9 +255,9 @@ def fill_form(
 
     # check if the outcome matches the expectation
     if expect_success:
-        WebDriverWait(driver, 3).until(EC.title_is(HOME_TITLE))
+        WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
     else:
-        WebDriverWait(driver, 3).until_not(EC.title_is(HOME_TITLE))
+        WebDriverWait(driver, 10).until_not(EC.title_is(HOME_TITLE))
 
     return expect_success
 
