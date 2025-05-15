@@ -210,7 +210,7 @@ class Route(db.Model):
             session = sorted_climbs[climb_idx].session
 
             # iterate over attempts and store video information
-            for attempt_idx, attempt in enumerate(video.attempts):
+            for attempt in video.attempts:
                 attempt_video = f"{base}_{attempt.attempt_number}{video.ext}"
                 out.append(
                     {
