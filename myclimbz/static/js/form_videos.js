@@ -48,6 +48,32 @@ async function addVideos() {
 	// Return if there is no video
 	if (videoFileInput.files.length == 0) return alert("There is no video");
 
+	// Check that each section's end is larger than each section's start,
+	// and that all values are between 0 and the video's duration
+	const sections = document.querySelectorAll("#sections-container>div");
+	for (const div of sections) {
+		const startInput = div.querySelector("input[id*='start']");
+		const endInput = div.querySelector("input[id*='end']");
+		const startValue = parseFloat(startInput.value);
+		const endValue = parseFloat(endInput.value);
+
+		if (isNaN(startValue) || isNaN(endValue))
+			return alert("Please enter valid numbers for all sections.");
+
+		if (
+			startValue < 0 ||
+			endValue < 0 ||
+			startValue > videoPlayer.duration ||
+			endValue > videoPlayer.duration
+		)
+			return alert(
+				`Sections must be between 0 and the video duration (${videoPlayer.duration} seconds).`
+			);
+
+		if (endValue <= startValue)
+			return alert("Each section's end must be greater than its start.");
+	}
+
 	// Disable the screen and inform the user about the upload
 	const uploadingOverlay = document.createElement("div");
 	uploadingOverlay.style.position = "fixed";
@@ -115,6 +141,7 @@ async function addVideos() {
 	let form = document.querySelector("#sections-0-file").form;
 	if (!form.checkValidity()) {
 		form.reportValidity();
+		document.body.removeChild(uploadingOverlay);
 		return;
 	}
 	form.submit();

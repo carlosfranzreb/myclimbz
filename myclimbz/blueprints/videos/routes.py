@@ -37,9 +37,6 @@ def annotate_video() -> str:
 
     Afterwards, the user is sent to `add_climb` to fill in route information. And after
     that, if there are more videos, the user is sent back here to annotate the next video.
-
-    TODO: section values cannot exceed video duration
-    TODO: add "sent" field to each section
     """
 
     # create video annotation form
