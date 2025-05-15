@@ -9,29 +9,18 @@ from flask import (
     current_app,
     send_from_directory,
     abort,
-    url_for,
-    jsonify,
-    make_response,
 )
 from flask_login import current_user
-from werkzeug.utils import secure_filename
 
 from myclimbz.models import Video, VideoAttempt, Session
 from myclimbz.forms import (
-    VideosUploadForm,
-    VideoAttemptForm,
     VideoAnnotationForm,
     RouteForm,
     ClimbForm,
     OpinionForm,
 )
 from myclimbz import db
-from myclimbz.blueprints.utils import render, delete_video_info
-from myclimbz.blueprints.videos.utils import (
-    check_access_to_file,
-    get_video_frames,
-    trim_video,
-)
+from myclimbz.blueprints.utils import render
 
 videos = Blueprint("videos", __name__)
 
@@ -138,20 +127,10 @@ def annotate_video() -> str:
     )
 
 
-@videos.route("/files/<filetype>/<filename>")
-def serve_file(filetype: str, filename: str):
-    """
-    Serves files from the UPLOAD_FOLDER.
-    """
-
-    if filetype == "videos":
-        folder = current_app.config["VIDEOS_FOLDER"]
-    elif filetype == "frames":
-        folder = current_app.config["FRAMES_FOLDER"]
-    else:
-        abort(404)
-
+@videos.route("/videos/<filename>")
+def serve_video(filename: str):
+    """Serves video from the VIDEOS_FOLDER."""
     try:
-        return send_from_directory(folder, filename)
+        return send_from_directory(current_app.config["VIDEOS_FOLDER"], filename)
     except FileNotFoundError:
         abort(404)
