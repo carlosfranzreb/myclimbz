@@ -154,18 +154,12 @@ async function addVideos() {
 	form.submit();
 }
 
-const toBlobURLPatched = async (url, mimeType, patcher) => {
+const toBlobURL = async (url, mimeType, patcher) => {
 	var resp = await fetch(url);
-	var body = await resp.text();
-	if (patcher) body = patcher(body);
-	var blob = new Blob([body], { type: mimeType });
-	return URL.createObjectURL(blob);
-};
-
-// TODO: merge this with `toBlobURLPatched`
-const toBlobURL = async (url, mimeType) => {
-	var resp = await fetch(url);
-	var body = await resp.blob();
+	if (patcher) {
+		var body = await resp.text();
+		body = patcher(body);
+	} else var body = await resp.blob();
 	var blob = new Blob([body], { type: mimeType });
 	return URL.createObjectURL(blob);
 };
@@ -181,7 +175,7 @@ const fetchFile = async (url) => {
 // TODO: check if all the modules are really needed
 async function loadFfmpeg() {
 	const baseURLFFMPEG = "https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/umd";
-	const ffmpegBlobURL = await toBlobURLPatched(
+	const ffmpegBlobURL = await toBlobURL(
 		`${baseURLFFMPEG}/ffmpeg.js`,
 		"text/javascript",
 		(js) => {
