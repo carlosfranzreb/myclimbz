@@ -48,6 +48,23 @@ async function addVideos() {
 	// Return if there is no video
 	if (videoFileInput.files.length == 0) return alert("There is no video");
 
+	// Disable the screen and inform the user about the upload
+	const uploadingOverlay = document.createElement("div");
+	uploadingOverlay.style.position = "fixed";
+	uploadingOverlay.style.top = 0;
+	uploadingOverlay.style.left = 0;
+	uploadingOverlay.style.width = "100%";
+	uploadingOverlay.style.height = "100%";
+	uploadingOverlay.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+	uploadingOverlay.style.zIndex = "9999";
+	uploadingOverlay.style.display = "flex";
+	uploadingOverlay.style.flexDirection = "column";
+	uploadingOverlay.style.alignItems = "center";
+	uploadingOverlay.style.justifyContent = "center";
+	uploadingOverlay.innerHTML =
+		"<h1 style='color: #fff;'>Uploading videos... Please wait.</h1>";
+	document.body.appendChild(uploadingOverlay);
+
 	// Ensure FFmpeg is loaded
 	while (!ffmpegLoaded)
 		await new Promise((resolve) => setTimeout(resolve, 50));
