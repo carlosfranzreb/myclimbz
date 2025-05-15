@@ -20,5 +20,6 @@ class VideoAttempt(db.Model):
 class Video(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     base_fname = db.Column(db.String(200), unique=True, nullable=False)
+    ext = db.Column(db.String(10), nullable=False)
     climb_id = db.Column(db.Integer, db.ForeignKey("climb.id"))
     attempts = db.relationship("VideoAttempt", backref="video", cascade="all, delete")

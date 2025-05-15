@@ -79,7 +79,7 @@ def edit_climb(climb_id: int) -> str:
     # POST: a climb form was submitted => edit climb or return error
     if request.method == "POST":
         climb_form = ClimbForm()
-        if not climb_form.validate(climb.route, climb.session_id, climb_id=climb_id):
+        if not climb_form.validate(climb.route, climb.session_id):
             flask_session["all_forms_valid"] = False
 
         else:

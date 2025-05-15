@@ -39,7 +39,9 @@ addSectionBtn.addEventListener("click", () => {
 		let newId = `sections-${newIndex}-${field}`;
 		inputField.id = newId;
 		inputField.name = newId;
-		inputField.value = "";
+
+		if (inputField.type === "checkbox") inputField.checked = false;
+		else inputField.value = "";
 
 		// Change the label
 		const label = newSection.querySelector(

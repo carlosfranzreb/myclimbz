@@ -12,7 +12,7 @@ from flask import (
 )
 from flask_login import current_user
 
-from myclimbz.models import Video, VideoAttempt, Session
+from myclimbz.models import Video, VideoAttempt, Session, Climb
 from myclimbz.forms import (
     VideoAnnotationForm,
     RouteForm,
@@ -71,6 +71,28 @@ def annotate_video() -> str:
         # store info if forms are valid
         if flask_session["all_forms_valid"]:
 
+            # store route, climb and opinion (TODO: use code from climbs.add_climb?)
+            sector = route_form.get_sector(area_id)
+            db.session.add(sector)
+            db.session.flush()
+
+            route = route_form.get_object(sector)
+            db.session.add(route)
+            db.session.flush()
+
+            opinion = opinion_form.get_object(current_user.id, route.id)
+            db.session.add(opinion)
+            db.session.flush()
+
+            # set the attempt offset
+            route_climbs = Climb.query.filter_by(
+                session_id=session_id, route_id=route.id
+            ).all()
+            if len(route_climbs) == 0:
+                attempt_offset = 0
+            else:
+                attempt_offset = route_climbs[0].n_attempts
+
             # store video annotations
             video = Video(base_fname=f"{current_user.id}_{session_id}_{int(time())}")
             for section_idx, section in enumerate(video_form.sections.data):
@@ -80,7 +102,7 @@ def annotate_video() -> str:
                     VideoAttempt(
                         start=section["start"],
                         end=section["end"],
-                        attempt_number=section_idx,
+                        attempt_number=attempt_offset + section_idx,
                         sent=section["sent"],
                     )
                 )
@@ -95,24 +117,15 @@ def annotate_video() -> str:
                     )
                 )
 
+            video.ext = f_ext
             db.session.add(video)
-
-            # store route, climb and opinion (TODO: use code from climbs.add_climb?)
-            sector = route_form.get_sector(area_id)
-            db.session.add(sector)
-            db.session.flush()
-
-            route = route_form.get_object(sector)
-            db.session.add(route)
-            db.session.flush()
-
-            opinion = opinion_form.get_object(current_user.id, route.id)
-            db.session.add(opinion)
-            db.session.flush()
 
             # add video to climb
             climb = climb_form.get_object(route)
             climb.videos.append(video)
+            if not climb.sent and any([att.sent for att in video.attempts]):
+                climb.sent = True
+
             db.session.add(climb)
             db.session.commit()
 
