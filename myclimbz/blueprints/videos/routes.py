@@ -110,13 +110,15 @@ def annotate_video() -> str:
 
             # store route, climb and opinion (TODO: use code from climbs.add_climb?)
             sector = route_form.get_sector(area_id)
+            db.session.add(sector)
+            db.session.flush()
+
             route = route_form.get_object(sector)
-            for obj in [sector, route]:
-                if obj.id is None:
-                    db.session.add(obj)
+            db.session.add(route)
+            db.session.flush()
+
             opinion = opinion_form.get_object(current_user.id, route.id)
-            if opinion.id is None:
-                db.session.add(opinion)
+            db.session.add(opinion)
             db.session.flush()
 
             # add video to climb

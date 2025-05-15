@@ -26,6 +26,7 @@ from .conftest import (
     HOME_TITLE,
     HOME_URL,
     EXISTING_OBJECTS,
+    CLIMBER_ID,
     get_existing_route,
     fill_form,
 )
@@ -92,7 +93,8 @@ def test_add_video(driver, db_session, started_session_id) -> None:
             "name": route_name,
             "sections-0-start": 1,
             "sections-0-end": 5,
-            "skip_opinion": True,
+            "grade": "13",
+            "rating": 5,
         },
     )
     assert form_accepted
@@ -110,6 +112,22 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     climb_id, n_attempts, sent = results[0]
     assert n_attempts == 1
     assert not sent
+
+    # check that an opinion for the route was created
+    sql_query = text(
+        f"""
+        SELECT grade_id,comment,landing,rating FROM opinion
+        WHERE climber_id = {CLIMBER_ID}
+        AND route_id = {route_id};
+        """
+    )
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 1
+    grade_id, comment, landing, rating = results[0]
+    assert grade_id == 13
+    assert comment is None
+    assert landing == 3
+    assert rating == 5
 
     # check that the video was recorded in the database
     results = db_session.execute(
