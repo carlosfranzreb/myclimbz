@@ -81,7 +81,7 @@ def annotate_video() -> str:
                         start=section["start"],
                         end=section["end"],
                         attempt_number=section_idx,
-                        sent=False,
+                        sent=section["sent"],
                     )
                 )
 

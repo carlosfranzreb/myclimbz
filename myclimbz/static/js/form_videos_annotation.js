@@ -34,7 +34,7 @@ addSectionBtn.addEventListener("click", () => {
 		.cloneNode(true);
 
 	// Change the IDs of the input fields and their labels, and empty them
-	["start", "end", "file"].forEach((field) => {
+	["start", "end", "file", "sent"].forEach((field) => {
 		const inputField = newSection.querySelector(`#sections-0-${field}`);
 		let newId = `sections-${newIndex}-${field}`;
 		inputField.id = newId;
@@ -55,19 +55,18 @@ addSectionBtn.addEventListener("click", () => {
 
 	// Add remove button
 	const removeContainer = document.createElement("div");
-	removeContainer.classList.add("col-md-2", "text-end");
+	removeContainer.classList.add("col-md-5", "col", "text-end");
 	const removeBtn = document.createElement("button");
 	removeBtn.textContent = "Remove";
 	removeBtn.classList.add(
 		"btn",
 		"btn-danger",
 		"btn-sm",
-		"remove-section-btn",
-		"mt-2"
+		"remove-section-btn"
 	);
 	removeBtn.addEventListener("click", handleRemoveClick);
 	removeContainer.appendChild(removeBtn);
-	newSection.appendChild(removeContainer);
+	newSection.querySelectorAll(":scope > div")[1].appendChild(removeContainer);
 
 	// Update the number of attempts and the info text of the climb form
 	nAttemptsField.value++;

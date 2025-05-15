@@ -1,8 +1,8 @@
 from flask import session as flask_session
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileRequired, FileAllowed, FileField
-from wtforms import FieldList, FormField, IntegerField
-from wtforms.validators import DataRequired
+from wtforms import FieldList, FormField, IntegerField, BooleanField
+from wtforms.validators import DataRequired, Optional
 
 
 ALLOWED_EXTS = ["mp4", "mov", "webm", "avi"]
@@ -11,6 +11,7 @@ ALLOWED_EXTS = ["mp4", "mov", "webm", "avi"]
 class VideoSectionForm(FlaskForm):
     start = IntegerField("Start", validators=[DataRequired()])
     end = IntegerField("End", validators=[DataRequired()])
+    sent = BooleanField("Sent", validators=[Optional()])
     file = FileField(
         "File",
         validators=[

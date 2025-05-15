@@ -44,7 +44,7 @@ def test_add_video(driver, db_session, started_session_id) -> None:
         WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
 
     # open the form to add videos
-    driver.find_element(By.ID, "add_videos").click()
+    driver.find_element(By.ID, "add_video").click()
     # create 8-second video with ffmpeg
     video_path = "/tmp/test_video.mp4"
     ffmpeg_command = [

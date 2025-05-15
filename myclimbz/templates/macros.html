@@ -141,12 +141,12 @@
                             {{ field(id=field.id, class='form-control', list=datalist_name, autocomplete='off') }}
                         {% endif %}
 
-                    <!-- Otherwise, we assume the field is a text input -->
+                    {# Otherwise, we assume the field is a text input #}
                     {% else %}
                         {{ field(id=field.id, class='form-control') }}
                     {% endif %}
 
-                    <!-- Add error messages if there are any -->
+                    {# Add error messages if there are any #}
                     {% if field.errors %}
                         <div class="invalid-feedback">
                             {% for error in field.errors %}

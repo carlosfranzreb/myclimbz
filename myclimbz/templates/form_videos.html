@@ -33,28 +33,46 @@
         <h4>Climbing sections</h4>
         <div id="sections-container">
             {% for section_field in video_form.sections %}
-            <div class="section-entry row align-items-center mb-2 border p-2 rounded" data-index="{{ loop.index0 }}">
+            <div class="section-entry border rounded mb-2 p-2">
+                <div class="row align-items-center">
                 
-                {# Display the file field, hidden #}
-                {{ section_field.file(class="d-none") }}
+                    {# Display the file field, hidden #}
+                    {{ section_field.file(class="d-none") }}
 
-                {# Create start and end inputs for the section #}
-                {% for field_name in ['start', 'end'] %}
-                <div class="col-md-5">
-                    {{ section_field[field_name].label(class="form-label") }}
-                    {{ section_field[field_name](onchange="navigateVideo(event)", onclick="navigateVideo(event)", class="form-control form-control-sm " ~ field_name ~ "-input") }}
-                    {% if section_field[field_name].errors %}
-                        <div class="invalid-feedback d-block">{{ section_field[field_name].errors|join(', ') }}</div>
+                    {# Create start and end inputs for the section #}
+                    {% for field_name in ['start', 'end'] %}
+                        <div class="col-md-5">
+                            {{ section_field[field_name].label(class="form-label") }}
+                            {{ section_field[field_name](onchange="navigateVideo(event)", onclick="navigateVideo(event)", class="form-control form-control-sm " ~ field_name ~ "-input") }}
+                            {% if section_field[field_name].errors %}
+                                <div class="invalid-feedback d-block">{{ section_field[field_name].errors|join(', ') }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# Checkbox to mark the section as a send #}
+                <div class="row align-items-center">
+                    <div class="col-md-5 col form-group">
+                        {{ section_field["sent"].label(id=section_field["sent"].id + "-label") }}
+                        {{ section_field["sent"](id=section_field["sent"].id, class='form-check') }}
+                        <script>
+                            document.getElementById("{{ section_field['sent'].id }}").parentElement.style.display = "flex";
+                            document.getElementById("{{ section_field['sent'].id }}").parentElement.parentElement.style.margin = "0.5em 0em;"
+                            document.getElementById("{{ section_field['sent'].id }}").style.cursor = "pointer";
+                            document.getElementById("{{ section_field['sent'].id }}-label").style.cursor = "pointer";
+                            document.getElementById("{{ section_field['sent'].id }}-label").classList.add("label-checkbox");
+                        </script>
+                    </div>
+
+                    {# If this section is not the first, it can be removed #}
+                    {% if loop.index0 > 0 %}
+                        <div class="col-md-5 col text-end">
+                            <button type="button" class="btn btn-danger btn-sm remove-section-btn">Remove</button>
+                        </div>
                     {% endif %}
-                </div>
-                {% endfor %}
 
-                {# If this section is not the first, it can be removed #}
-                {% if loop.index0 > 0 %}
-                <div class="col-md-2 text-end">
-                    <button type="button" class="btn btn-danger btn-sm remove-section-btn mt-2">Remove</button>
                 </div>
-                {% endif %}
 
                 {# Display errors, if any #}
                 {% if section_field.errors and 'start' not in section_field.errors and 'end' not in section_field.errors %} {# Catch form-level errors #}
