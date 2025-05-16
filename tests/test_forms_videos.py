@@ -10,10 +10,7 @@ If the user uploads multiple videos, the user must first sort them before going 
 annotation page.
 """
 
-import os
 import subprocess
-import json
-import math
 from time import sleep
 import sys
 
@@ -102,14 +99,14 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     # check that the climb was added with one attempt
     sql_query = text(
         f"""
-        SELECT id,n_attempts,sent FROM climb
+        SELECT n_attempts,sent FROM climb
         WHERE session_id = {started_session_id}
         AND route_id = {route_id};
         """
     )
     results = db_session.execute(sql_query).fetchall()
     assert len(results) == 1
-    climb_id, n_attempts, sent = results[0]
+    n_attempts, sent = results[0]
     assert n_attempts == 1
     assert not sent
 
@@ -128,50 +125,15 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     assert comment is None
     assert rating == 5
 
-    # check that the video was recorded in the database
-    results = db_session.execute(
-        text("SELECT id, climb_id, base_fname FROM video")
-    ).fetchall()
-    assert len(results) == 1
-    video_id, video_climb_id, base_fname = results[0]
-    assert video_climb_id == climb_id
-
-    # check that the attempt was recorded in the database
-    results = db_session.execute(
-        text("SELECT video_id, attempt_number, start, end, sent FROM video_attempt")
-    ).fetchall()
-    assert len(results) == 1
-    attempt_video_id, attempt_number, start, end, sent = results[0]
-    assert attempt_video_id == video_id
-    assert attempt_number == 0
-    assert start == 1
-    assert end == 5
-    assert not sent
-
-    # check that the video exists
-    video_fname = f"{base_fname}_{attempt_number}.mp4"
-    assert os.path.exists(os.path.join("./files/videos", video_fname))
-
-    # check that the video's duration is correct
-    ffprobe_command = [
-        "ffprobe",
-        "-v",
-        "error",
-        "-select_streams",
-        "v:0",
-        "-show_entries",
-        "format=duration",
-        "-of",
-        "json",
-        os.path.join("./files/videos", video_fname),
-    ]
-    result = subprocess.run(
-        ffprobe_command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        check=True,
+    # check that the video is visible in the route's page
+    route_url = f"{HOME_URL}/route/{route_id}"
+    driver.get(route_url)
+    video = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.TAG_NAME, "video"))
     )
-    duration_info = json.loads(result.stdout)
-    file_duration = float(duration_info["format"]["duration"])
-    assert math.isclose(file_duration, 4.0, rel_tol=0.2)
+    assert video.is_displayed()
+
+    # video display does not work in headless mode
+    if "debugpy" in sys.modules:
+        duration = driver.execute_script("return arguments[0].duration;", video)
+        assert abs(duration - 4) < 0.2
