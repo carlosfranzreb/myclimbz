@@ -74,6 +74,8 @@ def delete_route(route_id: int) -> str:
 
     if flask_session["error"] is None:
         for climber in Climber.query.all():
+            if climber.id == current_user.id:
+                continue
             if route in climber.projects:
                 flask_session["error"] = (
                     "This route has been marked as a project by other climbers."

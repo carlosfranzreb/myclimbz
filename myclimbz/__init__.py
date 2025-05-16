@@ -45,9 +45,7 @@ def create_app():
     mail.init_app(app)
 
     app.config["VIDEOS_FOLDER"] = os.path.join(os.environ["UPLOAD_FOLDER"], "videos")
-    app.config["FRAMES_FOLDER"] = os.path.join(os.environ["UPLOAD_FOLDER"], "frames")
     os.makedirs(app.config["VIDEOS_FOLDER"], exist_ok=True)
-    os.makedirs(app.config["FRAMES_FOLDER"], exist_ok=True)
 
     from myclimbz.blueprints.areas.routes import areas
     from myclimbz.blueprints.home.routes import home

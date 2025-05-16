@@ -33,23 +33,19 @@ class Climb(db.Model):
             return list()
 
         out = list()
-        session_attempts = 0
         for video in self.videos:
 
             # iterate over attempts and store video information
-            base, ext = os.path.splitext(video.fname)
-            for attempt_idx, attempt in enumerate(video.attempts):
+            for attempt in video.attempts:
                 attempt_video = (
-                    f"{base}_trim{attempt.start_frame}-{attempt.end_frame}{ext}"
+                    f"{video.base_fname}_{attempt.attempt_number}{video.ext}"
                 )
                 out.append(
                     {
-                        "attempt_number": session_attempts + attempt_idx + 1,
+                        "attempt_number": attempt.attempt_number,
                         "attempt_video": attempt_video,
+                        "attempt_sent": attempt.sent,
                     }
                 )
-
-            # update attempt counter and last session ID
-            session_attempts += len(video.attempts)
 
         return out[::-1]
