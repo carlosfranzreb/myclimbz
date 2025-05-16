@@ -95,11 +95,12 @@ def annotate_video() -> str:
             for section_idx, section in enumerate(video_form.sections.data):
 
                 # store section in database
+                attempt_number = attempt_offset + section_idx
                 video.attempts.append(
                     VideoAttempt(
                         start=section["start"],
                         end=section["end"],
-                        attempt_number=attempt_offset + section_idx,
+                        attempt_number=attempt_number,
                         sent=section["sent"],
                     )
                 )
@@ -110,7 +111,7 @@ def annotate_video() -> str:
                 file.save(
                     os.path.join(
                         current_app.config["VIDEOS_FOLDER"],
-                        f"{video.base_fname}_{section_idx}{f_ext}",
+                        f"{video.base_fname}_{attempt_number}{f_ext}",
                     )
                 )
 

@@ -81,6 +81,11 @@ async function addVideos() {
 			return alert("Each section's end must be greater than its start.");
 	}
 
+	// Check that the number of attempts is at least the number of sections
+	const nAttempts = parseInt(document.getElementById("n_attempts").value, 10);
+	if (isNaN(nAttempts) || nAttempts < sections.length)
+		return alert("There cannot be more sections than attempts.");
+
 	// Disable the screen and inform the user about the upload
 	const uploadingOverlay = document.createElement("div");
 	uploadingOverlay.style.position = "fixed";
