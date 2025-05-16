@@ -116,17 +116,16 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     # check that an opinion for the route was created
     sql_query = text(
         f"""
-        SELECT grade_id,comment,landing,rating FROM opinion
+        SELECT grade_id,comment,rating FROM opinion
         WHERE climber_id = {CLIMBER_ID}
         AND route_id = {route_id};
         """
     )
     results = db_session.execute(sql_query).fetchall()
     assert len(results) == 1
-    grade_id, comment, landing, rating = results[0]
+    grade_id, comment, rating = results[0]
     assert grade_id == 13
     assert comment is None
-    assert landing == 3
     assert rating == 5
 
     # check that the video was recorded in the database
