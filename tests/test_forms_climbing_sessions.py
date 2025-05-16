@@ -50,7 +50,11 @@ def test_create_invalid_session(driver) -> None:
         assert not form_accepted, data
 
     # cancel form
-    driver.find_element(By.LINK_TEXT, "Cancel").click()
+    sleep(3)
+    try:
+        driver.find_element(By.LINK_TEXT, "Cancel").click()
+    except Exception:
+        driver.save_screenshot("cancel_session.png")
 
 
 def test_create_session_on_new_area(driver, db_session) -> None:

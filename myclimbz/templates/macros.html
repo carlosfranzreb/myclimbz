@@ -141,12 +141,12 @@
                             {{ field(id=field.id, class='form-control', list=datalist_name, autocomplete='off') }}
                         {% endif %}
 
-                    <!-- Otherwise, we assume the field is a text input -->
+                    {# Otherwise, we assume the field is a text input #}
                     {% else %}
                         {{ field(id=field.id, class='form-control') }}
                     {% endif %}
 
-                    <!-- Add error messages if there are any -->
+                    {# Add error messages if there are any #}
                     {% if field.errors %}
                         <div class="invalid-feedback">
                             {% for error in field.errors %}
@@ -203,26 +203,33 @@ Macro to display videos, with the option of adding more videos to the list of di
 #}
 {% macro video_manager(videos, title) %}
 {% set video = videos[0] %}
-{# TODO: show frame at first and video on click #}
 <div class="container px-0 px-md-5 py-2 my-3">
     <h3 class="ms-3" style="display: inline-block">{{ title }}</h3>
     <div id="videos-container" class="row">
         {% for video_dict in videos %}
         <div class="col-lg-4 col-md-6 col-12 mb-4 {% if loop.index > 1 %}d-none video-item-hidden{% else %}video-item{% endif %}">
-            {# Removed list-group classes, added border for separation #}
             <div class="border rounded p-2 h-100" data-fname="{{ video_dict['attempt_video'] }}">
                 {% if "route_name" in video_dict %}
                     <p><b>{{ video_dict["route_name"] }}</b></p>
                 {% endif %}
-                {% if "session_number" in video_dict %}
-                    <p>Session #{{ video_dict["session_number"] }}, attempt #{{ video_dict["attempt_number"] }}</p>
-                {% else %}
-                    <p>Attempt #{{ video_dict["attempt_number"] }}</p>
+
+                {# Define the video's title #}
+                <script>console.log("{{video_dict}}")</script>
+                <p>
+                {% if video_dict["attempt_sent"] %}
+                    &#9989; 
                 {% endif %}
+
+                {% if "session_number" in video_dict %}
+                    Session #{{ video_dict["session_number"] }}, attempt #{{ video_dict["attempt_number"] + 1 }}
+                {% else %}
+                    Attempt #{{ video_dict["attempt_number"] + 1 }}
+                {% endif %}
+                </p>
+
                 <div class="text-center">
-                    {# Make video responsive #}
                     <video style="max-width: 100%; height: auto;" preload="metadata" class="me-2" controls>
-                        <source src="{{ url_for('videos.serve_file', filetype='videos', filename=video_dict['attempt_video']) }}" alt="{{ video_dict['attempt_video'] }}" type="video/mp4">
+                        <source src="{{ url_for('videos.serve_video', filename=video_dict['attempt_video']) }}" alt="{{ video_dict['attempt_video'] }}" type="video/mp4">
                     </video>
                 </div>
             </div>

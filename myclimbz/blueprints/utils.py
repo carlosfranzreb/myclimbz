@@ -39,10 +39,9 @@ def render(*args, **kwargs) -> str:
         else:
             flask_session["error"] = "An error occurred. Fix it and resubmit."
 
-    # check if videos are being annotated and show it in the title if yes
-    if "video_upload_status" in flask_session:
-        video_idx, n_videos = flask_session["video_upload_status"]
-        kwargs["title"] += f" (video {video_idx+1}/{n_videos})"
+    # check if videos should be uploaded by the client to the server
+    if "upload_videos_for_url" in flask_session:
+        kwargs["upload_videos_for_url"] = flask_session.pop("upload_videos_for_url")
 
     # add other kwargs
     kwargs["error"] = flask_session.pop("error", None)

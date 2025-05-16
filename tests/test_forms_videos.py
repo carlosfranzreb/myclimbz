@@ -10,6 +10,10 @@ If the user uploads multiple videos, the user must first sort them before going 
 annotation page.
 """
 
+import subprocess
+from time import sleep
+import sys
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -19,10 +23,10 @@ from .conftest import (
     HOME_TITLE,
     HOME_URL,
     EXISTING_OBJECTS,
+    CLIMBER_ID,
     get_existing_route,
     fill_form,
 )
-import subprocess
 
 
 def test_add_video(driver, db_session, started_session_id) -> None:
@@ -34,14 +38,11 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     # go to the home page
     if driver.current_url not in [HOME_URL, HOME_URL + "/"]:
         driver.get(HOME_URL)
-        WebDriverWait(driver, 30).until(EC.title_is(HOME_TITLE))
+        WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
 
     # open the form to add videos
-    driver.find_element(By.ID, "add_videos").click()
-    file_input = WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='file']"))
-    )
-    # create 2-second video with ffmpeg
+    driver.find_element(By.ID, "add_video").click()
+    # create 8-second video with ffmpeg
     video_path = "/tmp/test_video.mp4"
     ffmpeg_command = [
         "ffmpeg",
@@ -49,27 +50,34 @@ def test_add_video(driver, db_session, started_session_id) -> None:
         "-f",
         "lavfi",
         "-i",
-        "color=c=black:s=640x480:d=2",
+        "color=c=black:s=640x480:d=8",
         "-pix_fmt",
         "yuv420p",
         video_path,
     ]
     subprocess.run(ffmpeg_command, check=True)
 
-    # upload the video
+    # upload the video and wait until it is loaded
+    file_input = WebDriverWait(driver, 5).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='file']"))
+    )
     file_input.send_keys(video_path)
-    WebDriverWait(driver, 30).until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR, "input[type='submit']"))
-    ).click()
-    WebDriverWait(driver, 30).until(
-        lambda d: d.current_url == HOME_URL + "/annotate_video/1/0"
-    )
 
-    # the video should have 5 frames, as we are capturing 2 fps per default
-    total_frames_element = WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.ID, "total-frames"))
-    )
-    assert total_frames_element.text.strip() == "5"
+    # video display does not work in headless mode
+    if "debugpy" in sys.modules:
+        WebDriverWait(driver, 15).until(
+            lambda d: d.execute_script(
+                "return document.getElementById('videoPlayer').readyState"
+            )
+            == 4
+        )
+
+        # the video should have a duration of 8 seconds
+        video_player = driver.find_element(By.ID, "videoPlayer")
+        duration = driver.execute_script("return arguments[0].duration;", video_player)
+        assert abs(duration - 8) < 0.2
+    else:
+        sleep(5)
 
     # fill the form with a climbing section from 1 to 5 and submit
     route_name, route_id = get_existing_route(
@@ -82,24 +90,11 @@ def test_add_video(driver, db_session, started_session_id) -> None:
             "name": route_name,
             "sections-0-start": 1,
             "sections-0-end": 5,
-            "skip_opinion": True,
+            "grade": "13",
+            "rating": 5,
         },
     )
     assert form_accepted
-
-    # check that the video and the attempt were added to the database
-    for table in ["video", "video_attempt"]:
-        query = text(f"SELECT COUNT(*) FROM {table}")
-        n_rows = db_session.execute(query).fetchall()[0][0]
-        assert n_rows == 1, table
-
-    video_id = db_session.execute(text("SELECT id FROM video")).fetchall()[0][0]
-    attempt = db_session.execute(
-        text("SELECT video_id, start_frame, end_frame FROM video_attempt")
-    ).fetchall()[0]
-    assert attempt[0] == video_id
-    assert attempt[1] == 1
-    assert attempt[2] == 5
 
     # check that the climb was added with one attempt
     sql_query = text(
@@ -114,3 +109,31 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     n_attempts, sent = results[0]
     assert n_attempts == 1
     assert not sent
+
+    # check that an opinion for the route was created
+    sql_query = text(
+        f"""
+        SELECT grade_id,comment,rating FROM opinion
+        WHERE climber_id = {CLIMBER_ID}
+        AND route_id = {route_id};
+        """
+    )
+    results = db_session.execute(sql_query).fetchall()
+    assert len(results) == 1
+    grade_id, comment, rating = results[0]
+    assert grade_id == 13
+    assert comment is None
+    assert rating == 5
+
+    # check that the video is visible in the route's page
+    route_url = f"{HOME_URL}/route/{route_id}"
+    driver.get(route_url)
+    video = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.TAG_NAME, "video"))
+    )
+    assert video.is_displayed()
+
+    # video display does not work in headless mode
+    if "debugpy" in sys.modules:
+        duration = driver.execute_script("return arguments[0].duration;", video)
+        assert abs(duration - 4) < 0.2

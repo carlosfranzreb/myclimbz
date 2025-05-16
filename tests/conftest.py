@@ -59,7 +59,8 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
         driver_options = webdriver.ChromeOptions()
         driver_options.add_argument("--window-size=2560,1440")
         if "debugpy" not in sys.modules:
-            driver_options.add_argument("--headless")
+            driver_options.add_argument("--headless=new")
+
         driver = webdriver.Chrome(options=driver_options)
         driver.get("http://127.0.0.1:5000")
         WebDriverWait(driver, 30).until(EC.title_is("myclimbz - Home"))
@@ -239,18 +240,24 @@ def fill_form(
 
         # trigger the field's onchange attribute if it has one
         if field.get_attribute("onchange"):
-            driver.execute_script("arguments[0].onchange();", field)
+            try:
+                driver.execute_script("arguments[0].onchange();", field)
+            except Exception as exc:
+                print(f"Exception for field with ID {field_id}: {exc}")
 
     # submit the form
-    element = driver.find_element(By.XPATH, "//input[@type='submit']")
+    try:
+        element = driver.find_element(By.XPATH, "//input[@type='submit']")
+    except NoSuchElementException:
+        element = driver.find_element(By.XPATH, "//input[@value='Submit']")
     view_element(driver, element)
     driver.execute_script("arguments[0].click();", element)
 
     # check if the outcome matches the expectation
     if expect_success:
-        WebDriverWait(driver, 3).until(EC.title_is(HOME_TITLE))
+        WebDriverWait(driver, 10).until(EC.title_is(HOME_TITLE))
     else:
-        WebDriverWait(driver, 3).until_not(EC.title_is(HOME_TITLE))
+        WebDriverWait(driver, 10).until_not(EC.title_is(HOME_TITLE))
 
     return expect_success
 

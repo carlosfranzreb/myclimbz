@@ -1,3 +1,5 @@
+from sqlalchemy import UniqueConstraint
+
 from myclimbz import db
 
 
@@ -8,16 +10,16 @@ class VideoAttempt(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     video_id = db.Column(db.Integer, db.ForeignKey("video.id"))
-    start_frame_pred = db.Column(db.Integer)
-    end_frame_pred = db.Column(db.Integer)
-    start_frame = db.Column(db.Integer)
-    end_frame = db.Column(db.Integer)
+    attempt_number = db.Column(db.Integer, nullable=False)
+    start = db.Column(db.Integer, nullable=False)
+    end = db.Column(db.Integer, nullable=False)
+    sent = db.Column(db.Boolean, nullable=False)
+    UniqueConstraint(video_id, attempt_number, name="unique_attempt")
 
 
 class Video(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    fname = db.Column(db.String(200), unique=True)
+    base_fname = db.Column(db.String(200), unique=True, nullable=False)
+    ext = db.Column(db.String(10), nullable=False)
     climb_id = db.Column(db.Integer, db.ForeignKey("climb.id"))
-    fps_video = db.Column(db.Integer)  # video's FPS, measured by cv2
-    fps_taken = db.Column(db.Integer)  # FPS shown to the user for annotation
     attempts = db.relationship("VideoAttempt", backref="video", cascade="all, delete")

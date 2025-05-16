@@ -201,37 +201,26 @@ class Route(db.Model):
         sorted_session_ids = [climb.session.id for climb in sorted_climbs]
 
         out = list()
-        session_attempts = 0
-        last_session_id = None
         for video in videos:
 
             # get the session ID and its chronological order
-            base, ext = os.path.splitext(video.fname)
+            base = video.base_fname
             session_id = int(base.split("_", maxsplit=2)[1])
             climb_idx = sorted_session_ids.index(session_id)
             session = sorted_climbs[climb_idx].session
 
-            # restart the attempt counter if the session changed
-            if session_id != last_session_id:
-                session_attempts = 0
-
             # iterate over attempts and store video information
-            for attempt_idx, attempt in enumerate(video.attempts):
-                attempt_video = (
-                    f"{base}_trim{attempt.start_frame}-{attempt.end_frame}{ext}"
-                )
+            for attempt in video.attempts:
+                attempt_video = f"{base}_{attempt.attempt_number}{video.ext}"
                 out.append(
                     {
                         "session_number": climb_idx + 1,
                         "session_date": session.date,
-                        "attempt_number": session_attempts + attempt_idx + 1,
+                        "attempt_number": attempt.attempt_number,
                         "attempt_video": attempt_video,
+                        "attempt_sent": attempt.sent,
                     }
                 )
-
-            # update attempt counter and last session ID
-            last_session_id = session_id
-            session_attempts += len(video.attempts)
 
         return out[::-1]
 
