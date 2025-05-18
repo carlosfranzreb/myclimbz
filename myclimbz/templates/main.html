@@ -134,16 +134,6 @@
     <script>
         // Set the user's preferred grade scale
         let GRADE_SCALE = "{{ user_grade_scale }}";
-
-        // Prevent anything from happening when "Enter" is pressed
-        $(document).ready(function() {
-            $(window).keydown(function(event){
-                if(event.keyCode == 13) {
-                    event.preventDefault();
-                    return false;
-                }
-            });
-        });
     </script>
 
     <!-- Bootstrap -->
