@@ -42,6 +42,7 @@ class Climb(db.Model):
                 )
                 out.append(
                     {
+                        "attempt_id": attempt.id,
                         "attempt_number": attempt.attempt_number,
                         "attempt_video": attempt_video,
                         "attempt_sent": attempt.sent,

@@ -216,6 +216,7 @@ class Route(db.Model):
                     {
                         "session_number": climb_idx + 1,
                         "session_date": session.date,
+                        "attempt_id": attempt.id,
                         "attempt_number": attempt.attempt_number,
                         "attempt_video": attempt_video,
                         "attempt_sent": attempt.sent,
