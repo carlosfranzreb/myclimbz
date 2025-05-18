@@ -1,6 +1,6 @@
 // Variables related to video display
 const videoFileInput = document.getElementById("videoFile");
-const videoDisplayStep = document.getElementById("video-display-step");
+const videoContainer = document.getElementById("video-forms-container");
 const videoPlayer = document.getElementById("videoPlayer");
 const form = videoFileInput.form;
 let ffmpeg = null;
@@ -23,7 +23,7 @@ videoFileInput.addEventListener("change", function (event) {
 	if (!file.type.startsWith("video/")) {
 		alert("Please select a valid video file.");
 		videoFileInput.value = "";
-		videoDisplayStep.style.display = "none";
+		videoContainer.classList.append("d-none");
 		return;
 	}
 
@@ -33,7 +33,7 @@ videoFileInput.addEventListener("change", function (event) {
 
 	videoPlayer.src = videoURL;
 	videoPlayer.load();
-	videoDisplayStep.style.display = "block";
+	videoContainer.classList.remove("d-none");
 });
 
 // Seek the video's timestamp (in seconds) that matches the caller's value

@@ -17,13 +17,13 @@
 </div>
 
 {# div with the forms #}
-<div id="video_forms_container" class="container px-2 px-md-5">
+<div id="video-forms-container" class="container px-2 px-md-5 d-none">
 
     <form method="POST" enctype="multipart/form-data">
         {{ video_form.hidden_tag() }}
 
         <div class="row">
-            <div class="col-md-6" id="video-display-step" style="display: none;" class="my-3">
+            <div class="col-md-6" id="video-display-step" class="my-3">
                 <h4>Video</h4>
                 <video id="videoPlayer" controls style="max-width: 100%; border: 1px solid #ccc;">
                     Your browser does not support the video tag.
