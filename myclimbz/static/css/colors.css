@@ -112,6 +112,9 @@ a:hover {
 
 .table td {
     background-color: var(--color-white-200);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow:ellipsis;
 }
 
 .table-success td {
