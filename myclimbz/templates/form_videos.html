@@ -93,6 +93,9 @@
 
         <div class="row">
             {{ macros.three_forms(other_forms) }}
+        </div>
+
+        <div class="row-sm">
             <input class="btn btn-primary" value="Submit" onclick="addVideos()">
             <a href="{{ url_for('home.cancel_form') }}" class="btn btn-danger ms-2">Cancel</a>
         </div>

@@ -213,19 +213,31 @@ Macro to display videos, with the option of adding more videos to the list of di
                     <p><b>{{ video_dict["route_name"] }}</b></p>
                 {% endif %}
 
-                {# Define the video's title #}
+                {# Define the video's title and add actions #}
                 <script>console.log("{{video_dict}}")</script>
-                <p>
-                {% if video_dict["attempt_sent"] %}
-                    &#9989; 
-                {% endif %}
+                <div class="row">
+                    <div class="col-9">
+                        <p>
+                            {% if video_dict["attempt_sent"] %}
+                                &#9989; 
+                            {% endif %}
 
-                {% if "session_number" in video_dict %}
-                    Session #{{ video_dict["session_number"] }}, attempt #{{ video_dict["attempt_number"] + 1 }}
-                {% else %}
-                    Attempt #{{ video_dict["attempt_number"] + 1 }}
-                {% endif %}
-                </p>
+                            {% if "session_number" in video_dict %}
+                                Session #{{ video_dict["session_number"] }}, attempt #{{ video_dict["attempt_number"] + 1 }}
+                            {% else %}
+                                Attempt #{{ video_dict["attempt_number"] + 1 }}
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    {# button to delete video #}
+                    <div class="col-3 text-end">
+                        <a href="{{ url_for('videos.delete_video', video_attempt_id=video_dict['attempt_id']) }}" onclick="return confirm('Are you sure you want to delete this?');">
+                            {% include 'icons/delete.html' %}
+                        </a>
+                    </div>
+
+                </div>
 
                 <div class="text-center">
                     <video style="max-width: 100%; height: auto;" preload="metadata" class="me-2" controls>

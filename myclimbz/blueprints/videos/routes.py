@@ -145,3 +145,30 @@ def serve_video(filename: str):
         return send_from_directory(current_app.config["VIDEOS_FOLDER"], filename)
     except FileNotFoundError:
         abort(404)
+
+
+@videos.route("/delete_video/<int:video_attempt_id>")
+def delete_video(video_attempt_id: int) -> str:
+    """
+    Deleting a video is only possible if the user is the owner of the video, or an
+    admin. This is checked in check_request_validity (./myclimbz/__init__.py)
+    """
+
+    # return if the attempt does not exist
+    video_attempt = VideoAttempt.query.get(video_attempt_id)
+    if video_attempt is None:
+        return redirect(flask_session.pop("call_from_url"))
+
+    # delete the corresponding video
+    video = video_attempt.video
+    file_path = os.path.join(
+        current_app.config["VIDEOS_FOLDER"],
+        f"{video.base_fname}_{video_attempt.attempt_number}{video.ext}",
+    )
+    os.remove(file_path)
+
+    # delete the database record
+    db.session.delete(video_attempt)
+    db.session.commit()
+
+    return redirect(flask_session.pop("call_from_url"))
