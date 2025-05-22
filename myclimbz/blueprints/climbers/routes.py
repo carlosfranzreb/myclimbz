@@ -112,20 +112,12 @@ def register():
         if not verify_response["success"] or verify_response["score"] < 0.5:
             abort(403)
 
-        if not form.validate() or not pw_form.validate():
-            return render_template(
-                "register.html",
-                title="Register",
-                form=form,
-                pw_form=pw_form,
-                recaptcha=RECAPTCHA_PUBLIC_KEY,
-            )
-
-        # form is valid; commit changes and return
-        climber = form.get_edited_obj(Climber())
-        climber.password = generate_password_hash(pw_form.new_pw.data)
-        db.session.add(climber)
-        db.session.commit()
+        # if form is valid, commit changes and return
+        if form.validate() and pw_form.validate():
+            climber = form.get_edited_obj(Climber())
+            climber.password = generate_password_hash(pw_form.new_pw.data)
+            db.session.add(climber)
+            db.session.commit()
 
         login_user(climber)
         return redirect(url_for("home.page_home"))
