@@ -42,6 +42,7 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
     """
     If env=dev:
         Starts the Docker container with docker compose.
+        ! Make sure that in the .env file: DISABLE_LOGIN=0, PROD=0 are set
     Elif env=ci:
         GitHub Actions will run the web app as a service.
     """
@@ -49,11 +50,6 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
     try:
         if not IS_CI:
             os.system("git checkout instance/test_100.db")
-            assert os.environ["DISABLE_LOGIN"] == "1", "DISABLE_LOGIN must be set to 1"
-            assert os.environ["CLIMBZ_DB_URI"] == "sqlite:///test_100.db", (
-                "The DB URI is not set to the test DB"
-            )
-            assert os.environ["PROD"] == "0", "PROD must be set to 0"
             os.system("docker compose up --build -d")
 
         driver_options = webdriver.ChromeOptions()
