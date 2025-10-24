@@ -1,6 +1,4 @@
 from __future__ import annotations
-from collections.abc import Sequence
-from typing import Any, Mapping
 
 from flask_wtf import FlaskForm
 from wtforms import (

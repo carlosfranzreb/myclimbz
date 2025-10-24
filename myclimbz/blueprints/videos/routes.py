@@ -53,7 +53,6 @@ def annotate_video() -> str:
 
     # POST: user submitted forms
     if request.method == "POST":
-
         # validate forms
         flask_session["error"] = None
         flask_session["all_forms_valid"] = True
@@ -67,7 +66,6 @@ def annotate_video() -> str:
 
         # store info if forms are valid
         if flask_session["all_forms_valid"]:
-
             # store route, climb and opinion (TODO: use code from climbs.add_climb?)
             sector = route_form.get_sector(area_id)
             db.session.add(sector)
@@ -93,7 +91,6 @@ def annotate_video() -> str:
             # store video annotations
             video = Video(base_fname=f"{current_user.id}_{session_id}_{int(time())}")
             for section_idx, section in enumerate(video_form.sections.data):
-
                 # store section in database
                 attempt_number = attempt_offset + section_idx
                 video.attempts.append(

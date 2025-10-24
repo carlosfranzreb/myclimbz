@@ -1,0 +1,16 @@
+repos:
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: v0.12.4
+      hooks:
+          - id: ruff-check
+            args: [--fix, --ignore, E712]
+          - id: ruff-format
+    - repo: local
+      hooks:
+          - id: unittest-with-coverage
+            name: unittest with coverage
+            entry: python -m pytest tests/
+            language: system
+            pass_filenames: false
+            stages: [push]
+            working_directory: ..

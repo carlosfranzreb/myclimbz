@@ -12,7 +12,6 @@ climbs = Blueprint("climbs", __name__)
 
 @climbs.route("/add_climb", methods=["GET", "POST"])
 def add_climb() -> str:
-
     # create forms and add choices
     title = "Add climb"
     is_project_search = flask_session["session_id"] == "project_search"

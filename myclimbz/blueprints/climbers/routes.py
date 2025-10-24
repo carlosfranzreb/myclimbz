@@ -103,7 +103,6 @@ def register():
 
     # POST: a profile form was submitted => edit profile or return error
     if request.method == "POST":
-
         # validate the recaptcha
         secret_response = request.form["g-recaptcha-response"]
         verify_response = requests.post(
@@ -140,7 +139,6 @@ def forgot_password():
 
     # POST: a profile form was submitted => edit profile or return error
     if request.method == "POST":
-
         # validate the recaptcha
         secret_response = request.form["g-recaptcha-response"]
         verify_response = requests.post(

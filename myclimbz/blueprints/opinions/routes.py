@@ -11,7 +11,6 @@ opinions = Blueprint("opinions", __name__)
 
 @opinions.route("/add_opinion/<int:climber_id>/<int:route_id>", methods=["GET", "POST"])
 def add_opinion(climber_id: int, route_id: int) -> str:
-
     route_name = Route.query.get(route_id).name
     title = f"Add opinion for {route_name}"
 

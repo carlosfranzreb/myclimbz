@@ -140,7 +140,7 @@
     {{ macros.card({
         "header": {
             "title": opinion.climber.name,
-            "subtitle": "Sent" if opinion.route.sent_by(opinion.climber_id) else opinion.route.n_sessions_str(user_id),
+            "subtitle": "Sent" if opinion.route.sent_by(opinion.climber_id) else opinion.route.n_sessions_str(opinion.climber_id),
         },
         "body": {
             "facts": [
