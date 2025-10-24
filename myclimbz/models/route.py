@@ -1,5 +1,4 @@
 from collections import Counter
-import os
 
 from flask_login import current_user
 from sqlalchemy import UniqueConstraint
