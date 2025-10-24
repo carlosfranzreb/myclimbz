@@ -12,5 +12,5 @@ repos:
             entry: python -m pytest tests/
             language: system
             pass_filenames: false
-            stages: [push]
+            stages: [pre-push]
             working_directory: ..
