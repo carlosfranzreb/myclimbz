@@ -178,6 +178,11 @@ async function addVideos() {
 	// Use Background Fetch API if available
 	if ('BackgroundFetchManager' in self) {
 		try {
+			// Request notification permission
+			if ('Notification' in window && Notification.permission !== 'granted') {
+				await Notification.requestPermission();
+			}
+
 			const formData = new FormData(form);
 			const fetchRequest = new Request(form.action || window.location.href, {
 				method: 'POST',
@@ -196,26 +201,9 @@ async function addVideos() {
 				})
 			);
 
-			bgFetch.addEventListener('progress', (event) => {
-				if (!event.uploadTotal || event.uploadTotal === 0) return;
-				const percent = Math.round((event.uploaded / event.uploadTotal) * 100);
-				overlayStatus.innerText = `Uploading ${sectionDivs.length} videos... ${percent}%`;
-			});
-
-			// Poll for completion or success
-			// Since we can't easily get the response body from background fetch in the page context
-			// without the SW messaging us, we'll rely on the SW or a simple redirect after a delay/check.
-			// For now, we'll just show a message that it's in the background.
-			overlayStatus.innerText = "Upload started in background. You can close this tab.";
-			
-			// Wait for success message from SW
-			navigator.serviceWorker.addEventListener('message', (event) => {
-				if (event.data && event.data.type === 'BACKGROUND_FETCH_SUCCESS' && event.data.id === bgFetch.id) {
-					window.location.href = "/"; // Redirect to home or success page
-				}
-			});
-
-			return; // Exit function, let background fetch handle it
+			// Immediate redirect for better UX
+			window.location.href = "/"; 
+			return; 
 		} catch (err) {
 			console.error("Background Fetch failed to start, falling back to AJAX:", err);
 			// Fall through to AJAX

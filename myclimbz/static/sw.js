@@ -1,9 +1,15 @@
 self.addEventListener('backgroundfetchsuccess', (event) => {
   console.log('[Service Worker] Background Fetch Success', event);
-  // Ideally, we would notify the user here or update some client state.
-  // Since we can't access the DOM, we rely on the page to check status or the user to see the browser's native UI.
   event.waitUntil(async function() {
-    // We can try to notify the client pages
+    // Notify the user
+    if (Notification.permission === 'granted') {
+        self.registration.showNotification('Video Upload Complete', {
+            body: 'Your videos have been successfully uploaded.',
+            icon: '/static/images/icon-green-small.png' // Use a valid icon path if available
+        });
+    }
+    
+    // Notify client pages (optional, for in-app updates)
     const clients = await self.clients.matchAll();
     clients.forEach(client => {
         client.postMessage({
@@ -17,6 +23,13 @@ self.addEventListener('backgroundfetchsuccess', (event) => {
 self.addEventListener('backgroundfetchfail', (event) => {
   console.log('[Service Worker] Background Fetch Failed', event);
   event.waitUntil(async function() {
+    if (Notification.permission === 'granted') {
+        self.registration.showNotification('Video Upload Failed', {
+            body: 'There was an error uploading your videos.',
+            icon: '/static/images/icon-red-small.png' // Use a valid icon path if available
+        });
+    }
+
     const clients = await self.clients.matchAll();
     clients.forEach(client => {
         client.postMessage({
