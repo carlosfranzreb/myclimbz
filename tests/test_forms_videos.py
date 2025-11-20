@@ -94,6 +94,8 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     assert form_accepted
     sleep(5)  # video is uploaded in the background
 
+    driver.save_screenshot("video_submitted.png")
+
     # check that the climb was added with one attempt
     sql_query = text(
         f"""
