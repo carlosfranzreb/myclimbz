@@ -124,4 +124,10 @@ def create_app():
                 flask_session["error"] = "You are not allowed to access this page."
                 return redirect(flask_session.pop("call_from_url"))
 
+    @app.route("/sw.js")
+    def service_worker():
+        from flask import send_from_directory
+
+        return send_from_directory(app.static_folder, "sw.js")
+
     return app

@@ -172,10 +172,57 @@ async function addVideos() {
 		return;
 	}
 
-	overlayTitle.innerText = "Uploading videos";
+	overlayTitle.innerText = "Uploading videos...";
 	overlayStatus.innerText = "Starting upload...";
 
-	// Use AJAX to submit the form and track progress
+	// Use Background Fetch API if available
+	if ('BackgroundFetchManager' in self) {
+		try {
+			const formData = new FormData(form);
+			const fetchRequest = new Request(form.action || window.location.href, {
+				method: 'POST',
+				body: formData,
+			});
+
+			const bgFetch = await navigator.serviceWorker.ready.then(swReg => 
+				swReg.backgroundFetch.fetch(`upload-${Date.now()}`, fetchRequest, {
+					title: `Uploading ${sectionDivs.length} videos`,
+					icons: [{
+						src: '/static/logo.png', // Replace with actual logo path if available
+						sizes: '192x192',
+						type: 'image/png',
+					}],
+					downloadTotal: formData.size, // Approximate size
+				})
+			);
+
+			bgFetch.addEventListener('progress', (event) => {
+				if (!event.uploadTotal || event.uploadTotal === 0) return;
+				const percent = Math.round((event.uploaded / event.uploadTotal) * 100);
+				overlayStatus.innerText = `Uploading ${sectionDivs.length} videos... ${percent}%`;
+			});
+
+			// Poll for completion or success
+			// Since we can't easily get the response body from background fetch in the page context
+			// without the SW messaging us, we'll rely on the SW or a simple redirect after a delay/check.
+			// For now, we'll just show a message that it's in the background.
+			overlayStatus.innerText = "Upload started in background. You can close this tab.";
+			
+			// Wait for success message from SW
+			navigator.serviceWorker.addEventListener('message', (event) => {
+				if (event.data && event.data.type === 'BACKGROUND_FETCH_SUCCESS' && event.data.id === bgFetch.id) {
+					window.location.href = "/"; // Redirect to home or success page
+				}
+			});
+
+			return; // Exit function, let background fetch handle it
+		} catch (err) {
+			console.error("Background Fetch failed to start, falling back to AJAX:", err);
+			// Fall through to AJAX
+		}
+	}
+
+	// Fallback: Use AJAX to submit the form and track progress
 	const formData = new FormData(form);
 	const xhr = new XMLHttpRequest();
 
@@ -265,4 +312,9 @@ async function loadFfmpeg() {
 
 document.addEventListener("DOMContentLoaded", () => {
 	loadFfmpeg();
+	if ('serviceWorker' in navigator) {
+		navigator.serviceWorker.register('/sw.js')
+			.then(reg => console.log('Service Worker registered', reg))
+			.catch(err => console.log('Service Worker registration failed', err));
+	}
 });

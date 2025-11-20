@@ -1,0 +1,40 @@
+self.addEventListener('backgroundfetchsuccess', (event) => {
+  console.log('[Service Worker] Background Fetch Success', event);
+  // Ideally, we would notify the user here or update some client state.
+  // Since we can't access the DOM, we rely on the page to check status or the user to see the browser's native UI.
+  event.waitUntil(async function() {
+    // We can try to notify the client pages
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+        client.postMessage({
+            type: 'BACKGROUND_FETCH_SUCCESS',
+            id: event.registration.id
+        });
+    });
+  }());
+});
+
+self.addEventListener('backgroundfetchfail', (event) => {
+  console.log('[Service Worker] Background Fetch Failed', event);
+  event.waitUntil(async function() {
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+        client.postMessage({
+            type: 'BACKGROUND_FETCH_FAIL',
+            id: event.registration.id
+        });
+    });
+  }());
+});
+
+self.addEventListener('backgroundfetchclick', (event) => {
+  console.log('[Service Worker] Background Fetch Clicked', event);
+  event.waitUntil(async function() {
+    const clients = await self.clients.matchAll();
+    if (clients.length > 0) {
+        clients[0].focus();
+    } else {
+        self.clients.openWindow('/');
+    }
+  }());
+});
