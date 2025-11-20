@@ -193,11 +193,10 @@
                 if (ids.length > 0) {
                     // Assuming only one active upload for now
                     const bgFetch = await registration.backgroundFetch.get(ids[0]);
-                    attachProgress(bgFetch);
+                    attachProgress(bgFetch, registration);
                 }
 
-                // Listen for new background fetches (if started from this page, though usually we redirect)
-                // But more importantly, listen for messages from SW for success/fail
+                // Listen for messages from SW for success/fail
                 navigator.serviceWorker.addEventListener('message', (event) => {
                     if (event.data.type === 'BACKGROUND_FETCH_SUCCESS') {
                         finishProgress(true);
@@ -208,19 +207,12 @@
             }
         });
 
-        function attachProgress(bgFetch) {
+        function attachProgress(bgFetch, registration) {
             const container = document.getElementById('global-upload-progress-container');
             const bar = document.getElementById('global-upload-progress-bar');
             const text = document.getElementById('global-upload-text');
-            
+            text.innerText = `Uploading`;
             container.style.display = 'block';
-
-            bgFetch.addEventListener('progress', (event) => {
-                if (!event.uploadTotal || event.uploadTotal === 0) return;
-                const percent = Math.round((event.uploaded / event.uploadTotal) * 100);
-                bar.style.width = percent + '%';
-                text.innerText = `Uploading... ${percent}%`;
-            });
         }
 
         function finishProgress(success) {

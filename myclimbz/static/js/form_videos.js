@@ -99,7 +99,7 @@ async function addVideos() {
 	uploadingOverlay.style.flexDirection = "column";
 	uploadingOverlay.style.alignItems = "center";
 	uploadingOverlay.style.justifyContent = "center";
-	
+
 	const overlayTitle = document.createElement("h1");
 	overlayTitle.style.color = "#fff";
 	overlayTitle.innerText = "Clipping videos";
@@ -176,47 +176,41 @@ async function addVideos() {
 	overlayStatus.innerText = "Starting upload...";
 
 	// Use Background Fetch API if available
-	if ('BackgroundFetchManager' in self) {
+	if ("BackgroundFetchManager" in self) {
 		try {
 			// Request notification permission
-			if ('Notification' in window && Notification.permission !== 'granted') {
+			if (
+				"Notification" in window &&
+				Notification.permission !== "granted"
+			) {
 				await Notification.requestPermission();
 			}
 
-			// Calculate total upload size
-			let totalUploadSize = 0;
-			for (const div of sectionDivs) {
-				const fileInput = div.querySelector("input[type=file]");
-				if (fileInput.files[0]) {
-					totalUploadSize += fileInput.files[0].size;
-				}
-			}
-
 			const formData = new FormData(form);
-			const fetchRequest = new Request(form.action || window.location.href, {
-				method: 'POST',
-				body: formData,
-			});
-
-			const bgFetch = await navigator.serviceWorker.ready.then(swReg => 
-				swReg.backgroundFetch.fetch(`upload-${Date.now()}`, fetchRequest, {
-					title: `Uploading ${sectionDivs.length} videos`,
-					icons: [{
-						src: '/static/logo.png', // Replace with actual logo path if available
-						sizes: '192x192',
-						type: 'image/png',
-					}],
-					uploadTotal: totalUploadSize,
-					downloadTotal: 0, // We don't expect a large response
-				})
+			const fetchRequest = new Request(
+				form.action || window.location.href,
+				{
+					method: "POST",
+					body: formData,
+				}
 			);
 
-			// Immediate redirect for better UX
-			window.location.href = "/"; 
-			return; 
+			const bgFetch = await navigator.serviceWorker.ready.then((swReg) =>
+				swReg.backgroundFetch.fetch(
+					`upload-${Date.now()}`,
+					fetchRequest,
+					{
+						title: `Uploading (${sectionDivs.length}) video(s)`,
+					}
+				)
+			);
+			window.location.href = "/";
+			return;
 		} catch (err) {
-			console.error("Background Fetch failed to start, falling back to AJAX:", err);
-			// Fall through to AJAX
+			console.error(
+				"Background Fetch failed to start, falling back to AJAX:",
+				err
+			);
 		}
 	}
 
@@ -310,9 +304,12 @@ async function loadFfmpeg() {
 
 document.addEventListener("DOMContentLoaded", () => {
 	loadFfmpeg();
-	if ('serviceWorker' in navigator) {
-		navigator.serviceWorker.register('/sw.js')
-			.then(reg => console.log('Service Worker registered', reg))
-			.catch(err => console.log('Service Worker registration failed', err));
+	if ("serviceWorker" in navigator) {
+		navigator.serviceWorker
+			.register("/sw.js")
+			.then((reg) => console.log("Service Worker registered", reg))
+			.catch((err) =>
+				console.log("Service Worker registration failed", err)
+			);
 	}
 });
