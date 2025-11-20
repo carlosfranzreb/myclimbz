@@ -99,8 +99,18 @@ async function addVideos() {
 	uploadingOverlay.style.flexDirection = "column";
 	uploadingOverlay.style.alignItems = "center";
 	uploadingOverlay.style.justifyContent = "center";
-	uploadingOverlay.innerHTML =
-		"<h1 style='color: #fff;'>Uploading videos... Please wait.</h1>";
+	
+	const overlayTitle = document.createElement("h1");
+	overlayTitle.style.color = "#fff";
+	overlayTitle.innerText = "Clipping videos";
+	uploadingOverlay.appendChild(overlayTitle);
+
+	const overlayStatus = document.createElement("p");
+	overlayStatus.style.color = "#fff";
+	overlayStatus.style.fontSize = "1.2em";
+	overlayStatus.style.marginTop = "10px";
+	uploadingOverlay.appendChild(overlayStatus);
+
 	document.body.appendChild(uploadingOverlay);
 
 	// Ensure FFmpeg is loaded
@@ -111,9 +121,11 @@ async function addVideos() {
 	await ffmpeg.writeFile("input.mp4", await fetchFile(videoPlayer.src));
 
 	// Add the video to the form fields
-	const sectionPromises = Array.from(
-		document.querySelectorAll("#sections-container>div")
-	).map(async (div) => {
+	const sectionDivs = document.querySelectorAll("#sections-container>div");
+	let completedClips = 0;
+	overlayStatus.innerText = `0/${sectionDivs.length}`;
+
+	const sectionPromises = Array.from(sectionDivs).map(async (div) => {
 		let start = div.querySelector("input[id*='start']");
 		let sectionId = start.id.split("-")[1];
 		let startValue = start.value;
@@ -146,6 +158,9 @@ async function addVideos() {
 		const dt = new DataTransfer();
 		dt.items.add(clipFile);
 		fileInput.files = dt.files;
+
+		completedClips++;
+		overlayStatus.innerText = `${completedClips}/${sectionDivs.length}`;
 	});
 
 	// validate and submit the form
@@ -156,7 +171,46 @@ async function addVideos() {
 		document.body.removeChild(uploadingOverlay);
 		return;
 	}
-	form.submit();
+
+	overlayTitle.innerText = "Uploading videos";
+	overlayStatus.innerText = "Starting upload...";
+
+	// Use AJAX to submit the form and track progress
+	const formData = new FormData(form);
+	const xhr = new XMLHttpRequest();
+
+	xhr.open("POST", form.action || window.location.href, true);
+
+	xhr.upload.onprogress = function (e) {
+		if (e.lengthComputable) {
+			const percentComplete = (e.loaded / e.total) * 100;
+			overlayStatus.innerText = `${Math.round(percentComplete)}%`;
+		}
+	};
+
+	xhr.onload = function () {
+		if (xhr.status >= 200 && xhr.status < 300) {
+			// If the server redirects, the xhr.responseURL will be the new URL
+			if (xhr.responseURL && xhr.responseURL !== window.location.href) {
+				window.location.href = xhr.responseURL;
+			} else {
+				// Fallback: replace document content
+				document.open();
+				document.write(xhr.responseText);
+				document.close();
+			}
+		} else {
+			alert("Upload failed. Please try again.");
+			document.body.removeChild(uploadingOverlay);
+		}
+	};
+
+	xhr.onerror = function () {
+		alert("An error occurred during the upload.");
+		document.body.removeChild(uploadingOverlay);
+	};
+
+	xhr.send(formData);
 }
 
 const toBlobURL = async (url, mimeType, patcher) => {
