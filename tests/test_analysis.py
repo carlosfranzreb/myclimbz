@@ -105,13 +105,13 @@ def test_climbs_per_area(driver, db_session) -> None:
         plotted_data = get_plotted_data(driver, "Area", y_axis)
         assert len(plotted_data) == len(area_data), f"Failed for key {area_data_key}"
         for area, value in plotted_data:
-            assert (
-                value == area_data[area][area_data_key]
-            ), f"Failed for key {area_data_key} and area {area}"
+            assert value == area_data[area][area_data_key], (
+                f"Failed for key {area_data_key} and area {area}"
+            )
         area_names = [area for area, _ in plotted_data]
-        assert [area for area, _ in plotted_data] == sorted(
-            area_names
-        ), f"Failed for key {area_data_key}"
+        assert [area for area, _ in plotted_data] == sorted(area_names), (
+            f"Failed for key {area_data_key}"
+        )
 
 
 def test_attempts_per_area(driver, db_session) -> None:
@@ -435,9 +435,9 @@ def test_climbs_per_ratings(driver, db_session) -> None:
         plotted_data = get_plotted_data(driver, rat.capitalize(), "Climbs: total tried")
         assert len(plotted_data) == len(climbs_per_ratings[rat]), f"Failed for {rat}"
         for rat_value, n_sent_routes_plotted in plotted_data:
-            assert (
-                n_sent_routes_plotted == climbs_per_ratings[rat][rat_value]
-            ), f"Failed for {rat}, {rat_value}"
+            assert n_sent_routes_plotted == climbs_per_ratings[rat][rat_value], (
+                f"Failed for {rat}, {rat_value}"
+            )
         assert [rat_value for rat_value, _ in plotted_data] == list(
             climbs_per_ratings[rat].keys()
         ), f"Failed for {rat}, {rat_value}"

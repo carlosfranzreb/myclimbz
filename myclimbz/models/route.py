@@ -1,5 +1,4 @@
 from collections import Counter
-import os
 
 from flask_login import current_user
 from sqlalchemy import UniqueConstraint
@@ -202,7 +201,6 @@ class Route(db.Model):
 
         out = list()
         for video in videos:
-
             # get the session ID and its chronological order
             base = video.base_fname
             session_id = int(base.split("_", maxsplit=2)[1])

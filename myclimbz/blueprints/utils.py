@@ -1,13 +1,6 @@
 from collections import namedtuple
 
-from flask import (
-    render_template,
-    session as flask_session,
-    request,
-    redirect,
-    url_for,
-    abort,
-)
+from flask import render_template, session as flask_session, request, abort
 from flask_login import current_user, login_required
 
 from myclimbz.models import Session, Area

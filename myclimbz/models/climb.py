@@ -1,5 +1,3 @@
-import os
-
 from sqlalchemy import UniqueConstraint
 
 from myclimbz import db
@@ -34,7 +32,6 @@ class Climb(db.Model):
 
         out = list()
         for video in self.videos:
-
             # iterate over attempts and store video information
             for attempt in video.attempts:
                 attempt_video = (

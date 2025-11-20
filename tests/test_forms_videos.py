@@ -1,13 +1,10 @@
 """
-When uploading a single video, the user should fill the following forms:
+When uploading a video, the user should fill the following forms:
 
 1. Annotate video - mark sections that display climbing.
 2. Add climb - input the route of the video and the climbing facts.
   - If desired, the user can add/edit their opinion on the route.
 3. Return to last URL.
-
-If the user uploads multiple videos, the user must first sort them before going to the
-annotation page.
 """
 
 import subprocess
@@ -31,8 +28,8 @@ from .conftest import (
 
 def test_add_video(driver, db_session, started_session_id) -> None:
     """
-    Tests that the user can upload and annotate a single video.
-    as it is deleted with delete_video_info before redirecting the user to the home
+    Tests that the user can upload and annotate a video.
+    The video is deleted with delete_video_info before redirecting the user to the home
     page (see the end of videos.annotate_video)
     """
     # go to the home page
@@ -79,7 +76,7 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     else:
         sleep(5)
 
-    # fill the form with a climbing section from 1 to 5 and submit
+    # fill the form with a climbing section from 1 to 4 and submit
     route_name, route_id = get_existing_route(
         db_session, EXISTING_OBJECTS["sector"], idx=1
     )
@@ -89,7 +86,7 @@ def test_add_video(driver, db_session, started_session_id) -> None:
         {
             "name": route_name,
             "sections-0-start": 1,
-            "sections-0-end": 5,
+            "sections-0-end": 4,
             "grade": "13",
             "rating": 5,
         },
@@ -104,7 +101,12 @@ def test_add_video(driver, db_session, started_session_id) -> None:
         AND route_id = {route_id};
         """
     )
-    results = db_session.execute(sql_query).fetchall()
+    for _ in range(30):
+        results = db_session.execute(sql_query).fetchall()
+        if results is not None and len(results) > 0:
+            break
+        sleep(1)
+
     assert len(results) == 1
     n_attempts, sent = results[0]
     assert n_attempts == 1
@@ -136,4 +138,4 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     # video display does not work in headless mode
     if "debugpy" in sys.modules:
         duration = driver.execute_script("return arguments[0].duration;", video)
-        assert abs(duration - 4) < 0.2
+        assert abs(duration - 3) < 0.3

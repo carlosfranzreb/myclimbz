@@ -25,7 +25,6 @@ climber_projects = db.Table(
 
 
 class Climber(db.Model, UserMixin):
-
     id = db.Column(db.Integer, primary_key=True)
     role = db.Column(db.Integer, nullable=False, default=0)
 

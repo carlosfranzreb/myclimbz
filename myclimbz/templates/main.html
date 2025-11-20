@@ -2,7 +2,7 @@
 
 <head>
     <title>myclimbz - {{ title }}</title>
-    <meta name="version" content="2.2.2">
+    <meta name="version" content="2.3.0">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
@@ -129,6 +129,13 @@
     </div>
     {% endif %}
 
+    <!-- Global Upload Progress Bar -->
+    <div id="global-upload-progress-container" style="display: none; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; background-color: #f0f0f0;">
+        <div id="global-upload-progress-bar" style="width: 0%; height: 5px; background-color: #28a745; transition: width 0.2s;"></div>
+        <div id="global-upload-text" style="position: absolute; top: 5px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #333; background: rgba(255,255,255,0.8); padding: 2px 5px; border-radius: 3px; white-space: nowrap;">Uploading...</div>
+
+    </div>
+
     {%block content %}{% endblock %}
 
     <script>
@@ -167,6 +174,68 @@
     <script src="{{url_for('static', filename='js/filters/widgets/date_range.js')}}"></script>
     <script src="{{url_for('static', filename='js/filters/widgets/dropdown.js')}}"></script>
     <script src="{{url_for('static', filename='js/filters/widgets/radio_button.js')}}"></script>
+
+
+    <!--
+        This script initializes and manages background fetch operations using the Service Worker API.
+        It checks for the availability of Service Workers and the Background Fetch Manager.
+        If available, it retrieves the Service Worker registration and then queries for any existing
+        background fetch IDs, indicating ongoing or pending background fetch tasks.
+        Currently, it assumes a single active upload if multiple IDs are found.
+    -->
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            if ('serviceWorker' in navigator && 'BackgroundFetchManager' in self) {
+                const registration = await navigator.serviceWorker.ready;
+                
+                // Check for existing background fetches
+                const ids = await registration.backgroundFetch.getIds();
+                if (ids.length > 0) {
+                    // Assuming only one active upload for now
+                    const bgFetch = await registration.backgroundFetch.get(ids[0]);
+                    attachProgress(bgFetch, registration);
+                }
+
+                // Listen for messages from SW for success/fail
+                navigator.serviceWorker.addEventListener('message', (event) => {
+                    if (event.data.type === 'BACKGROUND_FETCH_SUCCESS') {
+                        finishProgress(true);
+                    } else if (event.data.type === 'BACKGROUND_FETCH_FAIL') {
+                        finishProgress(false);
+                    }
+                });
+            }
+        });
+
+        function attachProgress(bgFetch, registration) {
+            const container = document.getElementById('global-upload-progress-container');
+            const bar = document.getElementById('global-upload-progress-bar');
+            const text = document.getElementById('global-upload-text');
+            text.innerText = `Uploading`;
+            container.style.display = 'block';
+        }
+
+        function finishProgress(success) {
+            const container = document.getElementById('global-upload-progress-container');
+            const bar = document.getElementById('global-upload-progress-bar');
+            const text = document.getElementById('global-upload-text');
+
+            if (success) {
+                bar.style.width = '100%';
+                bar.style.backgroundColor = '#28a745'; // Green
+                text.innerText = 'Upload Complete!';
+            } else {
+                bar.style.backgroundColor = '#dc3545'; // Red
+                text.innerText = 'Upload Failed';
+            }
+
+            // Hide after a delay
+            setTimeout(() => {
+                container.style.display = 'none';
+                bar.style.width = '0%';
+            }, 5000);
+        }
+    </script>
 </body>
 
 </html>

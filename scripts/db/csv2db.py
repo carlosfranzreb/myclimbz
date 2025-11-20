@@ -50,7 +50,6 @@ from myclimbz.models import (
 
 
 def add_climbs(csv_file: str, db, climber_id: int):
-
     with open(csv_file) as f:
         reader = csv.DictReader(f)
         for row in reader:
