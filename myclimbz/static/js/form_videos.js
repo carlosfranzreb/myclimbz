@@ -183,6 +183,15 @@ async function addVideos() {
 				await Notification.requestPermission();
 			}
 
+			// Calculate total upload size
+			let totalUploadSize = 0;
+			for (const div of sectionDivs) {
+				const fileInput = div.querySelector("input[type=file]");
+				if (fileInput.files[0]) {
+					totalUploadSize += fileInput.files[0].size;
+				}
+			}
+
 			const formData = new FormData(form);
 			const fetchRequest = new Request(form.action || window.location.href, {
 				method: 'POST',
@@ -197,7 +206,8 @@ async function addVideos() {
 						sizes: '192x192',
 						type: 'image/png',
 					}],
-					downloadTotal: formData.size, // Approximate size
+					uploadTotal: totalUploadSize,
+					downloadTotal: 0, // We don't expect a large response
 				})
 			);
 
