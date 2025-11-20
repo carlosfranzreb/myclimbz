@@ -101,10 +101,9 @@ def test_add_video(driver, db_session, started_session_id) -> None:
         AND route_id = {route_id};
         """
     )
-    results = []
-    for _ in range(20):
+    for _ in range(30):
         results = db_session.execute(sql_query).fetchall()
-        if len(results) > 0:
+        if results is not None and len(results) > 0:
             break
         sleep(1)
 
