@@ -102,12 +102,11 @@ def test_add_video(driver, db_session, started_session_id) -> None:
         """
     )
     results = []
-    for _ in range(30):
+    for _ in range(20):
         results = db_session.execute(sql_query).fetchall()
         if len(results) > 0:
             break
         sleep(1)
-        driver.save_screenshot(f"video_submitted_{_}.png")
 
     assert len(results) == 1
     n_attempts, sent = results[0]
