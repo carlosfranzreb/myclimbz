@@ -1,13 +1,10 @@
 """
-When uploading a single video, the user should fill the following forms:
+When uploading a video, the user should fill the following forms:
 
 1. Annotate video - mark sections that display climbing.
 2. Add climb - input the route of the video and the climbing facts.
   - If desired, the user can add/edit their opinion on the route.
 3. Return to last URL.
-
-If the user uploads multiple videos, the user must first sort them before going to the
-annotation page.
 """
 
 import subprocess
@@ -31,8 +28,8 @@ from .conftest import (
 
 def test_add_video(driver, db_session, started_session_id) -> None:
     """
-    Tests that the user can upload and annotate a single video.
-    as it is deleted with delete_video_info before redirecting the user to the home
+    Tests that the user can upload and annotate a video.
+    The video is deleted with delete_video_info before redirecting the user to the home
     page (see the end of videos.annotate_video)
     """
     # go to the home page
