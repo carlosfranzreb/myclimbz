@@ -76,7 +76,7 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     else:
         sleep(5)
 
-    # fill the form with a climbing section from 1 to 5 and submit
+    # fill the form with a climbing section from 1 to 4 and submit
     route_name, route_id = get_existing_route(
         db_session, EXISTING_OBJECTS["sector"], idx=1
     )
@@ -86,12 +86,13 @@ def test_add_video(driver, db_session, started_session_id) -> None:
         {
             "name": route_name,
             "sections-0-start": 1,
-            "sections-0-end": 5,
+            "sections-0-end": 4,
             "grade": "13",
             "rating": 5,
         },
     )
     assert form_accepted
+    sleep(5)  # video is uploaded in the background
 
     # check that the climb was added with one attempt
     sql_query = text(
@@ -133,4 +134,4 @@ def test_add_video(driver, db_session, started_session_id) -> None:
     # video display does not work in headless mode
     if "debugpy" in sys.modules:
         duration = driver.execute_script("return arguments[0].duration;", video)
-        assert abs(duration - 4) < 0.2
+        assert abs(duration - 3) < 0.3

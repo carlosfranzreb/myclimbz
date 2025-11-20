@@ -57,6 +57,16 @@ def driver() -> Generator[webdriver.Chrome, None, None]:
         if "debugpy" not in sys.modules:
             driver_options.add_argument("--headless=new")
 
+        # Allow browser notifications
+        try:
+            notify_pref = int(os.environ.get("SELENIUM_NOTIFICATIONS", "1"))
+        except Exception:
+            notify_pref = 1
+        driver_options.add_experimental_option(
+            "prefs",
+            {"profile.default_content_setting_values.notifications": notify_pref},
+        )
+
         driver = webdriver.Chrome(options=driver_options)
         driver.get("http://127.0.0.1:5000")
         WebDriverWait(driver, 30).until(EC.title_is("myclimbz - Home"))
