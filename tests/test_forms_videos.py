@@ -92,9 +92,6 @@ def test_add_video(driver, db_session, started_session_id) -> None:
         },
     )
     assert form_accepted
-    sleep(10)  # video is uploaded in the background
-
-    driver.save_screenshot("video_submitted.png")
 
     # check that the climb was added with one attempt
     sql_query = text(
@@ -104,7 +101,14 @@ def test_add_video(driver, db_session, started_session_id) -> None:
         AND route_id = {route_id};
         """
     )
-    results = db_session.execute(sql_query).fetchall()
+    results = []
+    for _ in range(30):
+        results = db_session.execute(sql_query).fetchall()
+        if len(results) > 0:
+            break
+        sleep(1)
+        driver.save_screenshot(f"video_submitted_{_}.png")
+
     assert len(results) == 1
     n_attempts, sent = results[0]
     assert n_attempts == 1
